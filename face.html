@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مدرسة العلم</title>
+
+    <!-- إعدادات تحويل الموقع إلى تطبيق (PWA) يفتح بملء الشاشة -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مدرسة العلم">
+    <link rel="apple-touch-icon" href="icon-512.png">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        html, body {
+            width: 100%; height: 100%; overflow: hidden;
+            background: #0f172a; font-family: 'Cairo', sans-serif;
+        }
+
+        /* شاشة الغلاف والصورة الرئيسية */
+        #portal-screen {
+            position: relative; width: 100vw; height: 100vh;
+            background: url('landing.jpg') no-repeat center center;
+            background-size: cover;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* الزر الشفاف فوق الصورة للدخول إلى صفحة المراحل index.html */
+        #transparent-enter-btn {
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* زر تثبيت التطبيق كأيقونة على الجهاز (يظهر فقط قبل التثبيت) */
+        #install-app-btn {
+            position: fixed; bottom: 20px; left: 20px; z-index: 30;
+            background: rgba(15, 23, 42, 0.88); color: #ffffff;
+            border: 2px solid #38bdf8; border-radius: 30px;
+            padding: 10px 22px; font-size: 1rem; font-weight: bold;
+            cursor: pointer; display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        /* إطار عرض المنصة (index.html أو أرشيف IPFS) بملء الشاشة بدون شريط عنوان */
+        #ipfs-app-frame {
+            position: fixed; inset: 0; width: 100vw; height: 100vh;
+            border: none; display: none; z-index: 50; background: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- واجهة الصورة والزر الشفاف -->
+    <div id="portal-screen">
+        <button id="transparent-enter-btn" aria-label="دخول المنصة"></button>
+        <button id="install-app-btn">📲 تثبيت أيقونة المنصة على جهازك</button>
+    </div>
+
+    <!-- نافذة التطبيق الكاملة التي تحمّل index.html أو أرشيف IPFS -->
+    <iframe id="ipfs-app-frame" allow="autoplay; fullscreen; microphone"></iframe>
+
+    <script>
+        // 1. إذا كنتِ تشغلين المنصة من نفس المجلد، يفتح index.html تلقائياً
+        // 2. عند رفع الأرشيف على Pinata/IPFS، ضعي رابط الـ Hash بين علامتي التنصيص في IPFS_HASH_URL
+        const IPFS_HASH_URL = ""; 
+        const TARGET_URL = IPFS_HASH_URL !== "" ? IPFS_HASH_URL : "./index.html";
+
+        const enterBtn = document.getElementById('transparent-enter-btn');
+        const appFrame = document.getElementById('ipfs-app-frame');
+        const portalScreen = document.getElementById('portal-screen');
+
+        enterBtn.addEventListener('click', () => {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+            appFrame.src = TARGET_URL;
+            appFrame.style.display = 'block';
+            portalScreen.style.display = 'none';
+        });
+
+        // تسجيل مشغل التطبيق (Service Worker)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+
+        // إظهار زر تثبيت الأيقونة تلقائياً
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-app-btn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

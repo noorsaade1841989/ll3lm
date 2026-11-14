@@ -1,0 +1,137 @@
+# server.py - خادم مدرسة العلم الخفيف لإدارة المعلمين والفروع وتوليد المجلدات تلقائياً
+from flask import Flask, request, jsonify, send_from_directory
+import os, json, datetime
+
+app = Flask(__name__, static_folder='.')
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEACHERS_FILE = os.path.join(BASE_DIR, 'teachers.json')
+LOG_FILE = os.path.join(BASE_DIR, 'edits_log.json')
+
+# نموذج أولي لملف المعلمين وصلاحياتهم (يتولد تلقائياً إن لم يكن موجوداً)
+DEFAULT_TEACHERS = {
+    "MASTER777": {
+        "id": "admin",
+        "name": "الإدارة العامة",
+        "schoolName": "مدرسة العلم (الأصلية)",
+        "branchId": "main",
+        "allowedYears": "all",
+        "allowedSubjects": "all"
+    },
+    "SCI2026": {
+        "id": "t_sci",
+        "name": "أستاذ العلوم",
+        "schoolName": "مدرسة العلم (الأصلية)",
+        "branchId": "main",
+        "allowedYears": "all",
+        "allowedSubjects": [6]  # مسموح له تعديل مادة العلوم فقط
+    },
+    "NOOR101": {
+        "id": "school_noor",
+        "name": "الأستاذة فاطمة",
+        "schoolName": "مدرسة النور المشتركة",
+        "branchId": "school_noor",  # قالب مدرسة مستقل خاص بها
+        "allowedYears": [1, 2, 3, 4, 5, 6, 7],
+        "allowedSubjects": "all"
+    }
+}
+
+if not os.path.exists(TEACHERS_FILE):
+    with open(TEACHERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(DEFAULT_TEACHERS, f, ensure_ascii=False, indent=2)
+
+def append_audit_log(entry):
+    logs = []
+    if os.path.exists(LOG_FILE):
+        try:
+            with open(LOG_FILE, 'r', encoding='utf-8') as f:
+                logs = json.load(f)
+        except Exception:
+            logs = []
+    logs.append(entry)
+    with open(LOG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(logs[-1000:], f, ensure_ascii=False, indent=2)
+
+@app.route('/api/verify-teacher', methods=['POST'])
+def verify_teacher():
+    data = request.json or {}
+    code = data.get('code', '').strip()
+    with open(TEACHERS_FILE, 'r', encoding='utf-8') as f:
+        teachers = json.load(f)
+    if code in teachers:
+        return jsonify({"success": True, "teacher": teachers[code]})
+    return jsonify({"success": False}), 403
+
+@app.route('/api/list-schools', methods=['GET'])
+def list_schools():
+    with open(TEACHERS_FILE, 'r', encoding='utf-8') as f:
+        teachers = json.load(f)
+    branches = {}
+    for code, t in teachers.items():
+        b_id = t.get('branchId', 'main')
+        if b_id != 'main' and b_id not in branches:
+            branches[b_id] = {"id": b_id, "schoolName": t.get("schoolName"), "teacherName": t.get("name")}
+    return jsonify(list(branches.values()))
+
+@app.route('/api/upload-asset', methods=['POST'])
+def upload_asset():
+    file = request.files.get('file')
+    target_path = request.form.get('targetPath', '')
+    branch = request.form.get('branch', 'main')
+    teacher_name = request.form.get('teacherName', 'غير معروف')
+
+    if not file or not target_path or '..' in target_path:
+        return jsonify({"error": "Invalid path"}), 400
+
+    # إذا كان المعلم يعمل على مدرسته الخاصة، نحفظ في schools/{branch}/assets/...
+    rel_path = target_path if branch == 'main' else os.path.join('schools', branch, target_path)
+    full_dest = os.path.join(BASE_DIR, rel_path)
+
+    # توليد المجلدات تلقائياً إن لم تكن موجودة
+    os.makedirs(os.path.dirname(full_dest), exist_ok=True)
+    file.save(full_dest)
+
+    append_audit_log({
+        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "teacher": teacher_name,
+        "branch": branch,
+        "action": f"رفع ملف: {rel_path}"
+    })
+    return jsonify({"success": True, "path": rel_path})
+
+@app.route('/api/save-curriculum', methods=['POST'])
+def save_curriculum():
+    payload = request.json or {}
+    year_key = str(payload.get('year', 7))
+    branch = payload.get('branch', 'main')
+    teacher_name = payload.get('teacherName', 'الإدارة')
+    year_data = payload.get('data', payload.get(year_key))
+
+    rel_js = f"curriculum-y{year_key}.js" if branch == 'main' else os.path.join('schools', branch, f"curriculum-y{year_key}.js")
+    full_js = os.path.join(BASE_DIR, rel_js)
+    os.makedirs(os.path.dirname(full_js), exist_ok=True)
+
+    js_content = f"// منهج السنة ({year_key}) - الفرع ({branch}) - آخر تعديل بواسطة: {teacher_name}\n"
+    js_content += "window.curriculumData = window.curriculumData || {};\n"
+    js_content += f"window.curriculumData[{year_key}] = " + json.dumps(year_data, ensure_ascii=False, indent=2) + ";\n"
+
+    with open(full_js, 'w', encoding='utf-8') as f:
+        f.write(js_content)
+
+    append_audit_log({
+        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "teacher": teacher_name,
+        "branch": branch,
+        "action": f"حفظ نص المنهج للسنة {year_key}"
+    })
+    return jsonify({"success": True})
+
+@app.route('/<path:path>')
+def serve_files(path):
+    return send_from_directory(BASE_DIR, path)
+
+@app.route('/')
+def index():
+    return send_from_directory(BASE_DIR, 'index.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000)
