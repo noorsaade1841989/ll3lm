@@ -1,6 +1,5 @@
 import os
 import re
-import sys
 import json
 import time
 import threading
@@ -31,7 +30,6 @@ ctk.set_window_scaling(0.92)
 FONT_FAMILY = "Tahoma"
 
 ALI_AI_URL = "http://localhost:5001/v1/chat/completions"
-ALI_MODEL_API = "http://localhost:5001/api/v1/model"
 DEFAULT_STAGE2_DIR = Path.home() / "Desktop" / "ll3lm"
 RAYHANA_ROOT_DIR = Path.home() / "Desktop" / "ريحانة"
 
@@ -40,11 +38,6 @@ STRICT_ABJAD_LETTERS = [
     "ط", "ي", "ك", "ل", "م", "ن", "س", "ع",
     "ف", "ص", "ق", "ر", "ش", "ت", "ث", "خ",
     "ذ", "ض", "ظ", "غ"
-]
-
-STRICT_ABJAD_NUMBERS = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50,
-    60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000
 ]
 
 SEALS_META = {
@@ -74,10 +67,10 @@ ARABIC_DIGITS_MAP = {
 
 def sanitize_for_tts_and_points(raw_text: str) -> str:
     """
-    تنقية النص وترتيبه في نقاط واضحة ومقروءة:
-    - إزالة الأقواس والشرطات المائلة والرموز المعيقة للقارئ الآلي
-    - إزالة الأرقام أو تحويل الأرقام المفردة إلى كلمات عربية واضحة
-    - فصل النقاط بأسطر نظيفة لتكون سهلة القراءة والتصفح تحت السلايدات
+    تنقية النص وترتيبه في نقاط واضحة ومقروءة للقارئ الآلي:
+    - إزالة الأقواس والشرطات المائلة والرموز المعيقة
+    - إزالة الأرقام أو تحويل الأرقام المفردة الواضحة إلى كلمات عربية
+    - إزالة الحروف اللاتينية المشوهة الناتجة عن النموذج
     """
     if not raw_text:
         return ""
@@ -86,29 +79,24 @@ def sanitize_for_tts_and_points(raw_text: str) -> str:
     txt = re.sub(r"<br\s*/?>", "\n", txt, flags=re.IGNORECASE)
     txt = re.sub(r"<[^>]+>", " ", txt)
 
-    # تحويل بعض الأرقام المفردة الواضحة إلى حروف أو إزالة الأرقام
+    txt = re.sub(r"[A-Za-z]+", " ", txt)
+    txt = re.sub(r"[^\u0600-\u06FF0-9٠-٩\n\s]", " ", txt)
+
     def _num_repl(m):
         tok = m.group(0)
         return ARABIC_DIGITS_MAP.get(tok, "")
 
     txt = re.sub(r"\b(?:10|١٠|[0-9٠-٩])\b", _num_repl, txt)
     txt = re.sub(r"[0-9٠-٩]+", " ", txt)
-
-    # إزالة الأقواس والشرطات المائلة والرموز المزعجة للقارئ الآلي
-    txt = re.sub(r"[()\[\]{}«»\"'\\/\\|•●◆▪■★☆✳❖•·=×÷+<>@#%^&*_~`]+", " ", txt)
+    txt = re.sub(r"[()\[\]{}«»\"'\\/\\|•●◆▪■★☆✳❖·=×÷+<>@#%^&*_~`]+", " ", txt)
     txt = re.sub(r"[:؛،,.\-–—!؟?]+", " ", txt)
 
-    # ترتيب الأسطر كنقاط صافية بدون علامات ترقيم معيقة
     lines = []
     for ln in txt.splitlines():
         clean_ln = re.sub(r"\s+", " ", ln).strip()
         if len(clean_ln) >= 2:
             lines.append(clean_ln)
 
-    if not lines:
-        return ""
-
-    # دمج الكلمات الزائدة وترتيب النقاط بوضوح
     return "\n".join(lines)
 
 
@@ -123,7 +111,7 @@ def clean_plain_label(raw_text: str) -> str:
 
 
 def parse_quran_index(quran_text: str) -> dict[tuple[int, int], str]:
-    """فهرسة قرآن.txt بصيغة سورة|آية|نص"""
+    """فهرسة قرآن.txt بصيغة سورة|آية|نص مع الحفاظ على التشكيل كما هو"""
     index: dict[tuple[int, int], str] = {}
     if not quran_text:
         return index
@@ -138,13 +126,10 @@ def parse_quran_index(quran_text: str) -> dict[tuple[int, int], str]:
 
 
 def extract_quran_ayat_for_logic_lesson(logic_chunk: str, quran_index: dict[tuple[int, int], str]) -> str:
-    """
-    يستخرج الشواهد القرآنية المرتبطة بدرس المنطق فقط لخدمة البرهان المنطقي
-    """
+    """استخراج الآيات القرآنية المرتبطة بدرس المنطق كما هي بتشكيلها"""
     if not logic_chunk or not quran_index:
         return ""
     found_ayat: list[str] = []
-    # البحث عن أنماط مثل (111: 1–5) أو (63: 1-6) أو (1: 1)
     for m in re.finditer(r"\((\d+)\s*:\s*(\d+)(?:\s*[\-–—]\s*(\d+))?\)", logic_chunk):
         surah = int(m.group(1))
         start_a = int(m.group(2))
@@ -156,16 +141,43 @@ def extract_quran_ayat_for_logic_lesson(logic_chunk: str, quran_index: dict[tupl
     return " ".join(found_ayat[:6])
 
 
+def _fit_chunks_to_count(chunks: list[str], target_count: int) -> list[str]:
+    """ضبط قائمة المقاطع لتطابق عدد الوحدات المطلوب"""
+    if target_count <= 0:
+        return []
+    if not chunks:
+        return ["" for _ in range(target_count)]
+
+    if len(chunks) == target_count:
+        return chunks
+
+    if len(chunks) > target_count:
+        result: list[str] = []
+        n = len(chunks)
+        for i in range(target_count):
+            start = (i * n) // target_count
+            end = ((i + 1) * n) // target_count
+            result.append("\n".join(chunks[start:end]).strip())
+        return result
+
+    result = []
+    for i in range(target_count):
+        base_chunk = chunks[i % len(chunks)]
+        cycle_idx = (i // 28) + 1
+        if cycle_idx > 1:
+            result.append(f"{base_chunk}\nتوسيع الفهم في الدورة {cycle_idx}")
+        else:
+            result.append(base_chunk)
+    return result
+
+
 def split_book_into_units(text: str, total_units: int, book_kind: str = "generic") -> list[str]:
-    """
-    تقسيم النص إلى وحدات متوازنة بعدد وحدات السنة المطلوبة
-    """
+    """المهمة 1 و2: تقسيم الكتاب حسب بنيته وتوزيعه على العدد المطلوب من الأقسام"""
     if not text or not text.strip():
         return ["" for _ in range(total_units)]
 
     clean_t = text.strip()
 
-    # تقسيم دروس كتاب المنطق حسب السطر التمهيدي أو "درس رقم"
     if book_kind == "logic":
         lesson_matches = list(re.finditer(r"(?m)^[•\-\*]?\s*درس\s+[\d٠-٩]+\s*[—\-–:].+$", clean_t))
         if len(lesson_matches) >= 4:
@@ -176,7 +188,6 @@ def split_book_into_units(text: str, total_units: int, book_kind: str = "generic
                 chunks.append(clean_t[s:e].strip())
             return _fit_chunks_to_count(chunks, total_units)
 
-    # تقسيم الدروس المرقمة بالحروف أو الوحدات أو الدروس
     patterns = [
         r"(?m)^(?:#{1,4}\s*|\*\*)?(?:الوحدة|درس|الدرس)\s+[^\n]+$",
         r"(?m)^[\d٠-٩]+\s*[\.\-–—]\s*(?:الحرف|سؤال|صورة|الوسادة|زهرة|دوائر|الخيط|قطرات|سر|الصورة|دقائق|البذرة|ثِقَل|رنين|تعاقب|أغصان|رجع|مَعصرة|مِصفاة|العُود|رحيق|سحابة|نواة|إبرة|قرص|غصن|كفّتا|خيوط|نسيم|أوتاد|ينبوع)[^\n]*$",
@@ -194,7 +205,6 @@ def split_book_into_units(text: str, total_units: int, book_kind: str = "generic
             if len(chunks) >= 4:
                 return _fit_chunks_to_count(chunks, total_units)
 
-    # تقسيم متوازن على الفقرات أو الجمل
     paras = [p.strip() for p in re.split(r"\n\s*\n", clean_t) if len(p.strip()) > 15]
     if len(paras) < total_units:
         sents = [s.strip() for s in re.split(r"[.،؛\n]+", clean_t) if len(s.strip()) > 12]
@@ -203,50 +213,14 @@ def split_book_into_units(text: str, total_units: int, book_kind: str = "generic
     return _fit_chunks_to_count(paras if paras else [clean_t], total_units)
 
 
-def _fit_chunks_to_count(chunks: list[str], target_count: int) -> list[str]:
-    """ضبط قائمة المقاطع لتطابق عدد الوحدات المطلوب دون نقص أو زيادة"""
-    if target_count <= 0:
-        return []
-    if not chunks:
-        return ["" for _ in range(target_count)]
-
-    if len(chunks) == target_count:
-        return chunks
-
-    if len(chunks) > target_count:
-        # تجميع متوازن للمقاطع الزائدة ضمن كل وحدة
-        result: list[str] = []
-        n = len(chunks)
-        for i in range(target_count):
-            start = (i * n) // target_count
-            end = ((i + 1) * n) // target_count
-            result.append("\n".join(chunks[start:end]).strip())
-        return result
-
-    # إذا كانت المقاطع أقل من المطلوب، نعيد توزيعها بتصاعد عمري/دوري
-    result = []
-    for i in range(target_count):
-        base_chunk = chunks[i % len(chunks)]
-        cycle_idx = (i // 28) + 1
-        if cycle_idx > 1:
-            result.append(f"{base_chunk}\nتوسيع الفهم في الدورة {cycle_idx}")
-        else:
-            result.append(base_chunk)
-    return result
-
-
 def extract_age_level_from_book(chunk_text: str, age_year: int) -> str:
-    """
-    يستخرج المستوى المطابق لعمر الطالب (8 إلى 14) من الكتب ذات المستويات العمرية (كالرياضة والتجويد)
-    """
+    """استخراج المستوى المطابق لعمر الطالب (8 إلى 14)"""
     if not chunk_text:
         return ""
     level_num = max(1, min(7, age_year - 7))
-    # البحث عن سطر المستوى المطابق
     pat = re.compile(rf"(?m)^[•\-\*]?\s*المستوى\s*{level_num}\b[^\n]*")
     m = pat.search(chunk_text)
     if m:
-        # أخذ التأصيل الأول + المستوى المطابق
         first_lines = []
         for ln in chunk_text.splitlines()[:3]:
             if not re.match(r"^[•\-\*]?\s*(الهدف|المستوى)", ln.strip()):
@@ -255,10 +229,87 @@ def extract_age_level_from_book(chunk_text: str, age_year: int) -> str:
     return chunk_text
 
 
+def build_safe_lesson_entry(
+    seal_id: int,
+    seal_title: str,
+    slide_points: list[str],
+    apply_steps: list[str],
+    intro_title: str = "",
+    intro_goal: str = "",
+) -> dict:
+    """بناء بنية الدرس المحمية مع بقاء الأسئلة في مسار معزول غير معطِّل للدروس"""
+    safe_pts = [p for p in slide_points if p.strip()] or [clean_plain_label(f"هذا درس {seal_title} قيد التحضير")]
+    safe_steps = [s for s in apply_steps if s.strip()] or [clean_plain_label(f"أراجع نقاط {seal_title} وأعمل بها")]
+    first_pt = safe_pts[0]
+    second_pt = safe_pts[1] if len(safe_pts) > 1 else first_pt
+    third_pt = safe_pts[2] if len(safe_pts) > 2 else first_pt
+    wrong_fallback = clean_plain_label(f"غير وارد في درس {seal_title}")
+
+    return {
+        "learn": {
+            "introTitle": intro_title or clean_plain_label(f"درس {seal_title}"),
+            "introGoal": intro_goal or clean_plain_label(f"فهم {seal_title} وتطبيقه"),
+            "slides": [
+                {
+                    "img": "",
+                    "text": pt,
+                    "labData": False,
+                }
+                for pt in safe_pts
+            ],
+        },
+        "play": {
+            "questions": [
+                {
+                    "q": f"ما الفكرة الأساسية في درس {seal_title}",
+                    "focusWord": "",
+                    "options": [
+                        {"text": first_pt, "correct": True},
+                        {"text": wrong_fallback, "correct": False},
+                    ],
+                },
+                {
+                    "q": f"أي عبارة توافق ما ورد في {intro_title or seal_title}",
+                    "focusWord": "",
+                    "options": [
+                        {"text": second_pt, "correct": True},
+                        {"text": wrong_fallback, "correct": False},
+                    ],
+                },
+                {
+                    "q": f"ماذا نستنتج من نقاط درس {seal_title}",
+                    "focusWord": "",
+                    "options": [
+                        {"text": third_pt, "correct": True},
+                        {"text": wrong_fallback, "correct": False},
+                    ],
+                },
+            ],
+            "sadaqahPairs": [
+                {"right": clean_plain_label(seal_title), "left": first_pt},
+                {"right": intro_title or clean_plain_label(seal_title), "left": second_pt},
+                {"right": clean_plain_label("الخلاصة"), "left": third_pt},
+            ],
+            "sadaqahDecoy": wrong_fallback,
+            "giftBasket": {
+                "prompt": f"اختر العبارات الصحيحة من درس {seal_title}",
+                "targetCount": 1,
+                "items": [
+                    {"emoji": "📘", "label": first_pt, "good": True},
+                    {"emoji": "🚫", "label": wrong_fallback, "good": False},
+                ],
+            },
+        },
+        "apply": {
+            "steps": safe_steps,
+        },
+    }
+
+
 class RayhanaApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("ريحانة — مولّد مناهج مرحلة عبد (الربط مع علي AI)")
+        self.title("ريحانة — المهام الخمس لبناء دورات مرحلة عبد")
         self._center_window(0.84, 0.86, min_w=1020, min_h=640)
 
         RAYHANA_ROOT_DIR.mkdir(parents=True, exist_ok=True)
@@ -268,19 +319,19 @@ class RayhanaApp(ctk.CTk):
         self.stop_flag = False
         self.quran_index: dict[tuple[int, int], str] = {}
 
-        # مسارات الكتب الثمانية
         self.book_paths: dict[str, ctk.StringVar] = {
             "logic": ctk.StringVar(value=""),
             "quran": ctk.StringVar(value=""),
-            "tajweed": ctk.StringVar(value=""),
-            "sports": ctk.StringVar(value=""),
             "bayan": ctk.StringVar(value=""),
+            "tajweed": ctk.StringVar(value=""),
             "math": ctk.StringVar(value=""),
+            "sports": ctk.StringVar(value=""),
             "science": ctk.StringVar(value=""),
             "adab": ctk.StringVar(value=""),
         }
 
         self.year_var = ctk.StringVar(value="8")
+        self.cycle_var = ctk.StringVar(value="1")
         self.output_dir_var = ctk.StringVar(value=str(DEFAULT_STAGE2_DIR))
         self.ali_url_var = ctk.StringVar(value=ALI_AI_URL)
 
@@ -299,7 +350,6 @@ class RayhanaApp(ctk.CTk):
         self.geometry(f"{win_w}x{win_h}+{pos_x}+{pos_y}")
 
     def _auto_detect_books_in_folder(self, folder: Path):
-        """التقاط تلقائي لملفات الكتب إن وُجدت بنفس الأسماء المعروفة"""
         if not folder.exists():
             return
         known_files = {
@@ -325,12 +375,11 @@ class RayhanaApp(ctk.CTk):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # الشريط العلوي: السنة (8-14) + مسار الحقن + أزرار التشغيل والإيقاف
         top_bar = ctk.CTkFrame(self, corner_radius=8)
         top_bar.grid(row=0, column=0, padx=10, pady=(10, 6), sticky="ew")
 
         ctk.CTkLabel(
-            top_bar, text="سنة مرحلة عبد:", font=(FONT_FAMILY, 13, "bold")
+            top_bar, text="السنة:", font=(FONT_FAMILY, 13, "bold")
         ).pack(side="right", padx=(8, 4), pady=8)
 
         self.opt_year = ctk.CTkOptionMenu(
@@ -338,26 +387,40 @@ class RayhanaApp(ctk.CTk):
             values=["8", "9", "10", "11", "12", "13", "14"],
             variable=self.year_var,
             font=(FONT_FAMILY, 13, "bold"),
-            width=80,
+            width=72,
             height=34,
         )
         self.opt_year.pack(side="right", padx=4, pady=8)
+
+        ctk.CTkLabel(
+            top_bar, text="الدورة:", font=(FONT_FAMILY, 13, "bold")
+        ).pack(side="right", padx=(8, 4), pady=8)
+
+        self.opt_cycle = ctk.CTkOptionMenu(
+            top_bar,
+            values=["1", "2", "3", "4", "5", "6", "7"],
+            variable=self.cycle_var,
+            font=(FONT_FAMILY, 13, "bold"),
+            width=72,
+            height=34,
+        )
+        self.opt_cycle.pack(side="right", padx=4, pady=8)
 
         ctk.CTkLabel(
             top_bar, text="مجلد الستيج 2:", font=(FONT_FAMILY, 12, "bold")
         ).pack(side="right", padx=(10, 4), pady=8)
 
         ctk.CTkEntry(
-            top_bar, textvariable=self.output_dir_var, font=(FONT_FAMILY, 11), width=260, height=32
+            top_bar, textvariable=self.output_dir_var, font=(FONT_FAMILY, 11), width=230, height=32
         ).pack(side="right", padx=4, pady=8)
 
         ctk.CTkButton(
             top_bar, text="📁 اختر", font=(FONT_FAMILY, 12, "bold"),
-            width=68, height=32, command=self.pick_output_dir
+            width=64, height=32, command=self.pick_output_dir
         ).pack(side="right", padx=2, pady=8)
 
         self.btn_start = ctk.CTkButton(
-            top_bar, text="▶ توليد الجيسون مع علي AI", font=(FONT_FAMILY, 13, "bold"),
+            top_bar, text="▶ تنفيذ المهام الخمس للدورة", font=(FONT_FAMILY, 13, "bold"),
             fg_color="#059669", hover_color="#047857",
             height=36, command=self.start_generation
         )
@@ -366,16 +429,15 @@ class RayhanaApp(ctk.CTk):
         self.btn_stop = ctk.CTkButton(
             top_bar, text="⏹ إيقاف", font=(FONT_FAMILY, 13, "bold"),
             fg_color="#C62828", hover_color="#8E0000",
-            width=80, height=36, state="disabled", command=self.stop_generation
+            width=76, height=36, state="disabled", command=self.stop_generation
         )
         self.btn_stop.pack(side="left", padx=4, pady=8)
 
         self.lbl_status = ctk.CTkLabel(
             top_bar, text="جاهز", font=(FONT_FAMILY, 12, "bold"), text_color="#2E7D32"
         )
-        self.lbl_status.pack(side="left", padx=10)
+        self.lbl_status.pack(side="left", padx=8)
 
-        # الجسم الرئيسي: يمين الكتب الثمانية — يسار سجل التوليد والمعاينة
         body = ctk.CTkFrame(self, fg_color="transparent")
         body.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")
         body.grid_columnconfigure(0, weight=3)
@@ -387,7 +449,7 @@ class RayhanaApp(ctk.CTk):
         books_panel.grid_columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
-            books_panel, text="📚 الكتب المرجعية (المنطق يستند إلى القرآن)",
+            books_panel, text="📚 الكتب الثمانية (تُوحَّد إلى الأختام السبعة)",
             font=(FONT_FAMILY, 13, "bold"), text_color="#047857"
         ).grid(row=0, column=0, columnspan=3, padx=8, pady=(8, 6), sticky="e")
 
@@ -439,7 +501,7 @@ class RayhanaApp(ctk.CTk):
         log_panel.grid_rowconfigure(1, weight=1)
 
         ctk.CTkLabel(
-            log_panel, text="📝 سجل التوليد والنقاط تحت السلايدات",
+            log_panel, text="📝 سجل المهام الخمس (تقسيم ← تشكيل وأسئلة ← تجميع ← حقن)",
             font=(FONT_FAMILY, 13, "bold")
         ).grid(row=0, column=0, padx=8, pady=(8, 4), sticky="e")
 
@@ -466,7 +528,6 @@ class RayhanaApp(ctk.CTk):
             self.output_dir_var.set(chosen)
 
     def ensure_ali_running(self) -> bool:
-        """التحقق من تشغيل علي AI (Qwen 3 المحلي) أو محاولة تشغيله"""
         endpoint_model = self.ali_url_var.get().replace("/v1/chat/completions", "/api/v1/model")
         try:
             r = requests.get(endpoint_model, timeout=2)
@@ -508,14 +569,13 @@ class RayhanaApp(ctk.CTk):
         return False
 
     def call_ali_json(self, system_msg: str, user_msg: str) -> dict | None:
-        """إرسال طلب إلى علي AI واستخراج كائن JSON من الرد"""
         url = self.ali_url_var.get().strip() or ALI_AI_URL
         payload = {
             "messages": [
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": user_msg},
             ],
-            "temperature": 0.45,
+            "temperature": 0.35,
             "max_tokens": 1800,
         }
         try:
@@ -525,190 +585,255 @@ class RayhanaApp(ctk.CTk):
             content = re.sub(r"^```(?:json)?\s*", "", content, flags=re.IGNORECASE)
             content = re.sub(r"\s*```$", "", content).strip()
             match = re.search(r"\{.*\}", content, re.DOTALL)
-            if match:
-                return json.loads(match.group(0))
-            return json.loads(content)
+            raw_json = match.group(0) if match else content
+            raw_json = re.sub(r",\s*([}\]])", r"\1", raw_json)
+            return json.loads(raw_json)
         except Exception:
             return None
 
-    def build_seal_lesson_with_ali(
+    def task3_generate_seven_quiz_types_isolated(
         self,
-        year: int,
-        cycle_num: int,
-        global_week: int,
-        abjad_char: str,
-        seal_id: int,
         seal_title: str,
-        raw_source_text: str,
+        intro_title: str,
+        clean_points: list[str],
+        ali_available: bool,
     ) -> dict:
         """
-        يولّد محتوى الختم بنقاط واضحة تحت السلايدات ثم يشتق الأسئلة من نص السلايدات نفسه
+        خطوة معزولة لتوليد 7 أنواع من الأسئلة من نص السلايدات المنقّاة فقط:
+        - 3 أسئلة اختيارية (فهم مباشر، تمييز وتحليل، تطبيق واستنتاج)
+        - 3 أزواج مطابقة + مشتت واحد
+        - 1 نشاط فرز وانتقاء (سلة الألماسة)
+        عند أي تعثر في النموذج يعود للبديل الآمن دون المساس بالسلايدات.
         """
-        clean_source = clean_plain_label(raw_source_text)[:1400]
+        first_pt = clean_points[0]
+        second_pt = clean_points[1] if len(clean_points) > 1 else first_pt
+        third_pt = clean_points[2] if len(clean_points) > 2 else first_pt
+        wrong_fallback = clean_plain_label(f"غير وارد في درس {seal_title}")
 
-        # 1. توليد الشرائح بنقاط مقروءة وخالية من الأرقام والأقواس والسلاش للقارئ الآلي
-        sys_slides = (
-            "أنت معلم ومصمم مناهج لمرحلة عبد (الأعمار 8 إلى 14 سنة). "
-            "رتب المادة التعليمية في نقاط واضحة ومقروءة أسفل السلايدات. "
-            "قواعد صارمة للقارئ الآلي: "
-            "ممنوع كتابة أرقام. ممنوع كتابة أقواس. ممنوع كتابة شرطة مائلة أو سلاش. "
-            "ممنوع كتابة فواصل أو نقطتين أو رموز غريبة. "
-            "اكتب كل نقطة في سطر مستقل واضح ومباشر. "
-            "أعد النتيجة بصيغة JSON فقط بالمفاتيح التالية: "
-            '{"introTitle": "...", "introGoal": "...", "slides_points": ["نقطة أولى", "نقطة ثانية"], "apply_steps": ["خطوة عملية"]}'
-        )
-        user_slides = (
-            f"السنة {year} الدورة {cycle_num} الحرف {abjad_char} الختم {seal_title}\n"
-            f"المادة المصدر\n{clean_source}"
-        )
+        safe_play = {
+            "questions": [
+                {
+                    "q": f"ما الفكرة الأساسية في درس {seal_title}",
+                    "focusWord": "",
+                    "options": [
+                        {"text": first_pt, "correct": True},
+                        {"text": wrong_fallback, "correct": False},
+                    ],
+                },
+                {
+                    "q": f"أي عبارة توافق ما ورد في {intro_title}",
+                    "focusWord": "",
+                    "options": [
+                        {"text": second_pt, "correct": True},
+                        {"text": wrong_fallback, "correct": False},
+                    ],
+                },
+                {
+                    "q": f"ماذا نستنتج من نقاط درس {seal_title}",
+                    "focusWord": "",
+                    "options": [
+                        {"text": third_pt, "correct": True},
+                        {"text": wrong_fallback, "correct": False},
+                    ],
+                },
+            ],
+            "sadaqahPairs": [
+                {"right": clean_plain_label(seal_title), "left": first_pt},
+                {"right": intro_title, "left": second_pt},
+                {"right": clean_plain_label("الخلاصة"), "left": third_pt},
+            ],
+            "sadaqahDecoy": wrong_fallback,
+            "giftBasket": {
+                "prompt": f"اختر العبارات الصحيحة من درس {seal_title}",
+                "targetCount": 1,
+                "items": [
+                    {"emoji": "📘", "label": first_pt, "good": True},
+                    {"emoji": "🚫", "label": wrong_fallback, "good": False},
+                ],
+            },
+        }
 
-        data = self.call_ali_json(sys_slides, user_slides)
+        if not ali_available:
+            return safe_play
 
-        if isinstance(data, dict) and isinstance(data.get("slides_points"), list) and data["slides_points"]:
-            intro_title = sanitize_for_tts_and_points(data.get("introTitle", "")) or clean_plain_label(f"درس {seal_title}")
-            intro_goal = sanitize_for_tts_and_points(data.get("introGoal", "")) or clean_plain_label(f"فهم {seal_title} وتطبيقه")
-            slide_points = [sanitize_for_tts_and_points(p) for p in data["slides_points"] if sanitize_for_tts_and_points(p)]
-            apply_steps = [sanitize_for_tts_and_points(s) for s in (data.get("apply_steps") or []) if sanitize_for_tts_and_points(s)]
-        else:
-            intro_title = clean_plain_label(f"درس {seal_title}")
-            intro_goal = clean_plain_label(f"تطبيق {seal_title}")
-            slide_points = [sanitize_for_tts_and_points(clean_source)]
-            apply_steps = [sanitize_for_tts_and_points(f"أطبق ما تعلمته في {seal_title}")]
-
-        if not slide_points:
-            slide_points = [clean_plain_label(f"هذا درس {seal_title} قيد التحضير")]
-        if not apply_steps:
-            apply_steps = [clean_plain_label(f"أراجع نقاط {seal_title} وأعمل بها")]
-
-        joined_slide_text = "\n".join(slide_points)
-
-        # 2. توليد الأسئلة والمطابقات وسلة الألماسة من نص السلايدات فقط
+        joined_slides = "\n".join(clean_points)
         sys_quiz = (
-            "أنت واضع أسئلة تعليمية بناءً حصراً على نص السلايدات المرفق دون إضافة معلومات خارجية. "
-            "ممنوع الأرقام والأقواس والسلاش في النصوص. "
+            "أنت واضع أسئلة تعليمية بناءً حصراً على نص السلايدات المرفق دون أي إضافة من خارج النص. "
+            "أنشئ 7 عناصر تقويمية متنوعة: "
+            "أولاً 3 أسئلة اختيار من متعدد (الأول للفهم المباشر، الثاني للتمييز والتحليل، الثالث للاستنتاج والتطبيق). "
+            "ثانياً 3 أزواج مطابقة (يمين ويسار) مع مشتت واحد خاطئ. "
+            "ثالثاً سلة فرز وانتقاء لعناصر صحيحة وأخرى خاطئة. "
+            "قواعد صارمة للقارئ الآلي: ممنوع الأرقام، ممنوع الأقواس، ممنوع الشرطة المائلة، ممنوع الحروف الأجنبية. "
             "أعد JSON فقط بالشكل التالي: "
             '{"questions":[{"q":"...","options":[{"text":"...","correct":true},{"text":"...","correct":false}]}],'
             '"sadaqahPairs":[{"right":"...","left":"..."}],'
             '"sadaqahDecoy":"...",'
             '"giftBasket":{"prompt":"...","targetCount":1,"items":[{"emoji":"📘","label":"...","good":true},{"emoji":"🚫","label":"...","good":false}]}}'
         )
-        user_quiz = f"نص السلايدات\n{joined_slide_text}"
+        user_quiz = f"الختم {seal_title}\nنص السلايدات\n{joined_slides}"
+
         quiz_data = self.call_ali_json(sys_quiz, user_quiz)
+        if not isinstance(quiz_data, dict):
+            return safe_play
 
-        questions = []
-        sadaqah_pairs = []
-        sadaqah_decoy = ""
-        gift_basket = None
+        valid_questions = []
+        for q_item in (quiz_data.get("questions") or [])[:3]:
+            q_txt = sanitize_for_tts_and_points(q_item.get("q", ""))
+            opts = []
+            has_correct = False
+            for o_item in (q_item.get("options") or [])[:4]:
+                o_txt = sanitize_for_tts_and_points(o_item.get("text", ""))
+                is_corr = bool(o_item.get("correct"))
+                if o_txt:
+                    if is_corr:
+                        has_correct = True
+                    opts.append({"text": o_txt, "correct": is_corr})
+            if q_txt and len(opts) >= 2:
+                if not has_correct:
+                    opts[0]["correct"] = True
+                valid_questions.append({"q": q_txt, "focusWord": "", "options": opts})
 
-        if isinstance(quiz_data, dict):
-            for q_item in (quiz_data.get("questions") or [])[:3]:
-                q_txt = sanitize_for_tts_and_points(q_item.get("q", ""))
-                opts = []
-                has_correct = False
-                for o_item in (q_item.get("options") or [])[:4]:
-                    o_txt = sanitize_for_tts_and_points(o_item.get("text", ""))
-                    is_corr = bool(o_item.get("correct"))
-                    if o_txt:
-                        if is_corr:
-                            has_correct = True
-                        opts.append({"text": o_txt, "correct": is_corr})
-                if q_txt and len(opts) >= 2:
-                    if not has_correct:
-                        opts[0]["correct"] = True
-                    questions.append({"q": q_txt, "focusWord": "", "options": opts})
+        if len(valid_questions) == 3:
+            safe_play["questions"] = valid_questions
+        elif valid_questions:
+            for idx_q, vq in enumerate(valid_questions):
+                safe_play["questions"][idx_q] = vq
 
-            for p_item in (quiz_data.get("sadaqahPairs") or [])[:3]:
-                r_txt = sanitize_for_tts_and_points(p_item.get("right", ""))
-                l_txt = sanitize_for_tts_and_points(p_item.get("left", ""))
-                if r_txt and l_txt:
-                    sadaqah_pairs.append({"right": r_txt, "left": l_txt})
+        valid_pairs = []
+        seen_r, seen_l = set(), set()
+        for p_item in (quiz_data.get("sadaqahPairs") or [])[:3]:
+            r_txt = sanitize_for_tts_and_points(p_item.get("right", ""))
+            l_txt = sanitize_for_tts_and_points(p_item.get("left", ""))
+            if r_txt and l_txt and r_txt not in seen_r and l_txt not in seen_l:
+                seen_r.add(r_txt)
+                seen_l.add(l_txt)
+                valid_pairs.append({"right": r_txt, "left": l_txt})
 
-            sadaqah_decoy = sanitize_for_tts_and_points(quiz_data.get("sadaqahDecoy", ""))
+        if len(valid_pairs) >= 2:
+            safe_play["sadaqahPairs"] = valid_pairs
 
-            gb = quiz_data.get("giftBasket")
-            if isinstance(gb, dict):
-                g_prompt = sanitize_for_tts_and_points(gb.get("prompt", ""))
-                g_items = []
-                good_cnt = 0
-                for it in (gb.get("items") or [])[:5]:
-                    lbl = sanitize_for_tts_and_points(it.get("label", ""))
-                    is_g = bool(it.get("good"))
-                    if lbl:
-                        if is_g:
-                            good_cnt += 1
-                        g_items.append({
-                            "emoji": it.get("emoji") or "📘",
-                            "label": lbl,
-                            "good": is_g,
-                        })
-                if g_prompt and good_cnt >= 1 and len(g_items) >= 2:
-                    gift_basket = {
-                        "prompt": g_prompt,
-                        "targetCount": min(good_cnt, 3),
-                        "items": g_items,
-                    }
+        decoy_txt = sanitize_for_tts_and_points(quiz_data.get("sadaqahDecoy", ""))
+        if decoy_txt and decoy_txt not in seen_l:
+            safe_play["sadaqahDecoy"] = decoy_txt
 
-        # بدائل مشتقة مباشرة من نقاط السلايدات إن لم يعد النموذج صيغة كاملة
-        first_pt = slide_points[0]
-        second_pt = slide_points[1] if len(slide_points) > 1 else first_pt
-
-        if not questions:
-            questions = [
-                {
-                    "q": f"ما الفكرة الواردة في درس {seal_title}",
-                    "focusWord": "",
-                    "options": [
-                        {"text": first_pt, "correct": True},
-                        {"text": clean_plain_label(f"هذا درس {seal_title} قيد التحضير"), "correct": False},
-                    ],
+        gb = quiz_data.get("giftBasket")
+        if isinstance(gb, dict):
+            g_prompt = sanitize_for_tts_and_points(gb.get("prompt", ""))
+            g_items = []
+            good_cnt = 0
+            for it in (gb.get("items") or [])[:5]:
+                lbl = sanitize_for_tts_and_points(it.get("label", ""))
+                is_g = bool(it.get("good"))
+                if lbl:
+                    if is_g:
+                        good_cnt += 1
+                    g_items.append({
+                        "emoji": "📘" if is_g else "🚫",
+                        "label": lbl,
+                        "good": is_g,
+                    })
+            if g_prompt and good_cnt >= 1 and len(g_items) >= 2:
+                safe_play["giftBasket"] = {
+                    "prompt": g_prompt,
+                    "targetCount": min(good_cnt, 3),
+                    "items": g_items,
                 }
-            ]
 
-        if not sadaqah_pairs:
-            sadaqah_pairs = [{"right": intro_title, "left": first_pt}]
-        if not sadaqah_decoy:
-            sadaqah_decoy = clean_plain_label("غير وارد في الشريحة")
+        return safe_play
 
-        if not gift_basket:
-            gift_basket = {
-                "prompt": f"اختر العبارة الصحيحة من درس {seal_title}",
-                "targetCount": 1,
-                "items": [
-                    {"emoji": "📘", "label": second_pt, "good": True},
-                    {"emoji": "🚫", "label": sadaqah_decoy, "good": False},
-                ],
-            }
+    def task3_build_seal_slides_and_quizzes(
+        self,
+        year: int,
+        cycle_num: int,
+        abjad_char: str,
+        seal_id: int,
+        seal_title: str,
+        raw_source_text: str,
+        ali_available: bool,
+    ) -> dict:
+        """
+        المهمة 3 على مرحلتين معزولتين لكل ختم:
+        - المرحلة 3أ: بناء وتشكيل السلايدات وخطوات التطبيق (محمية بالكامل)
+        - المرحلة 3ب: توليد أنواع الأسئلة السبعة من نص السلايدات المنقّاة ودمجها في الدرس
+        """
+        if not raw_source_text.strip():
+            return build_safe_lesson_entry(seal_id, seal_title, [], [])
 
-        slides_out = []
-        for idx_p, pt in enumerate(slide_points):
-            slides_out.append({
-                "img": "",
-                "text": pt,
-                "labData": True if idx_p == 0 and seal_id in (2, 3, 4, 5, 6) else False,
-            })
+        clean_source = clean_plain_label(raw_source_text)[:1500]
+        fallback_pts = [pt for pt in sanitize_for_tts_and_points(clean_source).splitlines() if pt.strip()]
+        if not fallback_pts:
+            fallback_pts = [clean_plain_label(f"هذا درس {seal_title} قيد التحضير")]
 
-        return {
-            "learn": {
-                "introTitle": intro_title,
-                "introGoal": intro_goal,
-                "slides": slides_out,
-            },
-            "play": {
-                "questions": questions,
-                "sadaqahPairs": sadaqah_pairs,
-                "sadaqahDecoy": sadaqah_decoy,
-                "giftBasket": gift_basket,
-            },
-            "apply": {
-                "steps": apply_steps,
-            },
-        }
+        intro_title = clean_plain_label(f"درس {seal_title}")
+        intro_goal = clean_plain_label(f"فهم {seal_title} وتطبيقه")
+        clean_points = fallback_pts[:4]
+        clean_steps = [clean_points[0]]
+
+        if ali_available:
+            sys_slides = (
+                "أنت مدقق لغوي ومعلم لمرحلة عبد (الأعمار 8 إلى 14 سنة). "
+                "ضع التشكيل الكامل على الكلمات، ورتب الدرس في عناوين وأفكار ونقاط واضحة ومقروءة للشرائح. "
+                "قواعد صارمة للقارئ الآلي: ممنوع الأرقام، ممنوع الأقواس، ممنوع الشرطة المائلة، ممنوع الحروف الأجنبية. "
+                "أعد JSON فقط بالشكل التالي: "
+                '{"introTitle": "...", "introGoal": "...", "slides_points": ["نقطة أولى مشكّلة", "نقطة ثانية مشكّلة"], "apply_steps": ["خطوة تطبيقية"]}'
+            )
+            user_slides = (
+                f"السنة {year} الدورة {cycle_num} الحرف {abjad_char} الختم {seal_title}\n"
+                f"النص المصدر\n{clean_source}"
+            )
+            data = self.call_ali_json(sys_slides, user_slides)
+            if isinstance(data, dict):
+                t_cand = sanitize_for_tts_and_points(data.get("introTitle", ""))
+                g_cand = sanitize_for_tts_and_points(data.get("introGoal", ""))
+                pts_cand = [
+                    sanitize_for_tts_and_points(p)
+                    for p in (data.get("slides_points") or [])
+                    if sanitize_for_tts_and_points(p)
+                ]
+                stp_cand = [
+                    sanitize_for_tts_and_points(s)
+                    for s in (data.get("apply_steps") or [])
+                    if sanitize_for_tts_and_points(s)
+                ]
+                if t_cand:
+                    intro_title = t_cand
+                if g_cand:
+                    intro_goal = g_cand
+                if pts_cand:
+                    clean_points = pts_cand
+                if stp_cand:
+                    clean_steps = stp_cand
+
+        lesson_entry = build_safe_lesson_entry(
+            seal_id=seal_id,
+            seal_title=seal_title,
+            slide_points=clean_points,
+            apply_steps=clean_steps,
+            intro_title=intro_title,
+            intro_goal=intro_goal,
+        )
+
+        try:
+            lesson_entry["play"] = self.task3_generate_seven_quiz_types_isolated(
+                seal_title=seal_title,
+                intro_title=intro_title,
+                clean_points=clean_points,
+                ali_available=ali_available,
+            )
+        except Exception:
+            pass
+
+        return lesson_entry
 
     def start_generation(self):
         if self.is_running:
             return
 
         year = int(self.year_var.get())
+        max_cycles = max(1, min(7, year - 7))
+        cycle_num = min(max_cycles, max(1, int(self.cycle_var.get())))
+        self.cycle_var.set(str(cycle_num))
+
         out_dir = Path(self.output_dir_var.get().strip() or str(DEFAULT_STAGE2_DIR))
         out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -718,7 +843,11 @@ class RayhanaApp(ctk.CTk):
         self.btn_stop.configure(state="normal")
         self.txt_log.delete("1.0", "end")
 
-        threading.Thread(target=self._run_pipeline, args=(year, out_dir), daemon=True).start()
+        threading.Thread(
+            target=self._run_five_tasks_pipeline,
+            args=(year, cycle_num, out_dir),
+            daemon=True,
+        ).start()
 
     def stop_generation(self):
         self.stop_flag = True
@@ -735,195 +864,114 @@ class RayhanaApp(ctk.CTk):
         except Exception:
             return ""
 
-    def _run_pipeline(self, year: int, out_dir: Path):
-        cycles_count = max(1, min(7, year - 7))
-        total_weeks = cycles_count * 28
-        total_seals = total_weeks * 7
+    def _run_five_tasks_pipeline(self, year: int, cycle_num: int, out_dir: Path):
+        max_cycles = max(1, min(7, year - 7))
+        total_year_weeks = max_cycles * 28
+        cycle_start_idx = (cycle_num - 1) * 28
 
-        self.log(f"بدء العمل للسنة {year} بعدد دورات {cycles_count} وإجمالي وحدات {total_weeks}")
-
+        # المهمة 1: قراءة الكتب وتوحيدها على الأختام السبعة
+        self.log(f"[المهمة 1] توحيد الكتب إلى الأختام السبعة للسنة {year} — الدورة {cycle_num}")
         quran_raw = self._read_file_safe("quran")
         self.quran_index = parse_quran_index(quran_raw)
 
-        logic_units = split_book_into_units(self._read_file_safe("logic"), total_weeks, "logic")
-        bayan_units = split_book_into_units(self._read_file_safe("bayan"), total_weeks, "bayan")
-        tajweed_raw_units = split_book_into_units(self._read_file_safe("tajweed"), 28, "tajweed")
-        math_units = split_book_into_units(self._read_file_safe("math"), total_weeks, "math")
-        sports_raw_units = split_book_into_units(self._read_file_safe("sports"), 28, "sports")
-        science_units = split_book_into_units(self._read_file_safe("science"), total_weeks, "science")
-        adab_units = split_book_into_units(self._read_file_safe("adab"), total_weeks, "adab")
+        all_logic = split_book_into_units(self._read_file_safe("logic"), total_year_weeks, "logic")
+        all_bayan = split_book_into_units(self._read_file_safe("bayan"), total_year_weeks, "bayan")
+        all_tajweed_raw = split_book_into_units(self._read_file_safe("tajweed"), 28, "tajweed")
+        all_math = split_book_into_units(self._read_file_safe("math"), total_year_weeks, "math")
+        all_sports_raw = split_book_into_units(self._read_file_safe("sports"), 28, "sports")
+        all_science = split_book_into_units(self._read_file_safe("science"), total_year_weeks, "science")
+        all_adab = split_book_into_units(self._read_file_safe("adab"), total_year_weeks, "adab")
 
-        # تحضير المستويات العمرية للختم الثالث (التجويد) والخامس (الرياضة)
-        tajweed_units = [extract_age_level_from_book(u, year) for u in tajweed_raw_units]
-        sports_units = [extract_age_level_from_book(u, year) for u in sports_raw_units]
+        # المهمة 2: استخراج حصة السنة والدورة إلى 28 قسماً لكل ختم
+        self.log(f"[المهمة 2] استخراج 28 قسماً لكل ختم لعمر {year} سنوات (الدورة {cycle_num})")
+        seals_28_sections: dict[int, list[str]] = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: []}
 
-        json_out_path = out_dir / f"curriculum-y{year}.json"
-        js_out_path = out_dir / f"curriculum-y{year}.js"
+        for local_i in range(28):
+            global_i = cycle_start_idx + local_i
+            base_logic = all_logic[global_i] if global_i < len(all_logic) else ""
+            ayat_support = extract_quran_ayat_for_logic_lesson(base_logic, self.quran_index)
+            seals_28_sections[1].append(f"{base_logic}\n{ayat_support}".strip())
+            seals_28_sections[2].append(all_bayan[global_i] if global_i < len(all_bayan) else "")
+            seals_28_sections[3].append(extract_age_level_from_book(all_tajweed_raw[local_i], year))
+            seals_28_sections[4].append(all_math[global_i] if global_i < len(all_math) else "")
+            seals_28_sections[5].append(extract_age_level_from_book(all_sports_raw[local_i], year))
+            seals_28_sections[6].append(all_science[global_i] if global_i < len(all_science) else "")
+            seals_28_sections[7].append(all_adab[global_i] if global_i < len(all_adab) else "")
 
-        curriculum_year_dict: dict[str, dict[str, dict]] = {}
-        if json_out_path.exists():
-            try:
-                with open(json_out_path, "r", encoding="utf-8") as f:
-                    loaded = json.load(f)
-                if isinstance(loaded, dict) and str(year) in loaded and isinstance(loaded[str(year)], dict):
-                    curriculum_year_dict = loaded[str(year)]
-                    self.log("تم استئناف التقدم السابق من ملف الجيسون")
-            except Exception:
-                pass
+        structured_dir = RAYHANA_ROOT_DIR / f"y{year}_c{cycle_num}_structured"
+        structured_dir.mkdir(parents=True, exist_ok=True)
+        for s_id in range(1, 8):
+            with open(structured_dir / f"seal_{s_id}_28_units.json", "w", encoding="utf-8") as f:
+                json.dump(seals_28_sections[s_id], f, ensure_ascii=False, indent=2)
 
+        # المهمة 3: تشكيل وتنسيق الدروس وصناعة الأسئلة السبعة عبر علي AI
+        self.log("[المهمة 3] تشكيل الدروس وتوليد الأسئلة السبعة عبر علي AI")
         ali_available = self.ensure_ali_running()
         if not ali_available:
-            self.log("تنبيه: لم يتم الوصول إلى علي AI المحلي وسيتم استخدام التنظيم المحلي المباشر")
+            self.log("تنبيه: علي AI غير متصل، سيتم التنظيم المحلي الآمن دون تعطيل الدروس")
 
-        completed_steps = 0
-        for w in range(1, total_weeks + 1):
+        formatted_by_seal: dict[int, list[dict]] = {s: [] for s in range(1, 8)}
+        total_ops = 7 * 28
+        done_ops = 0
+
+        for s_id in range(1, 8):
             if self.stop_flag:
                 break
-
-            w_key = str(w)
-            curriculum_year_dict.setdefault(w_key, {})
-            cycle_num = ((w - 1) // 28) + 1
-            abjad_idx = (w - 1) % 28
-            abjad_char = STRICT_ABJAD_LETTERS[abjad_idx]
-
-            for s in range(1, 8):
+            for local_i in range(28):
                 if self.stop_flag:
                     break
-
-                s_key = str(s)
-                completed_steps += 1
-
-                if s_key in curriculum_year_dict[w_key] and curriculum_year_dict[w_key][s_key]:
-                    self._update_progress_ui(completed_steps, total_seals, f"الوحدة {w} الختم {s} محفوظ")
-                    continue
-
-                # تحديد مادة الختم: الختم 1 يأخذ المنطق ويستعين بالقرآن
-                if s == 1:
-                    base_logic = logic_units[w - 1]
-                    ayat_support = extract_quran_ayat_for_logic_lesson(base_logic, self.quran_index)
-                    src_txt = f"{base_logic}\n{ayat_support}".strip()
-                elif s == 2:
-                    src_txt = bayan_units[w - 1]
-                elif s == 3:
-                    src_txt = tajweed_units[abjad_idx]
-                elif s == 4:
-                    src_txt = math_units[w - 1]
-                elif s == 5:
-                    src_txt = sports_units[abjad_idx]
-                elif s == 6:
-                    src_txt = science_units[w - 1]
-                else:
-                    src_txt = adab_units[w - 1]
-
+                abjad_char = STRICT_ABJAD_LETTERS[local_i]
+                done_ops += 1
                 self._update_progress_ui(
-                    completed_steps,
-                    total_seals,
-                    f"توليد الوحدة {w} حرف {abjad_char} الختم {SEALS_META[s]}"
+                    done_ops,
+                    total_ops,
+                    f"المهمة 3: الختم {SEALS_META[s_id]} — حرف {abjad_char} ({local_i + 1}/28)"
                 )
+                raw_sec = seals_28_sections[s_id][local_i]
+                lesson_obj = self.task3_build_seal_slides_and_quizzes(
+                    year=year,
+                    cycle_num=cycle_num,
+                    abjad_char=abjad_char,
+                    seal_id=s_id,
+                    seal_title=SEALS_META[s_id],
+                    raw_source_text=raw_sec,
+                    ali_available=ali_available,
+                )
+                formatted_by_seal[s_id].append(lesson_obj)
+                self.log(f"✔ ختم {s_id} ({SEALS_META[s_id]}) — حرف {abjad_char} (درس + 7 أنواع أسئلة)")
 
-                if src_txt.strip() and ali_available:
-                    lesson_obj = self.build_seal_lesson_with_ali(
-                        year=year,
-                        cycle_num=cycle_num,
-                        global_week=w,
-                        abjad_char=abjad_char,
-                        seal_id=s,
-                        seal_title=SEALS_META[s],
-                        raw_source_text=src_txt,
-                    )
-                elif src_txt.strip():
-                    cleaned_pts = [
-                        pt for pt in sanitize_for_tts_and_points(src_txt).splitlines() if pt.strip()
-                    ] or [f"هذا درس {SEALS_META[s]} قيد التحضير"]
-                    lesson_obj = {
-                        "learn": {
-                            "introTitle": f"درس {SEALS_META[s]}",
-                            "introGoal": f"فهم وتطبيق {SEALS_META[s]}",
-                            "slides": [
-                                {
-                                    "img": "",
-                                    "text": pt,
-                                    "labData": True if i == 0 and s in (2, 3, 4, 5, 6) else False,
-                                }
-                                for i, pt in enumerate(cleaned_pts[:4])
-                            ],
-                        },
-                        "play": {
-                            "questions": [
-                                {
-                                    "q": f"ما الفكرة الواردة في درس {SEALS_META[s]}",
-                                    "focusWord": "",
-                                    "options": [
-                                        {"text": cleaned_pts[0], "correct": True},
-                                        {"text": f"هذا درس {SEALS_META[s]} قيد التحضير", "correct": False},
-                                    ],
-                                }
-                            ],
-                            "sadaqahPairs": [{"right": SEALS_META[s], "left": cleaned_pts[0]}],
-                            "sadaqahDecoy": "خيار غير مطابق",
-                            "giftBasket": {
-                                "prompt": f"اختر العبارة الصحيحة من درس {SEALS_META[s]}",
-                                "targetCount": 1,
-                                "items": [
-                                    {"emoji": "📘", "label": cleaned_pts[0], "good": True},
-                                    {"emoji": "🚫", "label": "خيار غير مطابق", "good": False},
-                                ],
-                            },
-                        },
-                        "apply": {
-                            "steps": [cleaned_pts[0]]
-                        },
-                    }
-                else:
-                    prep_msg = f"هذا درس {SEALS_META[s]} قيد التحضير"
-                    lesson_obj = {
-                        "learn": {
-                            "introTitle": prep_msg,
-                            "introGoal": prep_msg,
-                            "slides": [{"img": "", "text": prep_msg, "labData": False}],
-                        },
-                        "play": {
-                            "questions": [
-                                {
-                                    "q": prep_msg,
-                                    "focusWord": "",
-                                    "options": [
-                                        {"text": prep_msg, "correct": True},
-                                        {"text": "بانتظار التحضير", "correct": False},
-                                    ],
-                                }
-                            ],
-                            "sadaqahPairs": [],
-                            "sadaqahDecoy": "",
-                            "giftBasket": {
-                                "prompt": prep_msg,
-                                "targetCount": 1,
-                                "items": [{"emoji": "📘", "label": prep_msg, "good": True}],
-                            },
-                        },
-                        "apply": {"steps": [prep_msg]},
-                    }
+        if self.stop_flag:
+            return
 
-                curriculum_year_dict[w_key][s_key] = lesson_obj
-                self._write_outputs(year, curriculum_year_dict, json_out_path, js_out_path)
-                self.log(f"✔ الوحدة {w} ({abjad_char}) — {SEALS_META[s]}")
+        # المهمة 4: التجميع العرضي حسب الحروف عبر الأختام السبعة
+        self.log("[المهمة 4] تجميع الأختام السبعة معاً لكل حرف من الحروف الـ 28")
+        grouped_by_letter: dict[str, dict[str, dict]] = {}
+        for local_i in range(28):
+            global_week_num = cycle_start_idx + local_i + 1
+            w_key = str(global_week_num)
+            grouped_by_letter[w_key] = {}
+            for s_id in range(1, 8):
+                grouped_by_letter[w_key][str(s_id)] = formatted_by_seal[s_id][local_i]
 
-        self.after(0, lambda: self._on_pipeline_finished(year, json_out_path, js_out_path))
+        # المهمة 5: الحقن النهائي في ملفات الدورة المستقلة
+        self.log(f"[المهمة 5] حقن الدورة {cycle_num} في ملفات curriculum-y{year}-c{cycle_num}")
+        json_out_path = out_dir / f"curriculum-y{year}-c{cycle_num}.json"
+        js_out_path = out_dir / f"curriculum-y{year}-c{cycle_num}.js"
 
-    def _write_outputs(self, year: int, year_dict: dict, json_path: Path, js_path: Path):
-        """كتابة ملف الجيسون وملف الجافاسكريبت المحقون في الستيج 2"""
-        full_payload = {str(year): year_dict}
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(full_payload, f, ensure_ascii=False, indent=2)
+        with open(json_out_path, "w", encoding="utf-8") as f:
+            json.dump({str(year): grouped_by_letter}, f, ensure_ascii=False, indent=2)
 
         js_content = (
             "window.curriculumData = window.curriculumData || {};\n"
-            f"window.curriculumData[{year}] = "
-            + json.dumps(year_dict, ensure_ascii=False, indent=2)
-            + ";\n"
+            f"window.curriculumData[{year}] = window.curriculumData[{year}] || {{}};\n"
+            f"Object.assign(window.curriculumData[{year}], "
+            + json.dumps(grouped_by_letter, ensure_ascii=False, indent=2)
+            + ");\n"
         )
-        with open(js_path, "w", encoding="utf-8") as f:
+        with open(js_out_path, "w", encoding="utf-8") as f:
             f.write(js_content)
+
+        self.after(0, lambda: self._on_pipeline_finished(year, cycle_num, json_out_path, js_out_path))
 
     def _update_progress_ui(self, done: int, total: int, status_txt: str):
         ratio = max(0.0, min(1.0, done / max(1, total)))
@@ -933,18 +981,18 @@ class RayhanaApp(ctk.CTk):
             self.lbl_status.configure(text=status_txt, text_color="#059669")
         self.after(0, _upd)
 
-    def _on_pipeline_finished(self, year: int, json_path: Path, js_path: Path):
+    def _on_pipeline_finished(self, year: int, cycle_num: int, json_path: Path, js_path: Path):
         self.is_running = False
         self.btn_start.configure(state="normal")
         self.btn_stop.configure(state="disabled")
-        self.lbl_status.configure(text="✔ اكتمل التوليد والحقن", text_color="#2E7D32")
-        self.log(f"تم حفظ ملف الجيسون: {json_path}")
-        self.log(f"تم حقن ملف المنهج للستيج 2: {js_path}")
-        if not self.stop_flag:
-            messagebox.showinfo(
-                "اكتملت ريحانة",
-                f"تم توليد ملف المنهج للسنة {year} وحقنه في:\n{js_path}\n\nوملف الجيسون:\n{json_path}"
-            )
+        self.lbl_status.configure(text="✔ اكتملت المهام الخمس", text_color="#2E7D32")
+        self.log(f"✔ ملف الجيسون للدورة {cycle_num}: {json_path}")
+        self.log(f"✔ ملف الجافاسكريبت المحقون للستيج 2: {js_path}")
+        messagebox.showinfo(
+            "اكتملت ريحانة",
+            f"تم تنفيذ المهام الخمس للسنة {year} — الدورة {cycle_num}\n\n"
+            f"ملف الستيج 2:\n{js_path}\n\nملف الجيسون:\n{json_path}"
+        )
 
 
 if __name__ == "__main__":

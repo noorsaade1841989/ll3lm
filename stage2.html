@@ -181,19 +181,31 @@
             -webkit-backdrop-filter: blur(18px);
             border-bottom: 2px solid rgba(250, 204, 21, 0.48);
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
+            display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 clamp(8px, 1.6vw, 18px);
             gap: 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            cursor: grab;
+            scrollbar-width: thin;
+            scrollbar-color: #eab308 rgba(6, 40, 30, 0.5);
         }
 
+        header:active { cursor: grabbing; }
+        header::-webkit-scrollbar { height: 5px; }
+        header::-webkit-scrollbar-thumb { background: #eab308; border-radius: 999px; }
+
         .header-zone-start {
-            justify-self: start;
+            flex: 0 0 auto;
             display: flex;
             align-items: center;
             gap: clamp(6px, 1vw, 10px);
-            min-width: 0;
+            min-width: max-content;
         }
 
         .brand-logo-link {
@@ -241,6 +253,7 @@
             font-weight: 800;
             cursor: pointer;
             white-space: nowrap;
+            flex-shrink: 0;
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25), var(--glass-shine);
             transition: all 0.2s ease;
         }
@@ -251,11 +264,11 @@
         }
 
         .header-zone-center {
-            justify-self: center;
+            flex: 0 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 0;
+            min-width: max-content;
         }
 
         .unified-identity-capsule {
@@ -270,8 +283,7 @@
             text-decoration: none;
             color: #ffffff;
             white-space: nowrap;
-            max-width: 44vw;
-            overflow: hidden;
+            flex-shrink: 0;
             transition: transform 0.2s ease;
         }
         .unified-identity-capsule:hover { transform: translateY(-1px); }
@@ -311,15 +323,14 @@
             font-size: clamp(0.76rem, 1.7vmin, 0.94rem);
             font-weight: 800;
             color: #fde047;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .header-zone-end {
-            justify-self: end;
+            flex: 0 0 auto;
             display: flex;
             align-items: center;
-            min-width: 0;
+            min-width: max-content;
         }
 
         .unified-eval-capsule {
@@ -331,6 +342,8 @@
             background: linear-gradient(135deg, rgba(6, 30, 23, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%);
             border: 1.5px solid rgba(110, 231, 183, 0.45);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.38), var(--glass-shine);
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .eval-subj-orb {
@@ -397,6 +410,7 @@
             padding: 4px;
             opacity: 0.45;
             transition: all 0.28s ease;
+            flex-shrink: 0;
         }
         .station-icon svg { width: 100%; height: 100%; }
         .station-icon.hidden-station { display: none !important; }
@@ -426,6 +440,7 @@
             background: rgba(9, 13, 22, 0.6);
             border: 1px solid rgba(250, 204, 21, 0.3);
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .subj-coins-track { display: inline-flex; align-items: center; gap: 3px; }
@@ -436,6 +451,7 @@
             background: rgba(255, 255, 255, 0.16);
             border: 1.5px dashed rgba(255, 255, 255, 0.4);
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
         .hdr-coin.silver {
             background: radial-gradient(circle at 30% 30%, #ffffff, #94a3b8);
@@ -455,11 +471,33 @@
             opacity: 0.25;
             filter: grayscale(100%);
             transition: 0.35s;
+            flex-shrink: 0;
         }
         .diamond-coin-badge.lit, .diamond-coin-badge.earned {
             opacity: 1;
             filter: grayscale(0%) drop-shadow(0 0 8px #38bdf8);
             transform: scale(1.18);
+        }
+
+        .header-scroll-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .hdr-pan-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1.5px solid #fde047;
+            background: rgba(6, 78, 59, 0.85);
+            color: #fef08a;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* ================= الشريط الجانبي لأختام الهندسة المقدسة السبعة ================= */
@@ -1515,7 +1553,7 @@
 
         @media (max-width: 768px) {
             .brand-logo-text { display: none; }
-            .unified-identity-capsule { max-width: 46vw; padding: 4px 10px; gap: 4px; }
+            .unified-identity-capsule { padding: 4px 10px; gap: 4px; }
             .interactive-lab-stage { padding: 8px 40px; }
         }
     </style>
@@ -1608,6 +1646,11 @@
                     <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
             </div>
+        </div>
+
+        <div class="header-scroll-controls">
+            <button type="button" class="hdr-pan-btn" id="hdr-pan-right" title="يمين">▶</button>
+            <button type="button" class="hdr-pan-btn" id="hdr-pan-left" title="يسار">◀</button>
         </div>
     </header>
 
@@ -1798,6 +1841,42 @@
     </script>
 
     <script>
+        window.curriculumData = window.curriculumData || {};
+        window._loadedStage2Cycles = window._loadedStage2Cycles || {};
+
+        function loadCycleScriptIfNeeded(year, cycleNum, onComplete) {
+            window.curriculumData[year] = window.curriculumData[year] || {};
+            const safeCycle = Math.max(1, parseInt(cycleNum, 10) || 1);
+            const cacheKey = `${year}_c${safeCycle}`;
+
+            if (window._loadedStage2Cycles[cacheKey]) {
+                if (typeof onComplete === 'function') onComplete();
+                return;
+            }
+
+            const scriptSrc = `curriculum-y${year}-c${safeCycle}.js`;
+            const existing = document.querySelector(`script[data-cycle-key="${cacheKey}"]`);
+            if (existing) {
+                window._loadedStage2Cycles[cacheKey] = true;
+                if (typeof onComplete === 'function') onComplete();
+                return;
+            }
+
+            const s = document.createElement('script');
+            s.src = scriptSrc;
+            s.async = false;
+            s.dataset.cycleKey = cacheKey;
+            s.onload = () => {
+                window._loadedStage2Cycles[cacheKey] = true;
+                if (typeof onComplete === 'function') onComplete();
+            };
+            s.onerror = () => {
+                window._loadedStage2Cycles[cacheKey] = true;
+                if (typeof onComplete === 'function') onComplete();
+            };
+            document.head.appendChild(s);
+        }
+
         (function() {
             let blocked = [];
             try { blocked = JSON.parse(localStorage.getItem('blocked_schools_list') || '[]'); } catch (e) {}
@@ -1807,6 +1886,7 @@
 
             if (activeBranch === 'main') {
                 document.write('<script src="curriculum-y' + RAW_YEAR + '.js"><\/script>');
+                document.write('<script src="curriculum-y' + RAW_YEAR + '-c1.js"><\/script>');
             } else {
                 document.write('<script src="curriculum-master.js"><\/script>');
             }
@@ -1977,7 +2057,6 @@
             });
         })();
 
-        // محرك الرنين الصوتي
         function getSharedAudioCtx() {
             if (!window._sharedAudioCtx) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -2069,7 +2148,6 @@
             } catch (e) {}
         }
 
-        // القارئ الآلي الفصيح
         let isTTSActive = localStorage.getItem('tts_enabled_state') !== 'false';
         window._questionReadCompleted = false;
         window._isSpeakingMainQuestion = false;
@@ -2105,6 +2183,36 @@
             updateTTSButtonUI();
         }
 
+        function applyWordTashkeelAndEnding(word, isLastWord = false) {
+            if (!word) return '';
+            let w = word.replace(/([\u064B-\u0650])\u0651/g, '\u0651$1');
+            if (/[\u064B-\u0652\u0670]/.test(w)) return w;
+
+            const chars = Array.from(w);
+            if (chars.length <= 1) return w;
+
+            let out = '';
+            for (let i = 0; i < chars.length; i++) {
+                const ch = chars[i];
+                const isLast = (i === chars.length - 1);
+                if (!/[\u0621-\u064A]/.test(ch)) {
+                    out += ch;
+                    continue;
+                }
+                if (isLast) {
+                    out += isLastWord ? (ch + '\u0652') : (ch + '\u064E');
+                } else {
+                    const nextCh = chars[i + 1];
+                    if (['ا', 'و', 'ي', 'ى', 'آ'].includes(ch) || ['ا', 'و', 'ي', 'ى'].includes(nextCh)) {
+                        out += ch;
+                    } else {
+                        out += ch + '\u064E';
+                    }
+                }
+            }
+            return out;
+        }
+
         function preprocessTTS(text) {
             if (!text) return '';
             let clean = String(text).replace(/<[^>]*>/g, ' ');
@@ -2117,11 +2225,12 @@
 
             clean = clean.replace(/[()\[\]{}«»"']/g, ' ');
             clean = clean.replace(/[:؛—–]/g, ' ');
-            clean = clean.replace(/ة[\u064B-\u0652]*(?=\s*([.،,۔!؟]|$))/g, 'هْ');
-            clean = clean.replace(/ة\u0652/g, 'ت');
-            clean = clean.replace(/ة([\u064B-\u0650])/g, 'ت$1');
-            clean = clean.replace(/ة(?=\s+ال)/g, 'تُ');
+            clean = clean.replace(/ة[\u064B-\u0652]*(?=\s*([.،,۔!؟]|$))/g, 'ه');
+            clean = clean.replace(/ة([\u064B-\u0652])/g, 'ت$1');
             clean = clean.replace(/ة/g, 'ت');
+
+            const words = clean.trim().split(/\s+/).filter(Boolean);
+            clean = words.map((w, idx) => applyWordTashkeelAndEnding(w, idx === words.length - 1)).join(' ');
             clean = clean.replace(/\u0652(?=\s*[.،!؟]|$)/g, '');
             return clean.replace(/\s+/g, ' ').trim();
         }
@@ -2172,7 +2281,7 @@
                 audioObj.onerror = finish;
                 let playPromise = audioObj.play();
                 if (playPromise !== undefined) playPromise.catch(() => finish());
-                _questionGuardTimer = setTimeout(finish, Math.max(processedText.length * 105, 3500));
+                _questionGuardTimer = setTimeout(finish, Math.max(processedText.length * 160, 8000));
                 return;
             }
 
@@ -2181,13 +2290,13 @@
             window.speechSynthesis.cancel();
             let utterance = new SpeechSynthesisUtterance(processedText);
             utterance.lang = 'ar-SA';
-            utterance.rate = 0.92;
+            utterance.rate = 0.9;
             utterance.pitch = 1.0;
             selectBestArabicVoice(utterance);
 
             utterance.onend = finish;
-            utterance.onerror = finish;
-            _questionGuardTimer = setTimeout(finish, (processedText.length * 100) + 2200);
+            utterance.onerror = () => finish();
+            _questionGuardTimer = setTimeout(finish, Math.max((processedText.length * 160) + 5000, 10000));
             window.speechSynthesis.speak(utterance);
         }
 
@@ -2230,9 +2339,49 @@
                 }
             });
         })();
+
+        (function enableHeaderHorizontalPan() {
+            const hdr = document.querySelector('header');
+            if (!hdr) return;
+
+            const rightBtn = document.getElementById('hdr-pan-right');
+            const leftBtn = document.getElementById('hdr-pan-left');
+            const step = 180;
+            if (rightBtn) rightBtn.onclick = () => hdr.scrollBy({ left: step, behavior: 'smooth' });
+            if (leftBtn) leftBtn.onclick = () => hdr.scrollBy({ left: -step, behavior: 'smooth' });
+
+            let isDown = false, startX = 0, scrollStart = 0, dragged = false;
+            hdr.addEventListener('mousedown', (e) => {
+                if (e.target.closest('button, a, select, input')) return;
+                isDown = true;
+                dragged = false;
+                startX = e.pageX - hdr.offsetLeft;
+                scrollStart = hdr.scrollLeft;
+            });
+            window.addEventListener('mouseup', () => {
+                if (!isDown) return;
+                isDown = false;
+                if (dragged) setTimeout(() => { dragged = false; }, 0);
+            });
+            hdr.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                const x = e.pageX - hdr.offsetLeft;
+                const walk = (x - startX) * 1.5;
+                if (Math.abs(walk) > 4) dragged = true;
+                if (dragged) {
+                    e.preventDefault();
+                    hdr.scrollLeft = scrollStart - walk;
+                }
+            });
+            hdr.addEventListener('click', (e) => {
+                if (dragged) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+        })();
     </script>
 <!-- ==================== [ نهاية القسم 3 من 6 ] ==================== -->
-
 <script>
 // ==================== [ بداية القسم 4 من 6 : إدارة الدورات التصاعدية والخريطة والامتحان الشامل ] ====================
         const STRICT_ABJAD_LETTERS = [
@@ -2494,7 +2643,10 @@
                 document.getElementById('welcome-screen').style.display = 'none';
                 getSharedAudioCtx();
                 loadCustomCurriculumEdits();
-                initApp();
+                const startCycle = getCycleFromGlobalWeek(playWeek);
+                loadCycleScriptIfNeeded(RAW_YEAR, startCycle, () => {
+                    initApp();
+                });
             }, 450);
         }
 
@@ -2558,7 +2710,11 @@
             document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
             let activeBtn = document.getElementById('btn-subj-' + subjId);
             if (activeBtn) activeBtn.classList.add('active');
-            renderCurrentStep();
+
+            const targetCycle = getCycleFromGlobalWeek(playWeek);
+            loadCycleScriptIfNeeded(RAW_YEAR, targetCycle, () => {
+                renderCurrentStep();
+            });
         }
 
         function getSadaqahCount() {
@@ -2590,7 +2746,6 @@
             return buildSmartAutoLessonFallback(RAW_YEAR, playWeek, activeViewSubj);
         }
 
-        // نصوص افتراضية واضحة ومباشرة توضح أن الدرس قيد التحضير حسب المادة
         function buildSmartAutoLessonFallback(year, gWeek, subj) {
             const subjName = SUBJ_TITLES[subj] || 'الدرس';
             const prepTitle = `هذا درس ${subjName} قيد التحضير`;
@@ -2726,8 +2881,10 @@
                 if (!isLocked) {
                     btn.onclick = () => {
                         selectedMapCycle = c;
-                        buildCyclesTabsBar();
-                        buildWeekGrid();
+                        loadCycleScriptIfNeeded(RAW_YEAR, c, () => {
+                            buildCyclesTabsBar();
+                            buildWeekGrid();
+                        });
                     };
                 }
                 bar.appendChild(btn);
@@ -2903,8 +3060,10 @@
             selectedMapCycle = getCycleFromGlobalWeek(playWeek);
             updateFreeExploreUI();
             updateTTSButtonUI();
-            buildWeekGrid();
-            document.getElementById('week-modal').style.display = 'flex';
+            loadCycleScriptIfNeeded(RAW_YEAR, selectedMapCycle, () => {
+                buildWeekGrid();
+                document.getElementById('week-modal').style.display = 'flex';
+            });
         }
 
         function closeWeekModal(e) {
@@ -2928,9 +3087,9 @@
             }
         }
 // ==================== [ نهاية القسم 4 من 6 ] ====================
-    </script>
-	
-	<script>
+</script>
+
+<script>
 // ==================== [ بداية القسم 5 من 6 : العارض التفاعلي والمختبر والسلايدات والأطوار ] ====================
         // عارض الصور التفاعلي (تكبير، تصغير، تحريك باليد/اللمس، مشاركة، إغلاق X) بدون كلمات
         let _lbScale = 1;
@@ -2941,6 +3100,9 @@
         let _lbStartY = 0;
         let _lbPinchStartDist = 0;
         let _lbPinchStartScale = 1;
+
+        // حالة التقليب التلقائي للسلايدات مع القارئ الآلي
+        let isAutoAdvanceSlidesActive = localStorage.getItem('auto_advance_slides_stage2') === 'true';
 
         function applyLightboxTransform() {
             const img = document.getElementById('lb-target-img');
@@ -3149,7 +3311,7 @@
                     const numIn = controlsBar.querySelector('#f-num');
                     const denIn = controlsBar.querySelector('#f-den');
                     numIn.oninput = () => { num = parseInt(numIn.value, 10); if (num > den) { den = num; denIn.value = den; } controlsBar.querySelector('#f-num-v').innerText = num; controlsBar.querySelector('#f-den-v').innerText = den; drawFrac(); };
-                    denIn.oninput = () => { den = parseInt(denIn.value, 10); if (num > den) { num = den; numIn.value = num; } controlsBar.querySelector('#f-den-v').innerText = den; controlsBar.querySelector('#f-num-v').innerText = num; drawFrac(); };
+                    denIn.oninput = () => { den = parseInt(denIn.value, 10); if (num > den) { num = den; numIn.value = num; } controlsBar.querySelector('#f-num-v').innerText = num; controlsBar.querySelector('#f-den-v').innerText = den; drawFrac(); };
                     drawFrac();
                 } else if (type === 'pythagoras') {
                     headerPill.innerHTML = '<span>مختبر فيثاغورس الهندسي</span>';
@@ -3301,6 +3463,45 @@
                 else handleNextClick();
             };
             document.querySelector('.content-area').appendChild(btn);
+        }
+
+        // زر واضح للانتقال إلى محطة الأسئلة عند انتهاء كل السلايدات
+        function showGoToQuestionsButton(parentContainer) {
+            if (!parentContainer || isSecretEditMode) return;
+            if (parentContainer.querySelector('#go-to-questions-btn')) return;
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.id = 'go-to-questions-btn';
+            btn.innerHTML = 'الانتقال إلى محطة الأسئلة ⬅';
+            btn.style.cssText = `
+                position: absolute;
+                bottom: 14px;
+                right: 14px;
+                z-index: 35;
+                padding: 8px 18px;
+                border-radius: 999px;
+                border: 2.5px solid #fde047;
+                background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                color: #ffffff;
+                font-weight: 900;
+                font-size: clamp(0.86rem, 1.9vmin, 1.05rem);
+                cursor: pointer;
+                box-shadow: 0 8px 20px rgba(4, 120, 87, 0.55);
+                transition: transform 0.2s ease;
+            `;
+            btn.onmouseenter = () => { btn.style.transform = 'scale(1.05)'; };
+            btn.onmouseleave = () => { btn.style.transform = 'scale(1)'; };
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                playNextChime();
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                document.getElementById('custom-audio').pause();
+                globalStep = 2;
+                currentQuestionIdx = 0;
+                renderCurrentStep();
+            };
+            parentContainer.appendChild(btn);
         }
 
         function ensureOptionsForQuestion(rawOpts, isTrueFalseQuestion = false) {
@@ -3786,9 +3987,24 @@
                 btnSlides.type = 'button';
                 btnSlides.innerHTML = `<span class="layer-status-dot"></span><span>الشرائح</span>`;
 
+                // زر تقليب السلايدات تلقائياً مع القارئ الآلي
+                const btnAutoSlide = document.createElement('button');
+                btnAutoSlide.type = 'button';
+                const syncAutoSlideBtnUI = () => {
+                    btnAutoSlide.className = 'layer-tab-btn ' + (isAutoAdvanceSlidesActive ? 'active-layer' : 'available');
+                    btnAutoSlide.innerHTML = `<span class="layer-status-dot"></span><span>${isAutoAdvanceSlidesActive ? 'تقليب تلقائي: يعمل' : 'تقليب تلقائي'}</span>`;
+                };
+                syncAutoSlideBtnUI();
+                btnAutoSlide.onclick = () => {
+                    isAutoAdvanceSlidesActive = !isAutoAdvanceSlidesActive;
+                    localStorage.setItem('auto_advance_slides_stage2', isAutoAdvanceSlidesActive ? 'true' : 'false');
+                    syncAutoSlideBtnUI();
+                };
+
                 layersBar.appendChild(btnVideo);
                 layersBar.appendChild(btnLab);
                 layersBar.appendChild(btnSlides);
+                layersBar.appendChild(btnAutoSlide);
                 card.appendChild(layersBar);
 
                 const bodyStageWrap = document.createElement('div');
@@ -3823,6 +4039,7 @@
                             videoVerifiedAvailable = true;
                             btnVideo.classList.remove('unavailable'); btnVideo.classList.add('available', 'active-layer');
                             updateNavButtons(true);
+                            showGoToQuestionsButton(vidBox);
                             if (!isSecretEditMode) vidEl.play().catch(() => {});
                         };
                         vidEl.onerror = () => {
@@ -3834,7 +4051,10 @@
                                 attachEditHooksToCurrentStation(defData);
                             }
                         };
-                        vidEl.onended = () => updateNavButtons(true);
+                        vidEl.onended = () => {
+                            updateNavButtons(true);
+                            showGoToQuestionsButton(vidBox);
+                        };
                         if (isSecretEditMode) attachEditHooksToCurrentStation(defData);
                         return;
                     }
@@ -3877,9 +4097,29 @@
                     imgEl.onclick = (e) => openCurrentSlideZoom(e);
                     zoomCornerBtn.onclick = (e) => openCurrentSlideZoom(e);
 
+                    const handleSlideReadingFinished = () => {
+                        updateNavButtons(true);
+                        const isLastSlide = (currentSlide >= slides.length - 1);
+                        if (isLastSlide) {
+                            showGoToQuestionsButton(imgBox);
+                        } else if (isAutoAdvanceSlidesActive && !isSecretEditMode && layerName === 'slides') {
+                            setTimeout(() => {
+                                if (!isAutoAdvanceSlidesActive || isSecretEditMode) return;
+                                if (currentSlide < slides.length - 1) {
+                                    currentSlide++;
+                                    updateView();
+                                    playCurrentSlideAudio(handleSlideReadingFinished);
+                                }
+                            }, 550);
+                        }
+                    };
+
                     const updateView = () => {
                         let s = slides[currentSlide];
                         window._activeSlideIdx = currentSlide;
+
+                        const existingQBtn = imgBox.querySelector('#go-to-questions-btn');
+                        if (existingQBtn) existingQBtn.remove();
 
                         if (layerName === 'lab') {
                             imgEl.style.display = 'none';
@@ -3891,6 +4131,7 @@
                                 seed: playWeek
                             };
                             window.InteractiveLabEngine.render(labStageEl, activeLabCfg, activeViewSubj);
+                            showGoToQuestionsButton(imgBox);
                         } else {
                             labStageEl.style.display = 'none';
                             if (s.cardData) {
@@ -3916,6 +4157,9 @@
                                 imgEl.src = s.img || defaultImg;
                                 zoomCornerBtn.style.display = isSecretEditMode ? 'none' : 'inline-flex';
                             }
+                            if (currentSlide >= slides.length - 1 || isFreeExplore) {
+                                showGoToQuestionsButton(imgBox);
+                            }
                         }
 
                         textContent.innerHTML = colorizeHarakaAndMadd(s.text || `هذا درس ${subjName} قيد التحضير`);
@@ -3925,9 +4169,9 @@
                         if (isSecretEditMode) attachEditHooksToCurrentStation(defData);
                     };
 
-                    nextBtn.onclick = (e) => { e.stopPropagation(); if (currentSlide < slides.length - 1) { currentSlide++; updateView(); playCurrentSlideAudio(); } };
-                    prevBtn.onclick = (e) => { e.stopPropagation(); if (currentSlide > 0) { currentSlide--; updateView(); playCurrentSlideAudio(); } };
-                    soundIcon.onclick = (e) => { e.stopPropagation(); playCurrentSlideAudio(); };
+                    nextBtn.onclick = (e) => { e.stopPropagation(); if (currentSlide < slides.length - 1) { currentSlide++; updateView(); playCurrentSlideAudio(handleSlideReadingFinished); } };
+                    prevBtn.onclick = (e) => { e.stopPropagation(); if (currentSlide > 0) { currentSlide--; updateView(); playCurrentSlideAudio(handleSlideReadingFinished); } };
+                    soundIcon.onclick = (e) => { e.stopPropagation(); playCurrentSlideAudio(handleSlideReadingFinished); };
 
                     imgBox.appendChild(imgEl);
                     imgBox.appendChild(cardStageEl);
@@ -3939,7 +4183,7 @@
                     bodyStageWrap.appendChild(sliderContainer);
 
                     updateView();
-                    playCurrentSlideAudio(() => updateNavButtons(true));
+                    playCurrentSlideAudio(handleSlideReadingFinished);
                 }
 
                 btnVideo.onclick = () => { if (videoVerifiedAvailable || isSecretEditMode) activateLayer('video'); };
@@ -4053,7 +4297,8 @@
             }, true);
         })();
 // ==================== [ نهاية القسم 5 من 6 ] ====================
-    </script>
+</script>
+
 <script>
 // ==================== [ بداية القسم 6 من 6 : التعديل المباشر والمزامنة اللامركزية والتلميحات وحارس الصوت ] ====================
         let lastActiveEditableEl = null;
@@ -4440,8 +4685,16 @@
         updateGiftDiamondUI();
         updateNavButtons(false);
 // ==================== [ نهاية القسم 6 من 6 ] ====================
-    </script>
-	<script src="interactive-labs.js"></script>
+</script>
+<script src="interactive-labs.js"></script>
 </body>
 </html>
-	
+
+
+
+
+
+
+
+
+
