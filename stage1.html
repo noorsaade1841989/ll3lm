@@ -1872,56 +1872,66 @@
             }
             updateTTSButtonUI();
         }
+function preprocessTTS(text) {
+    if (!text) return '';
+    let clean = String(text).replace(/<[^>]*>/g, ' ');
+    clean = clean.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, ' ');
+    clean = clean.replace(/\u0640+/g, '');
+    clean = clean.replace(/([\u064B-\u0650])\u0651/g, '\u0651$1');
 
-        function preprocessTTS(text) {
-            if (!text) return '';
-            let clean = String(text).replace(/<[^>]*>/g, ' ');
-            clean = clean.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, ' ');
-            clean = clean.replace(/\u0640+/g, '');
-            clean = clean.replace(/([\u064B-\u0650])\u0651/g, '\u0651$1');
+    // 1. تحويل (ع) أو (عـ) بين قوسين إلى "عليه السلام"
+    clean = clean.replace(/\(\s*ع[\u064B-\u0652]*\s*\)/g, ' عليه السلام ');
 
-            let trimmedRaw = clean.trim();
-            if (ARABIC_LETTER_NAMES[trimmedRaw]) {
-                return ARABIC_LETTER_NAMES[trimmedRaw];
-            }
-            let singleHarakaMatch = trimmedRaw.match(/^([أاإبتثجحخدذرزسشصضطظعغفقكلمنهوي])([\u064E\u064F\u0650\u0652])$/);
-            if (singleHarakaMatch) {
-                let ltr = singleHarakaMatch[1];
-                let hrk = singleHarakaMatch[2];
-                if (hrk === '\u064E') return `${ltr}\u064Eه`;
-                if (hrk === '\u064F') return `${ltr}\u064Fو`;
-                if (hrk === '\u0650') return `${ltr}\u0650ي`;
-                if (hrk === '\u0652') return `أَ${ltr}\u0652`;
-            }
+    // 2. تحويل (ص) أو (صـ) بين قوسين إلى "صلى الله عليه وآله"
+    clean = clean.replace(/\(\s*ص[\u064B-\u0652]*\s*\)/g, ' صلى الله عليه وآله ');
 
-            clean = clean.replace(/حَرْف([\u064B-\u0652]*)\s*[\(\[«"]?\s*([أاإآبتثجحخدذرزسشصضطظعغفقكلمنهوي])\s*[\)\]»"]?(?=\s|[.،؛:!؟]|$)/g, (match, haraka, ltr) => {
-                let name = ARABIC_LETTER_NAMES[ltr] || ltr;
-                return `حَرْف${haraka} ${name}`;
-            });
+    // 3. حذف أي محتوى آخر بين الأقواس (أرقام، إشارات، أو نصوص جانبية) فلا يُقرأ
+    clean = clean.replace(/\([^)]*\)/g, ' ');
+    clean = clean.replace(/\[[^\]]*\]/g, ' ');
+    clean = clean.replace(/\{[^}]*\}/g, ' ');
 
-            clean = clean.replace(/=\s*؟/g, ' كَمْ يُسَاوِي ');
-            clean = clean.replace(/=/g, ' يُسَاوِي ');
-            clean = clean.replace(/\+/g, ' زَائِد ');
-            clean = clean.replace(/×/g, ' ضَرْب ');
-            clean = clean.replace(/÷/g, ' قِسْمَة ');
-            clean = clean.replace(/(\d|[٠-٩])\s*-\s*(\d|[٠-٩])/g, '$1 نَاقِص $2');
-            clean = clean.replace(/\bH2O\b/gi, 'إِتْش تُو أُو');
-            clean = clean.replace(/\bLED\b/gi, 'لِيد');
-            clean = clean.replace(/\bpH\b/gi, 'بِي إِتْش');
+    let trimmedRaw = clean.trim();
+    if (ARABIC_LETTER_NAMES[trimmedRaw]) {
+        return ARABIC_LETTER_NAMES[trimmedRaw];
+    }
+    let singleHarakaMatch = trimmedRaw.match(/^([أاإبتثجحخدذرزسشصضطظعغفقكلمنهوي])([\u064E\u064F\u0650\u0652])$/);
+    if (singleHarakaMatch) {
+        let ltr = singleHarakaMatch[1];
+        let hrk = singleHarakaMatch[2];
+        if (hrk === '\u064E') return `${ltr}\u064Eه`;
+        if (hrk === '\u064F') return `${ltr}\u064Fو`;
+        if (hrk === '\u0650') return `${ltr}\u0650ي`;
+        if (hrk === '\u0652') return `أَ${ltr}\u0652`;
+    }
 
-            clean = clean.replace(/[()\[\]{}«»"']/g, ' ');
-            clean = clean.replace(/[:؛—–]/g, ' ، ');
+    clean = clean.replace(/حَرْف([\u064B-\u0652]*)\s*[\(\[«"]?\s*([أاإآبتثجحخدذرزسشصضطظعغفقكلمنهوي])\s*[\)\]»"]?(?=\s|[.،؛:!؟]|$)/g, (match, haraka, ltr) => {
+        let name = ARABIC_LETTER_NAMES[ltr] || ltr;
+        return `حَرْف${haraka} ${name}`;
+    });
 
-            clean = clean.replace(/ة[\u064B-\u0652]*(?=\s*[.،,۔])/g, 'هْ');
-            clean = clean.replace(/ة\u0652/g, 'ت');
-            clean = clean.replace(/ة([\u064B-\u0650])/g, 'ت$1');
-            clean = clean.replace(/ة(?=\s+ال)/g, 'تُ');
-            clean = clean.replace(/ة/g, 'ت');
+    clean = clean.replace(/=\s*؟/g, ' كَمْ يُسَاوِي ');
+    clean = clean.replace(/=/g, ' يُسَاوِي ');
+    clean = clean.replace(/\+/g, ' زَائِد ');
+    clean = clean.replace(/×/g, ' ضَرْب ');
+    clean = clean.replace(/÷/g, ' قِسْمَة ');
+    clean = clean.replace(/(\d|[٠-٩])\s*-\s*(\d|[٠-٩])/g, '$1 نَاقِص $2');
+    clean = clean.replace(/\bH2O\b/gi, 'إِتْش تُو أُو');
+    clean = clean.replace(/\bLED\b/gi, 'لِيد');
+    clean = clean.replace(/\bpH\b/gi, 'بِي إِتْش');
 
-            clean = clean.replace(/\u0652(?=\s*[.،!؟]|$)/g, '');
-            clean = clean.replace(/\s+/g, ' ').trim();
-            return clean.replace(/ماما/g, 'مَامَا').replace(/بابا/g, 'بَابَا');
-        }
+    clean = clean.replace(/[()\[\]{}«»"']/g, ' ');
+    clean = clean.replace(/[:؛—–]/g, ' ، ');
+
+    clean = clean.replace(/ة[\u064B-\u0652]*(?=\s*[.،,۔])/g, 'هْ');
+    clean = clean.replace(/ة\u0652/g, 'ت');
+    clean = clean.replace(/ة([\u064B-\u0650])/g, 'ت$1');
+    clean = clean.replace(/ة(?=\s+ال)/g, 'تُ');
+    clean = clean.replace(/ة/g, 'ت');
+
+    clean = clean.replace(/\u0652(?=\s*[.،!؟]|$)/g, '');
+    clean = clean.replace(/\s+/g, ' ').trim();
+    return clean.replace(/ماما/g, 'مَامَا').replace(/بابا/g, 'بَابَا');
+}
 
         function selectBestArabicVoice(utterance) {
             const voices = window.speechSynthesis.getVoices();
