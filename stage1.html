@@ -2,6 +2,26 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+    (function ensureSafeStorage(){
+        try {
+            var t = '__al3lm_test__';
+            window.localStorage.setItem(t, '1');
+            window.localStorage.removeItem(t);
+        } catch (e) {
+            var mem = {};
+            var safeStore = {
+                getItem: function(k){ return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+                setItem: function(k, v){ mem[k] = String(v); },
+                removeItem: function(k){ delete mem[k]; },
+                clear: function(){ mem = {}; },
+                key: function(i){ return Object.keys(mem)[i] || null; },
+                get length(){ return Object.keys(mem).length; }
+            };
+            try { Object.defineProperty(window, 'localStorage', { value: safeStore, configurable: true }); } catch (_) {}
+        }
+    })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>العلم | مرحلة سيد الطفولية التفاعلية</title>
@@ -1494,35 +1514,42 @@
     <audio id="bg-music" loop></audio>
     <audio id="custom-audio"></audio>
 
-    <!-- الشريط العلوي الموحد ثلاثي المناطق -->
-    <header>
-        <!-- ١. البداية (يمين الشريط دائماً): اللوغو + كلمة العلم + كبسولة الخريطة المقابلة للتقييم -->
-        <div class="header-zone-start">
-            <a href="index.html" class="brand-logo-link" id="brand-home-link" title="العودة للصفحة الرئيسية">
-                <img src="icon-512.png" onerror="this.src='cc.ico'" alt="العلم" class="brand-logo-icon">
-                <span class="brand-logo-text">العلم</span>
-            </a>
-            <span class="week-badge" id="week-badge" onclick="openWeekModal()">🧭 أ (1)</span>
-        </div>
+    <!-- الشريط العلوي الموحد بكبسولتين فقط (يمين: الخريطة والختم وعنوان الدرس | يسار: أيقونة واسم المدرسة والمرحلة والعمر) -->
+    <header class="two-capsule-header">
+        <button type="button" class="week-badge merged-map-lesson-capsule" id="week-badge" onclick="openWeekModal()">
+            <span class="map-key-part" id="week-badge-map-part">🧭 أ (1)</span>
+            <span class="id-divider"></span>
+            <span class="seal-inline-icon" id="header-subj-emoji">🗣️</span>
+            <span class="lesson-inline-title" id="header-lesson-title">المَنْطِقُ وَالقِصَّةُ</span>
+        </button>
 
-        <!-- ٢. المنتصف حصراً: كبسولة الهوية الواحدة المدمجة (المرحلة والعمر + اسم المدرسة والمعلم) -->
-        <div class="header-zone-center">
-            <a href="index.html" class="unified-identity-capsule" id="header-year-badge">
-                <span class="id-stage-part">
-                    <span id="hdr-stage-txt">سيد</span>
-                    <span class="year-pill-circle" id="hdr-year-num">7</span>
-                    <span id="hdr-year-word">سنوات</span>
-                </span>
-                <span class="id-divider"></span>
-                <span class="id-school-part" id="header-logo">مدرسة العلم</span>
-            </a>
-        </div>
+        <a href="index.html" class="unified-identity-capsule" id="header-year-badge">
+            <img src="icon-512.png" id="brand-home-link" onerror="if(!this.dataset.triedIco){this.dataset.triedIco='1';this.src='cc.ico';}else{this.style.display='none';}" alt="" class="brand-logo-icon">
+            <span class="id-school-part" id="header-logo">مدرسة العلم</span>
+            <span class="id-divider"></span>
+            <span class="id-stage-part">
+                <span id="hdr-stage-txt">سيد</span>
+                <span class="year-pill-circle" id="hdr-year-num">7</span>
+                <span id="hdr-year-word">سنوات</span>
+            </span>
+        </a>
+    </header>
 
-        <!-- ٣. النهاية (يسار الشريط): كبسولة الأفعال والتقييم المدمجة بدون الوسام الكلي -->
-        <div class="header-zone-end">
-            <div class="unified-eval-capsule" id="header-score-box">
-                <div class="eval-subj-orb" id="header-subj-emoji" onclick="openWeekModal()" title="المادة الحالية">🗣️</div>
+    <!-- مساحة العمل والشريط الجانبي للأختام السبعة ببطارية الشحن الثلاثية -->
+    <div class="layout-wrapper">
+        <aside class="sidebar-nav" id="seals-sidebar">
+            <button class="subject-btn" id="btn-subj-1" onclick="openSubject(1)"><span class="subj-star">⭐</span><span class="subj-emoji">🗣️</span><span class="seal-battery" id="bat-subj-1"><i class="bat-bar"></i><i class="bat-bar"></i><i class="bat-bar"></i></span></button>
+            <button class="subject-btn" id="btn-subj-2" onclick="openSubject(2)"><span class="subj-star">⭐</span><span class="subj-emoji">👁️</span><span class="seal-battery" id="bat-subj-2"><i class="bat-bar"></i><i class="bat-bar"></i><i class="bat-bar"></i></span></button>
+            <button class="subject-btn" id="btn-subj-3" onclick="openSubject(3)"><span class="subj-star">⭐</span><span class="subj-emoji">👂</span><span class="seal-battery" id="bat-subj-3"><i class="bat-bar"></i><i class="bat-bar"></i><i class="bat-bar"></i></span></button>
+            <button class="subject-btn" id="btn-subj-4" onclick="openSubject(4)"><span class="subj-star">⭐</span><span class="subj-emoji">✋</span><span class="seal-battery" id="bat-subj-4"><i class="bat-bar"></i><i class="bat-bar"></i><i class="bat-bar"></i></span></button>
+            <button class="subject-btn" id="btn-subj-5" onclick="openSubject(5)"><span class="subj-star">⭐</span><span class="subj-emoji">👣</span><span class="seal-battery" id="bat-subj-5"><i class="bat-bar"></i><i class="bat-bar"></i><i class="bat-bar"></i></span></button>
+            <button class="subject-btn" id="btn-subj-6" onclick="openSubject(6)"><span class="subj-star">⭐</span><span class="subj-emoji">🍏</span><span class="seal-battery" id="bat-subj-6"><i class="bat-bar"></i><i class="bat-bar"></i><i class="bat-bar"></i></span></button>
+            <button class="subject-btn" id="btn-subj-7" onclick="openSubject(7)"><span class="subj-star">⭐</span><span class="subj-emoji">💧</span><span class="seal-battery" id="bat-subj-7"><i class="bat-bar"></i><i class="bat-bar"></i><i class="bat-bar"></i></span></button>
+        </aside>
 
+        <main class="workspace">
+            <!-- شريط طبقات الدرس الست والتقييم داخل مساحة العمل أعلى البطاقة -->
+            <div class="stage-layers-strip" id="stage-layers-strip">
                 <button id="prev-btn" class="nav-arrow-btn" onclick="handlePrevClick()" disabled>
                     <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
@@ -1530,13 +1557,15 @@
                 <div class="progress-stations" id="progress-dots">
                     <span class="station-icon" id="dot-0" onclick="jumpToStep(0)">🕌</span>
                     <span class="station-icon" id="dot-1" onclick="jumpToStep(1)">📖</span>
+                    <span class="layers-group-sep" id="layers-sep-1"></span>
                     <span class="station-icon" id="dot-2" onclick="jumpToStep(2)">🕋</span>
                     <span class="station-icon" id="dot-3" onclick="jumpToStep(3)">🪙</span>
                     <span class="station-icon" id="dot-4" onclick="jumpToStep(4)">🎁</span>
+                    <span class="layers-group-sep" id="layers-sep-2"></span>
                     <span class="station-icon" id="dot-5" onclick="jumpToStep(5)">🌱</span>
                 </div>
 
-                <div class="eval-points-cluster" onclick="openWeekModal()" title="نقاط الدرس">
+                <div class="eval-points-cluster" id="header-score-box" onclick="openWeekModal()">
                     <div class="subj-coins-track" id="header-subj-coins"></div>
                     <div id="gift-diamond-badge" class="diamond-coin-badge">💎</div>
                 </div>
@@ -1545,22 +1574,7 @@
                     <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
             </div>
-        </div>
-    </header>
 
-    <!-- مساحة العمل والشريط الجانبي للمواد السبع -->
-    <div class="layout-wrapper">
-        <aside class="sidebar-nav">
-            <button class="subject-btn" id="btn-subj-1" onclick="openSubject(1)"><span class="subj-star">⭐</span><span class="subj-emoji">🗣️</span></button>
-            <button class="subject-btn" id="btn-subj-2" onclick="openSubject(2)"><span class="subj-star">⭐</span><span class="subj-emoji">👁️</span></button>
-            <button class="subject-btn" id="btn-subj-3" onclick="openSubject(3)"><span class="subj-star">⭐</span><span class="subj-emoji">👂</span></button>
-            <button class="subject-btn" id="btn-subj-4" onclick="openSubject(4)"><span class="subj-star">⭐</span><span class="subj-emoji">✋</span></button>
-            <button class="subject-btn" id="btn-subj-5" onclick="openSubject(5)"><span class="subj-star">⭐</span><span class="subj-emoji">👣</span></button>
-            <button class="subject-btn" id="btn-subj-6" onclick="openSubject(6)"><span class="subj-star">⭐</span><span class="subj-emoji">🍏</span></button>
-            <button class="subject-btn" id="btn-subj-7" onclick="openSubject(7)"><span class="subj-star">⭐</span><span class="subj-emoji">💧</span></button>
-        </aside>
-
-        <main class="workspace">
             <div class="content-area" id="main-content"></div>
         </main>
     </div>
@@ -1717,11 +1731,6 @@
 
             if (activeBranch === 'main') {
                 document.write('<script src="curriculum-y' + RAW_YEAR + '.js"><\/script>');
-                if (RAW_YEAR === 7) {
-                    for (var _p = 1; _p <= 7; _p++) {
-                        document.write('<script src="curriculum-y7-part' + _p + '.js"><\/script>');
-                    }
-                }
             } else {
                 document.write('<script src="curriculum-master.js"><\/script>');
             }
@@ -2278,10 +2287,19 @@ function preprocessTTS(text) {
             let letterChar = getAbjadChar(playWeek - 1);
             let abjadVal = getAbjadNum(playWeek - 1);
             let modeBadge = isSecretEditMode ? "✏️ " : (isFreeExplore ? "🔓 " : (isReviewMode ? "🔄 " : "🧭 "));
-            let weekBadgeEl = document.getElementById('week-badge');
-            if (weekBadgeEl) {
-                weekBadgeEl.innerHTML = `${modeBadge}<span style="color:#fde047; font-size:1.08em;">${letterChar}</span> <span>(${abjadVal})</span>`;
+            let mapPartEl = document.getElementById('week-badge-map-part');
+            if (mapPartEl) {
+                mapPartEl.innerHTML = `${modeBadge}<span style="color:#fde047; font-size:1.06em;">${letterChar}</span> <span>(${abjadVal})</span>`;
             }
+            let lessonTitleEl = document.getElementById('header-lesson-title');
+            if (lessonTitleEl) {
+                let curObj = (typeof getActiveCurriculumObj === 'function') ? getActiveCurriculumObj() : null;
+                let shortT = (curObj && curObj.learn && curObj.learn.introTitle)
+                    ? String(curObj.learn.introTitle).replace(/<[^>]*>/g, '').split('—')[0].trim()
+                    : (SUBJ_TITLES[activeViewSubj] || '');
+                lessonTitleEl.innerText = shortT || (SUBJ_TITLES[activeViewSubj] || '');
+            }
+            if (typeof updateSealBatteriesUI === 'function') updateSealBatteriesUI();
 
             let fillEl = document.getElementById('cumulative-download-fill');
             let labelEl = document.getElementById('cumulative-score-label');
@@ -2372,16 +2390,55 @@ function preprocessTTS(text) {
             openSubject(activeViewSubj);
         }
 
+        function isSubjCompletedInWeek(w, s) {
+            if (w < actualWeek || (w === actualWeek && s < actualSubj)) return true;
+            return localStorage.getItem(`seal_done_${SAVE_KEY}_w${w}_s${s}`) === 'true';
+        }
+
+        function updateSealBatteriesUI() {
+            const isY1 = (SCHOOL_YEAR === 1);
+            const stripEl = document.getElementById('stage-layers-strip');
+            if (stripEl) {
+                stripEl.style.display = (isY1 && !isSecretEditMode) ? 'none' : 'flex';
+            }
+            for (let i = 1; i <= 7; i++) {
+                const btn = document.getElementById('btn-subj-' + i);
+                const bat = document.getElementById('bat-subj-' + i);
+                if (!btn || !bat) continue;
+                if (isY1) {
+                    bat.style.display = 'none';
+                    continue;
+                }
+                const done = isSubjCompletedInWeek(playWeek, i);
+                if (done) {
+                    btn.classList.add('completed');
+                    bat.style.display = 'none';
+                    continue;
+                }
+                bat.style.display = 'inline-flex';
+                const bars = bat.querySelectorAll('.bat-bar');
+                let litCount = 0;
+                if (i === activeViewSubj) {
+                    if (globalStep >= 2) litCount = 1;
+                    if (globalStep >= 5) litCount = 2;
+                }
+                bars.forEach((b, idx) => {
+                    b.classList.toggle('charged', idx < litCount);
+                });
+            }
+        }
+
         function updateButtonsUI() {
             let effectiveMaxSubj = (isFreeExplore || isSecretEditMode || playWeek < actualWeek) ? 7 : playMaxSubj;
             for (let i = 1; i <= 7; i++) {
                 let btn = document.getElementById('btn-subj-' + i);
                 if (!btn) continue;
                 btn.classList.remove('locked', 'active', 'completed', 'unlocked');
-                if (playWeek < actualWeek || (playWeek === actualWeek && i < actualSubj)) btn.classList.add('completed');
+                if (isSubjCompletedInWeek(playWeek, i)) btn.classList.add('completed');
                 if (i <= effectiveMaxSubj) btn.classList.add('unlocked');
                 else btn.classList.add('locked');
             }
+            updateSealBatteriesUI();
         }
 
         function openSubject(subjId) {
@@ -2430,10 +2487,14 @@ function preprocessTTS(text) {
             return curriculumData[yearKey][playWeek][activeViewSubj] || null;
         }
 
+        function isAssessmentSkippedForCurrent(defData) {
+            return SCHOOL_YEAR === 2 || Boolean(defData && defData.play && defData.play.skipQuiz);
+        }
+
         function jumpToStep(targetStep) {
             let defData = getActiveCurriculumObj();
             let stepExists = true;
-            if (SCHOOL_YEAR === 2 && (targetStep === 2 || targetStep === 3 || targetStep === 4) && !isSecretEditMode) stepExists = false;
+            if (isAssessmentSkippedForCurrent(defData) && (targetStep === 2 || targetStep === 3 || targetStep === 4) && !isSecretEditMode) stepExists = false;
             if (targetStep === 1 && defData && defData.learn && defData.learn.skipSom) stepExists = false;
             if (targetStep === 3 && !isSadaqahRequired()) stepExists = false;
             if (targetStep === 4 && defData && defData.play && defData.play.skipGift) stepExists = false;
@@ -2464,7 +2525,7 @@ function preprocessTTS(text) {
                 let hideThis = false;
                 if (SCHOOL_YEAR === 1 && i !== 1) hideThis = true;
                 // في عمر سنتين (SCHOOL_YEAR === 2) لا توجد أسئلة، بل تعريف وعرض وتطبيق فقط
-                if (SCHOOL_YEAR === 2 && (i === 2 || i === 3 || i === 4)) hideThis = true;
+                if (isAssessmentSkippedForCurrent(defData) && (i === 2 || i === 3 || i === 4)) hideThis = true;
                 if (i === 1 && defData && defData.learn && defData.learn.skipSom) hideThis = true;
                 if (i === 3 && !isSadaqahRequired()) hideThis = true;
                 if (i === 4 && defData && defData.play && defData.play.skipGift) hideThis = true;
@@ -2485,6 +2546,12 @@ function preprocessTTS(text) {
                     else dot.classList.add('active-green');
                 }
             }
+            const skipAssess = isAssessmentSkippedForCurrent(defData) && !isSecretEditMode;
+            const sep2 = document.getElementById('layers-sep-2');
+            const scoreCluster = document.getElementById('header-score-box');
+            if (sep2) sep2.style.display = skipAssess ? 'none' : 'inline-block';
+            if (scoreCluster) scoreCluster.style.display = (skipAssess || MAX_COINS_FOR_YEAR === 0) ? 'none' : 'inline-flex';
+            updateSealBatteriesUI();
         }
 
         function handleNextClick() {
@@ -2497,7 +2564,7 @@ function preprocessTTS(text) {
                 return;
             }
             // في عمر سنتين ينتقل من العرض (1) إلى التطبيق (5) مباشرة لأنه لا توجد أسئلة
-            if (SCHOOL_YEAR === 2 && globalStep === 1 && !isSecretEditMode) {
+            if (isAssessmentSkippedForCurrent(getActiveCurriculumObj()) && globalStep === 1 && !isSecretEditMode) {
                 globalStep = 5;
                 currentQuestionIdx = 0;
                 renderCurrentStep();
@@ -2526,7 +2593,7 @@ function preprocessTTS(text) {
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             document.getElementById('custom-audio').pause();
 
-            if (SCHOOL_YEAR === 2 && globalStep === 5 && !isSecretEditMode) {
+            if (isAssessmentSkippedForCurrent(getActiveCurriculumObj()) && globalStep === 5 && !isSecretEditMode) {
                 globalStep = 1;
                 currentQuestionIdx = 0;
                 renderCurrentStep();
@@ -2811,10 +2878,10 @@ function preprocessTTS(text) {
             `;
             card.appendChild(qBox);
 
-            let isOddSubj = (activeViewSubj % 2 === 1);
-            let isTrueFalse = Boolean(qObj.isTrueFalse) || isOddSubj || (qObj.options && qObj.options.length === 2);
+            let isTrueFalse = Boolean(qObj.isTrueFalse) || (Array.isArray(qObj.options) && qObj.options.length === 2);
             let processedOpts = ensureOptionsForQuestion(qObj.options || [], isTrueFalse);
-            let shuffledOpts = (isTrueFalse || isSecretEditMode) ? processedOpts : [...processedOpts].sort(() => Math.random() - 0.5);
+            let isTrueFalseLabels = isTrueFalse && processedOpts.some(o => /صَح|صح|خَطَأ|خطأ|✔️|✖️/.test(String(o.mainText)));
+            let shuffledOpts = (isTrueFalseLabels || isSecretEditMode) ? processedOpts : [...processedOpts].sort(() => Math.random() - 0.5);
 
             let useBalloons = (SCHOOL_YEAR === 3 || SCHOOL_YEAR === 4 || qObj.isBalloonMode) && !isSecretEditMode;
 
@@ -2883,7 +2950,7 @@ function preprocessTTS(text) {
             card.appendChild(optsGrid);
             contentDiv.appendChild(card);
 
-            let spokenQ = (focus && focus !== stem) ? `${stem} ، ${focus}` : stem;
+            let spokenQ = qObj.tts || ((focus && focus !== stem) ? `${stem} ، ${focus}` : stem);
             speakText(spokenQ, () => { if (isFreeExplore || isSecretEditMode) updateNavButtons(true); });
             if (isSecretEditMode) attachEditHooksToCurrentStation(defData);
         }
@@ -3260,7 +3327,7 @@ function preprocessTTS(text) {
             card.appendChild(stepsContainer);
             contentDiv.appendChild(card);
 
-            let rawSteps = (defData && defData.apply && Array.isArray(defData.apply.steps)) ? defData.apply.steps.join(' ، ') : stepsArr.join(' ، ');
+            let rawSteps = defData?.apply?.applyTTS || defData?.apply?.pocoyoScene?.narratorTTS || ((defData && defData.apply && Array.isArray(defData.apply.steps) && defData.apply.steps.length > 0) ? defData.apply.steps.join(' ، ') : stepsArr.join(' ، '));
             speakText(rawSteps, () => {
                 updateNavButtons(true);
                 showCenterAction(() => completeLesson(activeViewSubj), true);
@@ -3325,10 +3392,10 @@ function preprocessTTS(text) {
 
             const yFolder = `assets/y${RAW_YEAR}`;
             const defaultVidPath = `${yFolder}/videos/v${playWeek}.mp4`;
-            const defaultArtPath = `${yFolder}/art/art${playWeek}.jpg`;
-            const defaultSportPath = `${yFolder}/sports/sprt${playWeek}.jpg`;
-            const defaultSciPath = `${yFolder}/scince/s${playWeek}.1.jpg`;
-            const defaultRightPath = `${yFolder}/rights/r${playWeek}.jpg`;
+            const defaultArtPath = `assets/y4/art/art${playWeek}.jpg`;
+            const defaultSportPath = (RAW_YEAR >= 6) ? `assets/y6/sports/sprt${playWeek}.jpg` : `assets/y4/sports/sprt${playWeek}.jpg`;
+            const defaultSciPath = (RAW_YEAR >= 7) ? `assets/y7/scince/s${playWeek}.1.jpg` : ((RAW_YEAR === 6) ? `assets/y6/scince/s${playWeek}.jpg` : `assets/y4/scince/s${playWeek}.jpg`);
+            const defaultRightPath = (RAW_YEAR >= 7) ? `assets/y7/rights/r${playWeek}.jpg` : `assets/y4/rights/r${playWeek}.jpg`;
 
             const subjDefaultImgMap = {
                 1: defaultArtPath, 2: defaultArtPath, 3: defaultArtPath, 4: defaultArtPath,
@@ -3349,8 +3416,8 @@ function preprocessTTS(text) {
                 card.innerHTML = `
                 <div class="intro-reveal-stage">
                     <div class="intro-Formatted-backdrop"></div>
-                    <img src="${slideImgSrc}" class="intro-img-gray" onerror="window.handleSmartImageFallback(this)">
-                    <img src="${slideImgSrc}" class="intro-img-color" onerror="window.handleSmartImageFallback(this)" data-edit-asset-key="cover_img" style="clip-path: inset(0 0 0 calc(100% - ${percentRevealed}%));">
+                    <img src="${slideImgSrc}" class="intro-img-gray" >
+                    <img src="${slideImgSrc}" class="intro-img-color"  data-edit-asset-key="cover_img" style="clip-path: inset(0 0 0 calc(100% - ${percentRevealed}%));">
                     <div class="intro-info-banner">
                         <h2 class="intro-info-title" data-edit-field="intro_title">${colorizeHarakaAndMadd(bannerInfo.title)}</h2>
                         <p class="intro-info-desc" data-edit-field="intro_goal">${colorizeHarakaAndMadd(bannerInfo.goal)}</p>
@@ -3359,7 +3426,7 @@ function preprocessTTS(text) {
 
                 contentDiv.appendChild(card);
 
-                speakText(`${bannerInfo.title} ، ${bannerInfo.goal}`, () => {
+                speakText(defData.learn?.introTTS || `${bannerInfo.title} ، ${bannerInfo.goal}`, () => {
                     showCenterAction(() => handleNextClick(), false, SUBJ_EMOJIS[activeViewSubj]);
                     updateNavButtons(true);
                 }, defData.learn?.audio);
@@ -3446,7 +3513,7 @@ function preprocessTTS(text) {
                     let imgEl = document.createElement('img');
                     imgEl.className = 'pan-zoom-img';
                     imgEl.dataset.editAssetKey = 'slide_img';
-                    imgEl.onerror = function() { window.handleSmartImageFallback(this); };
+                    
 
                     let cardStageEl = document.createElement('div');
                     cardStageEl.className = 'auto-flashcard-stage';
@@ -3487,6 +3554,7 @@ function preprocessTTS(text) {
                         clickOverlay.style.display = isSecretEditMode ? 'none' : 'block';
 
                         if (s.cardData) {
+                            sliderContainer.classList.remove('has-img-and-text');
                             imgEl.style.display = 'none';
                             cardStageEl.style.display = 'flex';
                             cardStageEl.style.backgroundImage = s.cardData.bgImg
@@ -3514,6 +3582,11 @@ function preprocessTTS(text) {
                             cardStageEl.style.display = 'none';
                             imgEl.style.display = 'block';
                             imgEl.src = s.img || activeDefaultImg;
+                            if (s.text && String(s.text).trim().length > 0 && SCHOOL_YEAR >= 5) {
+                                sliderContainer.classList.add('has-img-and-text');
+                            } else {
+                                sliderContainer.classList.remove('has-img-and-text');
+                            }
                         }
                         textContent.innerHTML = colorizeHarakaAndMadd(s.text);
                         prevBtn.style.display = currentSlide === 0 ? 'none' : 'flex';
@@ -3606,124 +3679,113 @@ function preprocessTTS(text) {
                     tryLoadY1Video();
                     if (isSecretEditMode) attachEditHooksToCurrentStation(defData);
                 } else if (isGrades6Or7 || hasCustomVideo) {
-                    // بناء قائمة مسارات الفيديو الخاصة بالصف السادس أو السابع حصراً (دون الرجوع إلى فيديوهات الصف الأول)
-                    let candidateVideos = [];
-                    if (defData.learn?.video) {
-                        candidateVideos.push(defData.learn.video);
-                    }
-                    if (!preferSlides) {
-                        if (activeViewSubj === 1) {
-                            candidateVideos.push(
-                                `${yFolder}/videos/v${playWeek}.mp4`,
-                                `${yFolder}/videos/v${playWeek}_s1.mp4`
-                            );
+                    renderSlidesFallbackView();
+                    const fancyCard = contentDiv.querySelector('.fancy-card');
+                    const sliderContainer = fancyCard ? fancyCard.querySelector('.slider-container') : null;
+                    if (fancyCard && sliderContainer) {
+                        let candidateVideos = [];
+                        if (defData.learn?.video && String(defData.learn.video).startsWith('data:video')) {
+                            candidateVideos.push(defData.learn.video);
                         } else {
-                            candidateVideos.push(
-                                `${yFolder}/videos/v${playWeek}_s${activeViewSubj}.mp4`
-                            );
-                        }
-                    }
-
-                    // إنشاء شريط التحكم العلوي (زر الفيديو: مضاء عند التوفر / مطفأ عند عدم التوفر + زر الشرائح)
-                    let mediaToolbar = document.createElement('div');
-                    mediaToolbar.className = 'y67-media-toolbar';
-                    let videoBtn = document.createElement('button');
-                    videoBtn.type = 'button';
-                    videoBtn.className = 'y67-video-btn dimmed';
-                    videoBtn.disabled = true;
-                    videoBtn.innerHTML = '🎬 الفِيدْيُو (غَيْرُ مُتَوَفِّر)';
-
-                    let slidesBtn = document.createElement('button');
-                    slidesBtn.type = 'button';
-                    slidesBtn.className = 'y67-slides-btn active-tab';
-                    slidesBtn.innerHTML = '📖 الشَّرَائِحُ التَّعْلِيمِيَّة';
-
-                    mediaToolbar.appendChild(videoBtn);
-                    mediaToolbar.appendChild(slidesBtn);
-                    contentDiv.appendChild(mediaToolbar);
-
-                    let resolvedVideoUrl = null;
-
-                    const showVideoPlayerView = (vidSrc) => {
-                        contentDiv.querySelectorAll('.fancy-card').forEach(c => c.remove());
-                        videoBtn.className = 'y67-video-btn lit';
-                        videoBtn.disabled = false;
-                        videoBtn.innerHTML = '🎬 الفِيدْيُو (مُتَاح ✨)';
-                        slidesBtn.className = 'y67-slides-btn inactive-tab';
-
-                        let card = document.createElement('div');
-                        card.className = 'fancy-card';
-                        card.innerHTML = `
-                            <div class="video-wrapper-box">
-                                <video id="lesson-video" data-edit-asset-key="lesson_video" poster="${defData.learn?.coverImg || activeDefaultImg}" class="media-box-vid" controls playsinline preload="metadata" src="${vidSrc}"></video>
-                            </div>`;
-                        contentDiv.appendChild(card);
-
-                        let vidEl = document.getElementById('lesson-video');
-                        let bgMusic = document.getElementById('bg-music');
-                        vidEl.onloadeddata = () => {
-                            updateNavButtons(true);
-                            if (!isSecretEditMode) vidEl.play().catch(() => {});
-                        };
-                        vidEl.onplay = () => { if (isMusicPlaying) bgMusic.volume = 0.02; };
-                        vidEl.onpause = () => { if (isMusicPlaying) bgMusic.volume = 0.15; };
-                        vidEl.onended = () => {
-                            if (isMusicPlaying) bgMusic.volume = 0.15;
-                            updateNavButtons(true);
-                        };
-                        updateNavButtons(true);
-                        if (isSecretEditMode) attachEditHooksToCurrentStation(defData);
-                    };
-
-                    const showSlidesWithToolbarState = () => {
-                        if (resolvedVideoUrl) {
-                            videoBtn.className = 'y67-video-btn lit inactive-tab';
-                            videoBtn.disabled = false;
-                            videoBtn.innerHTML = '🎬 الفِيدْيُو (مُتَاح ✨)';
-                        } else {
-                            videoBtn.className = 'y67-video-btn dimmed';
-                            videoBtn.disabled = true;
-                            videoBtn.innerHTML = '🎬 الفِيدْيُو (مُطْفَأ)';
-                        }
-                        slidesBtn.className = 'y67-slides-btn active-tab';
-                        renderSlidesFallbackView();
-                    };
-
-                    videoBtn.onclick = () => {
-                        if (resolvedVideoUrl) showVideoPlayerView(resolvedVideoUrl);
-                    };
-                    slidesBtn.onclick = () => {
-                        let existingVid = document.getElementById('lesson-video');
-                        if (existingVid) existingVid.pause();
-                        showSlidesWithToolbarState();
-                    };
-
-                    // فحص وجود ملف الفيديو فعلياً: إن وُجد يضاء الزر ويضاء الفيديو، وإن لم يوجد يبدو الزر مطفأ وتظهر الشرائح فوراً
-                    if (candidateVideos.length === 0 || preferSlides) {
-                        showSlidesWithToolbarState();
-                    } else {
-                        let probeVid = document.createElement('video');
-                        probeVid.preload = 'metadata';
-                        let pIdx = 0;
-
-                        const probeNextCandidate = () => {
-                            if (pIdx < candidateVideos.length) {
-                                let candidate = candidateVideos[pIdx];
-                                probeVid.src = candidate;
-                                probeVid.onloadedmetadata = () => {
-                                    resolvedVideoUrl = candidate;
-                                    showVideoPlayerView(resolvedVideoUrl);
-                                };
-                                probeVid.onerror = () => {
-                                    pIdx++;
-                                    probeNextCandidate();
-                                };
+                            if (activeViewSubj === 1) {
+                                if (defData.learn?.video) candidateVideos.push(defData.learn.video);
+                                candidateVideos.push(`${yFolder}/videos/v${playWeek}.mp4`, `${yFolder}/videos/v${playWeek}_s1.mp4`);
                             } else {
-                                resolvedVideoUrl = null;
-                                showSlidesWithToolbarState();
+                                candidateVideos.push(`${yFolder}/videos/v${playWeek}_s${activeViewSubj}.mp4`);
+                            }
+                        }
+                        candidateVideos = [...new Set(candidateVideos.filter(Boolean))];
+
+                        let miniBtn = document.createElement('button');
+                        miniBtn.type = 'button';
+                        miniBtn.id = 'stage1-sawm-mini-video-btn';
+                        miniBtn.className = 'video-btn-dimmed';
+                        miniBtn.innerHTML = '🎬';
+                        miniBtn.disabled = true;
+                        fancyCard.appendChild(miniBtn);
+
+                        let isShowingVideo = false;
+                        let resolvedVideoUrl = null;
+
+                        const toggleInlineVideo = () => {
+                            if (!resolvedVideoUrl) return;
+                            let vidStage = fancyCard.querySelector('.sawm-inline-video-stage');
+                            if (!isShowingVideo) {
+                                isShowingVideo = true;
+                                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                                sliderContainer.style.display = 'none';
+                                if (!vidStage) {
+                                    vidStage = document.createElement('div');
+                                    vidStage.className = 'sawm-inline-video-stage';
+                                    vidStage.innerHTML = `<video id="lesson-video" data-edit-asset-key="lesson_video" poster="${defData.learn?.coverImg || activeDefaultImg}" class="media-box-vid" controls playsinline preload="metadata" src="${resolvedVideoUrl}"></video>`;
+                                    fancyCard.appendChild(vidStage);
+                                    const vEl = vidStage.querySelector('video');
+                                    const bgMusic = document.getElementById('bg-music');
+                                    if (vEl) {
+                                        vEl.onplay = () => { if (isMusicPlaying && bgMusic) bgMusic.volume = 0.02; };
+                                        vEl.onpause = () => { if (isMusicPlaying && bgMusic) bgMusic.volume = 0.15; };
+                                        vEl.onended = () => {
+                                            if (isMusicPlaying && bgMusic) bgMusic.volume = 0.15;
+                                            updateNavButtons(true);
+                                        };
+                                    }
+                                } else {
+                                    vidStage.style.display = 'flex';
+                                }
+                                const vEl = vidStage.querySelector('video');
+                                if (vEl && !isSecretEditMode) vEl.play().catch(() => {});
+                                miniBtn.innerHTML = '📖';
+                                updateNavButtons(true);
+                            } else {
+                                isShowingVideo = false;
+                                if (vidStage) {
+                                    const vEl = vidStage.querySelector('video');
+                                    if (vEl) vEl.pause();
+                                    vidStage.style.display = 'none';
+                                }
+                                sliderContainer.style.display = '';
+                                miniBtn.innerHTML = '🎬';
                             }
                         };
-                        probeNextCandidate();
+
+                        window._stage1VideoCache = window._stage1VideoCache || {};
+                        const probeCandidates = (idx) => {
+                            if (idx >= candidateVideos.length) return;
+                            const url = candidateVideos[idx];
+                            const onResult = (ok) => {
+                                if (!document.body.contains(miniBtn)) return;
+                                if (ok) {
+                                    resolvedVideoUrl = url;
+                                    miniBtn.className = 'video-btn-lit';
+                                    miniBtn.disabled = false;
+                                    miniBtn.onclick = (ev) => { ev.stopPropagation(); toggleInlineVideo(); };
+                                    if (!preferSlides || hasCustomVideo) toggleInlineVideo();
+                                } else {
+                                    probeCandidates(idx + 1);
+                                }
+                            };
+                            if (url.startsWith('data:video')) { onResult(true); return; }
+                            if (Object.prototype.hasOwnProperty.call(window._stage1VideoCache, url)) {
+                                onResult(window._stage1VideoCache[url]);
+                                return;
+                            }
+                            const pv = document.createElement('video');
+                            let done = false;
+                            const finishProbe = (res) => {
+                                if (done) return;
+                                done = true;
+                                window._stage1VideoCache[url] = res;
+                                pv.removeAttribute('src');
+                                pv.load();
+                                onResult(res);
+                            };
+                            const tmr = setTimeout(() => finishProbe(false), 1400);
+                            pv.preload = 'metadata';
+                            pv.onloadedmetadata = () => { clearTimeout(tmr); finishProbe(true); };
+                            pv.onerror = () => { clearTimeout(tmr); finishProbe(false); };
+                            pv.src = url;
+                        };
+                        probeCandidates(0);
                     }
                 }
             }
@@ -3758,6 +3820,10 @@ function preprocessTTS(text) {
 
         function completeLesson(subjId) {
             playCorrectChime();
+            if (!isSecretEditMode) {
+                localStorage.setItem(`seal_done_${SAVE_KEY}_w${playWeek}_s${subjId}`, 'true');
+            }
+            updateSealBatteriesUI();
             let contentDiv = document.getElementById('main-content');
             document.getElementById('next-btn').disabled = true;
             document.getElementById('prev-btn').disabled = true;
@@ -3799,43 +3865,105 @@ function preprocessTTS(text) {
             }
         }
 
-        // ================= ٦. محرك قبول جميع امتدادات الصور تلقائياً =================
-        (function enableSmartMultiExtensionImages() {
-            const EXT_LIST = ['.jpg', '.png', '.webp', '.jpeg', '.gif'];
+        // ================= ٦. محرك التوريث الذكي للمسارات والامتدادات (y7 -> y6 -> y4) دون تكرار طلبات 404 =================
+        (function setupUnifiedCascadingAssetEngine() {
+            const EXT_LIST = ['.jpg', '.png', '.webp', '.jpeg'];
             const resolvedCache = {};
+            let lastWorkingSlideSrc = '';
+            let lastLessonKey = '';
+
+            function getLessonKey() {
+                return `y${RAW_YEAR}_w${playWeek}_s${activeViewSubj}`;
+            }
+
+            function buildOrderedCandidates(rawSrc) {
+                const cleanSrc = String(rawSrc || '').split('?')[0];
+                const m = cleanSrc.match(/^(.*)\.(jpg|png|webp|jpeg|gif)$/i);
+                const baseNoExt = m ? m[1] : cleanSrc;
+                const candidates = [];
+                const add = (u) => { if (u && u !== rawSrc && !candidates.includes(u)) candidates.push(u); };
+
+                if (resolvedCache[baseNoExt]) add(resolvedCache[baseNoExt]);
+
+                // 1) نفس المسار الأساسي بجميع الامتدادات القياسية
+                EXT_LIST.forEach(ext => add(baseNoExt + ext));
+
+                // 2) إذا كانت شريحة فرعية في العلوم (مثل s1.2) ولم توجد، نرجع لشريحة s1.1 أو s1
+                if (/\/scince\/s\d+\.\d+$/i.test(baseNoExt)) {
+                    const stemMain = baseNoExt.replace(/\.\d+$/, '');
+                    EXT_LIST.forEach(ext => add(stemMain + '.1' + ext));
+                    EXT_LIST.forEach(ext => add(stemMain + ext));
+                }
+
+                // 3) سلسلة التوريث المعتمدة بين السنوات حسب نوع المجلد:
+                //    art -> y4 | rights -> y7 ثم y4 | sports -> y6 ثم y4 | scince -> y7 ثم y6 ثم y4
+                const folderMatch = baseNoExt.match(/^assets\/y(\d+)\/(art|rights|sports|scince|science)\/(.+)$/i);
+                if (folderMatch) {
+                    const cat = folderMatch[2].toLowerCase() === 'science' ? 'scince' : folderMatch[2].toLowerCase();
+                    const fileStem = folderMatch[3].replace(/\.\d+$/, '');
+                    const fallbackYears = (cat === 'art') ? [4]
+                        : (cat === 'rights' ? (RAW_YEAR >= 7 ? [7, 4] : [4])
+                        : (cat === 'sports' ? (RAW_YEAR >= 6 ? [6, 4] : [4])
+                        : (RAW_YEAR >= 7 ? [7, 6, 4] : (RAW_YEAR === 6 ? [6, 4] : [4]))));
+
+                    fallbackYears.forEach(yr => {
+                        EXT_LIST.forEach(ext => {
+                            if (cat === 'scince' && yr === 7) add(`assets/y7/scince/${fileStem}.1${ext}`);
+                            add(`assets/y${yr}/${cat}/${fileStem}${ext}`);
+                        });
+                    });
+                }
+
+                // 4) تثبيت آخر صورة شريحة ناجحة لنفس الدرس قبل الرجوع لخلفية المرحلة
+                if (lastWorkingSlideSrc && lastLessonKey === getLessonKey()) {
+                    add(lastWorkingSlideSrc);
+                }
+                add(STAGE_FALLBACK_IMG[STAGE_GROUP]);
+                return candidates;
+            }
+
+            window.handleSmartImageFallback = function(img) {
+                if (!img) return;
+                const currentSrc = img.getAttribute('src') || '';
+                if (!currentSrc || currentSrc.startsWith('data:') || currentSrc.startsWith('blob:')) return;
+
+                const key = `${getLessonKey()}_${img.dataset.origSrc || currentSrc}`;
+                if (img._assetTryKey !== key) {
+                    img.dataset.origSrc = currentSrc;
+                    img._assetTryKey = key;
+                    img._assetQueue = buildOrderedCandidates(currentSrc);
+                    img._assetIdx = 0;
+                }
+                while (img._assetIdx < img._assetQueue.length) {
+                    const nextUrl = img._assetQueue[img._assetIdx++];
+                    if (nextUrl && nextUrl !== currentSrc) {
+                        img.src = nextUrl;
+                        return;
+                    }
+                }
+            };
+
+            window.addEventListener('load', function(e) {
+                const el = e.target;
+                if (!el || el.tagName !== 'IMG') return;
+                const s = el.getAttribute('src') || '';
+                if (el.dataset.origSrc) {
+                    const m = el.dataset.origSrc.match(/^(.*)\.(jpg|png|webp|jpeg|gif)$/i);
+                    if (m && !s.includes('3427') && !s.includes('stage1-bg')) {
+                        resolvedCache[m[1]] = s;
+                    }
+                }
+                if (el.closest('.slider-image-box') && !s.includes('3427') && !s.includes('stage1-bg') && el.naturalWidth > 0) {
+                    lastWorkingSlideSrc = s;
+                    lastLessonKey = getLessonKey();
+                }
+            }, true);
 
             window.addEventListener('error', function(e) {
                 const el = e.target;
                 if (!el || el.tagName !== 'IMG') return;
-
-                const currentSrc = el.getAttribute('src') || '';
-                if (currentSrc.startsWith('data:') || currentSrc.startsWith('blob:')) return;
-
-                const baseMatch = currentSrc.match(/^(.*)\.(jpg|png|webp|jpeg|gif)$/i);
-                if (!baseMatch) return;
-
-                const basePath = baseMatch[1];
-                if (resolvedCache[basePath] && resolvedCache[basePath] !== currentSrc) {
-                    el.src = resolvedCache[basePath];
-                    return;
-                }
-
-                let tryIdx = parseInt(el.dataset.extTryIdx || '0', 10) + 1;
-                if (tryIdx < EXT_LIST.length) {
-                    el.dataset.extTryIdx = tryIdx;
-                    el.dataset.extTried = 'true';
-                    const nextCandidate = basePath + EXT_LIST[tryIdx];
-                    el.onload = function() { resolvedCache[basePath] = nextCandidate; };
-                    el.src = nextCandidate;
-                } else if (/\bs\d+\.\d+$/.test(basePath)) {
-                    el.dataset.extTryIdx = '0';
-                    el.src = basePath.replace(/\.(\d+)$/, '') + '.jpg';
-                } else if (currentSrc.includes(`/y${RAW_YEAR}/`) && RAW_YEAR !== 7) {
-                    el.dataset.extTryIdx = '0';
-                    el.src = basePath.replace(`/y${RAW_YEAR}/`, '/y7/') + '.jpg';
-                } else {
-                    el.src = STAGE_FALLBACK_IMG[STAGE_GROUP];
-                }
+                if (el.id === 'brand-home-link') return;
+                window.handleSmartImageFallback(el);
             }, true);
         })();
 <!-- ==================== [ نهاية القسم 5 من 6 : محرك المحطات الست والعرض الذكي والبالونات والصدقة والهدية ] ==================== -->
@@ -4767,655 +4895,486 @@ function preprocessTTS(text) {
         updateGiftDiamondUI();
         updateNavButtons(false);
     </script>
-	<style>
-    /* 1. تفعيل السكرول بار الموحد ليصعد السلايد مع النص الطويل تحته ككتلة واحدة */
-    .slider-container {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-        padding: 0 6px 16px 6px !important;
-        scroll-behavior: smooth;
-    }
-    .slider-image-box {
-        flex: 0 0 clamp(240px, 52dvh, 460px) !important;
-        min-height: 230px !important;
-        width: 100% !important;
-    }
-    .slider-text-box {
-        flex: 0 0 auto !important;
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        align-items: flex-start !important;
-    }
-    .slider-text-content {
-        max-height: none !important;
-        overflow: visible !important;
-        white-space: pre-line !important;
-    }
-</style>
-
-<script>
-// 2. محرك قراءة الصور التلقائي حسب (السنة + مجلد المادة + رقم الدرس 1..28 + ترتيب السلايد 1..N)
-(function() {
-    // خريطة مجلدات المواد والبادئات المحتملة لكل مادة
-    const SUBJ_CONFIG = {
-        1: { folders: ['art', 'logic', 'arabic'], prefixes: ['s', 'art', 'a', 'l', ''] },
-        2: { folders: ['art'],                    prefixes: ['s', 'art', 'a', ''] },
-        3: { folders: ['art', 'music'],           prefixes: ['s', 'art', 'm', ''] },
-        4: { folders: ['art', 'math'],            prefixes: ['s', 'art', 'm', ''] },
-        5: { folders: ['sports', 'sport'],        prefixes: ['s', 'sprt', 'sport', 'sp', ''] },
-        6: { folders: ['scince', 'science'],      prefixes: ['s', 'sci', 'sc', ''] },
-        7: { folders: ['rights', 'right'],        prefixes: ['r', 's', 'right', ''] }
-    };
-
-    // معرفة رقم السلايد الحالي بالترتيب (1، 2، 3، 4...)
-    function detectSlideOrder(img, rawSrc) {
-        if (typeof window.currentSlideIdx === 'number') return window.currentSlideIdx + 1;
-        if (typeof window.slideIndex === 'number') return window.slideIndex + 1;
-        if (typeof window._activeSlideIdx === 'number') return window._activeSlideIdx + 1;
-        if (img.dataset && img.dataset.slideIdx) return parseInt(img.dataset.slideIdx, 10) + 1;
-
-        // استنتاج رقم السلايد من الاسم الأصلي إن وجد (مثلاً s1.3 -> السلايد 3)
-        const file = rawSrc.split('/').pop().replace(/\.[^.]+$/, '');
-        const m = file.match(/[0-9]+[._\-\s]+[a-zA-Z]*([0-9]+)$/);
-        return m ? parseInt(m[1], 10) : 1;
-    }
-
-    document.addEventListener('error', function(e) {
-        const img = e.target;
-        if (!img || img.tagName !== 'IMG') return;
-
-        const currentSrc = img.getAttribute('src') || '';
-        if (!currentSrc || currentSrc.startsWith('data:') || currentSrc.startsWith('blob:')) return;
-
-        // إعادة بناء قائمة الاحتمالات إذا تغير الدرس أو المادة أو السلايد
-        const w = (typeof playWeek !== 'undefined') ? playWeek : 1;
-        const s = (typeof activeViewSubj !== 'undefined') ? activeViewSubj : 1;
-        const y = (typeof RAW_YEAR !== 'undefined') ? RAW_YEAR : 7;
-        const slideOrder = detectSlideOrder(img, currentSrc);
-        const stateKey = `y${y}_w${w}_s${s}_sl${slideOrder}`;
-
-        if (img._smartStateKey !== stateKey) {
-            img._smartStateKey = stateKey;
-            img._smartIdx = 0;
-
-            const cfg = SUBJ_CONFIG[s] || { folders: ['art'], prefixes: ['s', 'r', ''] };
-            const folders = [];
-
-            // 1. المجلد المذكور في مسار الصورة الأصلي أولاً
-            const lastSlash = currentSrc.lastIndexOf('/');
-            if (lastSlash !== -1) {
-                folders.push(currentSrc.substring(0, lastSlash));
-            }
-            // 2. مجلد السنة والمادة القياسي (مثلاً assets/y7/sports)
-            cfg.folders.forEach(f => {
-                const path = `assets/y${y}/${f}`;
-                if (!folders.includes(path)) folders.push(path);
-            });
-
-            // توليد الأسماء بالترتيب: أولاً رقم السلايد المحدد (مثلاً 1.2 أو s1.2)، ثم صورة الدرس العامة (1 أو s1 أو s1.1 أو s1.0)
-            const names = [];
-            const addName = (n) => { if (n && !names.includes(n)) names.push(n); };
-
-            const allPrefixes = [...cfg.prefixes, 's', 'S', 'r', 'R', 'sprt', 'art', ''];
-
-            // أ) البحث عن صورة السلايد بترتيبها الدقيق (مثلاً السلايد 1، 2، 3، 4)
-            allPrefixes.forEach(p => {
-                addName(`${p}${w}.${slideOrder}`);
-                addName(`${p}${w}_${slideOrder}`);
-                addName(`${p}${w}-${slideOrder}`);
-                addName(`${p}${w} r${slideOrder}`);
-                addName(`${p}${w} R${slideOrder}`);
-            });
-
-            // ب) إذا كان السلايد الأول (أو لم توجد إلا صورة واحدة للدرس)، يقبل S1 أو 1 أو S1.1 أو S1.0 بلا فرق
-            allPrefixes.forEach(p => {
-                addName(`${p}${w}`);
-                addName(`${p}${w}.1`);
-                addName(`${p}${w}.0`);
-            });
-
-            const exts = ['.jpg', '.png', '.webp', '.jpeg', '.JPG', '.PNG'];
-            const queue = [];
-
-            folders.forEach(folder => {
-                names.forEach(name => {
-                    exts.forEach(ext => {
-                        const url = `${folder}/${name}${ext}`;
-                        if (url !== currentSrc && !queue.includes(url)) {
-                            queue.push(url);
-                        }
-                    });
-                });
-            });
-
-            img._smartQueue = queue;
+	
+    <!-- ==================== [ تنسيقات الترويسة الثنائية وبطارية الأختام وشريط الطبقات ونافذة التكبير بالأيقونات ] ==================== -->
+    <style>
+        /* 1. الشريط العلوي بكبسولتين فقط دون التفاف أو تداخل على الجوال */
+        header.two-capsule-header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+            padding: 0 clamp(8px, 1.8vw, 18px) !important;
+        }
+        .merged-map-lesson-capsule {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 7px !important;
+            max-width: 50vw;
+            min-width: 0;
+            overflow: hidden;
+            padding: 5px 13px !important;
+            border-radius: 999px;
+            font-family: inherit;
+        }
+        .map-key-part {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .seal-inline-icon {
+            flex-shrink: 0;
+            font-size: clamp(0.95rem, 2vmin, 1.15rem);
+            filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+        }
+        .lesson-inline-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: clamp(0.74rem, 1.65vmin, 0.92rem);
+            font-weight: 800;
+            color: #e0f2fe;
+        }
+        header.two-capsule-header .unified-identity-capsule {
+            max-width: 47vw !important;
+            min-width: 0;
+            flex-shrink: 1;
+            gap: 6px !important;
+            padding: 4px 12px !important;
+        }
+        @media (max-width: 640px) {
+            .lesson-inline-title { max-width: 22vw; font-size: 0.72rem; }
+            .id-school-part { max-width: 18vw; font-size: 0.72rem; }
+            header.two-capsule-header .unified-identity-capsule,
+            .merged-map-lesson-capsule { padding: 4px 9px !important; gap: 5px !important; }
         }
 
-        // تجربة المسار التالي في القائمة حتى يجد الصورة الصحيحة داخل مجلد المادة
-        if (img._smartQueue && img._smartIdx < img._smartQueue.length) {
-            img.src = img._smartQueue[img._smartIdx++];
+        /* 2. بطارية الأختام ثلاثية الشرطات على الشريط الجانبي (تختفي عند اكتمال 3/3 ليضيء الختم) */
+        .subject-btn {
+            flex-direction: column;
+            gap: 3px;
+            padding: 4px 2px;
         }
-    }, true);
-
-    // إعادة السكرول بار إلى الأعلى تلقائياً عند الضغط على زر السلايد التالي أو السابق
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.slider-nav-btn')) {
-            const sc = document.querySelector('.slider-container');
-            if (sc) sc.scrollTop = 0;
+        .seal-battery {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 1.5px 3px;
+            border-radius: 5px;
+            background: rgba(15, 23, 42, 0.18);
+            border: 1px solid rgba(15, 23, 42, 0.28);
         }
-    });
-})();
-</script>
-	<!-- ==================== [ إضافات السكرول + تثبيت صورة السلايد + تكبير ومشاركة الصور بالأيقونات فقط ] ==================== -->
-<style>
-    /* 1. إلغاء شريط الشرائح والفيديو العلوي الزائد */
-    .y67-media-toolbar {
-        display: none !important;
-    }
-
-    /* 2. تفعيل السكرول بار الموحد ليصعد السلايد مع النص الطويل تحته */
-    .slider-container {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-        padding: 0 8px 18px 8px !important;
-        scroll-behavior: smooth;
-        height: 100% !important;
-    }
-    .slider-image-box {
-        position: relative !important;
-        flex: 0 0 clamp(250px, 55dvh, 480px) !important;
-        min-height: 240px !important;
-        width: 100% !important;
-        cursor: zoom-in !important;
-    }
-    .slider-image-box::after {
-        display: none !important;
-        content: none !important;
-    }
-
-    /* زر المكبر الدائري برمز 🔍 فقط */
-    .real-zoom-trigger-btn {
-        position: absolute;
-        bottom: 12px;
-        left: 14px;
-        z-index: 45;
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        background: rgba(15, 23, 42, 0.85);
-        color: #fde047;
-        font-size: 1.15rem;
-        border: 2px solid #38bdf8;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-        transition: transform 0.2s ease, background 0.2s ease;
-    }
-    .real-zoom-trigger-btn:hover {
-        transform: scale(1.12);
-        background: #0284c7;
-    }
-
-    /* 3. صندوق النص يأخذ طوله الطبيعي مع السكرول */
-    .slider-text-box {
-        flex: 0 0 auto !important;
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        align-items: flex-start !important;
-        padding: 18px 22px !important;
-    }
-    .slider-text-content {
-        display: block !important;
-        max-height: none !important;
-        overflow: visible !important;
-        text-align: right !important;
-        width: 100% !important;
-        white-space: pre-line !important;
-        line-height: 1.9 !important;
-    }
-
-    /* 4. نافذة تكبير ومشاركة الصور بالأيقونات الدائرية فقط */
-    #kid-img-zoom-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 999999;
-        background: rgba(15, 23, 42, 0.94);
-        backdrop-filter: blur(12px);
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 14px;
-    }
-    #kid-img-zoom-viewport {
-        width: 95vw;
-        height: 83dvh;
-        overflow: auto;
-        border-radius: 22px;
-        border: 2.5px solid #38bdf8;
-        background: #090d16;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 10px;
-    }
-    #kid-img-zoom-target {
-        display: block;
-        width: 95%;
-        max-width: none !important;
-        max-height: none !important;
-        height: auto;
-        object-fit: contain;
-        transition: width 0.2s ease;
-        margin: auto;
-        border-radius: 12px;
-    }
-    .zoom-controls-bar {
-        position: relative;
-        display: flex;
-        gap: 14px;
-        margin-top: 12px;
-        justify-content: center;
-        align-items: center;
-    }
-    .zoom-ctrl-btn {
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        color: #ffffff;
-        border: 2px solid #ffffff;
-        font-size: 1.25rem;
-        font-weight: 900;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-        transition: transform 0.2s ease;
-    }
-    .zoom-ctrl-btn:hover {
-        transform: scale(1.12);
-    }
-    .zoom-ctrl-btn.share-zoom {
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-    }
-    .zoom-ctrl-btn.close-zoom {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-    }
-
-    /* قائمة الخيارات المنبثقة لزر المشاركة (حفظ • إرسال • طباعة) بأيقونات فقط */
-    .kid-share-popover {
-        position: absolute;
-        bottom: 58px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: none;
-        gap: 10px;
-        padding: 8px 14px;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.96);
-        border: 2px solid #38bdf8;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
-        z-index: 1000000;
-    }
-    .kid-share-popover.open {
-        display: flex;
-    }
-    .kid-share-action {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 1.5px solid rgba(255, 255, 255, 0.85);
-        background: rgba(255, 255, 255, 0.14);
-        color: #ffffff;
-        font-size: 1.15rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.18s ease, background 0.18s ease;
-    }
-    .kid-share-action:hover {
-        transform: scale(1.14);
-        background: #0284c7;
-    }
-
-    /* 5. إعدادات الطباعة لتطبع الصورة المكبرة وحدها بملء الورقة */
-    @media print {
-        @page {
-            margin: 8mm;
+        .seal-battery .bat-bar {
+            display: block;
+            width: 6px;
+            height: 4px;
+            border-radius: 1.5px;
+            background: rgba(148, 163, 184, 0.45);
+            transition: background 0.25s ease, box-shadow 0.25s ease;
         }
-        body > *:not(#kid-img-zoom-modal) {
+        .seal-battery .bat-bar.charged {
+            background: #22c55e;
+            box-shadow: 0 0 5px rgba(34, 197, 94, 0.85);
+        }
+        .subject-btn.completed {
+            background: linear-gradient(135deg, #fef9c3 0%, #dcfce7 100%);
+            border-color: #22c55e;
+            box-shadow: 0 0 14px rgba(34, 197, 94, 0.45);
+        }
+        .subject-btn.completed .seal-battery {
             display: none !important;
         }
-        html, body {
-            background: #ffffff !important;
+
+        /* 3. شريط طبقات الدرس الست والتقييم أعلى مساحة العمل (#stage-layers-strip) */
+        .workspace {
+            gap: 8px;
+        }
+        .stage-layers-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(5px, 1vw, 10px);
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.84) 0%, rgba(30, 41, 59, 0.76) 100%);
+            border: 1.5px solid rgba(125, 211, 252, 0.45);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            max-width: 100%;
+            flex-shrink: 0;
+            z-index: 25;
+        }
+        .layers-group-sep {
+            width: 1.5px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.25);
+            display: inline-block;
+        }
+        .content-area {
+            flex: 1 1 0%;
+            min-height: 0;
+        }
+
+        /* 4. وضع زر النجمة والمتابعة (#center-action) في الزاوية السفلية اليسرى لئلا يحجب النص إطلاقاً */
+        .center-action-btn {
+            top: auto !important;
+            left: 16px !important;
+            bottom: 14px !important;
+            transform: none !important;
+            width: clamp(54px, 9.5vmin, 72px) !important;
+            height: clamp(54px, 9.5vmin, 72px) !important;
+            border-width: 3.5px !important;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35) !important;
+        }
+        .center-action-btn:hover {
+            transform: scale(1.1) !important;
+        }
+        .apply-structured-card {
+            overflow-y: auto !important;
+            justify-content: flex-start !important;
+            gap: 14px !important;
+            padding-bottom: 84px !important;
+        }
+
+        /* 5. عرض متواصل بسكرول سلس (الصورة بجانب النص على الشاشات العريضة وفوقه على الجوال) */
+        .slider-container {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 14px !important;
+            padding: 4px 8px 76px 8px !important;
+            scroll-behavior: smooth;
             height: 100% !important;
+            width: 100% !important;
+        }
+        .slider-image-box {
+            position: relative !important;
+            flex: 0 0 clamp(220px, 48dvh, 430px) !important;
+            min-height: 210px !important;
+            width: 100% !important;
+            cursor: zoom-in !important;
+        }
+        .slider-image-box::after { display: none !important; content: none !important; }
+        .slider-text-box {
+            flex: 0 0 auto !important;
+            height: auto !important;
+            max-height: none !important;
             overflow: visible !important;
+            align-items: flex-start !important;
+            padding: 16px 20px !important;
+        }
+        .slider-text-content {
+            display: block !important;
+            max-height: none !important;
+            overflow: visible !important;
+            text-align: right !important;
+            width: 100% !important;
+            white-space: pre-line !important;
+            line-height: 1.85 !important;
+        }
+        @media (min-width: 960px) {
+            .slider-container.has-img-and-text {
+                flex-direction: row !important;
+                align-items: flex-start !important;
+                overflow-y: auto !important;
+            }
+            .slider-container.has-img-and-text .slider-image-box {
+                flex: 0 0 44% !important;
+                width: 44% !important;
+                height: clamp(260px, 62dvh, 520px) !important;
+                position: sticky !important;
+                top: 0 !important;
+            }
+            .slider-container.has-img-and-text .slider-text-box {
+                flex: 1 1 54% !important;
+                min-width: 0 !important;
+            }
+        }
+
+        /* 6. زر الفيديو المصغر بالأيقونة لعمري 6 و7 سنوات */
+        #stage1-sawm-mini-video-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            left: auto;
+            z-index: 46;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        #stage1-sawm-mini-video-btn.video-btn-lit {
+            cursor: pointer;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            border: 2px solid #6ee7b7;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
+        }
+        #stage1-sawm-mini-video-btn.video-btn-dimmed {
+            opacity: 0.34;
+            filter: grayscale(100%);
+            cursor: not-allowed;
+            background: rgba(148, 163, 184, 0.3);
+            border: 1.5px solid rgba(148, 163, 184, 0.45);
+        }
+        .sawm-inline-video-stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #090d16;
+            border-radius: 22px;
+            overflow: hidden;
+        }
+        .sawm-inline-video-stage video {
+            width: 100%;
+            height: 100%;
+            max-height: 68dvh;
+            object-fit: contain;
+        }
+
+        /* 7. زر التكبير الدائري ونافذة التكبير والمشاركة بالأيقونات فقط */
+        .real-zoom-trigger-btn {
+            position: absolute;
+            bottom: 12px;
+            left: 14px;
+            z-index: 45;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.85);
+            color: #fde047;
+            font-size: 1.1rem;
+            border: 2px solid #38bdf8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
         }
         #kid-img-zoom-modal {
-            position: static !important;
-            display: flex !important;
-            background: #ffffff !important;
-            backdrop-filter: none !important;
-            padding: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(12px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
         }
         #kid-img-zoom-viewport {
-            width: 100% !important;
-            height: auto !important;
-            border: none !important;
-            background: #ffffff !important;
-            overflow: visible !important;
-            padding: 0 !important;
+            width: 95vw;
+            height: 83dvh;
+            overflow: auto;
+            border-radius: 22px;
+            border: 2.5px solid #38bdf8;
+            background: #090d16;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
         }
         #kid-img-zoom-target {
-            width: 100% !important;
-            max-width: 100% !important;
-            max-height: 95vh !important;
-            object-fit: contain !important;
-            border-radius: 0 !important;
+            display: block;
+            width: 95%;
+            max-width: none !important;
+            max-height: none !important;
+            height: auto;
+            object-fit: contain;
+            transition: width 0.2s ease;
+            margin: auto;
+            border-radius: 12px;
         }
-        .zoom-controls-bar, .kid-share-popover {
-            display: none !important;
+        .zoom-controls-bar {
+            position: relative;
+            display: flex;
+            gap: 14px;
+            margin-top: 12px;
+            justify-content: center;
+            align-items: center;
         }
-    }
-</style>
+        .zoom-ctrl-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            font-size: 1.22rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .zoom-ctrl-btn.share-zoom { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .zoom-ctrl-btn.close-zoom { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .kid-share-popover {
+            position: absolute;
+            bottom: 58px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.96);
+            border: 2px solid #38bdf8;
+            z-index: 1000000;
+        }
+        .kid-share-popover.open { display: flex; }
+        .kid-share-action {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            font-size: 1.12rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media print {
+            @page { margin: 8mm; }
+            body > *:not(#kid-img-zoom-modal) { display: none !important; }
+            #kid-img-zoom-modal { position: static !important; display: flex !important; background: #fff !important; padding: 0 !important; }
+            #kid-img-zoom-viewport { border: none !important; background: #fff !important; overflow: visible !important; height: auto !important; }
+            #kid-img-zoom-target { width: 100% !important; max-height: 95vh !important; }
+            .zoom-controls-bar, .kid-share-popover { display: none !important; }
+        }
+    </style>
 
-<!-- نافذة تكبير ومشاركة الصور برموز فقط -->
-<div id="kid-img-zoom-modal" onclick="closeKidImageZoom()">
-    <div id="kid-img-zoom-viewport" onclick="event.stopPropagation()">
-        <img id="kid-img-zoom-target" src="" alt="">
-    </div>
-    <div class="zoom-controls-bar" onclick="event.stopPropagation()">
-        <div class="kid-share-popover" id="kid-share-popover">
-            <button type="button" class="kid-share-action" onclick="sendOrSystemShareImage()">📤</button>
-            <button type="button" class="kid-share-action" onclick="saveKidZoomedImage()">💾</button>
-            <button type="button" class="kid-share-action" onclick="printKidZoomedImage()">🖨️</button>
+    <div id="kid-img-zoom-modal" onclick="closeKidImageZoom()">
+        <div id="kid-img-zoom-viewport" onclick="event.stopPropagation()">
+            <img id="kid-img-zoom-target" src="" alt="">
         </div>
-        <button type="button" class="zoom-ctrl-btn" onclick="stepKidImageZoom(35)">➕</button>
-        <button type="button" class="zoom-ctrl-btn" onclick="stepKidImageZoom(-35)">➖</button>
-        <button type="button" class="zoom-ctrl-btn" onclick="resetKidImageZoom()">🔄</button>
-        <button type="button" class="zoom-ctrl-btn share-zoom" onclick="toggleKidShareMenu()">📤</button>
-        <button type="button" class="zoom-ctrl-btn close-zoom" onclick="closeKidImageZoom()">✖</button>
+        <div class="zoom-controls-bar" onclick="event.stopPropagation()">
+            <div class="kid-share-popover" id="kid-share-popover">
+                <button type="button" class="kid-share-action" onclick="sendOrSystemShareImage()">📤</button>
+                <button type="button" class="kid-share-action" onclick="saveKidZoomedImage()">💾</button>
+                <button type="button" class="kid-share-action" onclick="printKidZoomedImage()">🖨️</button>
+            </div>
+            <button type="button" class="zoom-ctrl-btn" onclick="stepKidImageZoom(35)">➕</button>
+            <button type="button" class="zoom-ctrl-btn" onclick="stepKidImageZoom(-35)">➖</button>
+            <button type="button" class="zoom-ctrl-btn" onclick="resetKidImageZoom()">🔄</button>
+            <button type="button" class="zoom-ctrl-btn share-zoom" onclick="toggleKidShareMenu()">📤</button>
+            <button type="button" class="zoom-ctrl-btn close-zoom" onclick="closeKidImageZoom()">✖</button>
+        </div>
     </div>
-</div>
 
-<script>
-(function() {
-    // ================= أ. نافذة تكبير ومشاركة الصور بالأيقونات =================
-    let currentZoomWidthPct = 95;
-    const zoomModal = document.getElementById('kid-img-zoom-modal');
-    const zoomImg = document.getElementById('kid-img-zoom-target');
-    const zoomViewport = document.getElementById('kid-img-zoom-viewport');
-    const sharePopover = document.getElementById('kid-share-popover');
+    <script>
+    (function setupLightboxZoomControls() {
+        let currentZoomWidthPct = 95;
+        const zoomModal = document.getElementById('kid-img-zoom-modal');
+        const zoomImg = document.getElementById('kid-img-zoom-target');
+        const zoomViewport = document.getElementById('kid-img-zoom-viewport');
+        const sharePopover = document.getElementById('kid-share-popover');
 
-    function closeSharePopover() {
-        if (sharePopover) sharePopover.classList.remove('open');
-    }
+        function closeSharePopover() { if (sharePopover) sharePopover.classList.remove('open'); }
 
-    window.openKidImageZoom = function(src) {
-        if (!src || !zoomModal || !zoomImg) return;
-        closeSharePopover();
-        currentZoomWidthPct = 95;
-        zoomImg.src = src;
-        zoomImg.style.width = '95%';
-        zoomModal.style.display = 'flex';
-    };
+        window.openKidImageZoom = function(src) {
+            if (!src || !zoomModal || !zoomImg) return;
+            closeSharePopover();
+            currentZoomWidthPct = 95;
+            zoomImg.src = src;
+            zoomImg.style.width = '95%';
+            zoomModal.style.display = 'flex';
+        };
+        window.stepKidImageZoom = function(deltaPct) {
+            currentZoomWidthPct = Math.min(360, Math.max(50, currentZoomWidthPct + deltaPct));
+            if (zoomImg) zoomImg.style.width = currentZoomWidthPct + '%';
+        };
+        window.resetKidImageZoom = function() {
+            currentZoomWidthPct = 95;
+            if (zoomImg) zoomImg.style.width = '95%';
+        };
+        window.toggleKidShareMenu = function() {
+            if (sharePopover) sharePopover.classList.toggle('open');
+        };
+        window.sendOrSystemShareImage = async function() {
+            if (!zoomImg || !zoomImg.src) return;
+            closeSharePopover();
+            if (navigator.share) {
+                try { await navigator.share({ url: zoomImg.src }); return; } catch (e) {}
+            }
+            window.open(zoomImg.src, '_blank');
+        };
+        window.saveKidZoomedImage = function() {
+            if (!zoomImg || !zoomImg.src) return;
+            closeSharePopover();
+            const a = document.createElement('a');
+            a.href = zoomImg.src;
+            a.download = zoomImg.src.split('/').pop().split('?')[0] || 'lesson-slide.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+        window.printKidZoomedImage = function() {
+            if (!zoomImg || !zoomImg.src) return;
+            closeSharePopover();
+            window.print();
+        };
+        window.closeKidImageZoom = function() {
+            closeSharePopover();
+            if (zoomModal) zoomModal.style.display = 'none';
+        };
 
-    window.stepKidImageZoom = function(deltaPct) {
-        currentZoomWidthPct = Math.min(360, Math.max(50, currentZoomWidthPct + deltaPct));
-        if (zoomImg) zoomImg.style.width = currentZoomWidthPct + '%';
-    };
+        if (zoomViewport) {
+            zoomViewport.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                window.stepKidImageZoom(e.deltaY < 0 ? 25 : -25);
+            }, { passive: false });
+        }
 
-    window.resetKidImageZoom = function() {
-        currentZoomWidthPct = 95;
-        if (zoomImg) zoomImg.style.width = '95%';
-    };
-
-    window.toggleKidShareMenu = async function() {
-        if (!zoomImg || !zoomImg.src) return;
-        // إذا كان المتصفح يدعم مشاركة الملفات مباشرة، نحاول إرفاق الصورة في مشاركة النظام
-        if (navigator.share) {
-            try {
-                const resp = await fetch(zoomImg.src);
-                const blob = await resp.blob();
-                const ext = (blob.type && blob.type.split('/')[1]) ? blob.type.split('/')[1].replace('jpeg', 'jpg') : 'png';
-                const file = new File([blob], `slide-image.${ext}`, { type: blob.type || 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ files: [file] });
-                    return;
-                }
-            } catch (e) {
-                // في حال فتح الملف محلياً أو تعذر جلب Blob نفتح قائمة الخيارات السريعة
+        function attachZoomTrigger() {
+            const imgBox = document.querySelector('.slider-image-box');
+            if (!imgBox) return;
+            const img = imgBox.querySelector('img');
+            if (!img || img.style.display === 'none') return;
+            if (!imgBox.querySelector('.real-zoom-trigger-btn')) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'real-zoom-trigger-btn';
+                btn.innerHTML = '🔍';
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    if (img.src) window.openKidImageZoom(img.src);
+                };
+                imgBox.appendChild(btn);
+            }
+            if (!img.dataset.zoomClickBound) {
+                img.dataset.zoomClickBound = 'true';
+                img.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (this.src) window.openKidImageZoom(this.src);
+                });
             }
         }
-        if (sharePopover) sharePopover.classList.toggle('open');
-    };
 
-    window.sendOrSystemShareImage = async function() {
-        if (!zoomImg || !zoomImg.src) return;
-        closeSharePopover();
-        if (navigator.share) {
-            try {
-                const resp = await fetch(zoomImg.src);
-                const blob = await resp.blob();
-                const ext = (blob.type && blob.type.split('/')[1]) ? blob.type.split('/')[1].replace('jpeg', 'jpg') : 'png';
-                const file = new File([blob], `slide-image.${ext}`, { type: blob.type || 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ files: [file] });
-                    return;
-                }
-                await navigator.share({ url: zoomImg.src });
-                return;
-            } catch (e) {}
-        }
-        window.open(zoomImg.src, '_blank');
-    };
-
-    window.saveKidZoomedImage = function() {
-        if (!zoomImg || !zoomImg.src) return;
-        closeSharePopover();
-        const a = document.createElement('a');
-        a.href = zoomImg.src;
-        const cleanName = zoomImg.src.split('/').pop().split('?')[0] || 'lesson-slide.jpg';
-        a.download = cleanName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    };
-
-    window.printKidZoomedImage = function() {
-        if (!zoomImg || !zoomImg.src) return;
-        closeSharePopover();
-        window.print();
-    };
-
-    window.closeKidImageZoom = function() {
-        closeSharePopover();
-        if (zoomModal) zoomModal.style.display = 'none';
-    };
-
-    if (zoomViewport) {
-        zoomViewport.addEventListener('wheel', function(e) {
-            e.preventDefault();
-            window.stepKidImageZoom(e.deltaY < 0 ? 25 : -25);
-        }, { passive: false });
-    }
-
-    // ================= ب. تثبيت صورة السلايد الأول 100% عند عدم وجود صورة ثانية =================
-    let lastWorkingSlideSrc = '';
-    let lastLessonKey = '';
-
-    const SUBJ_CONFIG = {
-        1: { folders: ['logic', 'arabic', 'art'],  prefixes: ['s', 'l', 'art', 'a', ''] },
-        2: { folders: ['art'],                     prefixes: ['s', 'art', 'a', ''] },
-        3: { folders: ['music', 'audio', 'art'],   prefixes: ['s', 'm', 'art', ''] },
-        4: { folders: ['math', 'art'],             prefixes: ['s', 'm', 'math', 'art', ''] },
-        5: { folders: ['sports', 'sport'],         prefixes: ['s', 'sprt', 'sport', 'sp', ''] },
-        6: { folders: ['scince', 'science'],       prefixes: ['s', 'sci', 'sc', ''] },
-        7: { folders: ['rights', 'right', 'adab'], prefixes: ['r', 's', 'right', ''] }
-    };
-
-    function getLessonKey() {
-        const w = (typeof playWeek !== 'undefined') ? playWeek : 1;
-        const s = (typeof activeViewSubj !== 'undefined') ? activeViewSubj : 1;
-        const y = (typeof RAW_YEAR !== 'undefined') ? RAW_YEAR : 7;
-        return `y${y}_w${w}_s${s}`;
-    }
-
-    function detectSlideOrder(img) {
-        if (typeof window._activeSlideIdx === 'number') return window._activeSlideIdx + 1;
-        if (typeof window.currentSlideIdx === 'number') return window.currentSlideIdx + 1;
-        if (typeof window.slideIndex === 'number') return window.slideIndex + 1;
-        if (img && img.dataset && img.dataset.slideIdx) return parseInt(img.dataset.slideIdx, 10) + 1;
-        return 1;
-    }
-
-    function buildSlideCandidates(img) {
-        const w = (typeof playWeek !== 'undefined') ? playWeek : 1;
-        const s = (typeof activeViewSubj !== 'undefined') ? activeViewSubj : 1;
-        const y = (typeof RAW_YEAR !== 'undefined') ? RAW_YEAR : 7;
-        const slideOrder = detectSlideOrder(img);
-
-        const cfg = SUBJ_CONFIG[s] || { folders: ['art'], prefixes: ['s', 'r', ''] };
-        const folders = [];
-        const rawSrc = img.getAttribute('src') || '';
-        const lastSlash = rawSrc.lastIndexOf('/');
-        if (lastSlash !== -1) folders.push(rawSrc.substring(0, lastSlash));
-
-        cfg.folders.forEach(f => {
-            const p = `assets/y${y}/${f}`;
-            if (!folders.includes(p)) folders.push(p);
+        const obs = new MutationObserver(attachZoomTrigger);
+        window.addEventListener('DOMContentLoaded', () => {
+            const mainArea = document.getElementById('main-content') || document.body;
+            obs.observe(mainArea, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'style'] });
+            attachZoomTrigger();
         });
-
-        const prefixes = [...new Set([...cfg.prefixes, 's', 'r', 'sprt', 'art', ''])];
-        const exts = ['.jpg', '.png', '.webp', '.jpeg'];
-        const list = [];
-        const addUrl = (u) => { if (u && !list.includes(u)) list.push(u); };
-
-        folders.forEach(folder => {
-            prefixes.forEach(p => {
-                exts.forEach(ext => {
-                    addUrl(`${folder}/${p}${w}.${slideOrder}${ext}`);
-                    addUrl(`${folder}/${p}${w}_${slideOrder}${ext}`);
-                });
-            });
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.slider-nav-btn')) {
+                const sc = document.querySelector('.slider-container');
+                if (sc) sc.scrollTop = 0;
+            }
         });
+    })();
+    </script>
 
-        if (lastWorkingSlideSrc && lastLessonKey === getLessonKey()) {
-            addUrl(lastWorkingSlideSrc);
-        }
-
-        folders.forEach(folder => {
-            prefixes.forEach(p => {
-                exts.forEach(ext => {
-                    addUrl(`${folder}/${p}${w}${ext}`);
-                    addUrl(`${folder}/${p}${w}.1${ext}`);
-                    addUrl(`${folder}/${p}${w}.0${ext}`);
-                });
-            });
-        });
-
-        return list;
-    }
-
-    function bindSlideImageProtection() {
-        const imgBox = document.querySelector('.slider-image-box');
-        if (!imgBox) return;
-
-        if (!imgBox.querySelector('.real-zoom-trigger-btn')) {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'real-zoom-trigger-btn';
-            btn.innerHTML = '🔍';
-            btn.onclick = function(e) {
-                e.stopPropagation();
-                const currentImg = imgBox.querySelector('img');
-                if (currentImg && currentImg.src) window.openKidImageZoom(currentImg.src);
-            };
-            imgBox.appendChild(btn);
-        }
-
-        const img = imgBox.querySelector('img');
-        if (!img) return;
-
-        img.removeAttribute('onerror');
-        img.onerror = null;
-
-        if (!img.dataset.protectedBound) {
-            img.dataset.protectedBound = 'true';
-
-            img.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (this.src) window.openKidImageZoom(this.src);
-            });
-
-            img.addEventListener('load', function() {
-                const s = this.getAttribute('src') || '';
-                if (s && !s.includes('stage1-bg') && !s.includes('3427') && this.naturalWidth > 0) {
-                    lastWorkingSlideSrc = s;
-                    lastLessonKey = getLessonKey();
-                }
-            });
-
-            img.addEventListener('error', function() {
-                const stateKey = `${getLessonKey()}_sl${detectSlideOrder(this)}`;
-                if (this._tryKey !== stateKey) {
-                    this._tryKey = stateKey;
-                    this._tryList = buildSlideCandidates(this);
-                    this._tryIdx = 0;
-                }
-                while (this._tryIdx < this._tryList.length) {
-                    const nextCandidate = this._tryList[this._tryIdx++];
-                    if (nextCandidate !== this.getAttribute('src')) {
-                        this.src = nextCandidate;
-                        return;
-                    }
-                }
-                if (lastWorkingSlideSrc && lastLessonKey === getLessonKey()) {
-                    this.src = lastWorkingSlideSrc;
-                }
-            });
-        }
-
-        if (img.complete && img.naturalWidth === 0) {
-            img.dispatchEvent(new Event('error'));
-        }
-    }
-
-    const observer = new MutationObserver(() => {
-        bindSlideImageProtection();
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const mainArea = document.getElementById('main-content') || document.body;
-        observer.observe(mainArea, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
-        bindSlideImageProtection();
-    });
-
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.slider-nav-btn')) {
-            const sc = document.querySelector('.slider-container');
-            if (sc) sc.scrollTop = 0;
-            setTimeout(bindSlideImageProtection, 10);
-        }
-    });
-})();
-</script>
-<!-- ==================== [ نهاية الإضافات ] ==================== -->
 </body>
 </html>
 <!-- ==================== [ نهاية القسم 6 من 6 : اكتمال ملف stage1.html ] ==================== -->

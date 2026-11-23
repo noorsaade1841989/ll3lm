@@ -201,10 +201,10 @@ window.curriculumData[5] = {};
         const arAbjad = toArDigits(abjadVal);
 
         const vidPath   = `assets/y5/videos/v${w}.mp4`;
-        const artPath   = `assets/y5/art/art${w}.jpg`;
-        const sportPath = `assets/y5/sports/sprt${w}.jpg`;
-        const sciPath   = `assets/y5/scince/s${w}.jpg`;
-        const rightPath = `assets/y5/rights/r${w}.jpg`;
+        const artPath   = `assets/y4/art/art${w}.jpg`;
+        const sportPath = `assets/y4/sports/sprt${w}.jpg`;
+        const sciPath   = `assets/y4/scince/s${w}.jpg`;
+        const rightPath = `assets/y4/rights/r${w}.jpg`;
 
         window.curriculumData[5][w] = {
             // 1. المنطق (قراءة كلمة واحدة فقط: اسم النبي وكلمة الصفة)

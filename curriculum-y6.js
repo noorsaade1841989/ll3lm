@@ -1229,10 +1229,10 @@ window.toWesternDigits = function(str) {
         const next3 = Y6_WEEKS[(idx + 3) % 28];
 
         const vidPath   = `assets/y6/videos/v${w}.mp4`;
-        const artPath   = `assets/y6/art/art${w}.jpg`;
+        const artPath   = `assets/y4/art/art${w}.jpg`;
         const sportPath = `assets/y6/sports/sprt${w}.jpg`;
         const sciPath   = `assets/y6/scince/s${w}.jpg`;
-        const rightPath = `assets/y6/rights/r${w}.jpg`;
+        const rightPath = `assets/y4/rights/r${w}.jpg`;
 
         window.curriculumData[6][w] = {
             // 1. اللسان والمنطق (ثلث القصة بجملة محكمة)

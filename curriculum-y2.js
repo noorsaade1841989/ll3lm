@@ -65,10 +65,10 @@ window.curriculumData[2] = {};
         ] = row;
 
         const vidPath   = `assets/y2/videos/v${w}.mp4`;
-        const artPath   = `assets/y2/art/art${w}.jpg`;
-        const sportPath = `assets/y2/sports/sprt${w}.jpg`;
-        const sciPath   = `assets/y2/scince/s${w}.jpg`;
-        const rightPath = `assets/y2/rights/r${w}.jpg`;
+        const artPath   = `assets/y4/art/art${w}.jpg`;
+        const sportPath = `assets/y4/sports/sprt${w}.jpg`;
+        const sciPath   = `assets/y4/scince/s${w}.jpg`;
+        const rightPath = `assets/y4/rights/r${w}.jpg`;
 
         const otherColors = ALL_COLORS.filter(c => c.emoji !== colorEmoji).slice(0, 2);
         const otherShapes = ALL_SHAPES.filter(s => s.emoji !== shapeEmoji).slice(0, 2);

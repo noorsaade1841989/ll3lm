@@ -37,8 +37,8 @@ window.buildAndRegisterY7Section = function(sectionWeeksArray) {
         const prev1 = window.Y7_ALL_WEEKS_MAP[w > 1 ? w - 1 : 28] || next1;
 
         const vidPath   = `assets/y7/videos/v${w}.mp4`;
-        const artPath   = `assets/y7/art/art${w}.jpg`;
-        const sportPath = `assets/y7/sports/sprt${w}.jpg`;
+        const artPath   = `assets/y4/art/art${w}.jpg`;
+        const sportPath = `assets/y6/sports/sprt${w}.jpg`;
         const sciPath   = `assets/y7/scince/s${w}.1.jpg`;
         const rightPath = `assets/y7/rights/r${w}.jpg`;
 
@@ -524,7 +524,6 @@ window.buildAndRegisterY7Section = function(sectionWeeksArray) {
                     useVideo: false,
                     hasVideo: false,
                     preferSlidesOnly: true,
-                    preferSlidesOnly: true,
                     slides: item.sportExact ? [
                         {
                             img: item.sportExact.img,
@@ -595,7 +594,6 @@ window.buildAndRegisterY7Section = function(sectionWeeksArray) {
                     video: vidPath,
                     useVideo: false,
                     hasVideo: false,
-                    preferSlidesOnly: true,
                     preferSlidesOnly: true,
                     slides: (item.science && Array.isArray(item.science.slides))
                         ? [
@@ -725,7 +723,7 @@ window.buildAndRegisterY7Section = function(sectionWeeksArray) {
                 apply: {
                     img: rightPath,
                     steps: [
-                        `أَقْرَأُ قِصَّةَ حُورَ وَسُرُورَ فِي (${item.rightsFullTitle}) وَأَسْتَحْضِرُ وَصِيَّةَ رِسَالَةِ الحُقُوقِ.`,
+                        `أَقْرَأُ قِصَّةَ حُورَ وَسُرُورَ فِي «${item.rightsFullTitle}» وَأَسْتَحْضِرُ وَصِيَّةَ رِسَالَةِ الحُقُوقِ.`,
                         `أُطَبِّقُ بِنَفْسِي اليَوْمَ: (${item.rightsSummary.applyAction}) مَعَ مُرَاعَاةِ آدَابِ الطَّهَارَةِ وَالسَّتْرِ.`
                     ]
                 }
@@ -739,27 +737,24 @@ window.buildAndRegisterY7Section = function(sectionWeeksArray) {
 };
 
 // ============================================================================
-// محرك تنسيق السنة السابعة + زر الفيديو المصغر جداً داخل قسم العرض (محطة الصوم globalStep === 1) حصراً
-// - لا يظهر أي زر في الشريط العلوي (header) ولا في محطة الصلاة (0) أو الحج (2) أو الصدقة (3) أو الهدية (4) أو الزكاة (5)
-// - يظهر زر مصغر جداً (أصغر ما يمكن) في زاوية بطاقة قسم العرض (الصوم) فقط:
-//   * إن وُجد فيديو خاص بالدرس في السنة السابعة: يضاء الزر ويضاء/يعمل الفيديو (مع إمكانية التبديل للشرائح)
-//   * إن لم يوجد فيديو: يبدو الزر مطفأ وتظهر الشرائح
+// محرك تنسيق السنة السابعة (خط النسخ الواضح + الأرقام الغربية 0-9 + الحركات الحمراء)
+// ملاحظة: زر التبديل للفيديو المشروط لعمري 6 و7 مدمج مباشرةً وبصورة موحدة في stage1.html
 // ============================================================================
-window._stage1VideoAvailabilityCache = window._stage1VideoAvailabilityCache || {};
-
 window.initStage1VideoAndY7Engine = function() {
     if (typeof document === 'undefined') return;
+    if (typeof RAW_YEAR !== 'undefined' && Number(RAW_YEAR) !== 7) return;
 
-    if (!document.getElementById('y7-and-video-policy-styles')) {
+    document.body.classList.add('y7-mode-active');
+
+    if (!document.getElementById('y7-typography-styles')) {
         if (typeof navigator !== 'undefined' && navigator.onLine) {
             const fontLink = document.createElement('link');
             fontLink.rel = 'stylesheet';
             fontLink.href = 'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@600;700&family=Amiri:wght@700&display=swap';
             document.head.appendChild(fontLink);
         }
-
         const st = document.createElement('style');
-        st.id = 'y7-and-video-policy-styles';
+        st.id = 'y7-typography-styles';
         st.innerHTML = `
             body.y7-mode-active,
             body.y7-mode-active * {
@@ -783,296 +778,22 @@ window.initStage1VideoAndY7Engine = function() {
             }
             body.y7-mode-active .slider-text-content {
                 font-size: clamp(1.15rem, 2.9vmin, 1.75rem) !important;
-                line-height: 1.65 !important;
+                line-height: 1.75 !important;
             }
             body.y7-mode-active .quiz-opt-btn .opt-main-text {
-                font-size: clamp(1.1rem, 2.8vmin, 1.7rem) !important;
+                font-size: clamp(1.08rem, 2.7vmin, 1.65rem) !important;
                 line-height: 1.4 !important;
-            }
-
-            /* زر الفيديو المصغر جداً (أصغر ما يمكن) داخل بطاقة قسم العرض (محطة الصوم) حصراً */
-            #stage1-sawm-mini-video-btn {
-                position: absolute !important;
-                top: 8px !important;
-                left: 10px !important;
-                z-index: 45 !important;
-                width: auto !important;
-                max-width: max-content !important;
-                height: 24px !important;
-                min-height: 0 !important;
-                padding: 2px 8px !important;
-                margin: 0 !important;
-                border-radius: 999px !important;
-                font-size: 0.68rem !important;
-                font-weight: 800 !important;
-                line-height: 1 !important;
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                gap: 4px !important;
-                flex: 0 0 auto !important;
-                box-sizing: border-box !important;
-                transition: all 0.2s ease !important;
-            }
-
-            /* حالة الزر المصغر المضاء عند توفر الفيديو */
-            #stage1-sawm-mini-video-btn.video-btn-lit {
-                opacity: 1 !important;
-                filter: none !important;
-                cursor: pointer !important;
-                pointer-events: auto !important;
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-                color: #ffffff !important;
-                border: 1.5px solid #6ee7b7 !important;
-                box-shadow: 0 0 10px rgba(16, 185, 129, 0.7) !important;
-            }
-            #stage1-sawm-mini-video-btn.video-btn-lit:hover {
-                transform: scale(1.06) !important;
-                box-shadow: 0 0 14px rgba(16, 185, 129, 0.95) !important;
-            }
-
-            /* حالة الزر المصغر المطفأ عند عدم وجود فيديو */
-            #stage1-sawm-mini-video-btn.video-btn-dimmed {
-                opacity: 0.38 !important;
-                filter: grayscale(100%) !important;
-                cursor: not-allowed !important;
-                pointer-events: none !important;
-                background: rgba(148, 163, 184, 0.35) !important;
-                color: #64748b !important;
-                border: 1px solid rgba(148, 163, 184, 0.5) !important;
-                box-shadow: none !important;
-            }
-
-            /* حاوية الفيديو المدمجة داخل بطاقة محطة الصوم عند إضاءة الفيديو */
-            .sawm-inline-video-stage {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: #090d16;
-                border-radius: 22px;
-                overflow: hidden;
-                position: relative;
-            }
-            .sawm-inline-video-stage video {
-                width: 100%;
-                height: 100%;
-                max-height: 68dvh;
-                object-fit: contain;
-                border-radius: 18px;
             }
         `;
         document.head.appendChild(st);
     }
-
-    // إلغاء الفيديوهات تماماً في الصفوف 2..5
-    for (let yr = 2; yr <= 5; yr++) {
-        if (window.curriculumData && window.curriculumData[yr]) {
-            Object.keys(window.curriculumData[yr]).forEach(wKey => {
-                const weekObj = window.curriculumData[yr][wKey];
-                if (!weekObj) return;
-                Object.keys(weekObj).forEach(sKey => {
-                    if (weekObj[sKey] && weekObj[sKey].learn) {
-                        weekObj[sKey].learn.useVideo = false;
-                        weekObj[sKey].learn.hasVideo = false;
-                        weekObj[sKey].learn.preferSlidesOnly = true;
-                        weekObj[sKey].learn.video = '';
-                    }
-                });
-            });
-        }
-    }
-
-    function checkVideoExistsForLesson(videoUrl, callback) {
-        if (!videoUrl || typeof videoUrl !== 'string') {
-            callback(false);
-            return;
-        }
-        if (Object.prototype.hasOwnProperty.call(window._stage1VideoAvailabilityCache, videoUrl)) {
-            callback(window._stage1VideoAvailabilityCache[videoUrl]);
-            return;
-        }
-        const probeVideo = document.createElement('video');
-        let settled = false;
-        const finish = (isAvailable) => {
-            if (settled) return;
-            settled = true;
-            window._stage1VideoAvailabilityCache[videoUrl] = isAvailable;
-            probeVideo.removeAttribute('src');
-            probeVideo.load();
-            callback(isAvailable);
-        };
-        const timer = setTimeout(() => finish(false), 1500);
-        probeVideo.preload = 'metadata';
-        probeVideo.onloadedmetadata = () => {
-            clearTimeout(timer);
-            finish(true);
-        };
-        probeVideo.onerror = () => {
-            clearTimeout(timer);
-            finish(false);
-        };
-        probeVideo.src = videoUrl;
-    }
-
-    function convertY7DOMDigitsToWestern() {
-        if (typeof RAW_YEAR !== 'undefined' && Number(RAW_YEAR) !== 6 && Number(RAW_YEAR) !== 7) return;
-        const root = document.getElementById('main-content');
-        if (!root) return;
-        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-        let node;
-        while ((node = walker.nextNode())) {
-            if (/[٠-٩]/.test(node.nodeValue)) {
-                node.nodeValue = window.toWesternDigits(node.nodeValue);
-            }
-        }
-    }
-
-    window.syncStage1SawmMiniVideoUI = function() {
-        // إزالة أي زر قديم في الهيدر إن وجد
-        const oldHeaderBtn = document.getElementById('stage1-conditional-video-btn');
-        if (oldHeaderBtn) oldHeaderBtn.remove();
-
-        const yearNow = (typeof RAW_YEAR !== 'undefined') ? Number(RAW_YEAR) : 7;
-        if (yearNow === 7) {
-            document.body.classList.add('y7-mode-active');
-        }
-
-        // إذا لم نكن في محطة الصوم (قسم العرض globalStep === 1)، نزيل الزر المصغر فوراً
-        const stepNow = (typeof globalStep !== 'undefined') ? Number(globalStep) : -1;
-        const existingMiniBtn = document.getElementById('stage1-sawm-mini-video-btn');
-        if (stepNow !== 1 || (yearNow !== 6 && yearNow !== 7)) {
-            if (existingMiniBtn) existingMiniBtn.remove();
-            return;
-        }
-
-        // نحن الآن داخل قسم العرض (محطة الصوم globalStep === 1) في الصف 6 أو 7
-        const fancyCard = document.querySelector('#main-content .fancy-card');
-        if (!fancyCard) return;
-
-        const defData = (typeof getActiveCurriculumObj === 'function') ? getActiveCurriculumObj() : null;
-        if (!defData || !defData.learn) return;
-
-        const wNum = (typeof playWeek !== 'undefined') ? playWeek : 1;
-        const sNum = (typeof activeViewSubj !== 'undefined') ? activeViewSubj : 1;
-        const videoUrl = (sNum === 1)
-            ? (defData.learn.video || `assets/y${yearNow}/videos/v${wNum}.mp4`)
-            : `assets/y${yearNow}/videos/v${wNum}_s${sNum}.mp4`;
-
-        let miniBtn = document.getElementById('stage1-sawm-mini-video-btn');
-        if (!miniBtn) {
-            miniBtn = document.createElement('button');
-            miniBtn.type = 'button';
-            miniBtn.id = 'stage1-sawm-mini-video-btn';
-            miniBtn.className = 'video-btn-dimmed';
-            miniBtn.innerHTML = '<span>🎬</span><span>فيديو</span>';
-            miniBtn.disabled = true;
-            fancyCard.appendChild(miniBtn);
-        }
-
-        let isShowingVideo = false;
-        const sliderContainer = fancyCard.querySelector('.slider-container');
-
-        const toggleInlineVideoInSawm = () => {
-            if (!sliderContainer) return;
-            let vidStage = fancyCard.querySelector('.sawm-inline-video-stage');
-            if (!isShowingVideo) {
-                isShowingVideo = true;
-                sliderContainer.style.display = 'none';
-                if (!vidStage) {
-                    vidStage = document.createElement('div');
-                    vidStage.className = 'sawm-inline-video-stage';
-                    vidStage.innerHTML = `<video id="sawm-y7-inline-video" controls playsinline preload="metadata" src="${videoUrl}"></video>`;
-                    fancyCard.appendChild(vidStage);
-                    const vEl = vidStage.querySelector('video');
-                    if (vEl) {
-                        vEl.onended = () => {
-                            if (typeof updateNavButtons === 'function') updateNavButtons(true);
-                        };
-                    }
-                } else {
-                    vidStage.style.display = 'flex';
-                }
-                const vEl = vidStage.querySelector('video');
-                if (vEl) vEl.play().catch(() => {});
-                miniBtn.innerHTML = '<span>📖</span><span>الشرائح</span>';
-                miniBtn.title = 'العودة إلى عرض الشرائح';
-                if (typeof updateNavButtons === 'function') updateNavButtons(true);
-            } else {
-                isShowingVideo = false;
-                if (vidStage) {
-                    const vEl = vidStage.querySelector('video');
-                    if (vEl) vEl.pause();
-                    vidStage.style.display = 'none';
-                }
-                sliderContainer.style.display = '';
-                miniBtn.innerHTML = '<span>🎬</span><span>فيديو</span>';
-                miniBtn.title = 'تشغيل فيديو الدرس';
-            }
-        };
-
-        checkVideoExistsForLesson(videoUrl, (exists) => {
-            if (!document.body.contains(miniBtn)) return;
-            if (exists) {
-                miniBtn.classList.add('video-btn-lit');
-                miniBtn.classList.remove('video-btn-dimmed');
-                miniBtn.disabled = false;
-                miniBtn.title = 'تشغيل فيديو الدرس';
-                miniBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    toggleInlineVideoInSawm();
-                };
-                // إضاءة وتشغيل الفيديو تلقائياً عند توفره في محطة الصوم
-                if (!isShowingVideo) {
-                    toggleInlineVideoInSawm();
-                }
-            } else {
-                miniBtn.classList.add('video-btn-dimmed');
-                miniBtn.classList.remove('video-btn-lit');
-                miniBtn.disabled = true;
-                miniBtn.innerHTML = '<span>🎬</span><span>فيديو</span>';
-                miniBtn.title = 'لا يوجد فيديو لهذا الدرس';
-                miniBtn.onclick = null;
-            }
-        });
-    };
-
-    function hookRenderStepOnce() {
-        if (window._y7SawmMiniVideoHooked || typeof window.renderCurrentStep !== 'function') return;
-        window._y7SawmMiniVideoHooked = true;
-
-        const origRender = window.renderCurrentStep;
-        window.renderCurrentStep = function() {
-            if (typeof RAW_YEAR !== 'undefined') {
-                const yr = Number(RAW_YEAR);
-                const defData = (typeof getActiveCurriculumObj === 'function') ? getActiveCurriculumObj() : null;
-                if (yr >= 2 && yr <= 7 && defData && defData.learn) {
-                    // نمنع stage1.html الأصلي من تشغيل فيديوهات الصف الأول في الصفوف 2..7
-                    const hasCustom = Boolean(defData.learn.video && String(defData.learn.video).startsWith('data:video'));
-                    if (!hasCustom) {
-                        defData.learn.preferSlidesOnly = true;
-                        defData.learn.useVideo = false;
-                    }
-                }
-            }
-            origRender.apply(this, arguments);
-            convertY7DOMDigitsToWestern();
-            window.syncStage1SawmMiniVideoUI();
-        };
-
-        convertY7DOMDigitsToWestern();
-        window.syncStage1SawmMiniVideoUI();
-    }
-
-    if (document.readyState === 'loading') {
-        window.addEventListener('DOMContentLoaded', hookRenderStepOnce);
-    } else {
-        setTimeout(hookRenderStepOnce, 0);
-    }
 };
 
-window.initStage1VideoAndY7Engine();
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', window.initStage1VideoAndY7Engine);
+} else {
+    setTimeout(window.initStage1VideoAndY7Engine, 0);
+}
 
 
 (function registerCompleteYear7All7Parts() {
@@ -1523,7 +1244,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُحَافِظُ عَلَى بُنْيَانِ جِسْمِي بِشُرْبِ الحَلِيبِ وَمُمَارَسَةِ الرِّيَاضَةِ وَالنَّظَافَةِ اليَوْمِيَّةِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt1.jpg",
+      "img": "assets/y6/sports/sprt1.jpg",
       "title": "تَمَارِينُ الدِّمَاغِ السَّبْعَةُ (الرَّبْطُ بَيْنَ نِصْفَيِ الدِّمَاغِ)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِزِيَادَةِ التَّرْكِيزِ وَتَنْسِيقِ الحَرَكَةِ!",
       "slideText": "🧠 تَمَارِينُ الدِّمَاغِ السَّبْعَةُ (الرَّبْطُ بَيْنَ نِصْفَيِ الدِّمَاغِ — 10 دَقَائِقَ يَوْمِيًّا): (1) المِشْيَةُ المُتَقَاطِعَةُ: لَمْسُ الرُّكْبَةِ بِاليَدِ المُعَاكِسَةِ بِالتَّنَاوُبِ. (2) المِشْيَةُ المُتَقَاطِعَةُ الخَلْفِيَّةُ: رَفْعُ القَدَمِ لِلْخَلْفِ وَلَمْسُ كَعْبِهَا بِاليَدِ المُعَاكِسَةِ. (3) مَسْكَةُ الأُذُنِ وَالأَنْفِ مَعَ التَّصْفِيقِ وَالتَّبْدِيلِ. (4) رَسْمُ اللَّانِهَايَةِ الهَوَائِيِّ (∞). (5) الرَّسْمُ المُزْدَوَجُ المُتَنَاظِرُ بِكِلْتَا اليَدَيْنِ مَعًا. (6) طَاحُونَةُ الهَوَاءِ المُتَقَاطِعَةُ. (7) التَّرْبِيتُ الدَّائِرِيُّ المُتَعَاكِسُ عَلَى البَطْنِ وَالرَّأْسِ.",
@@ -1957,7 +1678,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَمْضَغُ طَعَامِي جَيِّدًا وَأَشْرَبُ الكَثِيرَ مِنَ المَاءِ النَّقِيِّ لِحِمَايَةِ جِهَازِي الهَضْمِيِّ وَالبَوْلِيِّ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt2.jpg",
+      "img": "assets/y6/sports/sprt2.jpg",
       "title": "تَمَارِينُ التَّآزُرِ البَصَرِيِّ وَالدِّقَّةِ الحَرَكِيَّةِ (المَجْمُوعَةُ الثَّانِيَةُ: 8..14)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِتَقْوِيَةِ التَّرْكِيزِ البَصَرِيِّ وَتَنَاسُقِ حَرَكَةِ اليَدَيْنِ!",
       "slideText": "👁️✋ تَمَارِينُ التَّآزُرِ البَصَرِيِّ وَالدِّقَّةِ الحَرَكِيَّةِ (المَجْمُوعَةُ الثَّانِيَةُ — التَّمَارِينُ 8 إِلَى 14): (8) الفِيلُ المُفَكِّرُ: إِلْصَاقُ الأُذُنِ بِالكَتِفِ وَرَسْمُ علامة (∞) بِالذِّرَاعِ مَعَ تَتَبُّعِ الأَصَابِعِ بِالعَيْنَيْنِ. (9) تَتَبُّعُ البَنْدُولِ بِالعَيْنَيْنِ مَعَ تَثْبِيتِ الرَّأْسِ. (10) رَمْيَةُ التَّبْدِيلِ لِلْكُرَةِ بَيْنَ اليَدَيْنِ. (11) الإِيقَاعُ الرُّبَاعِيُّ (ضَرْبُ الفَخِذَيْنِ ثُمَّ التَّصْفِيقُ ثُمَّ لَمْسُ الكَتِفَيْنِ بِتَقَاطُعٍ ثُمَّ التَّصْفِيقُ). (12) أَصَابِعُ البِيَانُو العَكْسِيَّةُ. (13) القَبْضَةُ وَالكَفُّ بِالتَّبَادُلِ. (14) نَقْلُ الكُرَاتِ بِالمِلْقَطِ عَبْرَ خَطِّ المُنْتَصَفِ.",
@@ -2386,7 +2107,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَنَامُ مُبَكِّرًا وَأُرِيحُ عَيْنَيَّ مِنَ الشَّاشَاتِ وَأَغْسِلُ يَدَيَّ لِتَقْوِيَةِ جِهَازِي العَصَبِيِّ وَالمَنَاعِيِّ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt3.jpg",
+      "img": "assets/y6/sports/sprt3.jpg",
       "title": "تَمَارِينُ التَّوَازُنِ وَالتَّكَامُلِ الحِسِّيِّ (المَجْمُوعَةُ الثَّالِثَةُ: 15..21)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِتَدْرِيبِ المُخَيْخِ وَزِيَادَةِ التَّرْكِيزِ وَضَبْطِ النَّفْسِ!",
       "slideText": "⚖️ تَمَارِينُ التَّوَازُنِ وَالتَّكَامُلِ الحِسِّيِّ (المَجْمُوعَةُ الثَّالِثَةُ — التَّمَارِينُ 15 إِلَى 21): (15) وَقْفَةُ اللَّقْلَقِ عَلَى قَدَمٍ وَاحِدَةٍ (10 ثَوَانٍ بِعَيْنَيْنِ مَفْتُوحَتَيْنِ ثُمَّ 5 ثَوَانٍ مَغْمُوضَتَيْنِ). (16) المَشْيُ عَلَى الخَيْطِ (الكَعْبُ مُلَاصِقٌ لِلْأَصَابِعِ). (17) المَشْيُ لِلْخَلْفِ عَلَى خَطٍّ مُسْتَقِيمٍ. (18) سَاعِي البَرِيدِ المُتَوَازِنُ (المَشْيُ مَعَ وَضْعِ كِتَابٍ فَوْقَ الرَّأْسِ). (19) القَفْزُ الدَّوَرَانِيُّ المُوَجَّهُ مَعَ الثَّبَاتِ. (20) مِشْيَةُ الدُّبِّ لِلْأَمَامِ أَوِ السَّلْطَعُونِ لِلْخَلْفِ. (21) التَّأَرْجُحُ الصَّخْرِيُّ بِضَمِّ الرُّكْبَتَيْنِ لِلصَّدْرِ.",
@@ -2807,7 +2528,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُطَبِّقُ تَجْرِبَةَ الرِّئَةِ البَالُونِيَّةِ وَأَسْتَمِعُ لِنَبْضِ القَلْبِ بَعْدَ الرِّيَاضَةِ لِأَرَى كَيْفَ يَزْدَادُ نَشَاطُهُ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt4.jpg",
+      "img": "assets/y6/sports/sprt4.jpg",
       "title": "الدَّرْسُ (1): البِدَايَةُ التَّأْسِيسِيَّةُ (المَسَارُ الأَوَّلُ) + فِيزْيَاءُ الوُضُوءِ",
       "subtitle": "الوَقْتُ: 30 دَقِيقَةً يَوْمِيًّا | الهَدَفُ: طَاقَةٌ، مُرُونَةٌ، وَقُوَّةٌ مُتَكَامِلَةٌ",
       "slideText": "⚡ الدَّرْسُ (1) البِدَايَةُ التَّأْسِيسِيَّةُ (المَسَارُ الأَوَّلُ — 30 دَقِيقَةً يَوْمِيًّا): (1) ضَبْطُ الطَّاقَةِ: التَّسْبِيحُ الحَرَكِيُّ. (2) فَكُّ ضَغْطِ الفَقَرَاتِ: القِيَامُ النَّقِيُّ. (3) البِنَاءُ العَضَلِيُّ: تَمْرِينُ البِلَانْكِ (Plank). (4) تَقْوِيَةُ الاتِّزَانِ: السُّكُونُ الكَوَانْتِيُّ. (5) الاسْتِجَابَةُ العَصَبِيَّةُ: تَغْيِيرُ الاتِّجَاهِ المُفَاجِئُ وَرَدُّ الفِعْلِ. (6) التَّدَفُّقُ وَالاسْتِرْخَاءُ: الجُلُوسُ فِي صَمْتٍ وَتَأَمُّلٍ. • ثَانِيًا: الهَنْدَسَةُ الحَرَكِيَّةُ لِلْعِبَادَةِ (مِيكَانِيكَا الاسْتِرَاحَةِ وَفِيزْيَاءُ الوُضُوءِ): تَطْهِيرُ الهَالَةِ الكَهْرُومِغْنَاطِيسِيَّةِ، التَّوَازُنُ العَصَبِيُّ، وَتَفْرِيغُ الشِّحْنَاتِ السَّاكِنَةِ لِلْأَرْضِ.",
@@ -3228,7 +2949,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَرْفُقُ بِالحَيَوَانَاتِ الأَلِيفَةِ وَالطُّيُورِ وَأَضَعُ لَهَا المَاءَ وَالحُبُوبَ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt5.jpg",
+      "img": "assets/y6/sports/sprt5.jpg",
       "title": "تَمَارِينُ التَّنَفُّسِ وَالتَّهْدِئَةِ العَصَبِيَّةِ (المَجْمُوعَةُ الرَّابِعَةُ: 22..28)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِتَنْظِيمِ الجِهَازِ العَصَبِيِّ وَالوُصُولِ لِلِاسْتِرْخَاءِ وَاليَقَظَةِ الذِّهْنِيَّةِ!",
       "slideText": "🌬️ تَمَارِينُ التَّنَفُّسِ وَالتَّهْدِئَةِ العَصَبِيَّةِ (المَجْمُوعَةُ الرَّابِعَةُ — التَّمَارِينُ 22 إِلَى 28): (22) تَنَفُّسُ الوَرْدَةِ وَالشَّمْعَةِ (شَهِيقٌ مِنَ الأَنْفِ كَشَمِّ الوَرْدَةِ وَزَفِيرٌ مِنَ الفَمِ كَإِطْفَاءِ الشَّمْعَةِ). (23) عُقْدَةُ الهُدُوءِ مَعَ وَضْعِ اللِّسَانِ فِي سَقْفِ الحَلْقِ. (24) قُبَّعَةُ التَّفْكِيرِ (تَدْلِيكُ حَافَتَيِ الأُذُنَيْنِ نُزُولًا لِلشَّحْمَةِ). (25) الشَّدُّ وَالاسْتِرْخَاءُ (كَالرُّوبُوتِ ثُمَّ كَالدُّمْيَةِ). (26) طَنِينُ النَّحْلَةِ مَعَ الزَّفِيرِ الهَادِئِ. (27) رَسْمُ النَّجْمَةِ عَبْرَ تَتَبُّعِ أَصَابِعِ الكَفِّ مَعَ الشَّهِيقِ وَالزَّفِيرِ. (28) العِنَاقُ الفَرَاشِيُّ (التَّرْبِيتُ الهَادِئُ عَلَى الصَّدْرِ بِالتَّنَاوُبِ).",
@@ -3653,7 +3374,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَتَأَمَّلُ حِكْمَةَ اللهِ فِي تَنَوُّعِ تَنَفُّسِ المَخْلُوقَاتِ بَيْنَ الرِّئَتَيْنِ فِي البَرِّ وَالخَيَاشِيمِ فِي المَاءِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt6.jpg",
+      "img": "assets/y6/sports/sprt6.jpg",
       "title": "تَمَارِينُ نِقَاطِ الطَّاقَةِ وَتَنْشِيطِ الدِّمَاغِ (المَجْمُوعَةُ الخَامِسَةُ: 29..35)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِتَنْشِيطِ مَسَارَاتِ الطَّاقَةِ وَزِيَادَةِ تَدَفُّقِ الأُكْسِجِينِ وَاليَقَظَةِ الذِّهْنِيَّةِ!",
       "slideText": "✨ تَمَارِينُ نِقَاطِ الطَّاقَةِ وَتَنْشِيطِ الدِّمَاغِ (المَجْمُوعَةُ الخَامِسَةُ — التَّمَارِينُ 29 إِلَى 35): (29) أَزْرَارُ الدِّمَاغِ (يَدٌ عَلَى السُّرَّةِ وَتَدْلِيكُ النُّقْطَتَيْنِ تَحْتَ التَّرْقُوَةِ مَعَ تَحْرِيكِ العَيْنَيْنِ أُفُقِيًّا). (30) أَزْرَارُ الأَرْضِ (إِصْبَعَانِ تَحْتَ الشَّفَةِ السُّفْلِيَّةِ وَاليَدُ الأُخْرَى أَسْفَلَ البَطْنِ مَعَ تَحْرِيكِ العَيْنَيْنِ عَمُودِيًّا). (31) أَزْرَارُ الفَضَاءِ (إِصْبَعَانِ فَوْقَ الشَّفَةِ العُلْيَا وَاليَدُ الأُخْرَى أَسْفَلَ الظَّهْرِ). (32) أَزْرَارُ التَّوَازُنِ خَلْفَ الأُذُنِ. (33) النِّقَاطُ الإِيجَابِيَّةُ عَلَى الجَبْهَةِ. (34) التَّثَاؤُبُ الطَّاقِيُّ لِإِرْخَاءِ الفَكِّ. (35) التَّرْبِيتُ التِّيمُوسِيُّ أَعْلَى الصَّدْرِ لِتَنْشِيطِ الحَيَوِيَّةِ.",
@@ -4083,7 +3804,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَغْسِلُ الخُضْرَوَاتِ وَالفَوَاكِهَ جَيِّدًا لِلْوِقَايَةِ مِنَ الدِّيدَانِ الضَّارَّةِ وَأَحْمِي النَّحْلَ النَّافِعَ فِي الطَّبِيعَةِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt7.jpg",
+      "img": "assets/y6/sports/sprt7.jpg",
       "title": "تَمَارِينُ التَّمَدُّدِ العَضَلِيِّ وَفَكِّ التَّوَتُّرِ (المَجْمُوعَةُ السَّادِسَةُ: 36..42)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِإِطَالَةِ الأَوْتَارِ وَإِرْخَاءِ العَضَلَاتِ المُنْقَبِضَةِ وَزِيَادَةِ الاسْتِيعَابِ!",
       "slideText": "🧘 تَمَارِينُ التَّمَدُّدِ العَضَلِيِّ وَفَكِّ التَّوَتُّرِ (المَجْمُوعَةُ السَّادِسَةُ — التَّمَارِينُ 36 إِلَى 42): (36) البُومَةُ الحَكِيمَةُ (مَسْكُ عَضَلَةِ الكَتِفِ مَعَ إِدَارَةِ الرَّأْسِ بِبُطْءٍ مَعَ الزَّفِيرِ). (37) تَفْعِيلُ الذِّرَاعِ بِجانبِ الأُذُنِ لِإِطَالَةِ الكَتِفَيْنِ. (38) انْحِنَاءَةُ الجَاذِبِيَّةِ لِلْأَمَامِ مَعَ تَقَاطُعِ الكَاحِلَيْنِ. (39) ضَخُّ السَّاقِ بِالارْتِكَازِ عَلَى الحَائِطِ وَمَدِّ السَّاقِ لِلْخَلْفِ. (40) ثَنْيُ القَدَمِ وَفَرْدُهَا بِبُطْءٍ. (41) المُنَشِّطُ المَائِيُّ عَبْرَ إِسْنَادِ الجَبْهَةِ بَيْنَ الكَفَّيْنِ عَلَى الطَّاوِلَةِ ثُمَّ رَفْعِ الرَّأْسِ مَعَ الشَّهِيقِ. (42) القِطَّةُ وَالبَقَرَةُ لِمُرُونَةِ العَمُودِ الفَقَرِيِّ.",
@@ -4505,7 +4226,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَسْتَخْدِمُ العَدَسَةَ المُكَبِّرَةَ لِمُلَاحَظَةِ الحَشَرَاتِ فِي الحَدِيقَةِ دُونَ إِيذَائِهَا وَأُدَوِّنُ صِفَاتِهَا فِي دَفْتَرِي."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt8.jpg",
+      "img": "assets/y6/sports/sprt8.jpg",
       "title": "تَمَارِينُ الجُمْبَازِ اليَدَوِيِّ المُتَقَدِّمِ (المَجْمُوعَةُ السَّابِعَةُ: 43..49)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِلْعَزْفِ العَصَبِيِّ لِلْأَصَابِعِ، تَقْوِيَةِ اسْتِقْلَالِيَّةِ نِصْفَيِ الدِّمَاغِ، وَتَهْيِئَةِ مَهَارَاتِ الكِتَابَةِ!",
       "slideText": "🖐️ تَمَارِينُ الجُمْبَازِ اليَدَوِيِّ المُتَقَدِّمِ (المَجْمُوعَةُ السَّابِعَةُ — التَّمَارِينُ 43 إِلَى 49): (43) السَّبَّابَةُ وَالخِنْصِرُ بِالتَّبَادُلِ الفَوْرِيِّ بَيْنَ اليَدَيْنِ. (44) عَلامَةُ النَّصْرِ بِيَدٍ وَالإِعْجَابِ بِاليَدِ الأُخْرَى ثُمَّ عَكْسُهُمَا مَعًا. (45) السُّلَّمُ العَنْكَبُوتِيُّ بِمُلَامَسَةِ إِبْهَامِ يَدٍ لِسَبَّابَةِ الأُخْرَى صُعُودًا. (46) حَلَقَاتُ الأَصَابِعِ المُتَدَاخِلَةُ كَالسِّلْسِلَةِ. (47) الدَّائِرَةُ وَالمُرَبَّعُ (رَسْمُ دَائِرَةٍ بِاليُمْنَى وَمُرَبَّعٍ بِاليُسْرَى فِي نَفْسِ الوَقْتِ). (48) القَرْعُ المُتَفَاوِتُ عَلَى الطَّاوِلَةِ. (49) تَدْوِيرُ المِعْصَمِ الأَيْمَنِ مَعَ الكَاحِلِ الأَيْسَرِ.",
@@ -4926,7 +4647,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَسْقِي النَّبَاتَاتِ وَأَحْفَظُ الطَّعَامَ فِي الثَّلَّاجَةِ مُغَطًّى لِحِمَايَتِهِ مِنْ فِطْرِيَّاتِ العَفَنِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt9.jpg",
+      "img": "assets/y6/sports/sprt9.jpg",
       "title": "تَمَارِينُ الإِيقَاعِ الحَرَكِيِّ وَالذَّاكِرَةِ العَامِلَةِ (المَجْمُوعَةُ الثَّامِنَةُ: 50..56)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِرَبْطِ الصَّوْتِ وَالحَرَكَةِ، زِيَادَةِ سُرْعَةِ البَدِيهَةِ، وَالتَّحَكُّمِ الذَّاتِيِّ!",
       "slideText": "🎵 تَمَارِينُ الإِيقَاعِ الحَرَكِيِّ وَالذَّاكِرَةِ العَامِلَةِ (المَجْمُوعَةُ الثَّامِنَةُ — التَّمَارِينُ 50 إِلَى 56): (50) إِيقَاعُ المِرْآةِ العَكْسِيَّةِ مَعَ المُدَرِّبِ. (51) شَفْرَةُ الأَلْوَانِ الحَرَكِيَّةِ (أَخْضَرُ = قَفْزٌ، أَصْفَرُ = جُلُوسٌ، أَحْمَرُ = ثَبَاتٌ). (52) صَدَى التَّصْفِيقِ المُشَفَّرِ بِالتَّرْبِيتِ عَلَى الرُّكْبَتَيْنِ. (53) المِشْيَةُ المُزْدَوَجَةُ (خُطْوَتَانِ لِلْأَمَامِ + تَصْفِيقَةٌ خَلْفَ الظَّهْرِ + خُطْوَةٌ لِلْخَلْفِ). (54) تَجْمِيدُ التِّمْثَالِ عِنْدَ تَوَقُّفِ الصَّوْتِ (5 ثَوَانٍ). (55) الكُرَةُ الصَّامِتَةُ مَعَ العَدِّ التَّنَازُلِيِّ الهَامِسِ (10، 9، 8...). (56) بُوصَلَةُ الاتِّجَاهَاتِ الأَرْبَعِ.",
@@ -5347,7 +5068,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَشْرَبُ المَاءَ النَّقِيَّ وَأَتَنَاوَلُ اللَّبَنَ الزَّبَادِيَّ المُفِيدَ لِصِحَّةِ الهَضْمِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt10.jpg",
+      "img": "assets/y6/sports/sprt10.jpg",
       "title": "تَمَارِينُ الإِيقَاظِ الحِسِّيِّ وَالحَرَكَاتِ الأَرْضِيَّةِ (المَجْمُوعَةُ التَّمْهِيدِيَّةُ الأُولَى: 1..7)",
       "subtitle": "7 دَقَائِقَ تَأْسِيسِيَّةً لِتَرْطِيبِ الدِّمَاغِ، رَسْمِ خَرِيطَةِ الجَسَدِ، وَدَمْجِ المُنْعَكَسَاتِ الفِطْرِيَّةِ قَبْلَ الحَرَكَةِ!",
       "slideText": "💧 تَمَارِينُ الإِيقَاظِ الحِسِّيِّ وَالحَرَكَاتِ الأَرْضِيَّةِ (المَجْمُوعَةُ التَّمْهِيدِيَّةُ الأُولَى — 7 دَقَائِقَ تَأْسِيسِيَّةً): (1) رَشَفَاتُ المَاءِ الوَاعِيَةُ (إِبْقَاءُ رَشْفَةِ المَاءِ فِي الفَمِ لِثَانِيَتَيْنِ قَبْلَ البَلْعِ لِتَرْطِيبِ الدِّمَاغِ). (2) الضَّغْطُ العَمِيقُ لِلْمَفَاصِلِ (الكَتِفَيْنِ، المِرْفَقَيْنِ، الرُّكْبَتَيْنِ). (3) نَجْمَةُ البَحْرِ (فَتْحُ الأَطْرَافِ مَعَ الشَّهِيقِ) وَالشَّرْنَقَةُ (ضَمُّ الرُّكْبَتَيْنِ مَعَ الزَّفِيرِ). (4) التَّدَحْرُجُ الأُسْطُوَانِيُّ كَقِطْعَةٍ وَاحِدَةٍ. (5) انْحِنَاءَةُ المَوْزَةِ يَمِينًا وَيَسَارًا. (6) الطَّائِرُ المُحَلِّقُ عَلَى البَطْنِ. (7) الزَّحْفُ التَّبَادُلِيُّ الفِطْرِيُّ.",
@@ -5769,7 +5490,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَحْرِصُ عَلَى النَّظَافَةِ وَتَقْوِيَةِ المَنَاعَةِ وَلَا أَتَنَاوَلُ المُضَادَّاتِ الحَيَوِيَّةَ إِلَّا بِأَمْرِ الطَّبِيبِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt11.jpg",
+      "img": "assets/y6/sports/sprt11.jpg",
       "title": "تَمَارِينُ الجُمْبَازِ الفَمَوِيِّ وَاللِّسَانِيِّ (المَجْمُوعَةُ التَّمْهِيدِيَّةُ الثَّانِيَةُ: 8..14)",
       "subtitle": "7 دَقَائِقَ يَوْمِيًّا لِتَهْيِئَةِ مَخَارِجِ النُّطْقِ، تَقْوِيَةِ عَضَلَاتِ الوَجْهِ وَاللِّسَانِ، وَضَبْطِ التَّنَفُّسِ!",
       "slideText": "🗣️ تَمَارِينُ الجُمْبَازِ الفَمَوِيِّ وَاللِّسَانِيِّ (المَجْمُوعَةُ التَّمْهِيدِيَّةُ الثَّانِيَةُ — 7 دَقَائِقَ يَوْمِيًّا): (8) خُدُودُ البَالُونِ (مَلْءُ الخَدَّيْنِ بِالهَوَاءِ وَنَقْلُهُ بَيْنَ الأَيْمَنِ وَالأَيْسَرِ لـ10 ثَوَانٍ). (9) مَسَّاحَةُ اللِّسَانِ (تَمْرِيرُ اللِّسَانِ دَائِرِيًّا فَوْقَ الأَسْنَانِ مِنْ الدَّاخِلِ). (10) بُوصَلَةُ اللِّسَانِ فِي الأَرْبَعِ جِهَاتٍ. (11) طَقْطَقَةُ الفَرَسِ بِإِلْصَاقِ اللِّسَانِ بِسَقْفِ الحَلْقِ. (12) الأَسَدُ وَالسَّمَكَةُ لِتَقْوِيَةِ عَضَلَاتِ الوَجْهِ وَالشَّفَتَيْنِ. (13) النَّفْخُ المُوَجَّهُ لِكُرَةٍ قُطْنِيَّةٍ فِي مَسَارٍ. (14) رَفْرَفَةُ الشِّفَاهِ مَعَ الزَّفِيرِ المُرِيحِ.",
@@ -5901,9 +5622,9 @@ window.initStage1VideoAndY7Engine();
         "raw": "العَمَلْ (آخر متصل / ساكن وقفا: ـلْ)"
       },
       {
-        "word": "3لَطَفَ",
+        "word": "لَطَفَ",
         "desc": "أول منفصل / متحرك بالفتح: لَـ",
-        "raw": "3لَطَفَ (أول منفصل / متحرك بالفتح: لَـ)"
+        "raw": "لَطَفَ (أول منفصل / متحرك بالفتح: لَـ)"
       },
       {
         "word": "فَلَزِمَ",
@@ -6190,7 +5911,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُجَرِّبُ وَضْعَ سَاقِ نَبَاتٍ أَوْ زَهْرَةٍ بَيْضَاءَ فِي مَاءٍ مُلَوَّنٍ وَأُرَاقِبُ صُعُودَ المَاءِ إِلَى البَتَلَاتِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt12.jpg",
+      "img": "assets/y6/sports/sprt12.jpg",
       "title": "تَمَارِينُ الجُمْبَازِ البَصَرِيِّ المَكَانِيِّ وَالهَنْدَسَةِ الذِّهْنِيَّةِ (المَجْمُوعَةُ التَّاسِعَةُ: 57..63)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِتَنْمِيَةِ التَّخَيُّلِ الهَنْدَسِيِّ، التَّنَاظُرِ البَصَرِيِّ، وَدِقَّةِ المُلَاحَظَةِ وَالتَّرْكِيزِ!",
       "slideText": "📐 تَمَارِينُ الجُمْبَازِ البَصَرِيِّ المَكَانِيِّ وَالهَنْدَسَةِ الذِّهْنِيَّةِ (المَجْمُوعَةُ التَّاسِعَةُ — التَّمَارِينُ 57 إِلَى 63): (57) الرَّسْمُ المُتَنَاظِرُ بِاليَدَيْنِ حَوْلَ خَطِّ المُنْتَصَفِ. (58) المَتَاهَةُ البَصَرِيَّةُ الصَّامِتَةُ بِالعَيْنَيْنِ فَقَطْ دُونَ قَلَمٍ. (59) التَّدْوِيرُ الذِّهْنِيُّ لِلْأَشْكَالِ الهَنْدَسِيَّةِ. (60) فُسَيْفِسَاءُ الأَجْزَاءِ وَالكُلِّ (التَّانْجْرَامُ الهَنْدَسِيُّ). (61) اسْتِخْرَاجُ الشَّكْلِ المَخْفِيِّ وَسَطَ الخُطُوطِ. (62) البِنَاءُ مِنْ مُخَطَّطٍ بِالمُكَعَّبَاتِ. (63) إِكْمَالُ المَصْفُوفَةِ المَنْطِقِيَّةِ وَالأنْمَاطِ.",
@@ -6321,8 +6042,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "الأَمِينْ",
-        "desc": "آخر متصل / ساكن وقفا: ـمْ) (أو: الحَكَمْ — آخر متصل / ساكن وقفا: ـمْ",
-        "raw": "الأَمِينْ (آخر متصل / ساكن وقفا: ـمْ) (أو: الحَكَمْ — آخر متصل / ساكن وقفا: ـمْ)"
+        "desc": "آخر متصل / ساكن وقفًا: ـمْ",
+        "raw": "الأَمِينْ (آخر متصل / ساكن وقفًا: ـمْ)"
       },
       {
         "word": "مَشَى",
@@ -6376,8 +6097,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "يُكَلِّمُ",
-        "desc": "لِلمُضَعَّفِ بِالكَسْرِ فِي المِيمِ: مُصَمِّمًا / وسط متصل / مضعف بالكسر: ـمِّـ",
-        "raw": "يُكَلِّمُ (لِلمُضَعَّفِ بِالكَسْرِ فِي المِيمِ: مُصَمِّمًا / وسط متصل / مضعف بالكسر: ـمِّـ)"
+        "desc": "وسط متصل / مضعف بالكسر: ـمِّـ",
+        "raw": "يُكَلِّمُ (وسط متصل / مضعف بالكسر: ـمِّـ)"
       },
       {
         "word": "مَاءٍ",
@@ -6618,7 +6339,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَتَفَكَّرُ فِي عَظَمَةِ خَلْقِ اللهِ لِلْجِبَالِ الرَّوَاسِي وَالصُّخُورِ وَالمَعَادِنِ وَأُحَافِظُ عَلَى ثَرَوَاتِ الأَرْضِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt13.jpg",
+      "img": "assets/y6/sports/sprt13.jpg",
       "title": "تَمَارِينُ الجُمْبَازِ السَّمْعِيِّ اللُّغَوِيِّ وَالتَّرْمِيزِ الصَّوْتِيِّ (المَجْمُوعَةُ الحَادِيَةَ عَشْرَةَ: 71..77)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا بِالأُذُنِ وَاللِّسَانِ وَالعَيْنِ وَاليَدِ لِتَأْسِيسِ الفَصَاحَةِ وَالوَعْيِ الصَّوْتِيِّ وَالتَّهْيِئَةِ لِلْقِرَاءَةِ وَالخَطِّ!",
       "slideText": "🎵📖 تَمَارِينُ الجُمْبَازِ السَّمْعِيِّ اللُّغَوِيِّ وَالتَّرْمِيزِ الصَّوْتِيِّ (المَجْمُوعَةُ 11 — التَّمَارِينُ 71 إِلَى 77): (71) مِيزَانُ المَقَاطِعِ الصَّوْتِيَّةِ بِالتَّصْفِيقِ أَوِ المُكَعَّبَاتِ. (72) البُوصَلَةُ الصَّوْتِيَّةُ لِلْحَرَكَاتِ (رَفْعُ اليَدِ لِلْفَتْحَةِ، خَفْضُهَا لِلْكَسْرَةِ، وَضَمُّهَا لِلضَّمَّةِ). (73) الإِبْدَالُ الصَّوْتِيُّ لِحَرْفٍ فِي الكَلِمَةِ. (74) النَّقْشُ الحِسِّيُّ لِحَرْفٍ أَوْ رَقْمٍ مَرْسُومٍ عَلَى الكَفِّ أَوِ الظَّهْرِ. (75) قِطَارُ الكَلِمَاتِ (كَلِمَةٌ تَبْدَأُ بِآخِرِ حَرْفٍ مِنَ السَّابِقَةِ مِثْلَ: رَمْلٌ ← بَدْرٌ ← قِطَارٌ). (76) هَنْدَسَةُ الجُمْلَةِ التَّامَّةِ. (77) الخَرِيطَةُ القَصَصِيَّةُ (البِدَايَةُ، المَكَانُ، الحَدَثُ، وَالحَلُّ).",
@@ -7043,7 +6764,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُحَافِظُ عَلَى كُلِّ قَطْرَةِ مَاءٍ عَذْبٍ وَلَا أُسْرِفُ فِي اسْتِخْدَامِ المِيَاهِ أَثْنَاءَ الوُضُوءِ وَالغَسِيلِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt14.jpg",
+      "img": "assets/y6/sports/sprt14.jpg",
       "title": "تَمَارِينُ البَصِيرَةِ الاجْتِمَاعِيَّةِ وَالحُقُوقِ وَالضَّبْطِ الأَخْلَاقِيِّ (المَجْمُوعَةُ الثَّانِيَةَ عَشْرَةَ: 78..84)",
       "subtitle": "10 دَقَائِقَ يَوْمِيًّا لِرَبْطِ يَقَظَةِ العَقْلِ بِنَقَاءِ السُّلُوكِ، وَفَهْمِ الآخَرِينَ، وَحِفْظِ الحُقُوقِ، وَالمُرَاقَبَةِ الذَّاتِيَّةِ!",
       "slideText": "⚖️❤️ تَمَارِينُ البَصِيرَةِ الاجْتِمَاعِيَّةِ وَالحُقُوقِ وَالضَّبْطِ الأَخْلَاقِيِّ (المَجْمُوعَةُ 12 — التَّمَارِينُ 78 إِلَى 84): (78) مِرْآةُ المَلَامِحِ لِفَهْمِ المَشَاعِرِ. (79) تَبْدِيلُ زَاوِيَةِ النَّظَرِ بَيْنَ طِفْلَيْنِ مُتَقَابِلَيْنِ. (80) مِيزَانُ الحُقُوقِ (تَصْنِيفُ المَوَاقِفِ فِي كِفَّةِ «حَقٌّ لِي» وَكِفَّةِ «وَاجِبٌ عَلَيَّ وَأَمَانَةٌ أَحْفَظُهَا»). (81) البِنَاءُ الصَّامِتُ بِالتَّعَاوُنِ وَالابْتِسَامَةِ. (82) جِسْرُ الحُلُولِ الأَرْبَعَةِ عِنْدَ الخِلَافِ (أَهْدَأُ وَأَتَنَفَّسُ ← أَسْمَعُ غَيْرِي ← أَقْتَرِحُ حَلًّا عَادِلًا ← نَتَصَافَحُ). (83) بُوصَلَةُ الأَمَانَةِ وَالمِعْيَارُ الصَّحِيحُ. (84) أَثَرُ اليَوْمِ الطَّيِّبِ (مَعْلُومَةٌ لِلْعَقْلِ، عَمَلٌ مُتْقَنٌ بِاليَدِ، وَخَيْرٌ لِلْغَيْرِ بِالقَلْبِ).",
@@ -7469,7 +7190,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُرَاقِبُ حَالَةَ الطَّقْسِ كُلَّ صَبَاحٍ وَأَشْكُرُ اللهَ عَلَى نِعْمَةِ الغِلَافِ الجَوِّيِّ وَتَعَاقُبِ اللَّيْلِ وَالنَّهَارِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt15.jpg",
+      "img": "assets/y6/sports/sprt15.jpg",
       "title": "الدَّرْسُ (4): المَسَارُ الأَوَّلُ (8 دَقَائِقَ وَنِصْفٌ) — رُوتِينُ 25 دَقِيقَةً المُتَكَامِلُ",
       "subtitle": "الوَعْيُ، الاسْتِطَالَةُ، النُّمُوُّ العَضَلِيُّ، الاسْتِجَابَةُ العَصَبِيَّةُ، وَالتَّدَفُّقُ",
       "slideText": "⏱️ الدَّرْسُ (4) المَسَارُ الأَوَّلُ (8 دَقَائِقَ وَنِصْفٌ مِنْ رُوتِينِ 25 دَقِيقَةً المُتَكَامِلِ): (1) الوَعْيُ (دَقِيقَةٌ وَنِصْفٌ): التَّنَفُّسُ الإِيقَاعِيُّ (شَهِيقٌ 4 ثَوَانٍ، زَفِيرٌ 7-8 ثَوَانٍ). (2) الاسْتِطَالَةُ (دَقِيقَةٌ وَنِصْفٌ): تَمَدُّدُ أَوْتَارِ الرُّكْبَةِ بِالانْحِنَاءِ الأَمَامِيِّ. (3) النُّمُوُّ العَضَلِيُّ: الضَّغْطُ عَلَى الحَائِطِ (8-12 عَدَّةً). (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَةٌ وَنِصْفٌ): لَمْسُ مَنَاطِقِ الجِسْمِ بِالتَّبَادُلِ. (5) التَّدَفُّقُ (يُؤَدَّى أَخِيرًا فَقَطْ): وَضْعِيَّةُ الفَرَاشَةِ.",
@@ -7906,7 +7627,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُنفِّذُ تَجْرِبَةَ سَحَابَةِ البَرْطَمَانِ فِي المَنْزِلِ لِأَرَى كَيْفَ يَتَكَاثَفُ البُخَارُ وَيَصْنَعُ الغُيُومَ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt16.jpg",
+      "img": "assets/y6/sports/sprt16.jpg",
       "title": "الدَّرْسُ (5): المَسَارُ الثَّانِي (7 دَقَائِقَ وَنِصْفٌ) — رُوتِينُ 25 دَقِيقَةً المُتَكَامِلُ",
       "subtitle": "دَوَرَانُ الجِذْعِ، تَمَدُّدُ الوَرِكِ المَائِلِ، السُّكْوَاتُ الجَانِبِيُّ، وَوَضْعِيَّةُ القُرْفُصَاءِ المُرِيحَةِ",
       "slideText": "🏃 الدَّرْسُ (5) المَسَارُ الثَّانِي (7 دَقَائِقَ وَنِصْفٌ مِنْ رُوتِينِ 25 دَقِيقَةً المُتَكَامِلِ): (1) الوَعْيُ (دَقِيقَةٌ وَنِصْفٌ): دَوَرَانُ الجِذْعِ بِهُدُوءٍ يَمِينًا وَيَسَارًا. (2) الاسْتِطَالَةُ (دَقِيقَةٌ وَنِصْفٌ): تَمَدُّدُ الوَرِكِ المَائِلِ. (3) النُّمُوُّ العَضَلِيُّ: السُّكْوَاتُ الجَانِبِيُّ (10-15 عَدَّةً). (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَتَانِ): الرَّدُّ الفَوْرِيُّ عَلَى الإِشَارَاتِ الصَّوْتِيَّةِ. (5) التَّدَفُّقُ (يُؤَدَّى أَخِيرًا فَقَطْ): وَضْعِيَّةُ القُرْفُصَاءِ المُرِيحَةِ (دَقِيقَةٌ وَاحِدَةٌ).",
@@ -8218,7 +7939,7 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "title": "🌷 قِصَّةُ حُورَ وَسُرُورَ: حق الأب",
-        "text": "🌳 حور ونور وظلّ الأب - النسخة المحسنة عاد الأب مع غروب الشمس، كتفاه منحنيان وكأنهما يحملان جبلاً من التعب. أسرعت حور لفتح الباب، فيما هرع نور إلى المطبخ: \"سأحضر لك عصيرًا باردًا يا أبي!\" جلس الأب على الأريكة، وأسلم رأسه إلى وسادتها كما يسلم الجندي سلاحه بعد معركة. حملقت حور في يديه المتقرحتين، وفجأة... انحنت وقبلت يده اليمنى في صمت. رفع الأب رأسه مبتسمًا: \"ما هذا يا حوراء؟\" فأجابت بدموع تلمع في عينيها: \"أشكرها لأنها تبني عالمي.\" في تلك اللحظة، عاد نور بالعصير، ثم أضاف: \"انتظر! سأعود!\" وعاد بعد قليل بمنشفة دافئة يمسح بها قدمي أبيه. قال الأب بصوت مخنوق: \"لماذا كل هذا الاهتمام اليوم؟\""
+        "text": "🌳 حور ونور وظلّ الأب عاد الأب مع غروب الشمس، كتفاه منحنيان وكأنهما يحملان جبلاً من التعب. أسرعت حور لفتح الباب، فيما هرع نور إلى المطبخ: \"سأحضر لك عصيرًا باردًا يا أبي!\" جلس الأب على الأريكة، وأسلم رأسه إلى وسادتها كما يسلم الجندي سلاحه بعد معركة. حملقت حور في يديه المتقرحتين، وفجأة... انحنت وقبلت يده اليمنى في صمت. رفع الأب رأسه مبتسمًا: \"ما هذا يا حوراء؟\" فأجابت بدموع تلمع في عينيها: \"أشكرها لأنها تبني عالمي.\" في تلك اللحظة، عاد نور بالعصير، ثم أضاف: \"انتظر! سأعود!\" وعاد بعد قليل بمنشفة دافئة يمسح بها قدمي أبيه. قال الأب بصوت مخنوق: \"لماذا كل هذا الاهتمام اليوم؟\""
       },
       {
         "title": "🌷 قِصَّةُ حُورَ وَسُرُورَ: حق الأب",
@@ -8332,7 +8053,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَتَأَمَّلُ السَّمَاءَ وَالنُّجُومَ لَيْلًا وَأُسَبِّحُ اللهَ خَالِقَ المَجَرَّاتِ وَالكَوْنِ الشَّاسِعِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt17.jpg",
+      "img": "assets/y6/sports/sprt17.jpg",
       "title": "الدَّرْسُ (9): مَسَارُ القُوَّةِ وَالتَّفْرِيغِ العَضَلِيِّ لِلطُّلَّابِ",
       "subtitle": "بَرْنَامَجٌ تَدْرِيبِيٌّ رِيَاضِيٌّ مُتَكَامِلٌ لِلطُّلَّابِ",
       "slideText": "💪 الدَّرْسُ (9) مَسَارُ القُوَّةِ وَالتَّفْرِيغِ العَضَلِيِّ لِلطُّلَّابِ: (1) الوَعْيُ (دَقِيقَتَانِ): تَنَفُّسٌ مُنْتَظَمٌ (شَهِيقٌ 4 ثَوَانٍ — زَفِيرٌ 6 ثَوَانٍ). (2) الاسْتِطَالَةُ (دَقِيقَةٌ وَنِصْفٌ): التَّعَلُّقُ عَلَى العَارِضَةِ لِفَكِّ ضَغْطِ الفَقَرَاتِ. (3) النُّمُوُّ العَضَلِيُّ (40 ثَانِيَةً): تَمْرِينُ الضَّغْطِ (8-12 عَدَّةً). (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَةٌ وَنِصْفٌ): التَّبْدِيلُ السَّرِيعُ لِلْحَرَكَةِ. (5) التَّدَفُّقُ (3 دَقَائِقَ): الشَّدُّ العَضَلِيُّ المُتَدَرِّجُ وَالارْتِخَاءُ (شَدٌّ 5 ثَوَانٍ ← ارْتِخَاءٌ 10 ثَوَانٍ ← شَدٌّ 5 ثَوَانٍ).",
@@ -8759,7 +8480,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَرْسُمُ كَوَاكِبَ المَجْمُوعَةِ الشَّمْسِيَّةِ الثَّمَانِيَةَ بِالتَّرْتِيبِ مِنْ عُطَارِدَ إِلَى نِبْتُونَ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt18.jpg",
+      "img": "assets/y6/sports/sprt18.jpg",
       "title": "الدَّرْسُ (2): التَّوَازُنُ المَرْكَزِيُّ (المَسَارُ الثَّانِي) + الهَنْدَسَةُ الطِّبِّيَّةُ لِلسُّجُودِ",
       "subtitle": "الوَقْتُ: 30 دَقِيقَةً يَوْمِيًّا | الهَدَفُ: طَاقَةٌ، مُرُونَةٌ، وَقُوَّةٌ مُتَكَامِلَةٌ",
       "slideText": "⚖️🕌 الدَّرْسُ (2) التَّوَازُنُ المَرْكَزِيُّ (المَسَارُ الثَّانِي — 30 دَقِيقَةً يَوْمِيًّا): (1) ضَبْطُ الطَّاقَةِ: التَّنَفُّسُ البَطْنِيُّ العَمِيقُ. (2) فَكُّ ضَغْطِ الفَقَرَاتِ: فَتْحُ مَفَاصِلِ الحَوْضِ وَالكَتِفَيْنِ. (3) البِنَاءُ العَضَلِيُّ: تَمْرِينُ القُرْفُصَاءِ (Squats). (4) تَقْوِيَةُ الاتِّزَانِ: المَشْيُ بِدِقَّةٍ عَلَى خَطٍّ مُسْتَقِيمٍ. (5) الاسْتِجَابَةُ العَصَبِيَّةُ: التَّوَافُقُ الحَرَكِيُّ بَيْنَ العَيْنِ وَاليَدِ. (6) التَّدَفُّقُ وَالاسْتِرْخَاءُ: تَمَدُّدٌ خَفِيفٌ وَاسْتِرْخَاءٌ عَضَلِيٌّ. • ثَانِيًا: الهَنْدَسَةُ الحَرَكِيَّةُ لِلْعِبَادَةِ — الهَنْدَسَةُ الطِّبِّيَّةُ لِلسُّجُودِ (التَّأْرِيضُ): الِاعْتِمَادُ عَلَى الأَعْضَاءِ السَّبْعَةِ لِلسُّجُودِ، تَدَفُّقُ الدَّمِ لِلْفَصِّ الأَمَامِيِّ لِلدِّمَاغِ، وَتَفْرِيغُ الشِّحْنَاتِ السَّاكِنَةِ لِلْأَرْضِ.",
@@ -9193,7 +8914,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُرَاقِبُ أَطْوَارَ القَمَرِ فِي السَّمَاءِ مِنْ هِلَالِ أَوَّلِ الشَّهْرِ الهِجْرِيِّ حَتَّى يَكْتَمِلَ بَدْرًا."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt19.jpg",
+      "img": "assets/y6/sports/sprt19.jpg",
       "title": "الدَّرْسُ (8): مَسَارُ الحَرَكَةِ وَالرَّشَاقَةِ لِلطُّلَّابِ",
       "subtitle": "بَرْنَامَجٌ تَدْرِيبِيٌّ رِيَاضِيٌّ مُتَكَامِلٌ لِلطُّلَّابِ",
       "slideText": "🤸 الدَّرْسُ (8) مَسَارُ الحَرَكَةِ وَالرَّشَاقَةِ لِلطُّلَّابِ: (1) الوَعْيُ (دَقِيقَتَانِ): تَحْرِيكُ الرَّأْسِ بِبُطْءٍ (10 مَرَّاتٍ يَمِينًا، وَ10 مَرَّاتٍ يَسَارًا). (2) الاسْتِطَالَةُ (دَقِيقَةٌ وَنِصْفٌ): لَمْسُ الأَصَابِعِ مِنَ الجُلُوسِ مَعَ مَدِّ السَّاقَيْنِ. (3) النُّمُوُّ العَضَلِيُّ (40 ثَانِيَةً): تَمْرِينُ السُّكْوَاتِ (10-15 عَدَّةً). (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَتَانِ): تَغْيِيرُ الاتِّجَاهِ (تَمْرِينُ يَمِينٍ-يَسَارٍ بِتَبْدِيلٍ كُلَّ 3 ثَوَانٍ). (5) التَّدَفُّقُ (دَقِيقَةٌ وَاحِدَةٌ): وَضْعِيَّةُ الطِّفْلِ لِلِاسْتِرْخَاءِ وَإِرَاحَةِ الظَّهْرِ.",
@@ -9351,8 +9072,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "رُسُلًا",
-        "desc": "أو رُوحَهُ — أول منفصل / متحرك بالضم: رُ",
-        "raw": "رُسُلًا(أو رُوحَهُ — أول منفصل / متحرك بالضم: رُ)"
+        "desc": "أول منفصل / متحرك بالضم: رُ",
+        "raw": "رُسُلًا (أول منفصل / متحرك بالضم: رُ)"
       },
       {
         "word": "سَرِيرٌ",
@@ -9391,8 +9112,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "وَزِيرًا",
-        "desc": "أو سَرِيرٌ — وسط متصل / ممدود بالياء: ـرِي",
-        "raw": "وَزِيرًا(أو سَرِيرٌ — وسط متصل / ممدود بالياء: ـرِي)"
+        "desc": "وسط متصل / ممدود بالياء: ـرِي",
+        "raw": "وَزِيرًا (وسط متصل / ممدود بالياء: ـرِي)"
       }
     ],
     "limbs": {
@@ -9622,7 +9343,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُنفِّذُ تَجْرِبَةَ المِصْبَاحِ اليَدَوِيِّ وَالكُرَةِ فِي غُرْفَةٍ خَافِتَةِ الإِضَاءَةِ لِأَرَى كَيْفَ يَتَعَاقَبُ اللَّيْلُ وَالنَّهَارُ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt20.jpg",
+      "img": "assets/y6/sports/sprt20.jpg",
       "title": "الدَّرْسُ (3): القُوَّةُ وَالتَّدَفُّقُ الكَامِلُ (المَسَارُ الثَّالِثُ) + دِينَامِيكِيَّةُ الرُّكُوعِ الطِّبِّيِّ",
       "subtitle": "الوَقْتُ: 30 دَقِيقَةً يَوْمِيًّا | الهَدَفُ: طَاقَةٌ، مُرُونَةٌ، وَقُوَّةٌ مُتَكَامِلَةٌ",
       "slideText": "🌟🕌 الدَّرْسُ (3) القُوَّةُ وَالتَّدَفُّقُ الكَامِلُ (المَسَارُ الثَّالِثُ — 30 دَقِيقَةً يَوْمِيًّا): (1) ضَبْطُ الطَّاقَةِ: الاسْتِقَامَةُ النُّورَانِيَّةُ. (2) فَكُّ ضَغْطِ الفَقَرَاتِ: تَمْرِينُ التَّعَلُّقِ الطِّبِّيِّ عَلَى العَارِضَةِ. (3) البِنَاءُ العَضَلِيُّ: تَمْرِينُ الضَّغْطِ (Push-ups). (4) تَقْوِيَةُ الاتِّزَانِ: السُّكُونُ الكَوَانْتِيُّ. (5) الاسْتِجَابَةُ العَصَبِيَّةُ: التَّوَافُقُ الحَرَكِيُّ بَيْنَ العَيْنِ وَاليَدِ. (6) التَّدَفُّقُ وَالاسْتِرْخَاءُ: تَمَدُّدٌ خَفِيفٌ وَاسْتِرْخَاءٌ عَضَلِيٌّ. • ثَانِيًا: الهَنْدَسَةُ الحَرَكِيَّةُ لِلْعِبَادَةِ (دِينَامِيكِيَّةُ الرُّكُوعِ الطِّبِّيِّ): اسْتِطَالَةُ البَدَنِ وَالعَمُودِ الفَقَرِيِّ، اسْتِطَالَةُ عَضَلَاتِ الفَخِذِ الخَلْفِيَّةِ، وَتَوَازُنُ الدَّمِ لِلنِّصْفِ العُلْوِيِّ.",
@@ -9816,8 +9537,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "يَخْشَوْنَ",
-        "desc": "وسط متصل / ممدود بالواو: ـشُو) (أو: خُشُوعٍ — وسط متصل / ممدود بالواو: ـشُو",
-        "raw": "يَخْشَوْنَ (وسط متصل / ممدود بالواو: ـشُو) (أو: خُشُوعٍ — وسط متصل / ممدود بالواو: ـشُو)"
+        "desc": "وسط متصل / ممدود بالواو: ـشَوْ",
+        "raw": "يَخْشَوْنَ (وسط متصل / ممدود بالواو: ـشَوْ)"
       },
       {
         "word": "رَشِيدٍ",
@@ -10056,7 +9777,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُطَبِّقُ مَبْدَأَ كَفَاءَةِ الطَّاقَةِ بِإِطْفَاءِ المَصَابِيحِ وَالأَجْهِزَةِ غَيْرِ المُسْتَخْدَمَةِ لِتَقْلِيلِ فَقْدِ الطَّاقَةِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt21.png",
+      "img": "assets/y6/sports/sprt21.jpg",
       "title": "خُطَّةُ التَّدْرِيبِ الرِّيَاضِيِّ المُتَكَامِلَةُ: 6 فَقَرَاتٍ لِتَحْقِيقِ التَّوَازُنِ وَالأَدَاءِ",
       "subtitle": "الوَعْيُ، الاسْتِطَالَةُ، النُّمُوُّ العَضَلِيُّ، قَوَاعِدُ السَّلَاسَةِ، الاسْتِجَابَةُ العَصَبِيَّةُ، وَالتَّدَفُّقُ",
       "slideText": "📋 خُطَّةُ التَّدْرِيبِ الرِّيَاضِيِّ المُتَكَامِلَةُ (6 فَقَرَاتٍ × 5 دَقَائِقَ): (1) الوَعْيُ (5 د): وُقُوفٌ مُسْتَقِيمٌ وَتَنَفُّسٌ بَطْنِيٌّ (شَهِيقٌ 4ث، زَفِيرٌ 6ث)، دَوَرَانُ الرَّأْسِ وَالكَتِفَيْنِ، وَسُكُونٌ تَامٌّ. (2) الاسْتِطَالَةُ (5 د): تَعَلُّقٌ عَلَى عَارِضَةٍ، انْحِنَاءٌ أَمَامِيٌّ جَالِسٌ، وَوَضْعِيَّةُ الفَرَاشَةِ. (3) النُّمُوُّ العَضَلِيُّ (5 د): 8-12 عَدَّةَ ضَغْطٍ، 10-15 عَدَّةَ سُكْوَاتٍ، وَ40 ثَانِيَةً بِلَانْكُ (الجَوْدَةُ أَهَمُّ مِنَ الكَمِّيَّةِ، تَوَقَّفْ قَبْلَ الاهْتِزَازِ). (4) قَوَاعِدُ السَّلَاسَةِ: نَفِّذِ الوَحَدَاتِ بِالتَّرْتِيبِ، وَبَعْدَ التَّدَفُّقِ لَا تَقِفْ فَجْأَةً. (5) الاسْتِجَابَةُ العَصَبِيَّةُ (5 د): لَمْسُ الكَتِفِ الأَيْسَرِ ثُمَّ الفَخِذِ الأَيْمَنِ، خُطُوَاتُ تَغْيِيرِ الاتِّجَاهِ، وَالرَّمْيُ الخَيَالِيُّ. (6) التَّدَفُّقُ (5 د): شَدٌّ عَضَلِيٌّ تَدْرِيجِيٌّ (5ث شَدٌّ، 10ث ارْتِخَاءٌ)، وَضْعِيَّةُ الطِّفْلِ، وَاسْتِلْقَاءٌ هَادِئٌ.",
@@ -10205,8 +9926,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "تَرَكَ",
-        "desc": "أول منفصل / متحرك بالفتح: تَـ) (أو: أَتَمَّ — وسط منفصل / متحرك بالفتح: تَـ",
-        "raw": "تَرَكَ (أول منفصل / متحرك بالفتح: تَـ) (أو: أَتَمَّ — وسط منفصل / متحرك بالفتح: تَـ)"
+        "desc": "أول منفصل / متحرك بالفتح: تَـ",
+        "raw": "تَرَكَ (أول منفصل / متحرك بالفتح: تَـ)"
       },
       {
         "word": "سَكَتَ",
@@ -10225,8 +9946,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "تِلْكَ",
-        "desc": "أو آتِنَا — متحرك بالكسر: تِـ",
-        "raw": "تِلْكَ(أو آتِنَا — متحرك بالكسر: تِـ)"
+        "desc": "متحرك بالكسر: تِـ",
+        "raw": "تِلْكَ (متحرك بالكسر: تِـ)"
       },
       {
         "word": "رَتَّلَ",
@@ -10255,8 +9976,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "تَمِيلُ",
-        "desc": "أو يَسْتَجِيبُ / آتِينَا — وسط متصل / ممدود بالياء: ـتِي",
-        "raw": "تَمِيلُ(أو يَسْتَجِيبُ / آتِينَا — وسط متصل / ممدود بالياء: ـتِي)"
+        "desc": "وسط متصل / ممدود بالياء: ـتِي",
+        "raw": "تَمِيلُ (وسط متصل / ممدود بالياء: ـتِي)"
       }
     ],
     "limbs": {
@@ -10494,7 +10215,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَحْذَرُ مِنْ لَمْسِ المَقَابِسِ الكَهْرَبَائِيَّةِ وَأُمَيِّزُ بَيْنَ المَوَادِّ المَوَصِّلَةِ كَالنُّحَاسِ وَالمَوَادِّ العَازِلَةِ كَالخَشَبِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt22.jpg",
+      "img": "assets/y6/sports/sprt22.jpg",
       "title": "خُطَّةُ التَّدْرِيبِ الرِّيَاضِيِّ المُتَكَامِلَةُ: 6 فَقَرَاتٍ جَدِيدَةٍ إِضَافِيَّةٍ",
       "subtitle": "تَنَفُّسُ (4-7-8)، التَّأَمُّلُ فِي الامْتِنَانِ، السُّكْوَاتُ الجَانِبِيُّ، وَالبِلَانْكُ العَكْسِيُّ",
       "slideText": "🌿 خُطَّةُ التَّدْرِيبِ الرِّيَاضِيِّ المُتَكَامِلَةُ (6 فَقَرَاتٍ جَدِيدَةٍ إِضَافِيَّةٍ): (1) الوَعْيُ (5 د): تَنَفُّسُ (4-7-8) مِنَ الأَنْفِ، دَوَرَانُ الجِذْعِ بِرِفْقٍ (Twist)، وَالتَّأَمُّلُ فِي الامْتِنَانِ (التَّفَكُّرُ فِي 3 نِعَمٍ تَشْعُرُ بِالامْتِنَانِ لَهَا). (2) الاسْتِطَالَةُ (5 د): تَمَدُّدُ أَوْتَارِ الرُّكْبَةِ، تَمَدُّدُ الوَرِكِ المَائِلِ (Lunge)، وَتَمَدُّدُ العَمُودِ الفَقَرِيِّ اللَّطِيفُ عَلَى الظَّهْرِ. (3) النُّمُوُّ العَضَلِيُّ (5 د): ضَغْطٌ عَلَى الحَائِطِ، سُكْوَاتٌ جَانِبِيٌّ أَوْ سُومُو سُكْوَاتٌ، وَبِلَانْكُ عَكْسِيٌّ (30-60 ثَانِيَةً). (4) قَوَاعِدُ السَّلَاسَةِ: شُرْبُ المَاءِ بِانْتِظَامٍ قَبْلَ وَبَعْدَ التَّمْرِينِ وَتَجَنُّبُ التَّشَتُّتِ. (5) الاسْتِجَابَةُ العَصَبِيَّةُ (5 د): لَمْسُ الكَاحِلِ الأَيْسَرِ بِاليَدِ اليُمْنَى، الرَّدُّ عَلَى إِشَارَاتٍ صَوْتِيَّةٍ، وَإِمْسَاكُ كُرَةٍ صَغِيرَةٍ بِتَبَادُلٍ سَرِيعٍ. (6) التَّدَفُّقُ (5 د): وَضْعِيَّةُ الفَرَاشَةِ، القُرْفُصَاءُ المُرِيحَةُ، وَالتَّأَمُّلُ الوَاعِي لِلنَّفَسِ.",
@@ -10618,13 +10339,13 @@ window.initStage1VideoAndY7Engine();
     "words": [
       {
         "word": "مَثْوَى",
-        "desc": "أو عُثْمَانَ / يُثْمِرُ — وسط متصل / ساكن: ـثْـ",
-        "raw": "مَثْوَى(أو عُثْمَانَ / يُثْمِرُ — وسط متصل / ساكن: ـثْـ)"
+        "desc": "وسط متصل / ساكن: ـثْـ",
+        "raw": "مَثْوَى (وسط متصل / ساكن: ـثْـ)"
       },
       {
         "word": "تُرَاثْ",
-        "desc": "أو الحَرْثْ — آخر منفصل أو متصل / ساكن وقفا: ثْ",
-        "raw": "تُرَاثْ(أو الحَرْثْ — آخر منفصل أو متصل / ساكن وقفا: ثْ)"
+        "desc": "آخر منفصل أو متصل / ساكن وقفا: ثْ",
+        "raw": "تُرَاثْ (آخر منفصل أو متصل / ساكن وقفا: ثْ)"
       },
       {
         "word": "ثَبَتَ",
@@ -10638,8 +10359,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "مَثَلَ",
-        "desc": "أو كَثُرَ بالفتح: نَثَرَ — وسط متصل / متحرك بالفتح: ـثَـ",
-        "raw": "مَثَلَ(أو كَثُرَ بالفتح: نَثَرَ — وسط متصل / متحرك بالفتح: ـثَـ)"
+        "desc": "وسط متصل / متحرك بالفتح: ـثَـ",
+        "raw": "مَثَلَ (وسط متصل / متحرك بالفتح: ـثَـ)"
       },
       {
         "word": "أَثَرِ",
@@ -10653,8 +10374,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "ثَقُلَ",
-        "desc": "وبالضم: ثُلُثَ اللَّيْلِ — أول منفصل / متحرك بالضم: ثُـ",
-        "raw": "ثَقُلَ(وبالضم: ثُلُثَ اللَّيْلِ — أول منفصل / متحرك بالضم: ثُـ)"
+        "desc": "أول منفصل / متحرك بالفتح: ثَـ",
+        "raw": "ثَقُلَ (أول منفصل / متحرك بالفتح: ثَـ)"
       },
       {
         "word": "غَيْثٌ",
@@ -10688,13 +10409,13 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "مَبْعُوثُونَ",
-        "desc": "أو يَرِثُونَ — وسط متصل / ممدود بالواو: ـثُو",
-        "raw": "مَبْعُوثُونَ(أو يَرِثُونَ — وسط متصل / ممدود بالواو: ـثُو)"
+        "desc": "وسط متصل / ممدود بالواو: ـثُو",
+        "raw": "مَبْعُوثُونَ (وسط متصل / ممدود بالواو: ـثُو)"
       },
       {
         "word": "أُغِيثُوا",
-        "desc": "أو كَثِيرًا — وسط متصل / ممدود بالياء: ـثِي",
-        "raw": "أُغِيثُوا(أو كَثِيرًا — وسط متصل / ممدود بالياء: ـثِي)"
+        "desc": "وسط متصل / ممدود بالياء: ـثِي",
+        "raw": "أُغِيثُوا (وسط متصل / ممدود بالياء: ـثِي)"
       }
     ],
     "limbs": {
@@ -10924,7 +10645,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَسْتَخْدِمُ الأَجْهِزَةَ الإِلِكْتْرُونِيَّةَ وَالحَوَاسِيبَ فِي طَلَبِ العِلْمِ النَّافِعِ وَلَا أُوَجِّهُ أَشِعَّةَ اللَّيْزَرِ إِلَى أَعْيُنِ الآخَرِينَ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt23.jpg",
+      "img": "assets/y6/sports/sprt23.jpg",
       "title": "الدَّرْسُ (6): المَسَارُ الثَّالِثُ (7 دَقَائِقَ وَنِصْفٌ) — تَأَمُّلٌ، مُرُونَةٌ، وَقُوَّةٌ هَادِئَةٌ",
       "subtitle": "التَّأَمُّلُ فِي الامْتِنَانِ، تَمَدُّدُ العَمُودِ الفَقَرِيِّ، البِلَانْكُ العَكْسِيُّ، وَتَبَادُلُ الكُرَةِ",
       "slideText": "🧘‍♂️ الدَّرْسُ (6) المَسَارُ الثَّالِثُ (7 دَقَائِقَ وَنِصْفٌ — تَأَمُّلٌ، مُرُونَةٌ، وَقُوَّةٌ هَادِئَةٌ): (1) الوَعْيُ (دَقِيقَتَانِ): التَّأَمُّلُ فِي الامْتِنَانِ مَعَ شَهِيقٍ (4 ثَوَانٍ) وَزَفِيرٍ (7-8 ثَوَانٍ). (2) الاسْتِطَالَةُ (دَقِيقَتَانِ): تَمَدُّدُ العَمُودِ الفَقَرِيِّ اللَّطِيفُ عَلَى الظَّهْرِ مَعَ ثَنْيِ الرُّكْبَتَيْنِ. (3) النُّمُوُّ العَضَلِيُّ (30-60 ثَانِيَةً): تَمْرِينُ بِلَانْكٍ عَكْسِيٍّ. (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَةٌ وَنِصْفٌ): تَبَادُلُ الكُرَةِ السَّرِيعُ بَيْنَ زَمِيلَيْنِ. (5) التَّدَفُّقُ (يُؤَدَّى أَخِيرًا فَقَطْ — دَقِيقَةٌ وَاحِدَةٌ): التَّأَمُّلُ الوَاعِي وَالجُلُوسُ الهَادِئُ.",
@@ -11067,8 +10788,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "دَخَلَ",
-        "desc": "وسط منفصل / متحرك بالفتح: خَـ) (أو فِي الوَسَطِ المُتَّصِلِ: نَخَلَ / سَخِطَ بِالفَتْحِ: بَخَسَ: ـخَـ",
-        "raw": "دَخَلَ (وسط منفصل / متحرك بالفتح: خَـ) (أو فِي الوَسَطِ المُتَّصِلِ: نَخَلَ / سَخِطَ بِالفَتْحِ: بَخَسَ: ـخَـ)"
+        "desc": "وسط منفصل / متحرك بالفتح: خَـ",
+        "raw": "دَخَلَ (وسط منفصل / متحرك بالفتح: خَـ)"
       },
       {
         "word": "أَخَذَ",
@@ -11087,13 +10808,13 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "وَسَخٌ",
-        "desc": "أو شَيْخٌ / فَرْخٌ — آخر متصل أو منفصل / متحرك بالضم: ـخٌ / خٌ",
-        "raw": "وَسَخٌ(أو شَيْخٌ / فَرْخٌ — آخر متصل أو منفصل / متحرك بالضم: ـخٌ / خٌ)"
+        "desc": "آخر متصل أو منفصل / متحرك بالضم: ـخٌ / خٌ",
+        "raw": "وَسَخٌ (آخر متصل أو منفصل / متحرك بالضم: ـخٌ / خٌ)"
       },
       {
         "word": "خِطَابٍ",
-        "desc": "أو آخِرَةِ — متحرك بالكسر: خِـ",
-        "raw": "خِطَابٍ(أو آخِرَةِ — متحرك بالكسر: خِـ)"
+        "desc": "متحرك بالكسر: خِـ",
+        "raw": "خِطَابٍ (متحرك بالكسر: خِـ)"
       },
       {
         "word": "سَخَّرَ",
@@ -11117,13 +10838,13 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "خُوخٍ",
-        "desc": "أو أَخْنُوخُ — ممدود بالواو: خُو",
-        "raw": "خُوخٍ(أو أَخْنُوخُ — ممدود بالواو: خُو)"
+        "desc": "ممدود بالواو: خُو",
+        "raw": "خُوخٍ (ممدود بالواو: خُو)"
       },
       {
         "word": "مَخِيطٍ",
-        "desc": "أو بَخِيلٍ — وسط متصل / ممدود بالياء: ـخِي",
-        "raw": "مَخِيطٍ(أو بَخِيلٍ — وسط متصل / ممدود بالياء: ـخِي)"
+        "desc": "وسط متصل / ممدود بالياء: ـخِي",
+        "raw": "مَخِيطٍ (وسط متصل / ممدود بالياء: ـخِي)"
       }
     ],
     "limbs": {
@@ -11353,7 +11074,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُنفِّذُ تَجْرِبَةَ طَبَقَاتِ السَّوَائِلِ (العَسَلِ وَالمَاءِ وَالزَّيْتِ) فِي كَأْسٍ شَفَّافٍ لِأُشَاهِدَ اخْتِلَافَ الكَثَافَةِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt24.jpg",
+      "img": "assets/y6/sports/sprt24.jpg",
       "title": "الدَّرْسُ (12): مَسَارُ التَّحَمُّلِ وَالصَّفَاءِ — رُوتِينٌ تَدْرِيبِيٌّ مُتَكَامِلٌ فِي 30 دَقِيقَةً",
       "subtitle": "الفَحْصُ البَصَرِيُّ، تَمَدُّدُ الوَرِكِ، الجُلُوسُ عَلَى الحَائِطِ، رَمْيُ الكُرَةِ، وَوَضْعِيَّةُ السَّعَادَةِ",
       "slideText": "🏔️ الدَّرْسُ (12) مَسَارُ التَّحَمُّلِ وَالصَّفَاءِ (رُوتِينٌ مُتَكَامِلٌ فِي 30 دَقِيقَةً): (1) الوَعْيُ (دَقِيقَتَانِ): الفَحْصُ البَصَرِيُّ الهَادِئُ مَعَ الجُلُوسِ المُسْتَقِيمِ. (2) الاسْتِطَالَةُ (دَقِيقَتَانِ): تَمَدُّدُ الوَرِكِ أَثْنَاءَ الجُلُوسِ. (3) النُّمُوُّ العَضَلِيُّ (30-60 ثَانِيَةً): الجُلُوسُ عَلَى الحَائِطِ (Wall Sit) لِقُوَّةِ السَّاقَيْنِ وَالتَّحَمُّلِ. (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَةٌ وَنِصْفٌ): رَمْيُ الكُرَةِ وَالتِقَاطُهَا بِتَرْكِيزٍ. (5) التَّدَفُّقُ (يُؤَدَّى أَخِيرًا فَقَطْ — دَقِيقَةٌ وَاحِدَةٌ): وَضْعِيَّةُ السَّعَادَةِ وَالاسْتِرْخَاءِ التَّامِّ عَلَى الظَّهْرِ.",
@@ -11502,23 +11223,23 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "عَذَابَ",
-        "desc": "أو هٰذَا — وسط متصل أو منفصل / متحرك بالفتح: ـذَ / ذَ",
-        "raw": "عَذَابَ(أو هٰذَا — وسط متصل أو منفصل / متحرك بالفتح: ـذَ / ذَ)"
+        "desc": "وسط متصل أو منفصل / متحرك بالفتح: ـذَ / ذَ",
+        "raw": "عَذَابَ (وسط متصل أو منفصل / متحرك بالفتح: ـذَ / ذَ)"
       },
       {
         "word": "أَخَذَ",
-        "desc": "أو نَفَذَ — آخر متصل / متحرك بالفتح: ـذَ",
-        "raw": "أَخَذَ(أو نَفَذَ — آخر متصل / متحرك بالفتح: ـذَ)"
+        "desc": "آخر متصل / متحرك بالفتح: ـذَ",
+        "raw": "أَخَذَ (آخر متصل / متحرك بالفتح: ـذَ)"
       },
       {
         "word": "ذُرِّيَّةِ",
-        "desc": "أو ذُو — أول منفصل / متحرك بالضم: ذُ",
-        "raw": "ذُرِّيَّةِ(أو ذُو — أول منفصل / متحرك بالضم: ذُ)"
+        "desc": "أول منفصل / متحرك بالضم: ذُ",
+        "raw": "ذُرِّيَّةِ (أول منفصل / متحرك بالضم: ذُ)"
       },
       {
         "word": "لَذِيذٌ",
-        "desc": "أو آخِذٌ — آخر متصل / متحرك بالضم: ـذٌ",
-        "raw": "لَذِيذٌ(أو آخِذٌ — آخر متصل / متحرك بالضم: ـذٌ)"
+        "desc": "آخر متصل / متحرك بالضم: ـذٌ",
+        "raw": "لَذِيذٌ (آخر متصل / متحرك بالضم: ـذٌ)"
       },
       {
         "word": "ذِكْرِ",
@@ -11787,7 +11508,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أَتَعَلَّمُ رُمُوزَ العَنَاصِرِ الأَسَاسِيَّةِ فِي حَيَاتِنَا مِثْلَ الأُكْسِجِينِ (O) وَالهِيدْرُوجِينِ (H) وَالحَدِيدِ (Fe)."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt25.jpg",
+      "img": "assets/y6/sports/sprt25.jpg",
       "title": "الدَّرْسُ (10): مَسَارُ التَّنْشِيطِ الحَيَوِيِّ — رُوتِينٌ تَدْرِيبِيٌّ مُتَكَامِلٌ فِي 30 دَقِيقَةً",
       "subtitle": "التَّنَفُّسُ المُتَنَاوِبُ، التَّمَدُّدُ الجَانِبِيُّ، تَمَارِينُ الذِّرَاعَيْنِ، القَفْزُ عَلَى الحَبْلِ، وَوَضْعِيَّةُ القِطَّةِ وَالكَلْبِ",
       "slideText": "⚡ الدَّرْسُ (10) مَسَارُ التَّنْشِيطِ الحَيَوِيِّ (رُوتِينٌ مُتَكَامِلٌ فِي 30 دَقِيقَةً): (1) الوَعْيُ (دَقِيقَةٌ وَنِصْفٌ): التَّنَفُّسُ المُتَنَاوِبُ عَبْرَ فَتْحَتَيِ الأَنْفِ. (2) الاسْتِطَالَةُ (دَقِيقَةٌ وَنِصْفٌ): التَّمَدُّدُ الجَانِبِيُّ لِلْجِذْعِ وَالذِّرَاعِ. (3) النُّمُوُّ العَضَلِيُّ (8-12 عَدَّةً): تَمَارِينُ الذِّرَاعَيْنِ. (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَةٌ وَنِصْفٌ): القَفْزُ عَلَى الحَبْلِ بِتَنَاسُقٍ وَخِفَّةٍ. (5) التَّدَفُّقُ (يُؤَدَّى أَخِيرًا فَقَطْ — 3 دَقَائِقَ): وَضْعِيَّةُ القِطَّةِ وَالكَلْبِ لِإِطَالَةِ وَإِرَاحَةِ العَمُودِ الفَقَرِيِّ.",
@@ -11942,8 +11663,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "فَرَضَ",
-        "desc": "أو نَهَضَ — آخر منفصل أو متصل / متحرك بالفتح: ضَ / ـضَ",
-        "raw": "فَرَضَ(أو نَهَضَ — آخر منفصل أو متصل / متحرك بالفتح: ضَ / ـضَ)"
+        "desc": "آخر منفصل أو متصل / متحرك بالفتح: ضَ / ـضَ",
+        "raw": "فَرَضَ (آخر منفصل أو متصل / متحرك بالفتح: ضَ / ـضَ)"
       },
       {
         "word": "ضُرٍّ",
@@ -11957,8 +11678,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "ضِيَاءٍ",
-        "desc": "أو ضِعْفٍ — أول منفصل / متحرك بالكسر: ضِـ",
-        "raw": "ضِيَاءٍ(أو ضِعْفٍ — أول منفصل / متحرك بالكسر: ضِـ)"
+        "desc": "أول منفصل / متحرك بالكسر: ضِـ",
+        "raw": "ضِيَاءٍ (أول منفصل / متحرك بالكسر: ضِـ)"
       },
       {
         "word": "فَضَّلَ",
@@ -11977,8 +11698,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "ضَامِنٌ",
-        "desc": "أو خَاضِعٍ — ممدود بالألف: ضَا",
-        "raw": "ضَامِنٌ(أو خَاضِعٍ — ممدود بالألف: ضَا)"
+        "desc": "ممدود بالألف: ضَا",
+        "raw": "ضَامِنٌ (ممدود بالألف: ضَا)"
       },
       {
         "word": "وُضُوءٍ",
@@ -11987,8 +11708,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "ضِيقٍ",
-        "desc": "أو عَظِيمٍ بِالضَّادِ: فَضِيلَةٍ / رَضِيًّا — ممدود بالياء: ضِي",
-        "raw": "ضِيقٍ(أو عَظِيمٍ بِالضَّادِ: فَضِيلَةٍ / رَضِيًّا — ممدود بالياء: ضِي)"
+        "desc": "ممدود بالياء: ضِي",
+        "raw": "ضِيقٍ (ممدود بالياء: ضِي)"
       }
     ],
     "limbs": {
@@ -12222,7 +11943,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُمَيِّزُ فِي مَطْبَخِنَا بَيْنَ المَخْلُوطِ غَيْرِ المُتَجَانِسِ (كَالسَّلَطَةِ) وَالمَحْلُولِ المُتَجَانِسِ (كَالمَاءِ وَالمِلْحِ)."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt26.jpg",
+      "img": "assets/y6/sports/sprt26.jpg",
       "title": "الدَّرْسُ (11): مَسَارُ التَّوَازُنِ وَاليَقَظَةِ — رُوتِينٌ تَدْرِيبِيٌّ مُتَكَامِلٌ فِي 30 دَقِيقَةً",
       "subtitle": "لَفُّ الخَصْرِ، تَمَدُّدُ العَضَلَةِ الخَلْفِيَّةِ، الطَّعَنَاتُ الجَانِبِيَّةُ، الرَّدُّ عَلَى الإِشَارَاتِ، وَوَضْعِيَّةُ المُثَلَّثِ",
       "slideText": "🧭 الدَّرْسُ (11) مَسَارُ التَّوَازُنِ وَاليَقَظَةِ (رُوتِينٌ مُتَكَامِلٌ فِي 30 دَقِيقَةً): (1) الوَعْيُ (دَقِيقَةٌ وَنِصْفٌ): لَفُّ الخَصْرِ بِهُدُوءٍ وَتَوَازُنٍ. (2) الاسْتِطَالَةُ (دَقِيقَةٌ وَنِصْفٌ): تَمَدُّدُ العَضَلَةِ الخَلْفِيَّةِ لِلسَّاقِ. (3) النُّمُوُّ العَضَلِيُّ (10-15 عَدَّةً): الطَّعَنَاتُ الجَانِبِيَّةُ (Side Lunges). (4) الاسْتِجَابَةُ العَصَبِيَّةُ (دَقِيقَتَانِ): الجَرْيُ الخَفِيفُ وَالرَّدُّ الفَوْرِيُّ عَلَى الإِشَارَاتِ الصَّوْتِيَّةِ. (5) التَّدَفُّقُ (يُؤَدَّى أَخِيرًا فَقَطْ — دَقِيقَةٌ وَاحِدَةٌ): وَضْعِيَّةُ المُثَلَّثِ لِلْإِطَالَةِ وَالاتِّزَانِ.",
@@ -12669,7 +12390,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُفَضِّلُ المَوَادَّ الطَّبِيعِيَّةَ وَأُشَارِكُ فِي إِعَادَةِ التَّدْوِيرِ لِحِمَايَةِ كَوْكَبِ الأَرْضِ مِنَ التَّلَوُّثِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt27.jpg",
+      "img": "assets/y6/sports/sprt27.jpg",
       "title": "الدَّرْسُ (7): مَسَارُ التَّرْكِيزِ وَالمُرُونَةِ لِلطُّلَّابِ",
       "subtitle": "مُرَاقَبَةُ النَّفَسِ، تَمْرِينُ الفَرَاشَةِ، البِلَانْكُ، الرَّمْيُ الخَيَالِيُّ، وَالاسْتِرْخَاءُ",
       "slideText": "🎯 الدَّرْسُ (7) مَسَارُ التَّرْكِيزِ وَالمُرُونَةِ لِلطُّلَّابِ: (1) الوَعْيُ (دَقِيقَةٌ وَاحِدَةٌ): مُرَاقَبَةُ النَّفَسِ بِهُدُوءٍ وَسَكِينَةٍ. (2) الاسْتِطَالَةُ (دَقِيقَتَانِ): تَمْرِينُ الفَرَاشَةِ لِمُرُونَةِ الحَوْضِ. (3) النُّمُوُّ العَضَلِيُّ: تَمْرِينُ البِلَانْكِ (الجَوْدَةُ أَهَمُّ مِنَ الكَمِّيَّةِ، تَوَقَّفْ قَبْلَ الاهْتِزَازِ). (4) الاسْتِجَابَةُ العَصَبِيَّةُ: الرَّمْيُ الخَيَالِيُّ (السُّرْعَةُ أَهَمُّ مِنَ الكَمَالِ). (5) التَّدَفُّقُ (دَقِيقَةٌ وَاحِدَةٌ): الاسْتِرْخَاءُ التَّامُّ عَلَى الظَّهْرِ.",
@@ -12794,9 +12515,9 @@ window.initStage1VideoAndY7Engine();
     ],
     "words": [
       {
-        "word": "أَغْشَى",
-        "desc": "وسط منفصل / ساكن: غْـ) (أو: مَغْفِرَةٌ — وسط متصل / ساكن: ـغْـ",
-        "raw": "أَغْشَى (وسط منفصل / ساكن: غْـ) (أو: مَغْفِرَةٌ — وسط متصل / ساكن: ـغْـ)"
+        "word": "مَغْفِرَةً",
+        "desc": "وسط متصل / ساكن: ـغْـ",
+        "raw": "مَغْفِرَةً (وسط متصل / ساكن: ـغْـ)"
       },
       {
         "word": "بَلِّغْ",
@@ -12814,9 +12535,9 @@ window.initStage1VideoAndY7Engine();
         "raw": "فَغَفَرَ (أول متصل / متحرك بالفتح: ـغَـ)"
       },
       {
-        "word": "صَغُرَ",
-        "desc": "أو نَغَمَ / شَغَلَ — وسط متصل / متحرك بالفتح: ـغَـ",
-        "raw": "صَغُرَ(أو نَغَمَ / شَغَلَ — وسط متصل / متحرك بالفتح: ـغَـ)"
+        "word": "شَغَلَ",
+        "desc": "وسط متصل / متحرك بالفتح: ـغَـ",
+        "raw": "شَغَلَ (وسط متصل / متحرك بالفتح: ـغَـ)"
       },
       {
         "word": "رَغَبَ",
@@ -12830,8 +12551,8 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "word": "غُفْرَانَكَ",
-        "desc": "أو غُلِبَتِ — أول منفصل / متحرك بالضم: غُـ",
-        "raw": "غُفْرَانَكَ(أو غُلِبَتِ — أول منفصل / متحرك بالضم: غُـ)"
+        "desc": "أول منفصل / متحرك بالضم: غُـ",
+        "raw": "غُفْرَانَكَ (أول منفصل / متحرك بالضم: غُـ)"
       },
       {
         "word": "بَلَاغٌ",
@@ -12839,24 +12560,24 @@ window.initStage1VideoAndY7Engine();
         "raw": "بَلَاغٌ (آخر منفصل / متحرك بالضم: غٌ)"
       },
       {
-        "word": "غِطَاءٍ",
-        "desc": "أو غِلٍّ — أول منفصل / متحرك بالكسر: غِـ",
-        "raw": "غِطَاءٍ(أو غِلٍّ — أول منفصل / متحرك بالكسر: غِـ)"
+        "word": "غِلٍّ",
+        "desc": "أول منفصل / متحرك بالكسر: غِـ",
+        "raw": "غِلٍّ (أول منفصل / متحرك بالكسر: غِـ)"
       },
       {
-        "word": "بَلَّغَ",
-        "desc": "وللمضعف بالفتح في الغين ذاتها: رَغَّبَ المؤمنين في الخير: ـغَّـ",
-        "raw": "بَلَّغَ(وللمضعف بالفتح في الغين ذاتها: رَغَّبَ المؤمنين في الخير: ـغَّـ)"
+        "word": "رَغَّبَ",
+        "desc": "وسط منفصل / مضعف بالفتح: غَّـ",
+        "raw": "رَغَّبَ (وسط منفصل / مضعف بالفتح: غَّـ)"
       },
       {
-        "word": "يَغُشُّ",
-        "desc": "وللمضعف بالضم في الغين ذاتها: يَزُغُّ أو يَسُغُّ / يَمُغُّ: ـغُّ",
-        "raw": "يَغُشُّ(وللمضعف بالضم في الغين ذاتها: يَزُغُّ أو يَسُغُّ / يَمُغُّ: ـغُّ)"
+        "word": "يَزُغُّ",
+        "desc": "آخر منفصل / مضعف بالضم: غُّ",
+        "raw": "يَزُغُّ (آخر منفصل / مضعف بالضم: غُّ)"
       },
       {
-        "word": "يُبَلِّغُ",
-        "desc": "وللمضعف بالكسر في الغين ذاتها: يُرَغِّبُ النَّاسَ فِي الجَنَّةِ: ـغِّـ",
-        "raw": "يُبَلِّغُ(وللمضعف بالكسر في الغين ذاتها: يُرَغِّبُ النَّاسَ فِي الجَنَّةِ: ـغِّـ)"
+        "word": "يُرَغِّبُ",
+        "desc": "وسط منفصل / مضعف بالكسر: غِّـ",
+        "raw": "يُرَغِّبُ (وسط منفصل / مضعف بالكسر: غِّـ)"
       },
       {
         "word": "غَارِ",
@@ -12864,14 +12585,14 @@ window.initStage1VideoAndY7Engine();
         "raw": "غَارِ (أول منفصل / ممدود بالألف: غَا)"
       },
       {
-        "word": "غَفُورٌ",
-        "desc": "وللممدود بالواو في الغين ذاتها: بُزُوغُ النُّورِ أو يَبْغُونَ: ـغُو",
-        "raw": "غَفُورٌ(وللممدود بالواو في الغين ذاتها: بُزُوغُ النُّورِ أو يَبْغُونَ: ـغُو)"
+        "word": "يَبْغُونَ",
+        "desc": "وسط متصل / ممدود بالواو: ـغُو",
+        "raw": "يَبْغُونَ (وسط متصل / ممدود بالواو: ـغُو)"
       },
       {
-        "word": "يَسْتَغِيثُ",
-        "desc": "أو صَغِيرٍ — وسط متصل / ممدود بالياء: ـغِي",
-        "raw": "يَسْتَغِيثُ(أو صَغِيرٍ — وسط متصل / ممدود بالياء: ـغِي)"
+        "word": "الصَّغِيرُ",
+        "desc": "وسط متصل / ممدود بالياء: ـغِي",
+        "raw": "الصَّغِيرُ (وسط متصل / ممدود بالياء: ـغِي)"
       }
     ],
     "limbs": {
@@ -12991,7 +12712,7 @@ window.initStage1VideoAndY7Engine();
       },
       {
         "title": "🌷 قِصَّةُ حُورَ وَسُرُورَ: حق أهل ملتك عامة",
-        "text": "بالتأكيد. سأحافظ على الهيكل الأساسي والرسالة، وسأعمل على إضافة العمق النفسي، والعفوية، والعناصر القصصية لجعلها أكثر إقناعًا وتأثيرًا. رمضان.. مدرسة القلوب (1) افتتاح الجلسة: بعد صلاة الظهر في يوم رمضاني هادئ، جلست الأم مع أطفالها (نور، حور، لينا) تحت ضوء الشمس الدافئ. لم تكن جلسة عادية، بل كان جوها مفعمًا بالهدوء والحنان. قالت الأم بصوت ناعم: \"يا قرة عيني، رمضان ليس فقط للصوم عن الطعام، بل هو مدرسة لتعلم لغة القلوب. اليوم سنتذكر سوياً بعض المواقف التي مررنا بها، وكيف يمكننا أن نكون أفضل مع من حولنا.\" (2) موقف إضمار السلامة: الأم: \"نور، هل تتذكر ذلك اليوم في الحديقة عندما رأيت الطفل الصغير يقترب من أرجوحة متحركة بقوة؟\" تذكر نور، وتلمع عيناه: \"نعم، لقد ركضت بسرعة وسحبته بلطف من يده. كنت خائفاً عليه حقاً، وقلبي كان يخفق بشدة.\" الأم (بتعاطف): \"ذلك الخوف الذي شعرت به في قلبك هو شعور نبيل. إنه يعني أنك تحمل سلامة الآخرين في داخلك. هذه هي المسؤولية.\" (3) موقف نشر الرحمة: الأم (تلتفت إلى حور): \"وحور، ماذا عن الموقف الذي كسرت فيه لينا لعبتك المفضلة عن غير قصد؟\" حور (تنظر إلى لينا الصغيرة التي انكمشت قليلاً): \"في البداية غضبت جداً ورفعت صوتي عليها. لكنني رأيت دموعها في عينيها وخوفها. فتذكرت كم مرة أخطأت أنا أيضاً فسامحتها.\" الأم (مبتسمة): \"الرحمة ليست أن تسامح فقط، بل أن تضع نفسك مكان من أخطأ وتشعر بألمه. هذا ما فعلتيه.\" (4) موقف الرفق بالمسيئين: الأم: \"وذلك الطفل الذي كان يرمي الحجارة تجاهكم في الحديقة العامة، كيف كان رد فعلكم يا نور؟\" نور (يبتسم ابتسامة صغيرة): \"أخبرت الحور ولينا بالابتعاد. نظرت إليه بحزم لكني لم أصرخ أو أرد عليه. بعد قليل، جاء واعتذر. كان يريد فقط لفت انتباهنا للعب معه.\" العبرة: \"اللين يلين القلوب القاسية، يكون الشخص السيء هو فقط شخص حزين أو وحيد يحتاج إلى لطف.\" (5) موقف تألفهم واستصلاحهم: الأم: \"وماذا عن ذلك اليوم الذي رأيتم فيه ذلك الولد يلقي الزيت على الرصيف؟\" حور: \"نور اخبرك فقلتي لوالديه فاصبحا يحرصان على مراقبته ،لأنه إذا سقط أحد على هذا الزيت قد يؤذيه'. العبرة: \"الإصلاح الحقيقي هو أن تساعد المخطئ ليرى الخطأ بنفسه، لا أن توبخه فقط.\" (6) موقف شكر المحسن إليك وإلى نفسه: الأم: \"نور، لقد فرحت كثيراً بالصابون المعطر الذي اشتريته. اتذكر؟\""
+        "text": "رمضان.. مدرسة القلوب (1) افتتاح الجلسة: بعد صلاة الظهر في يوم رمضاني هادئ، جلست الأم مع أطفالها (نور، حور، لينا) تحت ضوء الشمس الدافئ. لم تكن جلسة عادية، بل كان جوها مفعمًا بالهدوء والحنان. قالت الأم بصوت ناعم: \"يا قرة عيني، رمضان ليس فقط للصوم عن الطعام، بل هو مدرسة لتعلم لغة القلوب. اليوم سنتذكر سوياً بعض المواقف التي مررنا بها، وكيف يمكننا أن نكون أفضل مع من حولنا.\" (2) موقف إضمار السلامة: الأم: \"نور، هل تتذكر ذلك اليوم في الحديقة عندما رأيت الطفل الصغير يقترب من أرجوحة متحركة بقوة؟\" تذكر نور، وتلمع عيناه: \"نعم، لقد ركضت بسرعة وسحبته بلطف من يده. كنت خائفاً عليه حقاً، وقلبي كان يخفق بشدة.\" الأم (بتعاطف): \"ذلك الخوف الذي شعرت به في قلبك هو شعور نبيل. إنه يعني أنك تحمل سلامة الآخرين في داخلك. هذه هي المسؤولية.\" (3) موقف نشر الرحمة: الأم (تلتفت إلى حور): \"وحور، ماذا عن الموقف الذي كسرت فيه لينا لعبتك المفضلة عن غير قصد؟\" حور (تنظر إلى لينا الصغيرة التي انكمشت قليلاً): \"في البداية غضبت جداً ورفعت صوتي عليها. لكنني رأيت دموعها في عينيها وخوفها. فتذكرت كم مرة أخطأت أنا أيضاً فسامحتها.\" الأم (مبتسمة): \"الرحمة ليست أن تسامح فقط، بل أن تضع نفسك مكان من أخطأ وتشعر بألمه. هذا ما فعلتيه.\" (4) موقف الرفق بالمسيئين: الأم: \"وذلك الطفل الذي كان يرمي الحجارة تجاهكم في الحديقة العامة، كيف كان رد فعلكم يا نور؟\" نور (يبتسم ابتسامة صغيرة): \"أخبرت الحور ولينا بالابتعاد. نظرت إليه بحزم لكني لم أصرخ أو أرد عليه. بعد قليل، جاء واعتذر. كان يريد فقط لفت انتباهنا للعب معه.\" العبرة: \"اللين يلين القلوب القاسية، يكون الشخص السيء هو فقط شخص حزين أو وحيد يحتاج إلى لطف.\" (5) موقف تألفهم واستصلاحهم: الأم: \"وماذا عن ذلك اليوم الذي رأيتم فيه ذلك الولد يلقي الزيت على الرصيف؟\" حور: \"نور اخبرك فقلتي لوالديه فاصبحا يحرصان على مراقبته ،لأنه إذا سقط أحد على هذا الزيت قد يؤذيه'. العبرة: \"الإصلاح الحقيقي هو أن تساعد المخطئ ليرى الخطأ بنفسه، لا أن توبخه فقط.\" (6) موقف شكر المحسن إليك وإلى نفسه: الأم: \"نور، لقد فرحت كثيراً بالصابون المعطر الذي اشتريته. اتذكر؟\""
       },
       {
         "title": "🌷 قِصَّةُ حُورَ وَسُرُورَ: حق أهل ملتك عامة",
@@ -13117,7 +12838,7 @@ window.initStage1VideoAndY7Engine();
       "applyStep": "أُجَرِّبُ كَاشِفَ المَلْفُوفِ البَنَفْسَجِيِّ الطَّبِيعِيَّ فِي المَنْزِلِ مَعَ عَصِيرِ اللَّيْمُونِ وَبِيْكَرْبُونَاتِ الصُّودْيُومِ وَأَغْسِلُ يَدَيَّ بَعْدَ التَّجْرِبَةِ."
     },
     "sportExact": {
-      "img": "assets/y7/sports/sprt28.png",
+      "img": "assets/y6/sports/sprt28.jpg",
       "title": "مَنْهَجُ الرِّيَاضَةِ الحَيَوِيَّةِ فِي مَدْرَسَةِ عِلِّيُّونَ — 30 دَقِيقَةً يَوْمِيًّا لِبِنَاءِ الجَسَدِ وَالرُّوحِ",
       "subtitle": "البُرُوتُوكُولُ الرِّيَاضِيُّ اليَوْمِيُّ (6 وَحَدَاتٍ × 5 دَقَائِقَ) + الهَنْدَسَةُ الحَرَكِيَّةُ التَّطْبِيقِيَّةُ لِلْعِبَادَةِ",
       "slideText": "🏆🕌 مَنْهَجُ الرِّيَاضَةِ الحَيَوِيَّةِ فِي مَدْرَسَةِ عِلِّيُّونَ (30 دَقِيقَةً يَوْمِيًّا لِبِنَاءِ الجَسَدِ وَالرُّوحِ): • أَوَّلًا: البُرُوتُوكُولُ الرِّيَاضِيُّ اليَوْمِيُّ (6 وَحَدَاتٍ × 5 دَقَائِقَ): (1) مِحْوَرُ الوَعْيِ (عِلِّيُّونَ): الاسْتِقَامَةُ النُّورَانِيَّةُ وَضَبْطُ الطَّاقَةِ وَالتَّنَفُّسِ. (2) النُّمُوُّ وَالاسْتِطَالَةُ (Decompression): فَكُّ ضَغْطِ الفَقَرَاتِ بِالتَّعَلُّقِ وَدَعْمُ الطُّولِ. (3) البِنَاءُ وَالنُّمُوُّ العَضَلِيُّ: المُقَاوَمَةُ وَبِنَاءُ كُتْلَةٍ عَضَلِيَّةٍ (Push-ups، Squats، Plank). (4) الاسْتِجَابَةُ العَصَبِيَّةُ: تَحْفِيزُ السَّيَّالَاتِ العَصَبِيَّةِ وَالتَّوَازُنِ. (6) التَّدَفُّقُ وَالاسْتِرْخَاءُ: تَمَدُّدٌ خَفِيفٌ وَتَهْدِئَةُ الجِهَازِ العَصَبِيِّ. • ثَانِيًا: الهَنْدَسَةُ الحَرَكِيَّةُ التَّطْبِيقِيَّةُ لِلْعِبَادَةِ: (1) دِينَامِيكِيَّةُ الرُّكُوعِ الطِّبِّيِّ (زَاوِيَةُ 90° لِاسْتِطَالَةِ العَضَلَاتِ وَتَوَازُنِ ضَغْطِ الدَّمِ). (2) الهَنْدَسَةُ الطِّبِّيَّةُ لِلسُّجُودِ (التَّأْرِيضُ وَتَفْرِيغُ الشِّحْنَاتِ وَتَدَفُّقُ الدَّمِ لِلدِّمَاغِ). (3) مِيكَانِيكَا الاسْتِرَاحَةِ وَفِيزْيَاءُ الوُضُوءِ (تَطْهِيرُ الهَالَةِ وَتَوَازُنُ الجِهَازِ العَصَبِيِّ HRV).",

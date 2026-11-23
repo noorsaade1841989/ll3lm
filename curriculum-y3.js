@@ -252,10 +252,10 @@ window.curriculumData[3] = {};
         ] = row;
 
         const vidPath   = `assets/y3/videos/v${w}.mp4`;
-        const artPath   = `assets/y3/art/art${w}.jpg`;
-        const sportPath = `assets/y3/sports/sprt${w}.jpg`;
-        const sciPath   = `assets/y3/scince/s${w}.jpg`;
-        const rightPath = `assets/y3/rights/r${w}.jpg`;
+        const artPath   = `assets/y4/art/art${w}.jpg`;
+        const sportPath = `assets/y4/sports/sprt${w}.jpg`;
+        const sciPath   = `assets/y4/scince/s${w}.jpg`;
+        const rightPath = `assets/y4/rights/r${w}.jpg`;
 
         const baseChar = ltr.replace('ـ', '')[0];
         const fatha = (baseChar === 'أ') ? 'أَ' : `${baseChar}\u064E`;

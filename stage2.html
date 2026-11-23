@@ -1800,14 +1800,14 @@
 
         const YEAR_CYCLES_MAP = {
             8: 1,
-            9: 2,
-            10: 3,
-            11: 4,
-            12: 5,
-            13: 6,
-            14: 7
+            9: 1,
+            10: 1,
+            11: 1,
+            12: 1,
+            13: 2,
+            14: 2
         };
-        const TOTAL_CYCLES_FOR_YEAR = YEAR_CYCLES_MAP[RAW_YEAR] || 7;
+        const TOTAL_CYCLES_FOR_YEAR = YEAR_CYCLES_MAP[RAW_YEAR] || 1;
         const WEEKS_PER_CYCLE = 28;
         const TOTAL_WEEKS = TOTAL_CYCLES_FOR_YEAR * WEEKS_PER_CYCLE;
 
@@ -1833,7 +1833,9 @@
         document.getElementById('welcome-year-num').innerText = RAW_YEAR;
         document.getElementById('welcome-year-word').innerText = (RAW_YEAR >= 3 && RAW_YEAR <= 10) ? 'سنوات' : 'سنة';
         document.getElementById('welcome-cycles-info').innerText =
-            `عدد الدورات: (${TOTAL_CYCLES_FOR_YEAR}) — إجمالي الوحدات: (${TOTAL_WEEKS})`;
+            (TOTAL_CYCLES_FOR_YEAR === 1)
+                ? `دورة تأسيسية واحدة — إجمالي الوحدات: (${TOTAL_WEEKS})`
+                : `دورتان تأسيسيتان (2) — إجمالي الوحدات: (${TOTAL_WEEKS})`;
 
         document.getElementById('hdr-stage-txt').innerText = STAGE_SHORT[STAGE_GROUP] || 'عبد';
         document.getElementById('hdr-year-num').innerText = RAW_YEAR;
