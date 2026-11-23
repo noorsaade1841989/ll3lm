@@ -747,6 +747,54 @@
             cursor: pointer;
             flex-shrink: 0;
         }
+        .slider-tts-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .glass-autoplay-btn {
+            background: #f0f9ff;
+            border: 2px solid #38bdf8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            color: #0284c7;
+            font-size: 1.05rem;
+            font-weight: 900;
+            transition: all 0.2s ease;
+        }
+        .glass-autoplay-btn.is-playing {
+            background: #bae6fd;
+            border-color: #0284c7;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+        }
+        .tts-line-item {
+            display: block;
+            position: relative;
+            padding: 2px 22px 2px 8px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .tts-line-item.active-reading-line {
+            background-color: rgba(56, 189, 248, 0.08);
+        }
+        .tts-line-item.active-reading-line::before {
+            content: '◄';
+            position: absolute;
+            right: 4px;
+            top: 0.42em;
+            font-size: 0.72em;
+            color: #0284c7;
+            line-height: 1;
+        }
 
         /* البطاقة التعليمية المكبرة للعين والأذن واليد */
         .auto-flashcard-stage {
@@ -1853,7 +1901,8 @@
         let _questionGuardTimer = null;
 
         const ARABIC_LETTER_NAMES = {
-            'أ': 'الأَلِف', 'ا': 'الأَلِف', 'ب': 'البَاء', 'ت': 'التَّاء', 'ث': 'الثَّاء',
+            'أ': 'الأَلِف', 'ا': 'الأَلِف', 'إ': 'الأَلِف', 'آ': 'الأَلِف المَمْدُودَة', 'ء': 'الهَمْزَة',
+            'ب': 'البَاء', 'ت': 'التَّاء', 'ث': 'الثَّاء',
             'ج': 'الجِيم', 'ح': 'الحَاء', 'خ': 'الخَاء', 'د': 'الدَّال', 'ذ': 'الذَّال',
             'ر': 'الرَّاء', 'ز': 'الزَّاي', 'س': 'السِّين', 'ش': 'الشِّين', 'ص': 'الصَّاد',
             'ض': 'الضَّاد', 'ط': 'الطَّاء', 'ظ': 'الظَّاء', 'ع': 'العَيْن', 'غ': 'الغَيْن',
@@ -1874,6 +1923,7 @@
             isTTSActive = !isTTSActive;
             localStorage.setItem('tts_enabled_state', isTTSActive ? 'true' : 'false');
             if (!isTTSActive) {
+                if (window._stopActiveSlideAutoAndLine) window._stopActiveSlideAutoAndLine();
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
                 document.getElementById('custom-audio').pause();
                 window._isSpeakingMainQuestion = false;
@@ -1881,66 +1931,90 @@
             }
             updateTTSButtonUI();
         }
-function preprocessTTS(text) {
-    if (!text) return '';
-    let clean = String(text).replace(/<[^>]*>/g, ' ');
-    clean = clean.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, ' ');
-    clean = clean.replace(/\u0640+/g, '');
-    clean = clean.replace(/([\u064B-\u0650])\u0651/g, '\u0651$1');
 
-    // 1. تحويل (ع) أو (عـ) بين قوسين إلى "عليه السلام"
-    clean = clean.replace(/\(\s*ع[\u064B-\u0652]*\s*\)/g, ' عليه السلام ');
+        function preprocessTTS(text) {
+            if (!text) return '';
+            let clean = String(text).replace(/<[^>]*>/g, ' ');
+            clean = clean.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, ' ');
+            clean = clean.replace(/\u0640+/g, '');
+            clean = clean.replace(/([\u064B-\u0650])\u0651/g, '\u0651$1');
 
-    // 2. تحويل (ص) أو (صـ) بين قوسين إلى "صلى الله عليه وآله"
-    clean = clean.replace(/\(\s*ص[\u064B-\u0652]*\s*\)/g, ' صلى الله عليه وآله ');
+            // تصحيح كرسي الهمزة المقلوب إن وجد (أِ -> إِ ، إَ/إُ -> أَ/أُ)
+            clean = clean.replace(/أ\u0650/g, 'إِ').replace(/أ\u064D/g, 'إٍ');
+            clean = clean.replace(/إ([\u064E\u064F\u064B\u064C])/g, 'أ$1');
 
-    // 3. حذف أي محتوى آخر بين الأقواس (أرقام، إشارات، أو نصوص جانبية) فلا يُقرأ
-    clean = clean.replace(/\([^)]*\)/g, ' ');
-    clean = clean.replace(/\[[^\]]*\]/g, ' ');
-    clean = clean.replace(/\{[^}]*\}/g, ' ');
+            // معالجة الألف الخنجرية (ٰ) حتى لا يسقطها القارئ الآلي أو يقطع الكلمة
+            clean = clean.replace(/ه\u0670ذَا/g, 'هَذَا')
+                         .replace(/ه\u0670ذِهِ/g, 'هَذِهِ')
+                         .replace(/ه\u0670ؤُلَاءِ/g, 'هَؤُلَاءِ')
+                         .replace(/كَذ\u0670لِك/g, 'كَذَلِك')
+                         .replace(/ذ\u0670لِك/g, 'ذَلِك')
+                         .replace(/ل\u0670كِن/g, 'لَكِن')
+                         .replace(/أُول\u0670ئِك/g, 'أُولَئِك')
+                         .replace(/\u064E?\u0670/g, '\u064Eا');
 
-    let trimmedRaw = clean.trim();
-    if (ARABIC_LETTER_NAMES[trimmedRaw]) {
-        return ARABIC_LETTER_NAMES[trimmedRaw];
-    }
-    let singleHarakaMatch = trimmedRaw.match(/^([أاإبتثجحخدذرزسشصضطظعغفقكلمنهوي])([\u064E\u064F\u0650\u0652])$/);
-    if (singleHarakaMatch) {
-        let ltr = singleHarakaMatch[1];
-        let hrk = singleHarakaMatch[2];
-        if (hrk === '\u064E') return `${ltr}\u064Eه`;
-        if (hrk === '\u064F') return `${ltr}\u064Fو`;
-        if (hrk === '\u0650') return `${ltr}\u0650ي`;
-        if (hrk === '\u0652') return `أَ${ltr}\u0652`;
-    }
+            // إبقاء الكلام داخل الأقواس كما هو مكتوب دون حذفه ودون تحويل (ع) إلى عليه السلام
+            clean = clean.replace(/[()\[\]{}«»"“”'’﴿﴾]/g, ' ');
 
-    clean = clean.replace(/حَرْف([\u064B-\u0652]*)\s*[\(\[«"]?\s*([أاإآبتثجحخدذرزسشصضطظعغفقكلمنهوي])\s*[\)\]»"]?(?=\s|[.،؛:!؟]|$)/g, (match, haraka, ltr) => {
-        let name = ARABIC_LETTER_NAMES[ltr] || ltr;
-        return `حَرْف${haraka} ${name}`;
-    });
+            let trimmedRaw = clean.trim();
+            if (ARABIC_LETTER_NAMES[trimmedRaw]) {
+                return ARABIC_LETTER_NAMES[trimmedRaw];
+            }
+            let singleHarakaMatch = trimmedRaw.match(/^([أاإبتثجحخدذرزسشصضطظعغفقكلمنهوي])([\u064E\u064F\u0650\u0652])$/);
+            if (singleHarakaMatch) {
+                let ltr = singleHarakaMatch[1];
+                let hrk = singleHarakaMatch[2];
+                if (ltr === 'ا' || ltr === 'أ' || ltr === 'إ') {
+                    if (hrk === '\u064E') return 'أَهْ';
+                    if (hrk === '\u064F') return 'أُو';
+                    if (hrk === '\u0650') return 'إِي';
+                    if (hrk === '\u0652') return 'أَأْ';
+                }
+                if (hrk === '\u064E') return `${ltr}\u064Eهْ`;
+                if (hrk === '\u064F') return `${ltr}\u064Fو`;
+                if (hrk === '\u0650') return `${ltr}\u0650ي`;
+                if (hrk === '\u0652') return `أَ${ltr}\u0652`;
+            }
 
-    clean = clean.replace(/=\s*؟/g, ' كَمْ يُسَاوِي ');
-    clean = clean.replace(/=/g, ' يُسَاوِي ');
-    clean = clean.replace(/\+/g, ' زَائِد ');
-    clean = clean.replace(/×/g, ' ضَرْب ');
-    clean = clean.replace(/÷/g, ' قِسْمَة ');
-    clean = clean.replace(/(\d|[٠-٩])\s*-\s*(\d|[٠-٩])/g, '$1 نَاقِص $2');
-    clean = clean.replace(/\bH2O\b/gi, 'إِتْش تُو أُو');
-    clean = clean.replace(/\bLED\b/gi, 'لِيد');
-    clean = clean.replace(/\bpH\b/gi, 'بِي إِتْش');
+            clean = clean.replace(/حَرْف([\u064B-\u0652]*)\s+([أاإآبتثجحخدذرزسشصضطظعغفقكلمنهوي])(?=\s|[.،؛:!؟]|$)/g, (match, haraka, ltr) => {
+                let name = ARABIC_LETTER_NAMES[ltr] || ltr;
+                return `حَرْف${haraka} ${name}`;
+            });
 
-    clean = clean.replace(/[()\[\]{}«»"']/g, ' ');
-    clean = clean.replace(/[:؛—–]/g, ' ، ');
+            clean = clean.replace(/=\s*؟/g, ' كَمْ يُسَاوِي ');
+            clean = clean.replace(/=/g, ' يُسَاوِي ');
+            clean = clean.replace(/\+/g, ' زَائِد ');
+            clean = clean.replace(/×/g, ' ضَرْب ');
+            clean = clean.replace(/÷/g, ' قِسْمَة ');
+            clean = clean.replace(/(\d|[٠-٩])\s*-\s*(\d|[٠-٩])/g, '$1 نَاقِص $2');
+            clean = clean.replace(/\bH2O\b/gi, 'إِتْش تُو أُو');
+            clean = clean.replace(/\bLED\b/gi, 'لِيد');
+            clean = clean.replace(/\bpH\b/gi, 'بِي إِتْش');
 
-    clean = clean.replace(/ة[\u064B-\u0652]*(?=\s*[.،,۔])/g, 'هْ');
-    clean = clean.replace(/ة\u0652/g, 'ت');
-    clean = clean.replace(/ة([\u064B-\u0650])/g, 'ت$1');
-    clean = clean.replace(/ة(?=\s+ال)/g, 'تُ');
-    clean = clean.replace(/ة/g, 'ت');
+            clean = clean.replace(/[:؛—–]+/g, ' ، ');
 
-    clean = clean.replace(/\u0652(?=\s*[.،!؟]|$)/g, '');
-    clean = clean.replace(/\s+/g, ' ').trim();
-    return clean.replace(/ماما/g, 'مَامَا').replace(/بابا/g, 'بَابَا');
-}
+            // التاء المربوطة: عند الوقف (قبل النقطة أو الفاصلة أو علامات الوقف أو آخر النص) تقرأ هاءً ساكنة فقط، وفي وسط الكلام تقرأ تاءً بحركتها
+            clean = clean.replace(/ة[\u064B-\u0652]*(?=\s*(?:[.،,۔!؟\n]|$))/g, 'هْ');
+            clean = clean.replace(/ة\u064B/g, 'تًا');
+            clean = clean.replace(/ة([\u064C-\u0650])/g, 'ت$1');
+            clean = clean.replace(/ة(?=\s+ال)/g, 'تُ');
+            clean = clean.replace(/ة\u0652/g, 'تْ');
+            clean = clean.replace(/ة/g, 'تَ');
+
+            // ضبط همزة الوصل والقطع في الوصل والابتداء بالاتجاه الصحيح
+            clean = clean.replace(/(^|\s)([وفبكل][\u064E\u0650]?)\s*ا[\u064E\u064F\u0650](?=ل[\u0652\u0621-\u064A]|[\u0621-\u064A]\u0652)/g, '$1$2ا');
+            clean = clean.replace(/(^|[.،!؟]\s+)ا[\u064E\u064F\u0650]?ل(?!له)(?=[\u0621-\u064A\u0651\u0652])/g, '$1أَل');
+            clean = clean.replace(/(^|[.،!؟]\s+)ا[\u064E\u064F\u0650]?(?=(?:بْن|بْنَ|سْم|مْرَ|مْرُ|ثْنَ))/g, '$1إِ');
+            clean = clean.replace(/(^|[.،!؟]\s+)ا[\u064E\u064F\u0650]?([\u0621-\u064A])\u0652([\u0621-\u064A]\u0651?)([\u064E\u064F\u0650])/g, (m, pre, c1, c2, v2) => {
+                if (v2 === '\u064F' && !['مْش', 'بْن', 'قْض', 'مْض'].includes(c1 + c2)) {
+                    return `${pre}أُ${c1}\u0652${c2}${v2}`;
+                }
+                return `${pre}إِ${c1}\u0652${c2}${v2}`;
+            });
+
+            clean = clean.replace(/\s+/g, ' ').trim();
+            return clean.replace(/ماما/g, 'مَامَا').replace(/بابا/g, 'بَابَا');
+        }
 
         function selectBestArabicVoice(utterance) {
             const voices = window.speechSynthesis.getVoices();
@@ -1997,16 +2071,26 @@ function preprocessTTS(text) {
                 return;
             }
 
-            window.speechSynthesis.cancel();
+            if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                window.speechSynthesis.cancel();
+            }
             let utterance = new SpeechSynthesisUtterance(processedText);
+            window._activeUtterance = utterance;
             utterance.lang = 'ar-SA';
             utterance.rate = 0.88;
             utterance.pitch = 1.0;
             selectBestArabicVoice(utterance);
 
             utterance.onend = finish;
-            utterance.onerror = finish;
-            _questionGuardTimer = setTimeout(finish, (processedText.length * 105) + 2200);
+            utterance.onerror = (ev) => {
+                if (ev && (ev.error === 'canceled' || ev.error === 'interrupted')) {
+                    clearTimeout(_questionGuardTimer);
+                    window._isSpeakingMainQuestion = false;
+                    return;
+                }
+                finish();
+            };
+            _questionGuardTimer = setTimeout(finish, (processedText.length * 115) + 2500);
             window.speechSynthesis.speak(utterance);
         }
 
@@ -2444,6 +2528,7 @@ function preprocessTTS(text) {
         function openSubject(subjId) {
             let effectiveMaxSubj = (isFreeExplore || isSecretEditMode || playWeek < actualWeek) ? 7 : playMaxSubj;
             if (subjId > effectiveMaxSubj && !isFreeExplore && !isSecretEditMode) return;
+            if (window._stopActiveSlideAutoAndLine) window._stopActiveSlideAutoAndLine();
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             document.getElementById('custom-audio').pause();
             activeViewSubj = subjId;
@@ -2502,6 +2587,7 @@ function preprocessTTS(text) {
             if (!stepExists && !isFreeExplore && !isSecretEditMode) return;
             if (!isFreeExplore && !isSecretEditMode && targetStep > globalStep) return;
 
+            if (window._stopActiveSlideAutoAndLine) window._stopActiveSlideAutoAndLine();
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             document.getElementById('custom-audio').pause();
             globalStep = targetStep;
@@ -2556,6 +2642,7 @@ function preprocessTTS(text) {
 
         function handleNextClick() {
             playNextChime();
+            if (window._stopActiveSlideAutoAndLine) window._stopActiveSlideAutoAndLine();
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             document.getElementById('custom-audio').pause();
 
@@ -2590,6 +2677,7 @@ function preprocessTTS(text) {
         }
 
         function handlePrevClick() {
+            if (window._stopActiveSlideAutoAndLine) window._stopActiveSlideAutoAndLine();
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             document.getElementById('custom-audio').pause();
 
@@ -3534,18 +3622,167 @@ function preprocessTTS(text) {
                     let textContent = document.createElement('div');
                     textContent.className = 'slider-text-content';
                     textContent.dataset.editField = 'slide_text';
+                    let ttsControlsWrap = document.createElement('div');
+                    ttsControlsWrap.className = 'slider-tts-controls';
+
                     let soundIcon = document.createElement('div');
                     soundIcon.innerHTML = '🔊';
                     soundIcon.className = 'glass-audio-btn';
+                    ttsControlsWrap.appendChild(soundIcon);
+
+                    let isSlideAutoPlay = false;
+                    let lineReadSession = 0;
+                    let autoAdvanceTimer = null;
+                    let autoPlayBtn = null;
+
+                    const clearLineHighlight = () => {
+                        textContent.querySelectorAll('.tts-line-item.active-reading-line').forEach(el => {
+                            el.classList.remove('active-reading-line');
+                        });
+                    };
+
+                    const setAutoPlayUI = (active) => {
+                        isSlideAutoPlay = active;
+                        if (autoPlayBtn) {
+                            autoPlayBtn.innerHTML = active ? '⏸' : '▶';
+                            autoPlayBtn.classList.toggle('is-playing', active);
+                            autoPlayBtn.title = active ? 'إيقاف التشغيل التلقائي' : 'تشغيل الشرائح تلقائياً';
+                        }
+                    };
+
+                    const stopAllSlideReading = () => {
+                        lineReadSession++;
+                        clearTimeout(autoAdvanceTimer);
+                        setAutoPlayUI(false);
+                        clearLineHighlight();
+                    };
+                    window._stopActiveSlideAutoAndLine = stopAllSlideReading;
+
+                    if (slides.length > 1) {
+                        autoPlayBtn = document.createElement('div');
+                        autoPlayBtn.innerHTML = '▶';
+                        autoPlayBtn.className = 'glass-autoplay-btn';
+                        autoPlayBtn.title = 'تشغيل الشرائح تلقائياً';
+                        ttsControlsWrap.appendChild(autoPlayBtn);
+                        autoPlayBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            if (isSlideAutoPlay) {
+                                stopAllSlideReading();
+                                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                            } else {
+                                setAutoPlayUI(true);
+                                playCurrentSlideAudio(() => updateNavButtons(true));
+                            }
+                        };
+                    }
+
                     textBox.appendChild(textContent);
-                    textBox.appendChild(soundIcon);
+                    textBox.appendChild(ttsControlsWrap);
+
+                    const splitSlideIntoBalancedLines = (rawText) => {
+                        let str = String(rawText || '').trim();
+                        if (!str) return [];
+                        let rawChunks = str.split(/(?<=[.،!؟؛\n])\s+/).map(p => p.trim()).filter(Boolean);
+                        if (rawChunks.length <= 1) return [str];
+                        let merged = [];
+                        let buffer = '';
+                        for (let ch of rawChunks) {
+                            let plainLen = (buffer + ' ' + ch).replace(/[\u064B-\u0652\u0670]/g, '').trim().length;
+                            if (!buffer) {
+                                buffer = ch;
+                            } else if (plainLen < 42 && !/[.!؟\n]$/.test(buffer)) {
+                                buffer += ' ' + ch;
+                            } else {
+                                merged.push(buffer);
+                                buffer = ch;
+                            }
+                        }
+                        if (buffer) merged.push(buffer);
+                        return merged;
+                    };
+
+                    const renderSlideLines = (rawText) => {
+                        lineReadSession++;
+                        clearLineHighlight();
+                        if (isSecretEditMode) {
+                            textContent.innerHTML = colorizeHarakaAndMadd(rawText);
+                            return;
+                        }
+                        let lines = splitSlideIntoBalancedLines(rawText);
+                        if (lines.length === 0) {
+                            textContent.innerHTML = '';
+                            return;
+                        }
+                        textContent.innerHTML = lines.map((ln, idx) =>
+                            `<span class="tts-line-item" data-line-idx="${idx}">${colorizeHarakaAndMadd(ln)}</span>`
+                        ).join('');
+                    };
 
                     const playCurrentSlideAudio = (onDone) => {
                         let s = slides[currentSlide];
                         if (activeViewSubj === 3 && s.cardData) {
                             playEarTone(s.cardData.feature || s.text);
                         }
-                        speakText(s.tts || s.text, onDone);
+
+                        const handleSlideFinished = () => {
+                            clearLineHighlight();
+                            if (onDone) onDone();
+                            if (isSlideAutoPlay && !isSecretEditMode) {
+                                if (currentSlide < slides.length - 1) {
+                                    clearTimeout(autoAdvanceTimer);
+                                    let waitMs = isTTSActive ? 500 : 3200;
+                                    autoAdvanceTimer = setTimeout(() => {
+                                        if (!isSlideAutoPlay) return;
+                                        currentSlide++;
+                                        updateSlider();
+                                        playCurrentSlideAudio(() => updateNavButtons(true));
+                                    }, waitMs);
+                                } else {
+                                    setAutoPlayUI(false);
+                                    updateNavButtons(true);
+                                }
+                            }
+                        };
+
+                        if (s.tts || isSecretEditMode) {
+                            speakText(s.tts || s.text, handleSlideFinished);
+                            return;
+                        }
+
+                        let lineEls = Array.from(textContent.querySelectorAll('.tts-line-item'));
+                        if (lineEls.length === 0 || !isTTSActive) {
+                            speakText(s.text, handleSlideFinished);
+                            return;
+                        }
+
+                        lineReadSession++;
+                        clearLineHighlight();
+                        const mySession = lineReadSession;
+                        let idx = 0;
+
+                        const readNextLine = () => {
+                            if (mySession !== lineReadSession || !isTTSActive) {
+                                clearLineHighlight();
+                                return;
+                            }
+                            clearLineHighlight();
+                            if (idx >= lineEls.length) {
+                                handleSlideFinished();
+                                return;
+                            }
+                            let curEl = lineEls[idx];
+                            curEl.classList.add('active-reading-line');
+                            curEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            let lineText = curEl.textContent || '';
+                            idx++;
+                            speakText(lineText, () => {
+                                if (mySession === lineReadSession) {
+                                    setTimeout(readNextLine, 50);
+                                }
+                            });
+                        };
+
+                        readNextLine();
                     };
 
                     const updateSlider = () => {
@@ -3588,14 +3825,14 @@ function preprocessTTS(text) {
                                 sliderContainer.classList.remove('has-img-and-text');
                             }
                         }
-                        textContent.innerHTML = colorizeHarakaAndMadd(s.text);
+                        renderSlideLines(s.text);
                         prevBtn.style.display = currentSlide === 0 ? 'none' : 'flex';
                         nextBtn.style.display = currentSlide === slides.length - 1 ? 'none' : 'flex';
                         if (isSecretEditMode) attachEditHooksToCurrentStation(defData);
                     };
 
-                    nextBtn.onclick = (e) => { e.stopPropagation(); if (currentSlide < slides.length - 1) { currentSlide++; updateSlider(); playCurrentSlideAudio(); } };
-                    prevBtn.onclick = (e) => { e.stopPropagation(); if (currentSlide > 0) { currentSlide--; updateSlider(); playCurrentSlideAudio(); } };
+                    nextBtn.onclick = (e) => { e.stopPropagation(); stopAllSlideReading(); if ('speechSynthesis' in window) window.speechSynthesis.cancel(); if (currentSlide < slides.length - 1) { currentSlide++; updateSlider(); playCurrentSlideAudio(); } };
+                    prevBtn.onclick = (e) => { e.stopPropagation(); stopAllSlideReading(); if ('speechSynthesis' in window) window.speechSynthesis.cancel(); if (currentSlide > 0) { currentSlide--; updateSlider(); playCurrentSlideAudio(); } };
                     clickOverlay.onclick = (e) => { e.stopPropagation(); playCurrentSlideAudio(); };
                     soundIcon.onclick = (e) => { e.stopPropagation(); playCurrentSlideAudio(); };
 
@@ -3712,7 +3949,8 @@ function preprocessTTS(text) {
                             let vidStage = fancyCard.querySelector('.sawm-inline-video-stage');
                             if (!isShowingVideo) {
                                 isShowingVideo = true;
-                                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                                if (window._stopActiveSlideAutoAndLine) window._stopActiveSlideAutoAndLine();
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
                                 sliderContainer.style.display = 'none';
                                 if (!vidStage) {
                                     vidStage = document.createElement('div');
@@ -4001,7 +4239,7 @@ function preprocessTTS(text) {
 
         function extractCleanEditableHTML(el) {
             let clone = el.cloneNode(true);
-            clone.querySelectorAll('.haraka-red, .madd-red, .hl-char').forEach(sp => {
+            clone.querySelectorAll('.haraka-red, .madd-red, .hl-char, .tts-line-item').forEach(sp => {
                 sp.replaceWith(...sp.childNodes);
             });
             clone.querySelectorAll('.apply-hl-target').forEach(sp => {
