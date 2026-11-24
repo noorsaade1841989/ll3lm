@@ -4251,6 +4251,7 @@
         }
     });
 </script>
+
 <!-- ==================== [ بداية وحدة المعلم المحاور الذكي لمرحلة عبد stage2.html ] ==================== -->
 <style>
     /* ١. زر الاستفهام (؟) في الأعلى تحت شريط العنوان من الجهة اليسرى (مقابل عمود الأختام) وشبه شفاف حتى الاقتراب منه */
@@ -4312,8 +4313,8 @@
 
     .tutor-dialog-box {
         width: 100%;
-        max-width: 760px;
-        height: min(90dvh, 720px);
+        max-width: 740px;
+        height: min(88dvh, 700px);
         background: linear-gradient(145deg, #09221a 0%, #0f172a 100%);
         border: 2.5px solid #eab308;
         border-radius: 26px;
@@ -4397,18 +4398,18 @@
     .tutor-msg-row {
         display: flex;
         flex-direction: column;
-        max-width: 92%;
+        max-width: 90%;
         gap: 4px;
     }
     .tutor-msg-row.teacher { align-self: flex-start; }
     .tutor-msg-row.student { align-self: flex-end; }
 
     .tutor-bubble {
-        padding: 14px 18px;
+        padding: 12px 16px;
         border-radius: 18px;
         font-size: clamp(0.96rem, 2.1vmin, 1.15rem);
         font-weight: 700;
-        line-height: 1.9;
+        line-height: 1.85;
         text-align: right;
         white-space: pre-line;
         user-select: text;
@@ -4535,21 +4536,38 @@
 <script>
 (function initStage2SmartTutor() {
     const PLATFORM_TUTOR_WORKER_URL = localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+    const STORAGE_PREFIX = 'al3lm_stage2_tutor_mem_v1_';
 
-    let tutorConversation = [];
+    // الذاكرة تُحفظ لكل درس/حرف على حدة في sessionStorage لتبقى عند إغلاق النافذة أو العودة لرؤية السلايدات
+    const sessionMemoryMap = new Map();
     let currentLessonContextKey = '';
     let isTutorBusy = false;
     let activePendingMsg = null;
 
-    function stopPageSpeechSafely() {
+    function loadLessonMemory(contextKey) {
+        if (sessionMemoryMap.has(contextKey)) {
+            return sessionMemoryMap.get(contextKey);
+        }
         try {
-            if (typeof stopAllSpeech === 'function') {
-                stopAllSpeech();
-            } else if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
+            const raw = sessionStorage.getItem(STORAGE_PREFIX + encodeURIComponent(contextKey));
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    sessionMemoryMap.set(contextKey, parsed);
+                    return parsed;
+                }
             }
-            const aud = document.getElementById('custom-audio');
-            if (aud) aud.pause();
+        } catch (_) {}
+        const fresh = [];
+        sessionMemoryMap.set(contextKey, fresh);
+        return fresh;
+    }
+
+    function saveLessonMemory(contextKey, messagesArr) {
+        if (!contextKey) return;
+        sessionMemoryMap.set(contextKey, messagesArr);
+        try {
+            sessionStorage.setItem(STORAGE_PREFIX + encodeURIComponent(contextKey), JSON.stringify(messagesArr));
         } catch (_) {}
     }
 
@@ -4561,6 +4579,7 @@
             .trim();
     }
 
+    // نبقي القارئ الآلي فعالاً ليقرأ حتى عند الخروج من النافذة والعودة إلى السلايدات والدرس
     function speakReplySafely(text) {
         const arabicOnly = cleanArabicForSpeech(text);
         if (!arabicOnly) return;
@@ -4571,7 +4590,7 @@
                 window.speechSynthesis.cancel();
                 const u = new SpeechSynthesisUtterance(arabicOnly);
                 u.lang = 'ar-SA';
-                u.rate = 0.9;
+                u.rate = 0.92;
                 window.speechSynthesis.speak(u);
             }
         } catch (_) {}
@@ -4596,43 +4615,80 @@
             ? String(defData.learn.introGoal).replace(/<[^>]*>/g, '').trim()
             : '';
 
-        let slidesText = '';
+        let compactSummary = '';
         if (Array.isArray(defData?.learn?.slides) && defData.learn.slides.length > 0) {
-            slidesText = defData.learn.slides.map((s, i) => `(${i + 1}) ${String(s.text || '').replace(/<[^>]*>/g, '')}`).join('\n');
+            compactSummary = defData.learn.slides
+                .slice(0, 4)
+                .map((s, i) => `(${i + 1}) ${String(s.text || '').replace(/<[^>]*>/g, '').slice(0, 140)}`)
+                .join(' | ');
         } else {
-            slidesText = document.getElementById('main-content')?.innerText?.trim() || '';
+            compactSummary = (document.getElementById('main-content')?.innerText?.trim() || '').slice(0, 450);
         }
 
-        const applyText = Array.isArray(defData?.apply?.steps)
-            ? defData.apply.steps.map(s => String(s).replace(/<[^>]*>/g, '')).join('\n')
-            : '';
-
-        const fullLessonCorpus = [lessonTitle, lessonGoal, slidesText, applyText].filter(Boolean).join('\n');
-        const minCharLength = Math.max(fullLessonCorpus.length, 320);
-        const minWordCount = Math.max(fullLessonCorpus.split(/\s+/).filter(Boolean).length, 55);
-
         const contextKey = `${yearNum}_${mapKey}_${lessonTitle}`;
-        return { yearNum, lessonTitle, lessonGoal, slidesText, applyText, fullLessonCorpus, minCharLength, minWordCount, contextKey };
+        return { yearNum, lessonTitle, lessonGoal, compactSummary, contextKey };
     }
 
-    function buildLessonSystemInstruction(info, requireExpansion = false) {
-        const expansionNote = requireExpansion
-            ? `تنبيه مهم جداً: إجابتك السابقة كانت قصيرة جداً. أعد صياغة الشرح أو الجواب بتفصيل وافٍ وشامل يغطي الفكرة الأساسية والأمثلة والتطبيق العملي والنتيجة الواضحة بحيث لا يقل طول الرد عن ${info.minWordCount} كلمة و${info.minCharLength} حرفاً.`
-            : '';
+    // تصاعد متدرج ومنضبط:
+    // السؤال 1 (البداية): سطران فقط ثم سؤال للطالب
+    // السؤال 2: حوالي 5 أسطر ثم سؤال للطالب
+    // السؤال 3: حوالي 7 إلى 8 أسطر ثم سؤال للطالب
+    // السؤال 4 فأكثر: حتى 10 أسطر كحد أقصى
+    function getEscalationPlan(conversationArr) {
+        const studentQuestionsCount = conversationArr.filter(m => m.role === 'student').length;
 
+        if (studentQuestionsCount <= 1) {
+            return {
+                minLines: 2,
+                maxLines: 2,
+                maxTokens: 170,
+                rule: 'اكتب سطرين فقط (فكرة مركزة من سطرين قصيرين) ثم اطرح سؤالاً قصيراً واحداً للطالب ليتفاعل.'
+            };
+        }
+        if (studentQuestionsCount === 2) {
+            return {
+                minLines: 4,
+                maxLines: 5,
+                maxTokens: 320,
+                rule: 'اكتب نحو 5 أسطر (فقرة متماسكة من 4 إلى 5 أسطر) تشرح المعنى بمثال واضح، ثم اختم بسؤال واحد للطالب.'
+            };
+        }
+        if (studentQuestionsCount === 3) {
+            return {
+                minLines: 6,
+                maxLines: 8,
+                maxTokens: 480,
+                rule: 'اكتب نحو 7 إلى 8 أسطر (بحد أقصى 8 أسطر) تعمّق الفكرة وتوضح النتيجة، ثم اختم بسؤال واحد للطالب.'
+            };
+        }
+        return {
+            minLines: 8,
+            maxLines: 10,
+            maxTokens: 650,
+            rule: 'اكتب من 8 إلى 10 أسطر كحد أقصى (ولا تتجاوز 10 أسطر أبداً) لتوضيح الصورة الكاملة والنتيجة، ثم اختم بسؤال واحد للطالب.'
+        };
+    }
+
+    function enforceLineLimit(text, maxLines = 10) {
+        const clean = String(text || '').trim();
+        if (!clean) return '';
+        const lines = clean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length <= maxLines) {
+            return lines.join('\n');
+        }
+        return lines.slice(0, maxLines).join('\n');
+    }
+
+    function buildLessonSystemInstruction(info, plan) {
         return [
-            `أنت معلم حكيم، عطوف، وصبور، ومفسر دقيق في "مدرسة العلم"، تحاور طالباً عمره (${info.yearNum}) سنوات في مرحلة "عبد".`,
-            `عنوان الدرس الحالي: ${info.lessonTitle}.`,
-            info.lessonGoal ? `هدف الدرس: ${info.lessonGoal}` : '',
-            info.slidesText ? `نص الدرس وشرائحه الكاملة:
-${info.slidesText}` : '',
-            info.applyText ? `التطبيق العملي للدرس:
-${info.applyText}` : '',
-            expansionNote,
-            `قواعد الشرح والحوار الصارمة:`,
-            `1- يمنع منعاً باتاً الإجابة بكلمات مقتضبة أو جمل مبتورة أو مختصرة؛ يجب أن يكون شرحك أو جوابك وافياً ومفصلاً ومتماسكاً، وطوله لا يقل بأي حال عن طول نص الدرس نفسه (على الأقل ${info.minWordCount} كلمة و${info.minCharLength} حرفاً)، مع الوصول إلى نتيجة واضحة ومفهومة وربط المعنى بالواقع والعمل.`,
-            `2- عند شرح الدرس أو الإجابة عن سؤال الطالب، اشرح الفكرة خطوة بخطوة بوضوح وعمق يناسب عمر (${info.yearNum}) سنوات، واذكر أمثلة تطبيقية ملموسة، ثم اختم بسؤال تأملي واحد يثبت الفهم ويدفع للحوار.`,
-            `3- تحدث بعربية فصيحة مشرقة خالصة بدون أي كلمات أو حروف إنجليزية إطلاقاً، ومشكولة الحركات الأساسية ما أمكن، والتزم بمضمون الدرس وقيم العقل والأدب.`
+            `أنت معلم حكيم ولطيف في "مدرسة العلم"، تحاور طالباً عمره (${info.yearNum}) سنوات في مرحلة "عبد".`,
+            `الدرس الحالي: ${info.lessonTitle}.`,
+            info.lessonGoal ? `الهدف: ${info.lessonGoal}` : '',
+            info.compactSummary ? `ملخص الدرس: ${info.compactSummary}` : '',
+            `قاعدة التدرج والطول الصارمة:`,
+            `- ${plan.rule}`,
+            `- لا تتجاوز 10 أسطر في أي رد مهما كثر السؤال.`,
+            `- اكتب بعربية فصيحة واضحة ومختصرة العبارة دون أي حروف أو كلمات إنجليزية.`
         ].filter(Boolean).join('\n');
     }
 
@@ -4661,6 +4717,21 @@ ${info.applyText}` : '',
         return { row, bubble };
     }
 
+    function renderSavedConversationToDom(conversationArr) {
+        const area = document.getElementById('tutor-messages-area');
+        if (!area) return;
+        area.innerHTML = '';
+        for (const msg of conversationArr) {
+            if (!msg || !msg.text) continue;
+            if (msg.role === 'teacher') {
+                appendMessageBubble('teacher', msg.text, true);
+            } else if (msg.role === 'student' && !msg.hiddenPrompt) {
+                appendMessageBubble('student', msg.text, false);
+            }
+        }
+        area.scrollTop = area.scrollHeight;
+    }
+
     function clearPendingThinkingBubble() {
         if (activePendingMsg && activePendingMsg.row && activePendingMsg.row.parentNode) {
             activePendingMsg.row.parentNode.removeChild(activePendingMsg.row);
@@ -4668,17 +4739,18 @@ ${info.applyText}` : '',
         activePendingMsg = null;
     }
 
-    async function callTutorBackend(systemInstruction, historyMessages, maxTokens = 2400) {
+    async function callTutorBackend(systemInstruction, historyMessages, maxTokens) {
         const workerUrl = localStorage.getItem('al3lm_tutor_worker_url') || PLATFORM_TUTOR_WORKER_URL;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 35000);
+        const timeoutId = setTimeout(() => controller.abort(), 16000);
         try {
+            const recentMessages = historyMessages.slice(-4).map(m => ({ role: m.role, text: m.text }));
             const res = await fetch(workerUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     systemInstruction,
-                    messages: historyMessages,
+                    messages: recentMessages,
                     maxOutputTokens: maxTokens
                 }),
                 signal: controller.signal
@@ -4696,41 +4768,25 @@ ${info.applyText}` : '',
         }
     }
 
-    function isReplyShorterThanLesson(replyText, info) {
-        const cleanReply = String(replyText || '').trim();
-        const wordCount = cleanReply.split(/\s+/).filter(Boolean).length;
-        return cleanReply.length < info.minCharLength || wordCount < info.minWordCount;
-    }
-
     async function requestTeacherReply(info, isInitialGreeting = false) {
         if (isTutorBusy) return;
+        const lessonInfo = info || extractCurrentLessonDetails();
+        const activeKey = lessonInfo.contextKey;
+        const conv = loadLessonMemory(activeKey);
+
         isTutorBusy = true;
         clearPendingThinkingBubble();
-        const lessonInfo = info || extractCurrentLessonDetails();
-        activePendingMsg = appendMessageBubble('teacher', 'يَتَأَمَّلُ المُعَلِّمُ الدَّرْسَ بِتَفْصِيلٍ لِيَشْرَحَهُ لَكَ شَرْحًا وَافِيًا وَوَاضِحًا...', true);
+        const plan = getEscalationPlan(conv);
+        activePendingMsg = appendMessageBubble('teacher', 'يُجِيبُكَ المُعَلِّمُ الآنَ...', true);
 
         try {
-            const sysPrompt = buildLessonSystemInstruction(lessonInfo, false);
-            let reply = await callTutorBackend(sysPrompt, tutorConversation, 2400);
+            const sysPrompt = buildLessonSystemInstruction(lessonInfo, plan);
+            const rawReply = await callTutorBackend(sysPrompt, conv, plan.maxTokens);
+            const reply = enforceLineLimit(rawReply, plan.maxLines);
 
-            // إذا جاء الرد أقصر من نص الدرس، نطلب توسيع الشرح ليلتزم بالحد الأدنى المطلوب
-            if (isReplyShorterThanLesson(reply, lessonInfo)) {
-                const expandedMessages = [
-                    ...tutorConversation,
-                    { role: 'teacher', text: reply },
-                    {
-                        role: 'student',
-                        text: `هٰذَا مُخْتَصَرٌ يَا أُسْتَاذِي؛ أُرِيدُ شَرْحًا كَامِلًا وَمُفَصَّلًا يَصِلُ إِلَى النَّتِيجَةِ وَالجَوَابِ بِوُضُوحٍ، وَلَا يَقِلُّ طُولُهُ عَنْ طُولِ نَصِّ الدَّرْسِ.`
-                    }
-                ];
-                const expandPrompt = buildLessonSystemInstruction(lessonInfo, true);
-                const expandedReply = await callTutorBackend(expandPrompt, expandedMessages, 3200);
-                if (expandedReply && expandedReply.length > reply.length) {
-                    reply = expandedReply;
-                }
-            }
+            conv.push({ role: 'teacher', text: reply });
+            saveLessonMemory(activeKey, conv);
 
-            tutorConversation.push({ role: 'teacher', text: reply });
             if (activePendingMsg && activePendingMsg.bubble) {
                 activePendingMsg.bubble.innerText = reply;
             }
@@ -4740,11 +4796,12 @@ ${info.applyText}` : '',
             speakReplySafely(reply);
         } catch (_) {
             clearPendingThinkingBubble();
-            if (tutorConversation.length > 0 && tutorConversation[tutorConversation.length - 1].role === 'student') {
-                tutorConversation.pop();
+            if (conv.length > 0 && conv[conv.length - 1].role === 'student') {
+                conv.pop();
+                saveLessonMemory(activeKey, conv);
             }
-            if (isInitialGreeting) {
-                currentLessonContextKey = '';
+            if (isInitialGreeting && conv.length === 0) {
+                sessionMemoryMap.delete(activeKey);
             }
         } finally {
             isTutorBusy = false;
@@ -4752,29 +4809,33 @@ ${info.applyText}` : '',
     }
 
     window.openAiTutorModal = function() {
-        stopPageSpeechSafely();
         const info = extractCurrentLessonDetails();
+        currentLessonContextKey = info.contextKey;
+        const conv = loadLessonMemory(currentLessonContextKey);
+
         const modal = document.getElementById('ai-tutor-modal');
         const lbl = document.getElementById('tutor-lesson-label');
         if (lbl) lbl.innerText = info.lessonTitle;
         if (modal) modal.classList.add('open');
 
-        if (currentLessonContextKey !== info.contextKey || tutorConversation.length === 0) {
-            currentLessonContextKey = info.contextKey;
-            tutorConversation = [];
+        if (conv.length === 0) {
             const area = document.getElementById('tutor-messages-area');
             if (area) area.innerHTML = '';
-
-            tutorConversation.push({
+            conv.push({
                 role: 'student',
-                text: `يَا أُسْتَاذِي، أَنَا لَمْ أَفْهَمْ دَرْسَ «${info.lessonTitle}» جَيِّداً، هَلْ يُمْكِنُكَ أَنْ تُعِيدَ شَرْحَهُ لِي شَرْحًا كَامِلًا وَمُفَصَّلًا وَمُبَسَّطًا حَتَّى أَصِلَ إِلَى الفَهْمِ الكَامِلِ وَالنَّتِيجَةِ؟`
+                text: `اشرح لي فكرة درس «${info.lessonTitle}» في سطرين ثم اسألني سؤالاً.`,
+                hiddenPrompt: true
             });
+            saveLessonMemory(currentLessonContextKey, conv);
             requestTeacherReply(info, true);
+        } else {
+            // استعادة المحادثة الكاملة لنفس الدرس/الحرف دون حذف أي سؤال أو جواب
+            renderSavedConversationToDom(conv);
         }
     };
 
+    // عند إغلاق النافذة لرؤية السلايدات، لا نمسح الذاكرة ولا نوقف القارئ الآلي حتى يستمر في القراءة أثناء معاينة الدرس
     window.closeAiTutorModal = function() {
-        stopPageSpeechSafely();
         const modal = document.getElementById('ai-tutor-modal');
         if (modal) modal.classList.remove('open');
     };
@@ -4786,12 +4847,16 @@ ${info.applyText}` : '',
         if (!txt) return;
         if (isTutorBusy) return;
 
+        const info = extractCurrentLessonDetails();
+        currentLessonContextKey = info.contextKey;
+        const conv = loadLessonMemory(currentLessonContextKey);
+
         inputEl.value = '';
         inputEl.style.height = 'auto';
-        stopPageSpeechSafely();
         appendMessageBubble('student', txt, false);
-        tutorConversation.push({ role: 'student', text: txt });
-        requestTeacherReply(null, false);
+        conv.push({ role: 'student', text: txt, hiddenPrompt: false });
+        saveLessonMemory(currentLessonContextKey, conv);
+        requestTeacherReply(info, false);
     };
 
     const inputField = document.getElementById('tutor-user-input');
@@ -4824,7 +4889,6 @@ ${info.applyText}` : '',
             if (micBtn) micBtn.classList.remove('recording');
             return;
         }
-        stopPageSpeechSafely();
         recognition = new SpeechRec();
         recognition.lang = 'ar-SA';
         recognition.interimResults = false;
@@ -4850,5 +4914,8 @@ ${info.applyText}` : '',
 })();
 </script>
 <!-- ==================== [ نهاية وحدة المعلم المحاور الذكي لمرحلة عبد stage2.html ] ==================== -->
+
+
+
 </body>
 </html>
