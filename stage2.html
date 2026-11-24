@@ -4251,7 +4251,6 @@
         }
     });
 </script>
-
 <!-- ==================== [ بداية وحدة المعلم المحاور الذكي لمرحلة عبد stage2.html ] ==================== -->
 <style>
     /* ١. زر الاستفهام (؟) في الأعلى تحت شريط العنوان من الجهة اليسرى (مقابل عمود الأختام) وشبه شفاف حتى الاقتراب منه */
@@ -4277,7 +4276,7 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        z-index: 550;
+        z-index: 9500;
         opacity: 0.32;
         box-shadow: none;
         transition: opacity 0.25s ease, transform 0.22s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
@@ -4292,7 +4291,6 @@
         color: #06281e;
         box-shadow: 0 8px 22px rgba(234, 179, 8, 0.55);
     }
-    /* إخفاؤه أثناء وضع التعديل السري للمعلم */
     body.edit-mode-active #ai-tutor-q-btn {
         display: none !important;
     }
@@ -4314,8 +4312,8 @@
 
     .tutor-dialog-box {
         width: 100%;
-        max-width: 720px;
-        height: min(88dvh, 680px);
+        max-width: 760px;
+        height: min(90dvh, 720px);
         background: linear-gradient(145deg, #09221a 0%, #0f172a 100%);
         border: 2.5px solid #eab308;
         border-radius: 26px;
@@ -4399,18 +4397,18 @@
     .tutor-msg-row {
         display: flex;
         flex-direction: column;
-        max-width: 88%;
+        max-width: 92%;
         gap: 4px;
     }
     .tutor-msg-row.teacher { align-self: flex-start; }
     .tutor-msg-row.student { align-self: flex-end; }
 
     .tutor-bubble {
-        padding: 12px 16px;
+        padding: 14px 18px;
         border-radius: 18px;
         font-size: clamp(0.96rem, 2.1vmin, 1.15rem);
         font-weight: 700;
-        line-height: 1.85;
+        line-height: 1.9;
         text-align: right;
         white-space: pre-line;
         user-select: text;
@@ -4495,10 +4493,10 @@
 </style>
 
 <!-- الزر الهادئ الدائم (؟) -->
-<button type="button" id="ai-tutor-q-btn" title="اسأل المعلم عن الدرس" onclick="openAiTutorModal()">؟</button>
+<button type="button" id="ai-tutor-q-btn" title="اسأل المعلم عن الدرس" onclick="window.openAiTutorModal && window.openAiTutorModal()">؟</button>
 
 <!-- شاشة المحادثة مع المعلم -->
-<div id="ai-tutor-modal" onclick="if(event.target===this) closeAiTutorModal()">
+<div id="ai-tutor-modal" onclick="if(event.target===this && window.closeAiTutorModal) window.closeAiTutorModal()">
     <div class="tutor-dialog-box" onclick="event.stopPropagation()">
         <div class="tutor-header">
             <div class="tutor-identity">
@@ -4521,39 +4519,40 @@
                     <span class="tutor-lesson-sub" id="tutor-lesson-label">شَرْحُ الدَّرْسِ وَالحِوَارُ</span>
                 </div>
             </div>
-            <button type="button" class="tutor-close-btn" onclick="closeAiTutorModal()">×</button>
+            <button type="button" class="tutor-close-btn" onclick="window.closeAiTutorModal && window.closeAiTutorModal()">×</button>
         </div>
 
         <div class="tutor-messages-area" id="tutor-messages-area"></div>
 
         <div class="tutor-input-bar">
-            <button type="button" class="tutor-mic-btn" id="tutor-mic-btn" title="تحدث بصوتك" onclick="toggleTutorVoiceInput()">🎙️</button>
+            <button type="button" class="tutor-mic-btn" id="tutor-mic-btn" title="تحدث بصوتك" onclick="window.toggleTutorVoiceInput && window.toggleTutorVoiceInput()">🎙️</button>
             <textarea id="tutor-user-input" rows="1" placeholder="اكْتُبْ سُؤَالَكَ لِلْمُعَلِّمِ هُنَا..."></textarea>
-            <button type="button" class="tutor-send-btn" id="tutor-send-btn" title="إرسال" onclick="sendStudentMessageToTutor()">➤</button>
+            <button type="button" class="tutor-send-btn" id="tutor-send-btn" title="إرسال" onclick="window.sendStudentMessageToTutor && window.sendStudentMessageToTutor()">➤</button>
         </div>
     </div>
 </div>
 
 <script>
 (function initStage2SmartTutor() {
-    // رابط الجسر السحابي الخاص بالمنصة يعمل تلقائياً لجميع الطلاب دون أي إعداد
     const PLATFORM_TUTOR_WORKER_URL = localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
 
     let tutorConversation = [];
     let currentLessonContextKey = '';
     let isTutorBusy = false;
+    let activePendingMsg = null;
 
     function stopPageSpeechSafely() {
-        if (typeof stopAllSpeech === 'function') {
-            stopAllSpeech();
-        } else if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
-        const aud = document.getElementById('custom-audio');
-        if (aud) aud.pause();
+        try {
+            if (typeof stopAllSpeech === 'function') {
+                stopAllSpeech();
+            } else if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            const aud = document.getElementById('custom-audio');
+            if (aud) aud.pause();
+        } catch (_) {}
     }
 
-    // تنقية النص الموجه للقارئ الآلي من أي أحرف إنجليزية حتى لا يرتبك بالنطق أبداً
     function cleanArabicForSpeech(rawText) {
         if (!rawText) return '';
         return String(rawText)
@@ -4565,21 +4564,27 @@
     function speakReplySafely(text) {
         const arabicOnly = cleanArabicForSpeech(text);
         if (!arabicOnly) return;
-
-        if (typeof speakText === 'function') {
-            speakText(arabicOnly);
-        } else if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(arabicOnly);
-            u.lang = 'ar-SA';
-            u.rate = 0.9;
-            window.speechSynthesis.speak(u);
-        }
+        try {
+            if (typeof speakText === 'function') {
+                speakText(arabicOnly);
+            } else if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(arabicOnly);
+                u.lang = 'ar-SA';
+                u.rate = 0.9;
+                window.speechSynthesis.speak(u);
+            }
+        } catch (_) {}
     }
 
-    // قراءة بيانات الدرس الحالي مباشرة من كائن المنهج أو من نصوص الصفحة المعروضة أمام الطالب
     function extractCurrentLessonDetails() {
-        const defData = (typeof getActiveCurriculumObj === 'function') ? getActiveCurriculumObj() : null;
+        let defData = null;
+        try {
+            if (typeof getActiveCurriculumObj === 'function') {
+                defData = getActiveCurriculumObj();
+            }
+        } catch (_) {}
+
         const headerTitle = document.getElementById('header-lesson-title')?.innerText?.trim() || 'الدرس الحالي';
         const yearNum = document.getElementById('hdr-year-num')?.innerText?.trim() || (typeof RAW_YEAR !== 'undefined' ? String(RAW_YEAR) : '10');
         const mapKey = document.getElementById('week-badge-map-part')?.innerText?.trim() || '';
@@ -4595,30 +4600,39 @@
         if (Array.isArray(defData?.learn?.slides) && defData.learn.slides.length > 0) {
             slidesText = defData.learn.slides.map((s, i) => `(${i + 1}) ${String(s.text || '').replace(/<[^>]*>/g, '')}`).join('\n');
         } else {
-            const visibleText = document.getElementById('main-content')?.innerText?.trim() || '';
-            slidesText = visibleText;
+            slidesText = document.getElementById('main-content')?.innerText?.trim() || '';
         }
 
         const applyText = Array.isArray(defData?.apply?.steps)
             ? defData.apply.steps.map(s => String(s).replace(/<[^>]*>/g, '')).join('\n')
             : '';
 
+        const fullLessonCorpus = [lessonTitle, lessonGoal, slidesText, applyText].filter(Boolean).join('\n');
+        const minCharLength = Math.max(fullLessonCorpus.length, 320);
+        const minWordCount = Math.max(fullLessonCorpus.split(/\s+/).filter(Boolean).length, 55);
+
         const contextKey = `${yearNum}_${mapKey}_${lessonTitle}`;
-        return { yearNum, lessonTitle, lessonGoal, slidesText, applyText, contextKey };
+        return { yearNum, lessonTitle, lessonGoal, slidesText, applyText, fullLessonCorpus, minCharLength, minWordCount, contextKey };
     }
 
-    function buildLessonSystemInstruction(info) {
+    function buildLessonSystemInstruction(info, requireExpansion = false) {
+        const expansionNote = requireExpansion
+            ? `تنبيه مهم جداً: إجابتك السابقة كانت قصيرة جداً. أعد صياغة الشرح أو الجواب بتفصيل وافٍ وشامل يغطي الفكرة الأساسية والأمثلة والتطبيق العملي والنتيجة الواضحة بحيث لا يقل طول الرد عن ${info.minWordCount} كلمة و${info.minCharLength} حرفاً.`
+            : '';
+
         return [
-            `أنت معلم حكيم، عطوف، وصبور في "مدرسة العلم"، تحاور طالباً عمره (${info.yearNum}) سنوات في مرحلة "عبد".`,
+            `أنت معلم حكيم، عطوف، وصبور، ومفسر دقيق في "مدرسة العلم"، تحاور طالباً عمره (${info.yearNum}) سنوات في مرحلة "عبد".`,
             `عنوان الدرس الحالي: ${info.lessonTitle}.`,
             info.lessonGoal ? `هدف الدرس: ${info.lessonGoal}` : '',
-            info.slidesText ? `محتوى شرائح الدرس:\n${info.slidesText}` : '',
-            info.applyText ? `التطبيق العملي للدرس:\n${info.applyText}` : '',
+            info.slidesText ? `نص الدرس وشرائحه الكاملة:
+${info.slidesText}` : '',
+            info.applyText ? `التطبيق العملي للدرس:
+${info.applyText}` : '',
+            expansionNote,
             `قواعد الشرح والحوار الصارمة:`,
-            `1- تحدث بعربية فصيحة مشرقة خالصة بدون أي كلمات أو حروف إنجليزية إطلاقاً، مشكولة الحركات الأساسية ما أمكن، ومناسبة لطالب عمره ${info.yearNum} سنوات.`,
-            `2- اشرح الفكرة بأمثلة حسية قريبة من حياته اليومية والطبيعة دون إطالة مملة (من 4 إلى 7 أسطر في كل رد).`,
-            `3- اختم شرحك دائماً بسؤال لطيف واحد تتأكد به من فهمه وتشجعه على التفكير والحوار.`,
-            `4- التزم بمضمون الدرس وقيم الإخلاص والعقل والأدب، ولا تخرج إلى مواضيع لا تناسب عمره.`
+            `1- يمنع منعاً باتاً الإجابة بكلمات مقتضبة أو جمل مبتورة أو مختصرة؛ يجب أن يكون شرحك أو جوابك وافياً ومفصلاً ومتماسكاً، وطوله لا يقل بأي حال عن طول نص الدرس نفسه (على الأقل ${info.minWordCount} كلمة و${info.minCharLength} حرفاً)، مع الوصول إلى نتيجة واضحة ومفهومة وربط المعنى بالواقع والعمل.`,
+            `2- عند شرح الدرس أو الإجابة عن سؤال الطالب، اشرح الفكرة خطوة بخطوة بوضوح وعمق يناسب عمر (${info.yearNum}) سنوات، واذكر أمثلة تطبيقية ملموسة، ثم اختم بسؤال تأملي واحد يثبت الفهم ويدفع للحوار.`,
+            `3- تحدث بعربية فصيحة مشرقة خالصة بدون أي كلمات أو حروف إنجليزية إطلاقاً، ومشكولة الحركات الأساسية ما أمكن، والتزم بمضمون الدرس وقيم العقل والأدب.`
         ].filter(Boolean).join('\n');
     }
 
@@ -4647,40 +4661,85 @@
         return { row, bubble };
     }
 
-    async function callTutorBackend(systemInstruction, historyMessages) {
+    function clearPendingThinkingBubble() {
+        if (activePendingMsg && activePendingMsg.row && activePendingMsg.row.parentNode) {
+            activePendingMsg.row.parentNode.removeChild(activePendingMsg.row);
+        }
+        activePendingMsg = null;
+    }
+
+    async function callTutorBackend(systemInstruction, historyMessages, maxTokens = 2400) {
         const workerUrl = localStorage.getItem('al3lm_tutor_worker_url') || PLATFORM_TUTOR_WORKER_URL;
-        const res = await fetch(workerUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ systemInstruction, messages: historyMessages })
-        });
-        if (!res.ok) {
-            throw new Error('NETWORK_OR_SERVER_ERROR');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 35000);
+        try {
+            const res = await fetch(workerUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    systemInstruction,
+                    messages: historyMessages,
+                    maxOutputTokens: maxTokens
+                }),
+                signal: controller.signal
+            });
+            if (!res.ok) {
+                throw new Error('NETWORK_OR_SERVER_ERROR');
+            }
+            const data = await res.json();
+            if (data && typeof data.reply === 'string' && data.reply.trim().length > 0) {
+                return data.reply.trim();
+            }
+            throw new Error('EMPTY_REPLY');
+        } finally {
+            clearTimeout(timeoutId);
         }
-        const data = await res.json();
-        if (data && typeof data.reply === 'string' && data.reply.trim().length > 0) {
-            return data.reply.trim();
-        }
-        throw new Error('EMPTY_REPLY');
+    }
+
+    function isReplyShorterThanLesson(replyText, info) {
+        const cleanReply = String(replyText || '').trim();
+        const wordCount = cleanReply.split(/\s+/).filter(Boolean).length;
+        return cleanReply.length < info.minCharLength || wordCount < info.minWordCount;
     }
 
     async function requestTeacherReply(info, isInitialGreeting = false) {
         if (isTutorBusy) return;
         isTutorBusy = true;
+        clearPendingThinkingBubble();
         const lessonInfo = info || extractCurrentLessonDetails();
-        const pendingMsg = appendMessageBubble('teacher', 'يَتَأَمَّلُ المُعَلِّمُ الدَّرْسَ لِيَشْرَحَهُ لَكَ بِبَسَاطَةٍ...', true);
+        activePendingMsg = appendMessageBubble('teacher', 'يَتَأَمَّلُ المُعَلِّمُ الدَّرْسَ بِتَفْصِيلٍ لِيَشْرَحَهُ لَكَ شَرْحًا وَافِيًا وَوَاضِحًا...', true);
+
         try {
-            const sysPrompt = buildLessonSystemInstruction(lessonInfo);
-            const reply = await callTutorBackend(sysPrompt, tutorConversation);
+            const sysPrompt = buildLessonSystemInstruction(lessonInfo, false);
+            let reply = await callTutorBackend(sysPrompt, tutorConversation, 2400);
+
+            // إذا جاء الرد أقصر من نص الدرس، نطلب توسيع الشرح ليلتزم بالحد الأدنى المطلوب
+            if (isReplyShorterThanLesson(reply, lessonInfo)) {
+                const expandedMessages = [
+                    ...tutorConversation,
+                    { role: 'teacher', text: reply },
+                    {
+                        role: 'student',
+                        text: `هٰذَا مُخْتَصَرٌ يَا أُسْتَاذِي؛ أُرِيدُ شَرْحًا كَامِلًا وَمُفَصَّلًا يَصِلُ إِلَى النَّتِيجَةِ وَالجَوَابِ بِوُضُوحٍ، وَلَا يَقِلُّ طُولُهُ عَنْ طُولِ نَصِّ الدَّرْسِ.`
+                    }
+                ];
+                const expandPrompt = buildLessonSystemInstruction(lessonInfo, true);
+                const expandedReply = await callTutorBackend(expandPrompt, expandedMessages, 3200);
+                if (expandedReply && expandedReply.length > reply.length) {
+                    reply = expandedReply;
+                }
+            }
+
             tutorConversation.push({ role: 'teacher', text: reply });
-            if (pendingMsg && pendingMsg.bubble) pendingMsg.bubble.innerText = reply;
+            if (activePendingMsg && activePendingMsg.bubble) {
+                activePendingMsg.bubble.innerText = reply;
+            }
+            activePendingMsg = null;
             const area = document.getElementById('tutor-messages-area');
             if (area) area.scrollTop = area.scrollHeight;
             speakReplySafely(reply);
         } catch (_) {
-            if (pendingMsg && pendingMsg.row) {
-                pendingMsg.row.remove();
-            }
+            clearPendingThinkingBubble();
             if (tutorConversation.length > 0 && tutorConversation[tutorConversation.length - 1].role === 'student') {
                 tutorConversation.pop();
             }
@@ -4708,7 +4767,7 @@
 
             tutorConversation.push({
                 role: 'student',
-                text: `يَا أُسْتَاذِي، أَنَا لَمْ أَفْهَمْ دَرْسَ «${info.lessonTitle}» جَيِّداً، هَلْ يُمْكِنُكَ أَنْ تُعِيدَ شَرْحَهُ لِي بِطَرِيقَةٍ مُبَسَّطَةٍ وَمُشَوِّقَةٍ؟`
+                text: `يَا أُسْتَاذِي، أَنَا لَمْ أَفْهَمْ دَرْسَ «${info.lessonTitle}» جَيِّداً، هَلْ يُمْكِنُكَ أَنْ تُعِيدَ شَرْحَهُ لِي شَرْحًا كَامِلًا وَمُفَصَّلًا وَمُبَسَّطًا حَتَّى أَصِلَ إِلَى الفَهْمِ الكَامِلِ وَالنَّتِيجَةِ؟`
             });
             requestTeacherReply(info, true);
         }
@@ -4721,12 +4780,14 @@
     };
 
     window.sendStudentMessageToTutor = function() {
-        if (isTutorBusy) return;
         const inputEl = document.getElementById('tutor-user-input');
         if (!inputEl) return;
         const txt = inputEl.value.trim();
         if (!txt) return;
+        if (isTutorBusy) return;
+
         inputEl.value = '';
+        inputEl.style.height = 'auto';
         stopPageSpeechSafely();
         appendMessageBubble('student', txt, false);
         tutorConversation.push({ role: 'student', text: txt });
@@ -4734,12 +4795,20 @@
     };
 
     const inputField = document.getElementById('tutor-user-input');
+    const sendBtn = document.getElementById('tutor-send-btn');
     if (inputField) {
         inputField.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 window.sendStudentMessageToTutor();
             }
+        });
+    }
+    if (sendBtn) {
+        sendBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.sendStudentMessageToTutor();
         });
     }
 
@@ -4781,6 +4850,5 @@
 })();
 </script>
 <!-- ==================== [ نهاية وحدة المعلم المحاور الذكي لمرحلة عبد stage2.html ] ==================== -->
-
 </body>
 </html>
