@@ -271,7 +271,7 @@
             flex-shrink: 0;
         }
 
-        /* ================= ٢. الشريط العمودي: المادة الأساسية أكبر حجماً وبروزاً دوماً من البقية ================= */
+        /* ================= ٢. الشريط العمودي: المادة الأساسية أكبر حجماً وبروزاً دوماً ================= */
         .layout-wrapper {
             flex: 1 1 auto;
             min-height: 0;
@@ -298,7 +298,6 @@
             z-index: 100;
         }
 
-        /* المواد العامة الست (٥٪): رشيقة ومصغرة */
         .seal-btn {
             position: relative;
             width: 82%;
@@ -318,7 +317,6 @@
             padding: 3px;
         }
 
-        /* المادة الأساسية المختارة (٧٠٪): بوابة كبرى مضاعفة الحجم والعرض دوماً! */
         .seal-btn.major-seal {
             width: 108%;
             flex: 2.25 1 0;
@@ -421,7 +419,7 @@
             transform: scale(1.03);
         }
 
-        /* ================= ٣. مساحة العمل الموحدة التمرير ================= */
+        /* ================= ٣. مساحة العمل وشريط المحطات ================= */
         main.workspace {
             flex: 1 1 auto;
             min-width: 0;
@@ -522,19 +520,22 @@
             text-align: center;
         }
 
-        /* ================= ٤. تمرير موحد لساحة المحتوى (الدرس / السؤال + المجيب / التطبيق) ================= */
+        /* ================= ٤. ساحة التمرير الموحدة الحرة (لا تضغط أي عنصر داخلي أبداً) ================= */
         .station-body-host {
             flex: 1 1 auto;
             min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 16px 18px 96px 18px;
+            padding: 16px 18px 104px 18px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 18px;
             scroll-behavior: smooth;
         }
-        .station-body-host::-webkit-scrollbar { width: 9px; }
+        .station-body-host > * {
+            flex-shrink: 0 !important; /* يمنع المتصفح من عصر أو إخفاء صندوق المجيب الآلي! */
+        }
+        .station-body-host::-webkit-scrollbar { width: 10px; }
         .station-body-host::-webkit-scrollbar-track { background: rgba(209, 250, 229, 0.5); border-radius: 8px; }
         .station-body-host::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #10b981, #065f46); border-radius: 8px; }
 
@@ -552,7 +553,6 @@
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            flex-shrink: 0;
         }
         .lesson-title-banner.major-banner {
             background: linear-gradient(135deg, #451a03 0%, #064e3b 55%, #047857 100%);
@@ -615,7 +615,6 @@
             color: #064e3b;
         }
 
-        /* شكل العرض المقتضب للثقافة العامة (٥٪) من الكتاب العام */
         .general-culture-card {
             width: 100%;
             max-width: 880px;
@@ -675,7 +674,7 @@
         .lab-ctrl-group { display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; font-weight: 800; color: #e2e8f0; }
         .lab-val-badge { background: #065f46; color: #fde047; padding: 2px 9px; border-radius: 8px; font-weight: 900; }
 
-        /* ================= ٥. محطة السؤال (القالب في الأعلى + المجيب الآلي المدمج أسفله مباشرة) ================= */
+        /* ================= ٥. محطة السؤال والمحاورة (القالب + المجيب الآلي المفتوح كاملاً بالأسفل) ================= */
         .quiz-card-shell {
             width: 100%;
             max-width: 880px;
@@ -683,7 +682,7 @@
             background: #ffffff;
             border: 2.5px solid #6ee7b7;
             border-radius: 22px;
-            padding: clamp(16px, 2.8vmin, 24px);
+            padding: clamp(16px, 2.6vmin, 22px);
             display: flex;
             flex-direction: column;
             gap: 14px;
@@ -700,10 +699,10 @@
             border-bottom: 2px dashed #d1fae5;
             flex-wrap: wrap;
         }
-        .quiz-prompt-text { font-size: clamp(0.98rem, 2.2vmin, 1.2rem); font-weight: 900; color: #065f46; }
-        .quiz-tools-grp { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .quiz-prompt-text { font-size: clamp(0.98rem, 2.2vmin, 1.18rem); font-weight: 900; color: #065f46; }
+        .quiz-tools-grp { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
-        .ray-reroll-btn, .ai-inject-q-btn {
+        .ray-reroll-btn, .ai-inject-q-btn, .jump-tutor-btn {
             display: inline-flex;
             align-items: center;
             gap: 5px;
@@ -715,74 +714,67 @@
             cursor: pointer;
             transition: transform 0.16s ease;
         }
-        .ray-reroll-btn {
-            border: 2px solid #059669;
-            background: #ecfdf5;
-            color: #064e3b;
-        }
-        .ai-inject-q-btn {
-            border: 2px solid #eab308;
-            background: linear-gradient(135deg, #78350f, #064e3b);
-            color: #fef08a;
-        }
-        .ray-reroll-btn:hover, .ai-inject-q-btn:hover { transform: translateY(-1px); }
+        .ray-reroll-btn { border: 2px solid #059669; background: #ecfdf5; color: #064e3b; }
+        .ai-inject-q-btn { border: 2px solid #eab308; background: linear-gradient(135deg, #78350f, #064e3b); color: #fef08a; }
+        .jump-tutor-btn { border: 2px solid #eab308; background: #fef9c3; color: #78350f; }
+        .ray-reroll-btn:hover, .ai-inject-q-btn:hover, .jump-tutor-btn:hover { transform: translateY(-1px); }
 
         .quiz-stem-box {
             background: linear-gradient(145deg, #ecfdf5, #fefce8);
             border: 2px solid #34d399;
             border-radius: 18px;
-            padding: 15px 18px;
+            padding: 14px 18px;
             font-family: 'Amiri', 'Cairo', serif;
-            font-size: clamp(1.18rem, 2.6vmin, 1.55rem);
+            font-size: clamp(1.16rem, 2.5vmin, 1.5rem);
             line-height: 1.9;
             color: #0f172a;
             text-align: center;
         }
 
-        .order-slots-zone { min-height: 64px; padding: 12px; border-radius: 18px; background: #f8fafc; border: 2px dashed #10b981; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
-        .order-pool-zone { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 6px 0; }
-        .order-tile-btn { padding: 9px 15px; border-radius: 14px; border: 2px solid #10b981; background: #ffffff; color: #0f172a; font-family: 'Amiri', 'Cairo', serif; font-size: clamp(1.05rem, 2.4vmin, 1.32rem); font-weight: 700; cursor: pointer; }
+        .order-slots-zone { min-height: 62px; padding: 10px; border-radius: 18px; background: #f8fafc; border: 2px dashed #10b981; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+        .order-pool-zone { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 6px 0; }
+        .order-tile-btn { padding: 8px 14px; border-radius: 14px; border: 2px solid #10b981; background: #ffffff; color: #0f172a; font-family: 'Amiri', 'Cairo', serif; font-size: clamp(1.02rem, 2.3vmin, 1.28rem); font-weight: 700; cursor: pointer; }
         .order-tile-btn.placed-tile { background: #d1fae5; border-color: #059669; }
         .order-tile-btn.tile-correct { background: #dcfce7; border-color: #16a34a; color: #14532d; }
         .order-tile-btn.tile-wrong { background: #ffe4e6; border-color: #e11d48; color: #881337; }
 
-        .mcq-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-        .quiz-opt-btn { padding: 12px 15px; border-radius: 16px; border: 2px solid #cbd5e1; background: #ffffff; color: #0f172a; font-family: 'Amiri', 'Cairo', serif; font-size: clamp(1.05rem, 2.4vmin, 1.32rem); line-height: 1.65; font-weight: 700; text-align: right; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .mcq-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 10px; }
+        .quiz-opt-btn { padding: 11px 14px; border-radius: 16px; border: 2px solid #cbd5e1; background: #ffffff; color: #0f172a; font-family: 'Amiri', 'Cairo', serif; font-size: clamp(1.02rem, 2.3vmin, 1.28rem); line-height: 1.6; font-weight: 700; text-align: right; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .quiz-opt-btn:hover:not(:disabled) { border-color: #059669; background: #ecfdf5; }
         .quiz-opt-btn.correct { border-color: #16a34a; background: #dcfce7; color: #14532d; }
         .quiz-opt-btn.wrong { border-color: #e11d48; background: #ffe4e6; color: #881337; }
 
         .tf-buttons-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .tf-choice-btn { padding: 15px; border-radius: 18px; border: 2.5px solid #cbd5e1; background: #ffffff; font-family: inherit; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
+        .tf-choice-btn { padding: 14px; border-radius: 18px; border: 2.5px solid #cbd5e1; background: #ffffff; font-family: inherit; font-size: 1.15rem; font-weight: 900; cursor: pointer; }
 
         .math-circles-pool { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 12px; background: #f8fafc; border-radius: 18px; border: 2px dashed #94a3b8; }
-        .math-eq-circle { min-width: 82px; height: 82px; padding: 0 10px; border-radius: 999px; border: 3px solid #059669; background: radial-gradient(circle at 30% 30%, #ffffff, #d1fae5); color: #0f172a; font-weight: 900; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; direction: ltr; cursor: pointer; }
+        .math-eq-circle { min-width: 80px; height: 80px; padding: 0 10px; border-radius: 999px; border: 3px solid #059669; background: radial-gradient(circle at 30% 30%, #ffffff, #d1fae5); color: #0f172a; font-weight: 900; font-size: 0.98rem; display: inline-flex; align-items: center; justify-content: center; direction: ltr; cursor: pointer; }
         .math-eq-circle.selected-circle { border-color: #eab308; background: #fef9c3; transform: scale(1.07); }
-        .math-baskets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-        .math-basket-box { min-height: 110px; border-radius: 20px; border: 3px solid #059669; background: linear-gradient(180deg, #ecfdf5, #d1fae5); padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; cursor: pointer; }
-        .basket-target-num { font-size: 1.28rem; font-weight: 900; color: #064e3b; }
+        .math-baskets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; }
+        .math-basket-box { min-height: 106px; border-radius: 20px; border: 3px solid #059669; background: linear-gradient(180deg, #ecfdf5, #d1fae5); padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; cursor: pointer; }
+        .basket-target-num { font-size: 1.25rem; font-weight: 900; color: #064e3b; }
         .mini-solved-eq { padding: 2px 8px; border-radius: 999px; background: #059669; color: #ffffff; font-size: 0.78rem; font-weight: 800; direction: ltr; }
 
         .cloze-top-choices { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 10px; border-radius: 16px; background: #ecfdf5; border: 2px solid #6ee7b7; }
-        .cloze-word-pill { padding: 8px 16px; border-radius: 999px; border: 2px solid #059669; background: #ffffff; font-family: 'Amiri', 'Cairo', serif; font-size: 1.15rem; font-weight: 800; cursor: pointer; }
+        .cloze-word-pill { padding: 8px 16px; border-radius: 999px; border: 2px solid #059669; background: #ffffff; font-family: 'Amiri', 'Cairo', serif; font-size: 1.12rem; font-weight: 800; cursor: pointer; }
         .cloze-blank-slot { display: inline-flex; align-items: center; justify-content: center; min-width: 110px; padding: 2px 12px; margin: 0 5px; border-radius: 10px; border: 2px dashed #059669; background: #ffffff; color: #059669; font-weight: 900; }
         .cloze-blank-slot.filled-right { border-style: solid; border-color: #16a34a; background: #dcfce7; color: #14532d; }
 
         .adab-list-stack { display: flex; flex-direction: column; gap: 8px; }
         .adab-counter-badge { align-self: center; padding: 4px 14px; border-radius: 999px; background: #fef9c3; border: 2px solid #eab308; color: #713f12; font-weight: 900; font-size: 0.9rem; }
 
-        /* ================= المجيب الآلي المدمج مباشرة أسفل السؤال (مبني على Worker المرحلة الثانية) ================= */
+        /* ================= صندوق المجيب الآلي المفتوح بالكامل (لا ينكمش ولا يختفي شريط كتابته أبداً) ================= */
         .embedded-tutor-box {
             width: 100%;
             max-width: 880px;
             margin: 0 auto;
             background: linear-gradient(145deg, #09221a 0%, #0f172a 100%);
-            border: 2.5px solid #eab308;
+            border: 3px solid #eab308;
             border-radius: 24px;
-            box-shadow: 0 14px 34px rgba(6, 30, 24, 0.25);
+            box-shadow: 0 14px 34px rgba(6, 30, 24, 0.28);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            flex-shrink: 0 !important;
         }
 
         .embedded-tutor-hdr {
@@ -790,51 +782,52 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            padding: 10px 16px;
-            background: linear-gradient(135deg, rgba(6, 78, 59, 0.92), rgba(15, 23, 42, 0.96));
-            border-bottom: 1.5px solid rgba(250, 204, 21, 0.42);
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.94), rgba(15, 23, 42, 0.96));
+            border-bottom: 1.5px solid rgba(250, 204, 21, 0.45);
+            border-radius: 21px 21px 0 0;
             flex-wrap: wrap;
         }
         .tutor-id-row { display: flex; align-items: center; gap: 10px; }
         .tutor-orb {
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fef08a, #eab308);
             border: 2px solid #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             flex-shrink: 0;
         }
-        .tutor-hdr-title { color: #fef08a; font-size: 0.95rem; font-weight: 900; }
-        .tutor-hdr-sub { color: #a7f3d0; font-size: 0.76rem; font-weight: 700; }
+        .tutor-hdr-title { color: #fef08a; font-size: 0.98rem; font-weight: 900; }
+        .tutor-hdr-sub { color: #a7f3d0; font-size: 0.78rem; font-weight: 700; }
 
         .tutor-messages-stream {
-            min-height: 170px;
-            max-height: 340px;
+            min-height: 160px;
+            max-height: 320px;
             overflow-y: auto;
             padding: 14px 16px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        .tutor-msg-row { display: flex; flex-direction: column; max-width: 90%; gap: 4px; }
+        .tutor-msg-row { display: flex; flex-direction: column; max-width: 90%; gap: 4px; flex-shrink: 0; }
         .tutor-msg-row.teacher { align-self: flex-start; }
         .tutor-msg-row.student { align-self: flex-end; }
 
         .tutor-bubble {
-            padding: 11px 15px;
+            padding: 12px 16px;
             border-radius: 18px;
-            font-size: clamp(0.94rem, 2.1vmin, 1.1rem);
+            font-size: clamp(0.95rem, 2.1vmin, 1.1rem);
             font-weight: 700;
             line-height: 1.85;
             text-align: right;
             white-space: pre-line;
         }
         .tutor-msg-row.teacher .tutor-bubble {
-            background: rgba(240, 253, 244, 0.96);
+            background: rgba(240, 253, 244, 0.97);
             color: #0f172a;
             border: 2px solid #10b981;
             border-top-right-radius: 4px;
@@ -849,30 +842,33 @@
         .tutor-input-bar {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            background: rgba(6, 30, 23, 0.96);
-            border-top: 1.5px solid rgba(110, 231, 183, 0.28);
+            gap: 10px;
+            padding: 12px 14px;
+            background: rgba(6, 30, 23, 0.98);
+            border-top: 2px solid rgba(250, 204, 21, 0.45);
+            border-radius: 0 0 21px 21px;
+            flex-shrink: 0;
         }
         #s3-tutor-input {
             flex: 1 1 auto;
             min-width: 0;
-            background: rgba(255, 255, 255, 0.96);
+            min-height: 46px;
+            background: #ffffff;
             color: #0f172a;
             border: 2px solid #10b981;
             border-radius: 16px;
-            padding: 9px 14px;
+            padding: 10px 14px;
             font-family: inherit;
-            font-size: 0.94rem;
+            font-size: 0.96rem;
             font-weight: 700;
             outline: none;
-            resize: none;
+            resize: vertical;
         }
-        #s3-tutor-input:focus { border-color: #fde047; }
+        #s3-tutor-input:focus { border-color: #fde047; box-shadow: 0 0 0 3px rgba(253, 224, 71, 0.28); }
 
         .tutor-action-circle {
-            width: 42px;
-            height: 42px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
             border: 2px solid #fde047;
             display: flex;
@@ -880,17 +876,17 @@
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
         }
         .tutor-send-circle { background: linear-gradient(135deg, #10b981, #047857); color: #ffffff; }
-        .tutor-mic-circle { background: rgba(255, 255, 255, 0.12); color: #fef08a; }
+        .tutor-mic-circle { background: rgba(255, 255, 255, 0.14); color: #fef08a; }
         .tutor-mic-circle.recording { background: #dc2626; color: #ffffff; }
 
-        /* ================= ٦. محطة التطبيق العملي (تُحقن من الكتاب العام) ================= */
+        /* ================= ٦. محطة التطبيق العملي ================= */
         .apply-card-box {
             width: 100%;
             max-width: 840px;
-            margin: auto;
+            margin: 0 auto;
             background: linear-gradient(145deg, #ffffff, #ecfdf5);
             border: 3px solid #10b981;
             border-radius: 26px;
@@ -1078,7 +1074,7 @@
         </button>
     </header>
 
-    <!-- ٢. مساحة العمل + الشريط العمودي للأختام (المادة المختارة تظهر أكبر حجماً وبروزاً دوماً) -->
+    <!-- ٢. مساحة العمل + الشريط العمودي للأختام -->
     <div class="layout-wrapper">
         <aside class="sidebar-nav" id="seals-sidebar" aria-label="الأختام السبعة">
             <button type="button" class="seal-btn" id="btn-subj-1" data-seal="1" title="المنطق والبيان">
@@ -1138,10 +1134,9 @@
                     <button type="button" class="st-pill active" id="st-pill-0" data-st="0">📖 دَرْسٌ</button>
                     <button type="button" class="st-pill" id="st-pill-1" data-st="1">❓ سُؤَالٌ وَمُحَاوَرَةٌ</button>
                     <button type="button" class="st-pill" id="st-pill-2" data-st="2">🌱 تَطْبِيقٌ</button>
-                    <span class="book-source-badge" id="book-source-badge">📚 الكِتَابُ العَامُّ</span>
+                    <span class="book-source-badge" id="book-source-badge">📚 المَنْهَجُ العَامُّ</span>
                 </div>
 
-                <!-- بدون أي قارئ آلي (TTS) في المنصة الثالثة -->
                 <div class="media-controls-cluster" id="station-media-bar">
                     <button type="button" class="icon-ctrl-btn" id="slide-prev-btn" title="الشريحة السابقة">▶</button>
                     <span class="slide-counter-badge" id="slide-counter-badge">١ / ١</span>
@@ -1210,12 +1205,15 @@
     <div id="app-toast"></div>
 
     <!-- ============================================================================ -->
-    <!-- ١. نظام تحميل وفصل «الكتاب العام» (للمواد العامة والمجيب والتطبيق) عن «الكتاب التخصصي» -->
+    <!-- ١. نظام تحميل البيانات الموحد بدون أي رسائل تقنية أو ملاحظات خارجية -->
     <!-- ============================================================================ -->
     <script>
-        window.STAGE3_GENERAL_BOOK = window.STAGE3_GENERAL_BOOK || {}; // { 15: { 1: { 1..7 }, ... 140 }, 16: { 1..168 }, 17: { 1..196 } }
-        window.STAGE3_MAJOR_BOOKS  = window.STAGE3_MAJOR_BOOKS  || {}; // { "15_4": { 1: { slides: [...] }, ... } }
-        window._loadedS3Files = window._loadedS3Files || {};
+        window.STAGE3_GENERAL_BOOK = window.STAGE3_GENERAL_BOOK || {};
+        window.STAGE3_MAJOR_BOOKS  = window.STAGE3_MAJOR_BOOKS  || {};
+        window.STAGE3_CURRICULA    = window.STAGE3_CURRICULA    || {};
+        window.STAGE2_CURRICULA    = window.STAGE2_CURRICULA    || {};
+        window.curriculumData      = window.curriculumData      || {};
+        window._loadedS3Files      = window._loadedS3Files      || {};
 
         function loadScriptOnce(src, cb) {
             if (window._loadedS3Files[src]) { cb(); return; }
@@ -1226,22 +1224,81 @@
             document.head.appendChild(s);
         }
 
-        // يحمّل الكتاب العام للسنة (5 أو 6 أو 7 دورات) + يحمّل حصراً كتاب المادة الأساسية المختارة (70%)
+        function syncLegacyPacksIfPresent(year, cycleNum) {
+            window.STAGE3_GENERAL_BOOK[year] = window.STAGE3_GENERAL_BOOK[year] || {};
+            const pack = window.STAGE3_CURRICULA[`Y${year}_C${cycleNum}`]
+                      || window.STAGE2_CURRICULA[`Y${year}_C${cycleNum}`];
+            if (pack && Array.isArray(pack.units)) {
+                const offset = (cycleNum - 1) * 28;
+                pack.units.forEach((u, idx) => {
+                    const gw = offset + (parseInt(u.unit, 10) || (idx + 1));
+                    window.STAGE3_GENERAL_BOOK[year][gw] = window.STAGE3_GENERAL_BOOK[year][gw] || {};
+                    if (!u.seals) return;
+                    for (let s = 1; s <= 7; s++) {
+                        const sl = u.seals[s] || u.seals[String(s)];
+                        if (!sl || window.STAGE3_GENERAL_BOOK[year][gw][s]) continue;
+                        const fullTxt = [sl.basmala, sl.verses, sl.content].filter(Boolean).join('\n\n').trim();
+                        const paras = String(sl.content || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+                        window.STAGE3_GENERAL_BOOK[year][gw][s] = {
+                            title: sl.title || '',
+                            headings: sl.headings || (sl.title ? [sl.title] : []),
+                            essence: fullTxt || sl.title || '',
+                            slides: paras.length > 0
+                                ? [
+                                    ...(sl.verses ? [{ heading: sl.title || '', text: sl.basmala ? `${sl.basmala}\n${sl.verses}` : sl.verses, isQuran: true }] : []),
+                                    ...paras.map(p => ({ heading: '', text: p }))
+                                  ]
+                                : [{ heading: sl.title || '', text: fullTxt }],
+                            apply: sl.apply || paras[paras.length - 1] || ''
+                        };
+                    }
+                });
+            }
+
+            const cData = window.curriculumData[year];
+            if (cData) {
+                Object.keys(cData).forEach(wKey => {
+                    const gw = parseInt(wKey, 10);
+                    if (isNaN(gw)) return;
+                    window.STAGE3_GENERAL_BOOK[year][gw] = window.STAGE3_GENERAL_BOOK[year][gw] || {};
+                    for (let s = 1; s <= 7; s++) {
+                        const item = cData[gw]?.[s];
+                        if (!item || window.STAGE3_GENERAL_BOOK[year][gw][s]) continue;
+                        const slides = item.learn?.slides || [];
+                        const joined = slides.map(x => x.text).filter(Boolean).join('\n\n');
+                        window.STAGE3_GENERAL_BOOK[year][gw][s] = {
+                            title: item.learn?.introTitle || '',
+                            headings: item.learn?.headings || (item.learn?.introTitle ? [item.learn.introTitle] : []),
+                            essence: joined,
+                            slides: slides,
+                            apply: (item.apply?.steps || []).join('\n\n'),
+                            mathBaskets: item.mathBaskets || null
+                        };
+                    }
+                });
+            }
+        }
+
         function ensureStage3BooksLoaded(year, cycleNum, majorSeal, callback) {
             const files = [
+                `curriculum-y${year}.js`,
+                `curriculum-y${year}-c${cycleNum}.js`,
                 `curriculum-s3-general-y${year}.js`,
-                `curriculum-s3-general-y${year}-c${cycleNum}.js`,
-                `curriculum-s3-major-y${year}-s${majorSeal}.js`,
-                `curriculum-s3-major-s${majorSeal}.js`
+                `curriculum-s3-major-y${year}-s${majorSeal}.js`
             ];
             let pending = files.length;
-            const done = () => { if (--pending <= 0 && typeof callback === 'function') callback(); };
+            const done = () => {
+                if (--pending <= 0) {
+                    syncLegacyPacksIfPresent(year, cycleNum);
+                    if (typeof callback === 'function') callback();
+                }
+            };
             files.forEach(f => loadScriptOnce(f, done));
         }
     </script>
 
     <!-- ============================================================================ -->
-    <!-- ٢. محرك الأسئلة السباعي (السؤال العام من الكتاب العام | الشعاع السباعي الكامل للمادة الأساسية) -->
+    <!-- ٢. محرك الأسئلة السباعي -->
     <!-- ============================================================================ -->
     <script>
 (function(exports) {
@@ -1288,38 +1345,35 @@
     return (fem ? 'ليست ' : 'ليس ') + s;
   }
 
-  // توليد أي نمط من الأنماط السبعة بناءً على نوع الشعاع المطلوب (1..7)
   function buildQuestionByPattern(patternType, sourceTexts, generalEntry, week) {
-    // إذا كان هناك سؤال محقون جاهز في الكتاب العام للمواد غير الأساسية، نعرضه أولاً عند عدم طلب تنويع الشعاع
     if (generalEntry?.generalQuestion && !patternType._forceRay) {
       const gq = generalEntry.generalQuestion;
       if (gq.type) return gq;
       if (Array.isArray(gq.options)) {
-        return { type: 'mcq_half', prompt: gq.prompt || 'اختر الإجابة الصحيحة على ضوء الفكرة العامة للدرس:', stem: gq.q || gq.stem || '', options: shuffle(gq.options) };
+        return { type: 'mcq_half', prompt: gq.prompt || 'اختر الإجابة الصحيحة على ضوء الدرس:', stem: gq.q || gq.stem || '', options: shuffle(gq.options) };
       }
     }
 
     const mode = patternType._mode || patternType;
     const sents = extractCleanSentences(sourceTexts, 5, 34);
-    const fallbackSent = sents[0] || generalEntry?.essence || 'العلم الراسخ يقوم على الدليل العقلي والتجربة المنضبطة.';
+    const fallbackSent = sents[0] || generalEntry?.essence || generalEntry?.title || 'يقوم البرهان العلمي على الملاحظة الدقيقة والاستدلال الصحيح.';
 
-    // نمط ١: الترتيب المنطقي (order)
     if (mode === 1) {
-      const target = sents[Math.floor(Math.random() * sents.length)] || fallbackSent;
-      let parts = target.split(/\s*[،؛:]\s*/).map(p => p.trim()).filter(p => p.split(/\s+/).length >= 2);
+      const quranRaw = (sourceTexts || []).find(t => t && t.includes('﴿')) || fallbackSent;
+      let cleanQ = quranRaw.replace(/[﴿﴾]/g, '').replace(/۝[٠-٩\d]+/g, '|').replace(/\(\d+\)/g, '|').trim();
+      let parts = cleanQ.split(/\||\s*[،؛:]\s*/).map(p => p.trim()).filter(p => p.split(/\s+/).length >= 2);
       if (parts.length >= 3) {
         const picked = parts.slice(0, 4);
         let scr = shuffle(picked.map((c, i) => ({ id: i, label: c })));
         if (scr.every((it, i) => it.id === i)) scr.reverse();
-        return { type: 'order', modeLabel: 'رتّب المقاطع الفكرية التالية وفق تسلسلها المنطقي في الدرس:', correctOrder: picked, tiles: scr };
+        return { type: 'order', modeLabel: 'رتّب المقاطع التالية وفق تسلسلها الصحيح في النص:', correctOrder: picked, tiles: scr };
       }
-      const wToks = target.split(/\s+/).filter(Boolean).slice(0, 7);
+      const wToks = cleanQ.split(/\s+/).filter(Boolean).slice(0, 7);
       let scr = shuffle(wToks.map((w, i) => ({ id: i, label: w })));
       if (scr.every((it, i) => it.id === i) && scr.length > 1) scr.reverse();
-      return { type: 'order', modeLabel: 'رتّب الكلمات لتكوين القاعدة الواردة في الدرس:', correctOrder: wToks, tiles: scr };
+      return { type: 'order', modeLabel: 'رتّب الكلمات لتكوين العبارة الواردة في الدرس:', correctOrder: wToks, tiles: scr };
     }
 
-    // نمط ٣: تمييز الصواب والخطأ (true_false)
     if (mode === 3) {
       const chosen = sents[Math.floor(Math.random() * sents.length)] || fallbackSent;
       const isT = Math.random() < 0.5;
@@ -1331,7 +1385,6 @@
       };
     }
 
-    // نمط ٤: سلال المعادلات والمقادير (math_baskets)
     if (mode === 4) {
       if (generalEntry?.mathBaskets && Array.isArray(generalEntry.mathBaskets.baskets)) {
         return {
@@ -1358,7 +1411,6 @@
       return { type: 'math_baskets', prompt: 'ضَعْ كُلَّ مِقْدَارٍ رِيَاضِيٍّ فِي سَلَّةِ القِيمَةِ المُطَابِقَةِ لَهُ:', baskets, circles: shuffle(circles) };
     }
 
-    // نمط ٦: ملء المصطلح المحوري (science_cloze)
     if (mode === 6) {
       const chosen = sents[Math.floor(Math.random() * sents.length)] || fallbackSent;
       const tokens = chosen.split(/\s+/).filter(Boolean);
@@ -1380,7 +1432,6 @@
       };
     }
 
-    // نمط ٧: الاختيار المتعدد المركب (adab_multiselect)
     if (mode === 7 && sents.length >= 2) {
       const uniq = [...new Set(sents)];
       const req = Math.min(3, uniq.length);
@@ -1394,7 +1445,6 @@
       };
     }
 
-    // نمط ٢ و ٥ (إكمال العبارة / اختيار من متعدد دقيق mcq_half)
     const chosen = sents[Math.floor(Math.random() * sents.length)] || fallbackSent;
     const words = chosen.split(/\s+/).filter(Boolean);
     const half = Math.ceil(words.length / 2);
@@ -1498,12 +1548,12 @@ window.Stage3LabEngine = (function() {
     </script>
 
     <!-- ============================================================================ -->
-    <!-- ٤. المحرك الرئيسي لمرحلة صاحب + المجيب الآلي المدمج (بنفس Worker المرحلة الثانية) -->
+    <!-- ٤. المحرك الرئيسي لمرحلة صاحب + المجيب الآلي المفتوح دائماً -->
     <!-- ============================================================================ -->
     <script>
 (function initStage3App() {
     const PLATFORM_TUTOR_WORKER_URL = localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
-    const TUTOR_MEM_PREFIX = 'al3lm_stage3_tutor_mem_v1_';
+    const TUTOR_MEM_PREFIX = 'al3lm_stage3_tutor_mem_v2_';
 
     const ABJAD = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي','ك','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
     const SEAL_NAMES = {
@@ -1525,7 +1575,6 @@ window.Stage3LabEngine = (function() {
         7: 'عِلْمُ النَّفْسِ التَّرْبَوِيُّ وَبِنَاءُ المَنَاهِجِ وَالعُمْرَانُ'
     };
 
-    // التوزيع الثابت للدورات الـ ١٨: عمر ١٥ (٥ دورات)، عمر ١٦ (٦ دورات)، عمر ١٧ (٧ دورات)
     const YEAR_CYCLES_MAP = { 15: 5, 16: 6, 17: 7, 18: 1, 19: 1, 20: 1, 21: 1 };
     const STAGE3_GLOBAL_CYCLE_OFFSET = { 15: 10, 16: 15, 17: 21, 18: 28, 19: 28, 20: 28, 21: 28 };
     const CYCLE_AR_NAMES = ['', 'الأُولَى', 'الثَّانِيَةُ', 'الثَّالِثَةُ', 'الرَّابِعَةُ', 'الخَامِسَةُ', 'السَّادِسَةُ', 'السَّابِعَةُ'];
@@ -1542,7 +1591,6 @@ window.Stage3LabEngine = (function() {
 
     let isFreeExplore = SafeStore.get('stage3_explore_mode') === 'true';
 
-    // ميثاق التخصص المقفل لمرة واحدة
     const MAJOR_SEAL_KEY = 's3_committed_major_seal';
     const MAJOR_LOCKED_KEY = 's3_committed_major_locked';
 
@@ -1563,12 +1611,12 @@ window.Stage3LabEngine = (function() {
     let playWeek = 1;
     let selectedMapCycle = 1;
     let activeSeal = getMajorSeal();
-    let activeStation = 0; // 0: درس | 1: سؤال ومحاورة | 2: تطبيق
+    let activeStation = 0;
     let currentSlideIdx = 0;
     let isLabMode = false;
     let currentQuestionResolved = false;
     let currentQuizData = null;
-    let majorRayIndex = 0; // يدور عبر أنماط الأسئلة الـ ٧ للمادة الأساسية كشعاع شامل
+    let majorRayIndex = 0;
 
     const getTotalCycles = () => YEAR_CYCLES_MAP[activeYear] || 5;
     const getTotalWeeks = () => getTotalCycles() * 28;
@@ -1612,7 +1660,6 @@ window.Stage3LabEngine = (function() {
         return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    // إدارة النجوم والمعدل المرجح (٧٠٪ للمادة الأساسية + ٥٪ × ٦ للمواد العامة)
     function starKey(y, w, s) { return `s3_star_y${y}_w${w}_s${s}`; }
     function stationKey(y, w, s) { return `s3_st_y${y}_w${w}_s${s}`; }
 
@@ -1662,7 +1709,7 @@ window.Stage3LabEngine = (function() {
     }
     function isWeekUnlocked(w) { return isFreeExplore || w <= getMaxUnlockedWeek(activeYear); }
 
-    // ١. جلب بيانات «الكتاب العام» (يغذي المواد الـ ٦ العامة + يغذي المجيب الآلي + يغذي محطة التطبيق دائماً)
+    // قراءة نظيفة من الكتاب العام بدون أي ملاحظات تقنية أو إشارة لملفات خارجية
     function getGeneralBookEntry(y, w, s) {
         const gBook = window.STAGE3_GENERAL_BOOK?.[y]?.[w]?.[s];
         if (gBook) return gBook;
@@ -1672,30 +1719,32 @@ window.Stage3LabEngine = (function() {
         const ltr = ABJAD[localIdx] || 'أ';
         const sealTitle = SEAL_NAMES[s] || 'الدَّرْسُ';
         return {
-            title: `${sealTitle} — دَوْرَةُ (${toAr(cyc)}) حَرْفُ (${ltr})`,
-            headings: [`المِحْوَرُ الرَّئِيسِيُّ فِي ${sealTitle}`, `الفِكْرَةُ الفَرْعِيَّةُ لِوَحْدَةِ (${ltr})`],
-            essence: `خُلَاصَةُ الثَّقَافَةِ العَامَّةِ لِهٰذِهِ الوَحْدَةِ فِي (${sealTitle}) قَيْدُ التَّحْمِيلِ مِنْ مَلَفِّ الكِتَابِ العَامِّ (curriculum-s3-general-y${y}.js).`,
+            title: `${sealTitle} — الدَّوْرَةُ ${CYCLE_AR_NAMES[cyc] || toAr(cyc)} (${ltr})`,
+            headings: [`مِحْوَرُ ${sealTitle}`, `وَحْدَةُ حَرْفِ (${ltr})`],
+            essence: `${sealTitle} — وَحْدَةُ حَرْفِ (${ltr}) فِي الدَّوْرَةِ ${CYCLE_AR_NAMES[cyc] || toAr(cyc)}.`,
             tutorContext: `الوحدة (${w}) حرف (${ltr}) في مادة (${sealTitle}) لعمر ${y} سنة.`,
-            apply: `طَبِّقِ الخُلَاصَةَ العَمَلِيَّةَ المُقَرَّرَةَ فِي الكِتَابِ العَامِّ لِوَحْدَةِ (${ltr}) فِي (${sealTitle}).`,
+            apply: `طَبِّقِ المَفْهُومَ العَمَلِيَّ لِوَحْدَةِ (${ltr}) فِي مَيْدَانِ (${sealTitle}).`,
             generalQuestion: null
         };
     }
 
-    // ٢. جلب بيانات «الكتاب التخصصي الكامل» حصراً للمادة الأساسية المختارة (٧٠٪)
+    // قراءة المادة التخصصية بدون أي جملة ملاحظة إضافية في آخر النص نهائياً!
     function getMajorBookLesson(y, w, majorSeal) {
         const mBook = window.STAGE3_MAJOR_BOOKS?.[`${y}_${majorSeal}`]?.[w]
                    || window.STAGE3_MAJOR_BOOKS?.[majorSeal]?.[`${y}_${w}`];
         if (mBook && Array.isArray(mBook.slides) && mBook.slides.length > 0) {
             return mBook;
         }
-        // تراجع آمن إلى الكتاب العام ريثما يُحمّل ملف الكتاب التخصصي
         const gen = getGeneralBookEntry(y, w, majorSeal);
+        if (Array.isArray(gen.slides) && gen.slides.length > 0) {
+            return { title: gen.title, slides: gen.slides };
+        }
         return {
             title: gen.title,
             slides: [
                 {
                     heading: gen.headings?.[0] || SEAL_NAMES[majorSeal],
-                    text: `${gen.essence}\n\n(مُلَاحَظَةٌ: يُقرَأُ المَتْنُ التَّفْصِيلِيُّ الكَامِلُ لِهٰذَا التَّخَصُّصِ مِنْ مَلَفِّ curriculum-s3-major-y${y}-s${majorSeal}.js)`
+                    text: gen.essence
                 }
             ]
         };
@@ -1807,18 +1856,10 @@ window.Stage3LabEngine = (function() {
         });
 
         const srcBadge = document.getElementById('book-source-badge');
-        srcBadge.classList.toggle('major-book', isMajorActive && activeStation === 0);
-        if (activeStation === 0) {
-            srcBadge.textContent = isMajorActive
-                ? '👑 الكِتَابُ التَّخَصُّصِيُّ الكَامِلُ (٧٠٪)'
-                : '📚 الكِتَابُ العَامُّ — ثَقَافَةٌ عَامَّةٌ (٥٪)';
-        } else if (activeStation === 1) {
-            srcBadge.textContent = isMajorActive
-                ? '👑 الشُّعَاعُ السُّبَاعِيُّ + المُجِيبُ التَّخَصُّصِيُّ'
-                : '🤖 السُّؤَالُ العَامُّ + المُجِيبُ الآلِيُّ';
-        } else {
-            srcBadge.textContent = '🌱 التَّطْبِيقُ مِنَ الكِتَابِ العَامِّ';
-        }
+        srcBadge.classList.toggle('major-book', isMajorActive);
+        srcBadge.textContent = isMajorActive
+            ? '👑 التَّخَصُّصُ الأَسَاسِيُّ (٧٠٪)'
+            : '📚 الثَّقَافَةُ العَامَّةُ (٥٪)';
 
         const mediaBar = document.getElementById('station-media-bar');
         if (mediaBar) {
@@ -1851,7 +1892,7 @@ window.Stage3LabEngine = (function() {
         }
     }
 
-    // ================= المحطة الأولى: عرض الدرس (شكلان متمايزان: الكتاب الكامل للتخصص / الزبدة للعام) =================
+    // ================= المحطة الأولى: الدرس =================
     function renderLessonStation() {
         window.Stage3LabEngine.stop();
         const host = document.getElementById('station-body-host');
@@ -1868,7 +1909,6 @@ window.Stage3LabEngine = (function() {
             return;
         }
 
-        // الشكل الثاني: المواد العامة الست (٥٪) تقرأ زبدتها وأفكارها الرئيسية من الكتاب العام
         if (!isMajorActive) {
             const gen = getGeneralBookEntry(activeYear, playWeek, activeSeal);
             const headingsHtml = (gen.headings || []).map((h, i) => `
@@ -1889,9 +1929,7 @@ window.Stage3LabEngine = (function() {
                     </div>
                 </div>
                 <div class="general-culture-card">
-                    <div style="font-weight:900; color:#065f46; font-size:0.92rem;">📌 الأَفْكَارُ الرَّئِيسِيَّةُ وَالفَرْعِيَّةُ:</div>
                     ${headingsHtml ? `<ul class="summary-headings-list">${headingsHtml}</ul>` : ''}
-                    <div style="font-weight:900; color:#065f46; font-size:0.92rem; margin-top:4px;">💡 زُبْدَةُ المَعْرِفَةِ العَامَّةِ:</div>
                     <div class="general-essence-box">${safeRenderText(gen.essence)}</div>
                 </div>
             `;
@@ -1900,7 +1938,6 @@ window.Stage3LabEngine = (function() {
             return;
         }
 
-        // الشكل الأول: المادة الأساسية المختارة (٧٠٪) تقرأ متنها الكامل من كتابها التخصصي
         const majLesson = getMajorBookLesson(activeYear, playWeek, major);
         const slides = majLesson.slides || [];
         if (currentSlideIdx >= slides.length) currentSlideIdx = 0;
@@ -1924,7 +1961,7 @@ window.Stage3LabEngine = (function() {
         updateChromeUI();
     }
 
-    // ================= المحطة الثانية: قالب السؤال + المجيب الآلي المدمج أسفله مباشرة =================
+    // ================= المحطة الثانية: السؤال + المجيب الآلي المفتوح بالكامل =================
     const tutorSessionMap = new Map();
     let isTutorBusy = false;
 
@@ -1977,9 +2014,9 @@ window.Stage3LabEngine = (function() {
         return [
             `أنت المجيب الآلي المتخصص في "مدرسة العلم" لمرحلة "صاحب" (عمر ${activeYear} سنة).`,
             `المادة الحالية: ${SEAL_NAMES[activeSeal]} (${isMajor ? 'المادة التخصصية الأساسية للطالب بوزن 70% — تعمّق معه تخصصياً وبرهانياً' : 'مادة ثقافة عامة مساندة بوزن 5%'}).`,
-            `عنوان الوحدة المحقونة من الكتاب العام: ${genEntry.title}.`,
+            `عنوان الدرس: ${genEntry.title}.`,
             genEntry.headings?.length ? `الأفكار الرئيسية: ${genEntry.headings.join(' | ')}.` : '',
-            `زبدة المادة المحقونة من الكتاب العام: ${genEntry.tutorContext || genEntry.essence}.`,
+            `مادة الدرس المحقونة: ${genEntry.tutorContext || genEntry.essence}.`,
             `أجب بعربية فصيحة رصينة وواضحة، وحاور الطالب بعمق في كل ما يسأل عنه حول الدرس وتطبيقاته التخصصية.`,
             extraDirective
         ].filter(Boolean).join('\n');
@@ -1991,7 +2028,7 @@ window.Stage3LabEngine = (function() {
         playChime(true);
         setSealStationProgress(activeYear, playWeek, activeSeal, 2);
         updateChromeUI();
-        showToast('أَحْسَنْتَ! يُمْكِنُكَ مُتَابَعَةُ التَّشَعُّبِ مَعَ المُجِيبِ الآلِيِّ أَوِ الِانْتِقَالُ لِلتَّطْبِيقِ ⬅');
+        showToast('أَحْسَنْتَ! يُمْكِنُكَ مُحَاوَرَةُ المُجِيبِ الآلِيِّ أَسْفَلَهُ أَوِ الِانْتِقَالُ لِلتَّطْبِيقِ ⬅');
     }
 
     function renderInteractiveQuizWidget(q, bodyEl) {
@@ -2148,7 +2185,6 @@ window.Stage3LabEngine = (function() {
         const isMajorActive = (activeSeal === major);
         const genEntry = getGeneralBookEntry(activeYear, playWeek, activeSeal);
 
-        // جمع نصوص المصدر لتوليد الأسئلة
         const sourceTexts = [genEntry.essence];
         if (isMajorActive) {
             const majSlides = getMajorBookLesson(activeYear, playWeek, major).slides || [];
@@ -2157,7 +2193,6 @@ window.Stage3LabEngine = (function() {
 
         if (!currentQuizData || forceRayShift) {
             if (isMajorActive && forceRayShift) {
-                // المادة الأساسية تعمل كشعاع يطوف على كل أنواع الأسئلة السبعة!
                 majorRayIndex = (majorRayIndex % 7) + 1;
                 currentQuizData = window.Stage3QuestionEngine.buildQuestionByPattern(
                     { _mode: majorRayIndex, _forceRay: true }, sourceTexts, genEntry, playWeek
@@ -2180,31 +2215,32 @@ window.Stage3LabEngine = (function() {
                     <span class="quiz-prompt-text" id="quiz-top-prompt">${safeRenderText(q.prompt || q.modeLabel || '')}</span>
                     <div class="quiz-tools-grp">
                         ${isMajorActive ? `
-                            <button type="button" class="ray-reroll-btn" id="ray-cycle-btn" title="تنويع السؤال عبر الشعاع السباعي للمادة الأساسية">🔄 شُعَاعُ الأَسْئِلَةِ السَّبْعَةِ</button>
-                            <button type="button" class="ai-inject-q-btn" id="ai-inject-q-btn" title="اطلب من المجيب الآلي حقن سؤال تخصصي جديد في هذا القالب">➕ حَقْنُ سُؤَالٍ تَخَصُّصِيٍّ مِنَ المُجِيبِ</button>
+                            <button type="button" class="ray-reroll-btn" id="ray-cycle-btn">🔄 شُعَاعُ الأَسْئِلَةِ السَّبْعَةِ</button>
+                            <button type="button" class="ai-inject-q-btn" id="ai-inject-q-btn">➕ حَقْنُ سُؤَالٍ تَخَصُّصِيٍّ</button>
                         ` : `
                             <button type="button" class="ray-reroll-btn" id="general-reroll-btn">🎲 سُؤَالٌ عَامٌّ آخَرُ</button>
                         `}
+                        <button type="button" class="jump-tutor-btn" id="jump-to-tutor-btn">💬 خَاطِبِ المُجِيبَ الآلِيَّ ⬇</button>
                     </div>
                 </div>
                 <div id="quiz-interactive-body"></div>
             </div>
 
-            <!-- ٢. المجيب الآلي المدمج أسفل السؤال مباشرة (محقون بالكتاب العام ومتصل بـ Worker المنصة) -->
-            <div class="embedded-tutor-box">
+            <!-- ٢. صندوق المجيب الآلي المفتوح بالكامل مع شريط الكتابة والميكروفون -->
+            <div class="embedded-tutor-box" id="embedded-tutor-box">
                 <div class="embedded-tutor-hdr">
                     <div class="tutor-id-row">
                         <div class="tutor-orb">🤖</div>
                         <div>
                             <div class="tutor-hdr-title">المُجِيبُ الآلِيُّ وَالمُحَاوِرُ التَّخَصُّصِيُّ</div>
-                            <div class="tutor-hdr-sub">مَحْقُونٌ بِمَادَّةِ الكِتَابِ العَامِّ — اسْأَلْ وَنَاقِشْ وَتَشَعَّبْ عَلَى جَمِيعِ الأَصْعِدَةِ</div>
+                            <div class="tutor-hdr-sub">اكْتُبْ سُؤَالَكَ فِي المُرَبَّعِ أَدْنَاهُ أَوْ تَحَدَّثْ بِالمِيكْرُوفُونِ لِمُنَاقَشَةِ الدَّرْسِ</div>
                         </div>
                     </div>
                 </div>
                 <div class="tutor-messages-stream" id="s3-tutor-stream"></div>
                 <div class="tutor-input-bar">
-                    <button type="button" class="tutor-action-circle tutor-mic-circle" id="s3-mic-btn" title="مخاطبة صوتية">🎙️</button>
-                    <textarea id="s3-tutor-input" rows="1" placeholder="اسْأَلِ المُجِيبَ الآلِيَّ أَوْ نَاقِشْهُ فِي تَفَاصِيلِ الدَّرْسِ وَالتَّخَصُّصِ..."></textarea>
+                    <button type="button" class="tutor-action-circle tutor-mic-circle" id="s3-mic-btn" title="تحدث بالصوت">🎙️</button>
+                    <textarea id="s3-tutor-input" rows="2" placeholder="اكْتُبْ سُؤَالَكَ أَوْ نِقَاشَكَ هُنَا ثُمَّ اضْغَطْ إِرْسَالَ (➤)..."></textarea>
                     <button type="button" class="tutor-action-circle tutor-send-circle" id="s3-send-btn" title="إرسال">➤</button>
                 </div>
             </div>
@@ -2212,6 +2248,13 @@ window.Stage3LabEngine = (function() {
 
         const quizBody = document.getElementById('quiz-interactive-body');
         renderInteractiveQuizWidget(q, quizBody);
+
+        document.getElementById('jump-to-tutor-btn').onclick = () => {
+            const tutorBox = document.getElementById('embedded-tutor-box');
+            const inp = document.getElementById('s3-tutor-input');
+            if (tutorBox) tutorBox.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            if (inp) setTimeout(() => inp.focus(), 300);
+        };
 
         if (isMajorActive) {
             document.getElementById('ray-cycle-btn').onclick = () => renderQuestionStation(true);
@@ -2229,12 +2272,11 @@ window.Stage3LabEngine = (function() {
         initEmbeddedTutorConversation(genEntry, isMajorActive);
     }
 
-    // ميزة «زائد (+) التخصص»: المجيب الآلي يولّد سؤالاً تخصصياً عميقاً ويحقنه مباشرة داخل القالب التفاعلي أعلاه!
     async function injectSpecialtyQuestionFromAI(genEntry, quizBody) {
         if (isTutorBusy) return;
         const btn = document.getElementById('ai-inject-q-btn');
         const origTxt = btn.textContent;
-        btn.textContent = '⏳ جَارِي صِيَاغَةُ وَحَقْنُ السُّؤَالِ...';
+        btn.textContent = '⏳ جَارِي الحَقْنُ...';
         btn.disabled = true;
         isTutorBusy = true;
 
@@ -2250,7 +2292,7 @@ window.Stage3LabEngine = (function() {
 
             const injectedQ = {
                 type: 'mcq_half',
-                prompt: '👑 سُؤَالٌ تَخَصُّصِيٌّ مُولَّدٌ وَمَحْقُونٌ مِنَ المُجِيبِ الآلِيِّ:',
+                prompt: '👑 سُؤَالٌ تَخَصُّصِيٌّ مُولَّدٌ مِنَ المُجِيبِ الآلِيِّ:',
                 stem: parsed.stem,
                 options: [
                     { text: parsed.correct, correct: true },
@@ -2262,9 +2304,8 @@ window.Stage3LabEngine = (function() {
             currentQuizData = injectedQ;
             document.getElementById('quiz-top-prompt').textContent = injectedQ.prompt;
             renderInteractiveQuizWidget(injectedQ, quizBody);
-            showToast('تَمَّ حَقْنُ سُؤَالٍ تَخَصُّصِيٍّ جَدِيدٍ فِي القَالَبِ بِنَجَاحٍ! ✨');
+            showToast('تَمَّ حَقْنُ سُؤَالٍ تَخَصُّصِيٍّ جَدِيدٍ فِي القَالَبِ! ✨');
         } catch (e) {
-            showToast('تَعَذَّرَ الِاتِّصَالُ، تَمَّ تَنْوِيعُ السُّؤَالِ مَحَلِّيّاً عَبْرَ الشُّعَاعِ السُّبَاعِيِّ 🔄');
             renderQuestionStation(true);
         } finally {
             isTutorBusy = false;
@@ -2295,8 +2336,8 @@ window.Stage3LabEngine = (function() {
         stream.innerHTML = '';
         if (history.length === 0) {
             const welcomeMsg = isMajor
-                ? `مَرْحَباً بِكَ فِي قَاعَةِ التَّخَصُّصِ لِـ «${genEntry.title}». أَمَامَكَ فِي الأَعْلَى سُؤَالُ المِيزَانِ، وَأَنَا مَعَكَ هُنَا لِنَغُوصَ فِي أَيِّ تَفْصِيلٍ أَوْ بُرْهَانٍ أَوْ تَشَعُّبٍ يَخْطُرُ بِبَالِكَ فِي هٰذَا الدَّرْسِ.`
-                : `مَرْحَباً بِكَ فِي مِحْوَرِ «${genEntry.title}». بَعْدَ حَلِّ سُؤَالِ المَعْلُومَاتِ العَامَّةِ فِي الأَعْلَى، يُمْكِنُكَ سُؤَالِي عَنْ أَيِّ فِكْرَةٍ أَوْ رَبْطِهَا بِمَسَارِ تَخَصُّصِكَ.`;
+                ? `مَرْحَباً بِكَ فِي قَاعَةِ التَّخَصُّصِ لِـ «${genEntry.title}». اكْتُبْ سُؤَالَكَ فِي المُرَبَّعِ أَسْفَلَ هٰذِهِ الرِّسَالَةِ لِنَغُوصَ فِي تَفَاصِيلِ الدَّرْسِ وَبَرَاهِينِهِ.`
+                : `مَرْحَباً بِكَ فِي مِحْوَرِ «${genEntry.title}». يُمْكِنُكَ مُخَاطَبَتِي مُبَاشَرَةً فِي المُرَبَّعِ أَدْنَاهُ لِمُنَاقَشَةِ أَيِّ فِكْرَةٍ فِي الدَّرْسِ.`;
             history.push({ role: 'teacher', text: welcomeMsg });
             saveTutorHistory(ctxKey, history);
         }
@@ -2350,7 +2391,7 @@ window.Stage3LabEngine = (function() {
         };
     }
 
-    // ================= المحطة الثالثة: التطبيق (يُحقن دائماً من الكتاب العام المبسط) =================
+    // ================= المحطة الثالثة: التطبيق =================
     function renderApplyStation() {
         window.Stage3LabEngine.stop();
         const host = document.getElementById('station-body-host');
@@ -2361,7 +2402,7 @@ window.Stage3LabEngine = (function() {
         host.innerHTML = `
             <div class="apply-card-box">
                 <div class="apply-badge-icon">🌱</div>
-                <h3 style="font-size:1.22rem; font-weight:900; color:#065f46;">مَحَطَّةُ التَّطْبِيقِ العَمَلِيِّ (مِنَ الكِتَابِ العَامِّ)</h3>
+                <h3 style="font-size:1.22rem; font-weight:900; color:#065f46;">مَحَطَّةُ التَّطْبِيقِ العَمَلِيِّ</h3>
                 <p class="apply-step-text">${safeRenderText(stepText)}</p>
             </div>`;
         updateChromeUI();
@@ -2484,7 +2525,6 @@ window.Stage3LabEngine = (function() {
         }
     }
 
-    // ربط الأحداث
     document.getElementById('map-lesson-capsule').onclick = () => {
         selectedMapCycle = getCycleOfWeek(playWeek);
         renderMapModal();
@@ -2557,7 +2597,6 @@ window.Stage3LabEngine = (function() {
 
     document.getElementById('corner-next-btn').onclick = handleCornerButtonAction;
 
-    // التشغيل الابتدائي
     if (!checkAndRenderOnboardingGate()) {
         activeSeal = getMajorSeal();
         playWeek = getMaxUnlockedWeek(activeYear);
