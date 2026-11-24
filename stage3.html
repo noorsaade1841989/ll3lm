@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>العِلْم | مَرْحَلَةُ عَبْد — القَالَبُ المُوَحَّدُ التَّفَاعُلِيُّ</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="cc.ico" type="image/x-icon">
+    <meta name="theme-color" content="#064e3b">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Amiri:wght@700&family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-dark: #064e3b;
+            --primary-light: #ecfdf5;
+            --accent-gold: #eab308;
+            --accent-gold-light: #fef9c3;
+            --accent-green: #10b981;
+            --accent-red: #e11d48;
+            --surface-glass: rgba(255, 255, 255, 0.94);
+            --border-glass: rgba(16, 185, 129, 0.45);
+            --shadow-soft: 0 14px 36px rgba(6, 40, 30, 0.24);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+            letter-spacing: 0;
+            background-color: #06281e;
+            background-image: radial-gradient(circle at 18% 15%, rgba(16, 185, 129, 0.28) 0%, rgba(6, 40, 30, 0.94) 55%, rgba(9, 17, 30, 0.97) 100%);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ================= ١. الشريط العلوي الموحد بكبسولتين فقط ================= */
+        header.top-bar {
+            flex: 0 0 auto;
+            width: 100%;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: rgba(6, 34, 26, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 2px solid rgba(250, 204, 21, 0.45);
+            z-index: 200;
+        }
+
+        .hdr-capsule {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 46px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: linear-gradient(145deg, #ffffff, #ecfdf5);
+            border: 2px solid #eab308;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+            color: var(--text-main);
+            font-family: inherit;
+            font-weight: 800;
+            font-size: clamp(0.78rem, 2.1vmin, 0.98rem);
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            max-width: 49%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .hdr-capsule:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(234, 179, 8, 0.35);
+            border-color: #fde047;
+        }
+
+        /* الكبسولة اليمنى: الرمز + المدرسة + المرحلة (عبد) + العمر */
+        #home-identity-capsule {
+            background: linear-gradient(135deg, #022c22 0%, #065f46 100%);
+            color: #ffffff;
+            border-color: #fde047;
+        }
+
+        .school-emblem {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #eab308, #10b981);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(234, 179, 8, 0.5);
+        }
+
+        .school-emblem svg { width: 18px; height: 18px; fill: #ffffff; }
+
+        .capsule-sep {
+            width: 1.5px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.32);
+            flex-shrink: 0;
+        }
+
+        .stage-age-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(250, 204, 21, 0.2);
+            border: 1px solid rgba(253, 224, 71, 0.45);
+            padding: 2px 9px;
+            border-radius: 999px;
+            color: #fef08a;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .school-name-txt {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* الكبسولة اليسرى: الخريطة + الدورة + حرف الدرس + اسم الدرس + النجوم */
+        #map-lesson-capsule {
+            background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
+            border-color: #10b981;
+        }
+
+        .abjad-orb {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #059669, #064e3b);
+            border: 1.5px solid #fde047;
+            color: #fef08a;
+            font-weight: 900;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
+        }
+
+        .map-lesson-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #064e3b;
+            font-weight: 900;
+        }
+
+        .map-star-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: #fef9c3;
+            border: 1.5px solid #eab308;
+            color: #713f12;
+            padding: 1px 8px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        /* ================= ٢. تخطيط مساحة العمل والشريط العمودي لأختام الهندسة المقدسة ================= */
+        .layout-wrapper {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            padding: 10px 12px;
+            position: relative;
+        }
+
+        aside.sidebar-nav {
+            flex: 0 0 72px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 6px;
+            background: linear-gradient(180deg, rgba(6, 40, 30, 0.90) 0%, rgba(15, 23, 42, 0.92) 100%);
+            backdrop-filter: blur(14px);
+            border: 2px solid rgba(250, 204, 21, 0.42);
+            border-radius: 24px;
+            padding: 8px 6px;
+            box-shadow: var(--shadow-soft);
+            z-index: 100;
+        }
+
+        .seal-btn {
+            position: relative;
+            flex: 1 1 0;
+            min-height: 0;
+            border-radius: 16px;
+            border: 2px solid rgba(110, 231, 183, 0.4);
+            background: rgba(15, 23, 42, 0.82);
+            color: #a7f3d0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            padding: 4px;
+        }
+
+        .seal-svg-wrap {
+            width: clamp(22px, 3.4vmin, 28px);
+            height: clamp(22px, 3.4vmin, 28px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .seal-svg-wrap svg { width: 100%; height: 100%; }
+
+        /* البطارية الأفقية ثلاثية النقاط (درس • سؤال • تطبيق) */
+        .seal-battery {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 2px 5px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.42);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .seal-bat-seg {
+            width: 8px;
+            height: 5px;
+            border-radius: 3px;
+            background: #475569;
+            transition: background 0.25s ease, transform 0.25s ease;
+        }
+
+        .seal-bat-seg.done { background: #34d399; }
+        .seal-bat-seg.current { background: #fde047; transform: scaleY(1.3); }
+
+        .seal-star-stamp {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fde047, #ca8a04);
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(234, 179, 8, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.74rem;
+            z-index: 3;
+        }
+
+        .seal-btn.completed {
+            border-color: #34d399;
+            background: linear-gradient(145deg, #064e3b, #022c22);
+            color: #6ee7b7;
+        }
+        .seal-btn.completed .seal-star-stamp { display: flex; }
+
+        .seal-btn.active-seal {
+            border-color: #fde047;
+            background: radial-gradient(circle at 30% 30%, #059669 0%, #064e3b 100%);
+            color: #fef08a;
+            box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35), 0 6px 16px rgba(16, 185, 129, 0.35);
+            transform: scale(1.05);
+        }
+
+        .seal-btn.next-illuminated {
+            border-color: #fde047;
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.55);
+        }
+
+        .seal-btn.locked-seal {
+            opacity: 0.35;
+            filter: grayscale(0.75);
+            cursor: not-allowed;
+        }
+
+        .seal-lock-mini {
+            position: absolute;
+            bottom: 2px;
+            left: 3px;
+            font-size: 0.62rem;
+            display: none;
+        }
+        .seal-btn.locked-seal .seal-lock-mini { display: block; }
+
+        /* ================= ٣. مساحة العمل وشريط المحطات الثلاث ================= */
+        main.workspace {
+            flex: 1 1 auto;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface-glass);
+            backdrop-filter: blur(16px);
+            border: 2.5px solid rgba(250, 204, 21, 0.6);
+            border-radius: 26px;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .station-top-strip {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 14px;
+            background: linear-gradient(90deg, #ecfdf5 0%, #fefce8 100%);
+            border-bottom: 1.5px solid rgba(16, 185, 129, 0.32);
+            flex-wrap: wrap;
+        }
+
+        .stations-pills {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .st-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 13px;
+            border-radius: 999px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            font-family: inherit;
+            font-size: 0.84rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .st-pill.active {
+            background: linear-gradient(135deg, #059669, #064e3b);
+            color: #fef08a;
+            border-color: #eab308;
+            box-shadow: 0 3px 10px rgba(5, 150, 105, 0.32);
+        }
+
+        .st-pill.done:not(.active) {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .st-pill.locked {
+            opacity: 0.42;
+            cursor: not-allowed;
+        }
+
+        .media-controls-cluster {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .icon-ctrl-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1.5px solid #6ee7b7;
+            background: #ffffff;
+            color: #064e3b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .icon-ctrl-btn:hover:not(:disabled) {
+            background: #ecfdf5;
+            border-color: #059669;
+            transform: scale(1.06);
+        }
+
+        .icon-ctrl-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .icon-ctrl-btn.active-toggle {
+            background: #065f46;
+            color: #fef08a;
+            border-color: #eab308;
+        }
+
+        .slide-counter-badge {
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            color: #064e3b;
+            font-weight: 900;
+            font-size: 0.84rem;
+            min-width: 56px;
+            text-align: center;
+        }
+
+        .explore-banner-chip {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            background: #fef3c7;
+            border: 1.5px solid #f59e0b;
+            color: #92400e;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 800;
+        }
+        body.explore-mode-active .explore-banner-chip { display: inline-flex; }
+
+        /* ================= ٤. المحطة الأولى (الدرس + المختبر + الفيديو) بسكرول معزول ================= */
+        .station-body-host {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #lesson-scroll-box {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 18px 94px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        #lesson-scroll-box::-webkit-scrollbar { width: 9px; }
+        #lesson-scroll-box::-webkit-scrollbar-track { background: rgba(209, 250, 229, 0.5); border-radius: 8px; }
+        #lesson-scroll-box::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #10b981, #065f46); border-radius: 8px; }
+
+        .slide-image-frame {
+            position: relative;
+            width: 100%;
+            max-width: 840px;
+            height: clamp(210px, 38vh, 360px);
+            margin: 0 auto;
+            border-radius: 22px;
+            background: linear-gradient(145deg, #06281e, #0f172a);
+            border: 2.5px solid #10b981;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(6, 40, 30, 0.16);
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .slide-image-frame.expanded-frame { height: clamp(320px, 62vh, 560px); }
+        .slide-image-frame.pan-enabled { cursor: grab; touch-action: none; }
+        .slide-image-frame.pan-enabled.dragging { cursor: grabbing; }
+
+        #slide-zoom-target {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            transform-origin: center center;
+            transition: transform 0.08s ease-out;
+            pointer-events: none;
+            display: block;
+        }
+
+        .img-zoom-toolbar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(6, 40, 30, 0.84);
+            border: 1px solid rgba(253, 224, 71, 0.45);
+            backdrop-filter: blur(8px);
+            padding: 5px 7px;
+            border-radius: 999px;
+            z-index: 15;
+        }
+
+        .zoom-icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+        .zoom-icon-btn:hover { background: rgba(16, 185, 129, 0.6); transform: scale(1.08); }
+        .zoom-icon-btn.pan-on { background: #eab308; color: #0f172a; }
+
+        .zoom-level-pill {
+            color: #fde047;
+            font-size: 0.76rem;
+            font-weight: 900;
+            padding: 0 5px;
+            direction: ltr;
+        }
+
+        /* لافتة عنوان الختم الزمردية الذهبية */
+        .lesson-title-banner {
+            width: 100%;
+            max-width: 840px;
+            margin: 0 auto;
+            padding: clamp(18px, 3.2vmin, 28px) 22px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #022c22 0%, #065f46 58%, #047857 100%);
+            color: #ffffff;
+            border: 2.5px solid #eab308;
+            box-shadow: 0 10px 26px rgba(6, 78, 59, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        .banner-title-main {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .banner-letter-seal {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 2px solid #fde047;
+            color: #fef08a;
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .banner-lesson-heading {
+            font-size: clamp(1.08rem, 2.7vmin, 1.52rem);
+            font-weight: 900;
+            line-height: 1.5;
+            color: #fef08a;
+        }
+
+        .banner-seal-sub {
+            font-size: 0.82rem;
+            color: #a7f3d0;
+            font-weight: 800;
+            margin-bottom: 3px;
+        }
+
+        /* نص الشريحة بالتشكيل المتصل غير المقطع */
+        .lesson-text-card {
+            width: 100%;
+            max-width: 840px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 2px solid #a7f3d0;
+            border-radius: 22px;
+            padding: clamp(18px, 3.2vmin, 28px);
+            font-family: 'Amiri', 'Cairo', serif;
+            font-size: clamp(1.3rem, 3vmin, 1.8rem);
+            line-height: 2.1;
+            color: #0f172a;
+            box-shadow: 0 4px 16px rgba(6, 78, 59, 0.06);
+            text-align: justify;
+        }
+
+        .lesson-text-card.quran-ayah-card {
+            background: linear-gradient(145deg, #fffbeb, #fefce8);
+            border-color: #eab308;
+            text-align: center;
+            font-size: clamp(1.42rem, 3.4vmin, 1.98rem);
+            color: #064e3b;
+        }
+
+        .lesson-text-card.speaking-highlight {
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+        }
+
+        /* حاوية المختبر التفاعلي المدمج لمرحلة عبد */
+        .stage2-lab-box {
+            width: 100%;
+            max-width: 840px;
+            margin: 0 auto;
+            border-radius: 22px;
+            background: radial-gradient(circle at 50% 30%, #0f2922 0%, #09111e 100%);
+            border: 2.5px solid #eab308;
+            padding: 16px;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 12px 30px rgba(6, 40, 30, 0.35);
+        }
+
+        .lab-header-pill {
+            padding: 4px 16px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.22);
+            border: 1.5px solid #34d399;
+            color: #fef08a;
+            font-weight: 800;
+            font-size: 0.92rem;
+        }
+
+        .lab-canvas-wrap {
+            width: 100%;
+            min-height: 230px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lab-canvas-wrap canvas, .lab-canvas-wrap svg { max-width: 100%; max-height: 260px; }
+
+        .lab-controls-bar {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.86);
+            border: 1px solid rgba(250, 204, 21, 0.4);
+            border-radius: 16px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .lab-ctrl-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: #e2e8f0;
+        }
+        .lab-ctrl-group input[type="range"] { accent-color: #eab308; cursor: pointer; }
+        .lab-val-badge {
+            background: #065f46;
+            color: #fde047;
+            padding: 2px 9px;
+            border-radius: 8px;
+            font-weight: 900;
+        }
+        .lab-action-mini-btn {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #0f172a;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: 0.84rem;
+            cursor: pointer;
+        }
+
+        /* مشغل الفيديو العالمي */
+        .universal-video-shell {
+            width: 100%;
+            max-width: 840px;
+            margin: 0 auto;
+            border-radius: 22px;
+            overflow: hidden;
+            background: #090d16;
+            border: 3px solid #10b981;
+            box-shadow: 0 14px 34px rgba(6, 40, 30, 0.35);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-stage-area {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: radial-gradient(circle, #1e293b 0%, #090d16 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .video-stage-area video { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        .video-big-play-overlay {
+            position: absolute;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: 3px solid #fde047;
+            background: rgba(5, 150, 105, 0.88);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+        }
+        .video-big-play-overlay svg { width: 30px; height: 30px; fill: #ffffff; }
+
+        .video-fallback-notice {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            text-align: center;
+            color: #e2e8f0;
+            background: rgba(6, 40, 30, 0.94);
+            z-index: 6;
+        }
+
+        .universal-video-controls {
+            direction: ltr;
+            background: linear-gradient(180deg, #06281e 0%, #020617 100%);
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: #f8fafc;
+        }
+        .uv-seek-bar { width: 100%; height: 6px; accent-color: #10b981; cursor: pointer; }
+        .uv-buttons-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .uv-left-grp, .uv-right-grp { display: inline-flex; align-items: center; gap: 6px; }
+        .uv-btn {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid rgba(110, 231, 183, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff; display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.85rem; font-weight: 800;
+        }
+        .uv-time-txt { font-family: monospace; font-size: 0.84rem; color: #a7f3d0; padding: 0 4px; }
+        .uv-vol-slider { width: 68px; accent-color: #10b981; cursor: pointer; }
+
+        /* ================= ٥. المحطة الثانية (محطة السؤال السباعي) ================= */
+        .quiz-scroll-area {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 16px 18px 94px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .quiz-card-shell {
+            width: 100%;
+            max-width: 840px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 2.5px solid #6ee7b7;
+            border-radius: 22px;
+            padding: clamp(16px, 3vmin, 26px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 8px 22px rgba(6, 40, 30, 0.08);
+        }
+
+        .quiz-prompt-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #d1fae5;
+        }
+
+        .quiz-prompt-text {
+            font-size: clamp(1.02rem, 2.4vmin, 1.28rem);
+            font-weight: 900;
+            color: #065f46;
+        }
+
+        .quiz-stem-box {
+            background: linear-gradient(145deg, #ecfdf5, #fefce8);
+            border: 2px solid #34d399;
+            border-radius: 18px;
+            padding: 16px 18px;
+            font-family: 'Amiri', 'Cairo', serif;
+            font-size: clamp(1.26rem, 2.9vmin, 1.68rem);
+            line-height: 1.95;
+            color: #0f172a;
+            text-align: center;
+        }
+
+        .order-slots-zone {
+            min-height: 68px;
+            padding: 12px;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 2px dashed #10b981;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .order-pool-zone {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .order-tile-btn {
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 2px solid #10b981;
+            background: #ffffff;
+            color: #0f172a;
+            font-family: 'Amiri', 'Cairo', serif;
+            font-size: clamp(1.12rem, 2.6vmin, 1.45rem);
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.12);
+            transition: all 0.16s ease;
+        }
+        .order-tile-btn:hover { transform: translateY(-2px); background: #ecfdf5; }
+        .order-tile-btn.placed-tile { background: #d1fae5; border-color: #059669; }
+        .order-tile-btn.tile-correct { background: #dcfce7; border-color: #16a34a; color: #14532d; }
+        .order-tile-btn.tile-wrong { background: #ffe4e6; border-color: #e11d48; color: #881337; }
+
+        .mcq-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .quiz-opt-btn {
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 2px solid #cbd5e1;
+            background: #ffffff;
+            color: #0f172a;
+            font-family: 'Amiri', 'Cairo', serif;
+            font-size: clamp(1.12rem, 2.6vmin, 1.42rem);
+            line-height: 1.7;
+            font-weight: 700;
+            text-align: right;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quiz-opt-btn:hover:not(:disabled) {
+            border-color: #059669;
+            background: #ecfdf5;
+            transform: translateY(-1px);
+        }
+        .quiz-opt-btn.correct { border-color: #16a34a; background: #dcfce7; color: #14532d; }
+        .quiz-opt-btn.wrong { border-color: #e11d48; background: #ffe4e6; color: #881337; }
+
+        .tf-buttons-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .tf-choice-btn {
+            padding: 18px;
+            border-radius: 20px;
+            border: 3px solid #cbd5e1;
+            background: #ffffff;
+            font-family: inherit;
+            font-size: clamp(1.2rem, 3vmin, 1.6rem);
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.18s ease;
+        }
+        .tf-choice-btn.tf-true:hover:not(:disabled) { border-color: #16a34a; background: #f0fdf4; }
+        .tf-choice-btn.tf-false:hover:not(:disabled) { border-color: #e11d48; background: #fff1f2; }
+
+        .math-circles-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            padding: 12px;
+            min-height: 88px;
+            background: #f8fafc;
+            border-radius: 20px;
+            border: 2px dashed #94a3b8;
+        }
+
+        .math-eq-circle {
+            min-width: 88px;
+            height: 88px;
+            padding: 0 10px;
+            border-radius: 999px;
+            border: 3px solid #059669;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #d1fae5);
+            color: #0f172a;
+            font-weight: 900;
+            font-size: 1.08rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            direction: ltr;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(5, 150, 105, 0.18);
+            transition: all 0.18s ease;
+        }
+        .math-eq-circle.selected-circle {
+            border-color: #eab308;
+            background: #fef9c3;
+            transform: scale(1.08);
+            box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.32);
+        }
+
+        .math-baskets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 14px;
+        }
+
+        .math-basket-box {
+            min-height: 126px;
+            border-radius: 22px;
+            border: 3px solid #059669;
+            background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .math-basket-box:hover { transform: translateY(-2px); border-color: #eab308; }
+        .basket-target-num { font-size: 1.45rem; font-weight: 900; color: #064e3b; display: inline-flex; align-items: center; gap: 6px; }
+        .basket-collected-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        .mini-solved-eq { padding: 3px 9px; border-radius: 999px; background: #059669; color: #ffffff; font-size: 0.82rem; font-weight: 800; direction: ltr; }
+
+        .cloze-top-choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 18px;
+            background: #ecfdf5;
+            border: 2px solid #6ee7b7;
+        }
+        .cloze-word-pill {
+            padding: 9px 18px;
+            border-radius: 999px;
+            border: 2px solid #059669;
+            background: #ffffff;
+            font-family: 'Amiri', 'Cairo', serif;
+            font-size: clamp(1.15rem, 2.6vmin, 1.45rem);
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .cloze-word-pill:hover:not(:disabled) { background: #d1fae5; transform: translateY(-2px); }
+        .cloze-blank-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            padding: 2px 14px;
+            margin: 0 6px;
+            border-radius: 12px;
+            border: 2.5px dashed #059669;
+            background: #ffffff;
+            color: #059669;
+            font-weight: 900;
+        }
+        .cloze-blank-slot.filled-right {
+            border-style: solid;
+            border-color: #16a34a;
+            background: #dcfce7;
+            color: #14532d;
+        }
+
+        .adab-list-stack { display: flex; flex-direction: column; gap: 9px; }
+        .adab-counter-badge {
+            align-self: center;
+            padding: 5px 16px;
+            border-radius: 999px;
+            background: #fef9c3;
+            border: 2px solid #eab308;
+            color: #713f12;
+            font-weight: 900;
+            font-size: 0.95rem;
+        }
+
+        /* ================= ٦. المحطة الثالثة (التطبيق العملي) ================= */
+        .apply-card-box {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            background: linear-gradient(145deg, #ffffff, #ecfdf5);
+            border: 3px solid #10b981;
+            border-radius: 26px;
+            padding: clamp(22px, 4vmin, 36px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(5, 150, 105, 0.14);
+        }
+
+        .apply-badge-icon {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669, #064e3b);
+            border: 2.5px solid #fde047;
+            color: #fef08a;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .apply-step-text {
+            font-family: 'Amiri', 'Cairo', serif;
+            font-size: clamp(1.32rem, 3.2vmin, 1.85rem);
+            line-height: 2.05;
+            color: #0f172a;
+        }
+
+        /* ================= ٧. زر الزاوية السفلية اليسرى (سهم / نجمة بلا كلام) ================= */
+        #corner-next-btn {
+            position: fixed;
+            bottom: 18px;
+            left: 18px;
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            border: 3px solid #fde047;
+            background: linear-gradient(135deg, #059669, #064e3b);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 26px rgba(6, 78, 59, 0.55);
+            z-index: 500;
+            transition: transform 0.2s ease, background 0.25s ease, opacity 0.2s ease, box-shadow 0.25s ease;
+        }
+        #corner-next-btn:hover:not(:disabled) { transform: scale(1.09); }
+        #corner-next-btn:disabled { background: #64748b; border-color: #cbd5e1; box-shadow: none; opacity: 0.5; cursor: not-allowed; }
+        #corner-next-btn.ready-pulse:not(:disabled) {
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.32), 0 10px 26px rgba(5, 150, 105, 0.5);
+        }
+        #corner-next-btn.star-mode:not(:disabled) {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #0f172a;
+            border-color: #ffffff;
+            box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.38), 0 10px 28px rgba(202, 138, 4, 0.55);
+        }
+        #corner-next-btn svg { width: 30px; height: 30px; }
+
+        /* ================= ٨. النوافذ المنبثقة (الخريطة والدورات، النجوم، اختيار العمر ٨-١٤) ================= */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 20, 15, 0.72);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 1000;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-card {
+            width: 100%;
+            max-width: 760px;
+            max-height: 92dvh;
+            overflow-y: auto;
+            background: #ffffff;
+            border: 3px solid #eab308;
+            border-radius: 28px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+            position: relative;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            background: #f8fafc;
+            font-size: 1.2rem;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .cycles-tabs-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .cycle-tab-pill {
+            padding: 6px 16px;
+            border-radius: 999px;
+            border: 2px solid #6ee7b7;
+            background: #ecfdf5;
+            color: #064e3b;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.86rem;
+            cursor: pointer;
+        }
+        .cycle-tab-pill.active-cycle {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #0f172a;
+            border-color: #ca8a04;
+        }
+        .cycle-tab-pill.locked-cycle { opacity: 0.4; cursor: not-allowed; }
+
+        .map-stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            background: #ecfdf5;
+            border: 1.5px solid #6ee7b7;
+            padding: 12px 16px;
+            border-radius: 18px;
+        }
+
+        .abjad-map-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .map-letter-cell {
+            padding: 8px 4px;
+            border-radius: 14px;
+            border: 2px solid #cbd5e1;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.16s ease;
+        }
+        .map-letter-cell .cell-ltr { font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+        .map-letter-cell .cell-stars { font-size: 0.72rem; font-weight: 800; color: #b45309; }
+        .map-letter-cell.current-week { border-color: #059669; background: #d1fae5; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.24); }
+        .map-letter-cell.completed-week { border-color: #eab308; background: #fefce8; }
+        .map-letter-cell.locked-week { opacity: 0.42; cursor: not-allowed; background: #f1f5f9; }
+
+        .cycle-exam-btn {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 16px;
+            border: 2px solid #eab308;
+            background: linear-gradient(135deg, #064e3b, #047857);
+            color: #fef08a;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.94rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .cycle-exam-btn.locked { opacity: 0.4; cursor: not-allowed; }
+
+        .settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            padding-top: 8px;
+            border-top: 1.5px solid #e2e8f0;
+        }
+
+        .setting-pill-btn {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 2px solid #cbd5e1;
+            background: #f8fafc;
+            font-family: inherit;
+            font-size: 0.86rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .setting-pill-btn.mode-seq { border-color: #059669; background: #d1fae5; color: #064e3b; }
+        .setting-pill-btn.mode-exp { border-color: #f59e0b; background: #fef3c7; color: #92400e; }
+
+        .years-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+            gap: 8px;
+        }
+        .year-pick-btn {
+            padding: 10px;
+            border-radius: 16px;
+            border: 2px solid #6ee7b7;
+            background: #ecfdf5;
+            color: #064e3b;
+            font-family: inherit;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .year-pick-btn.active-yr { background: #065f46; color: #fef08a; border-color: #eab308; }
+
+        #app-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 92px;
+            background: rgba(6, 40, 30, 0.95);
+            border: 1.5px solid #fde047;
+            color: #fef08a;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            z-index: 1200;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+        #app-toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 640px) {
+            header.top-bar { padding: 6px 6px; gap: 5px; }
+            .hdr-capsule { height: 38px; padding: 2px 7px; gap: 4px; font-size: 0.68rem; max-width: 49.5%; }
+            .capsule-sep { display: none; }
+            .stage-age-badge { padding: 1px 6px; gap: 3px; }
+            .school-emblem, .abjad-orb { height: 24px; min-width: 24px; font-size: 0.78rem; }
+            .lesson-text-card { text-align: right; line-height: 1.98; }
+            .layout-wrapper { padding: 6px; gap: 6px; }
+            aside.sidebar-nav { flex: 0 0 56px; padding: 6px 4px; border-radius: 18px; }
+            .seal-bat-seg { width: 6px; height: 4px; }
+            .abjad-map-grid { grid-template-columns: repeat(4, 1fr); }
+            #corner-next-btn { width: 54px; height: 54px; bottom: 12px; left: 12px; }
+            #app-toast { right: 16px; bottom: 76px; }
+        }
+    </style>
+    <script>
+        (function initSafeStorage() {
+            const mem = {};
+            window.SafeStore = {
+                get(k) {
+                    try { const v = window.localStorage.getItem(k); return v !== null ? v : (k in mem ? mem[k] : null); }
+                    catch (e) { return k in mem ? mem[k] : null; }
+                },
+                set(k, v) {
+                    mem[k] = String(v);
+                    try { window.localStorage.setItem(k, String(v)); } catch (e) {}
+                },
+                remove(k) {
+                    delete mem[k];
+                    try { window.localStorage.removeItem(k); } catch (e) {}
+                }
+            };
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- الشريط العلوي الموحد: كبسولتان فقط -->
+    <header class="top-bar">
+        <button type="button" class="hdr-capsule" id="home-identity-capsule" title="الرئيسية واختيار العمر">
+            <span class="school-emblem" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3L2 8l10 5 10-5-10-5zm-7 7.5v5.2c0 1.8 3.1 3.3 7 3.3s7-1.5 7-3.3v-5.2l-7 3.5-7-3.5z"/></svg>
+            </span>
+            <span class="school-name-txt" id="hdr-school-name">مَدْرَسَةُ العِلْم</span>
+            <span class="capsule-sep"></span>
+            <span class="stage-age-badge">
+                <span id="hdr-stage-name">عَبْد</span>
+                <span>•</span>
+                <span id="hdr-age-label">٨ سَنَوَاتٍ</span>
+            </span>
+        </button>
+
+        <button type="button" class="hdr-capsule" id="map-lesson-capsule" title="خريطة الدورات والدروس والإعدادات">
+            <span aria-hidden="true">🧭</span>
+            <span class="abjad-orb" id="hdr-lesson-letter">أ</span>
+            <span class="map-lesson-title" id="hdr-lesson-title">سُورَةُ المَسَدِ</span>
+            <span class="map-star-pill" id="hdr-lesson-stars">⭐ ٠/٧</span>
+        </button>
+    </header>
+
+    <!-- مساحة العمل + الشريط العمودي لأختام الهندسة المقدسة السبعة -->
+    <div class="layout-wrapper">
+        <aside class="sidebar-nav" id="seals-sidebar" aria-label="الأختام السبعة لمرحلة عبد">
+            <button type="button" class="seal-btn" id="btn-subj-1" data-seal="1" title="المنطق والبيان">
+                <span class="seal-star-stamp">⭐</span>
+                <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="18" r="13"/><line x1="18" y1="3" x2="18" y2="33"/><circle cx="18" cy="18" r="3.5" fill="currentColor"/></svg></span>
+                <span class="seal-battery" id="bat-subj-1"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
+                <span class="seal-lock-mini">🔒</span>
+            </button>
+            <button type="button" class="seal-btn" id="btn-subj-2" data-seal="2" title="البصيرة والفن الهندسي">
+                <span class="seal-star-stamp">⭐</span>
+                <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="13.5" cy="18" r="10.5"/><circle cx="22.5" cy="18" r="10.5"/><circle cx="18" cy="18" r="2.3" fill="currentColor"/></svg></span>
+                <span class="seal-battery" id="bat-subj-2"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
+                <span class="seal-lock-mini">🔒</span>
+            </button>
+            <button type="button" class="seal-btn" id="btn-subj-3" data-seal="3" title="الرنين والتجويد والصوت">
+                <span class="seal-star-stamp">⭐</span>
+                <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 18a2 2 0 0 1 2 2 4 4 0 0 1-4 4 7 7 0 0 1-7-7 11 11 0 0 1 11-11 14 14 0 0 1 14 14"/><circle cx="18" cy="18" r="1.8" fill="currentColor"/></svg></span>
+                <span class="seal-battery" id="bat-subj-3"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
+                <span class="seal-lock-mini">🔒</span>
+            </button>
+            <button type="button" class="seal-btn" id="btn-subj-4" data-seal="4" title="الرياضيات والمقدار">
+                <span class="seal-star-stamp">⭐</span>
+                <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.1"><polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5"/><polyline points="5,10.5 18,18 31,10.5"/><line x1="18" y1="18" x2="18" y2="33"/></svg></span>
+                <span class="seal-battery" id="bat-subj-4"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
+                <span class="seal-lock-mini">🔒</span>
+            </button>
+            <button type="button" class="seal-btn" id="btn-subj-5" data-seal="5" title="الحركة والاتزان البدني">
+                <span class="seal-star-stamp">⭐</span>
+                <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="14"/><polygon points="18,5 21.5,14 31,14.5 23.5,20.5 26,30 18,24.5 10,30 12.5,20.5 5,14.5 14.5,14"/></svg></span>
+                <span class="seal-battery" id="bat-subj-5"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
+                <span class="seal-lock-mini">🔒</span>
+            </button>
+            <button type="button" class="seal-btn" id="btn-subj-6" data-seal="6" title="العلوم وسنن الكون">
+                <span class="seal-star-stamp">⭐</span>
+                <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="18" cy="18" r="6"/><circle cx="18" cy="12" r="6"/><circle cx="18" cy="24" r="6"/><circle cx="23.2" cy="15" r="6"/><circle cx="12.8" cy="21" r="6"/><circle cx="23.2" cy="21" r="6"/><circle cx="12.8" cy="15" r="6"/></svg></span>
+                <span class="seal-battery" id="bat-subj-6"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
+                <span class="seal-lock-mini">🔒</span>
+            </button>
+            <button type="button" class="seal-btn" id="btn-subj-7" data-seal="7" title="الآداب وتزكية السلوك">
+                <span class="seal-star-stamp">⭐</span>
+                <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="20" height="20"/><rect x="8" y="8" width="20" height="20" transform="rotate(45 18 18)"/><circle cx="18" cy="18" r="2.6" fill="currentColor"/></svg></span>
+                <span class="seal-battery" id="bat-subj-7"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
+                <span class="seal-lock-mini">🔒</span>
+            </button>
+        </aside>
+
+        <main class="workspace">
+            <div class="station-top-strip">
+                <div class="stations-pills" id="stations-pills">
+                    <button type="button" class="st-pill active" id="st-pill-0" data-st="0">📖 دَرْسٌ</button>
+                    <button type="button" class="st-pill" id="st-pill-1" data-st="1">❓ سُؤَالٌ</button>
+                    <button type="button" class="st-pill" id="st-pill-2" data-st="2">🌱 تَطْبِيقٌ</button>
+                </div>
+
+                <span class="explore-banner-chip" id="explore-chip">🔓 اسْتِكْشَافٌ (النُّجُومُ مُتَوَقِّفَةٌ)</span>
+
+                <div class="media-controls-cluster" id="station-media-bar">
+                    <button type="button" class="icon-ctrl-btn" id="slide-prev-btn" title="الشريحة السابقة">▶</button>
+                    <span class="slide-counter-badge" id="slide-counter-badge">١ / ١</span>
+                    <button type="button" class="icon-ctrl-btn" id="slide-next-btn" title="الشريحة التالية">◀</button>
+                    <button type="button" class="icon-ctrl-btn active-toggle" id="tts-play-btn" title="القارئ الآلي">🔊</button>
+                    <button type="button" class="icon-ctrl-btn active-toggle" id="auto-flip-btn" title="التقليب الآلي للسلايدات">🔄</button>
+                    <button type="button" class="icon-ctrl-btn" id="lab-mode-btn" title="المختبر التفاعلي الحي">🧪</button>
+                    <button type="button" class="icon-ctrl-btn" id="video-mode-btn" title="عرض الفيديو">🎬</button>
+                </div>
+            </div>
+
+            <div class="station-body-host" id="station-body-host"></div>
+        </main>
+    </div>
+
+    <!-- زر الانتقال في الزاوية السفلية اليسرى -->
+    <button type="button" id="corner-next-btn" aria-label="الانتقال للمحطة التالية">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+    </button>
+
+    <!-- نافذة خريطة الدورات والدروس الـ ٢٨ والإعدادات -->
+    <div class="modal-overlay" id="map-modal">
+        <div class="modal-card">
+            <button type="button" class="modal-close-btn" id="close-map-modal">×</button>
+            <h2 style="font-size:1.25rem; font-weight:900; color:#065f46; text-align:center;">خَرِيطَةُ المَدَارَاتِ وَالدَّوْرَاتِ وَحَصِيلَةُ النُّجُومِ</h2>
+
+            <div class="cycles-tabs-bar" id="cycles-tabs-bar"></div>
+
+            <div class="map-stats-row">
+                <div style="font-weight:900; color:#0f172a;">⭐ نُجُومُ الدَّرْسِ الحَالِيِّ: <span id="modal-week-stars" style="color:#b45309;">٠ / ٧</span></div>
+                <div style="font-weight:900; color:#0f172a;">🏆 مَجْمُوعُ نُجُومِ السَّنَةِ: <span id="modal-year-stars" style="color:#065f46;">٠ / ١٩٦</span></div>
+            </div>
+
+            <div class="abjad-map-grid" id="abjad-map-grid"></div>
+
+            <button type="button" class="cycle-exam-btn" id="cycle-exam-btn">
+                <span>🏆</span>
+                <span id="cycle-exam-label">الامْتِحَانُ التَّطْبِيقِيُّ الشَّامِلُ لِلدَّوْرَةِ الأُولَى</span>
+            </button>
+
+            <div class="settings-row">
+                <button type="button" class="setting-pill-btn mode-seq" id="toggle-mode-btn">🔒 وَضْعُ التَّسَلْسُلِ (تَحْتَسِبُ النُّجُومُ)</button>
+                <button type="button" class="setting-pill-btn" id="toggle-global-tts-btn">🔊 القَارِئُ الآلِيُّ: مُفَعَّلٌ</button>
+                <button type="button" class="setting-pill-btn" id="reset-year-progress-btn" style="border-color:#fda4af; color:#be123c;">🗑️ تَصْفِيرُ نُجُومِ السَّنَةِ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة عد النجوم آخر كل درس -->
+    <div class="modal-overlay" id="lesson-complete-modal">
+        <div class="modal-card" style="max-width:460px; text-align:center; align-items:center;">
+            <div style="font-size:3.2rem; line-height:1;">🌟</div>
+            <h2 id="complete-modal-title" style="font-size:1.4rem; font-weight:900; color:#065f46;">أَتْمَمْتَ الدَّرْسَ بِنَجَاحٍ!</h2>
+            <div id="complete-stars-row" style="font-size:1.8rem; letter-spacing:4px;">⭐⭐⭐⭐⭐⭐⭐</div>
+            <p id="complete-modal-summary" style="font-weight:800; color:#334155; font-size:1.05rem;"></p>
+            <button type="button" id="next-lesson-arrow-btn" style="width:64px; height:64px; border-radius:50%; border:3px solid #fde047; background:linear-gradient(135deg,#059669,#064e3b); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px rgba(5,150,105,0.4);">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+
+    <div id="app-toast"></div>
+
+    <!-- تحميل ملفات مناهج مرحلة عبد بسلاسة وديناميكية -->
+    <script>
+        window.curriculumData = window.curriculumData || {};
+        window._loadedStage2Scripts = window._loadedStage2Scripts || {};
+
+        function loadStage2CurriculumFiles(year, cycleNum, callback) {
+            window.curriculumData[year] = window.curriculumData[year] || {};
+            const filesToTry = [`curriculum-y${year}.js`, `curriculum-y${year}-c${cycleNum}.js`];
+            let pending = 0;
+            const checkDone = () => {
+                if (pending <= 0 && typeof callback === 'function') callback();
+            };
+            filesToTry.forEach(src => {
+                if (window._loadedStage2Scripts[src]) return;
+                pending++;
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = () => { window._loadedStage2Scripts[src] = true; pending--; checkDone(); };
+                s.onerror = () => { window._loadedStage2Scripts[src] = true; pending--; checkDone(); };
+                document.head.appendChild(s);
+            });
+            checkDone();
+        }
+    </script>
+
+    <script>
+// ============================================================================
+// محرك الأسئلة الديناميكي السباعي المطور لمرحلة عبد (يحافظ على الحركات كاملة)
+// ============================================================================
+(function(exports) {
+  const toAr = (s) => String(s).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+  const toWest = (s) => String(s).replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function baseKey(word) {
+    return String(word || '').replace(/[\u064B-\u0652\u0670\u0640]/g, '').replace(/[^\u0621-\u064A]/g, '');
+  }
+
+  function extractCleanSentences(slides, minWords = 4, maxWords = 32) {
+    const out = [];
+    (slides || []).forEach(sl => {
+      if (!sl || !sl.text || sl.isImagePrompt) return;
+      let txt = String(sl.text)
+        .replace(/﴿[^﴾]*﴾/g, ' ')
+        .replace(/\([^)]*\)/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const parts = txt.split(/(?<=[.؟!؛])\s+|\n+/g);
+      parts.forEach(p => {
+        let s = p.replace(/^[–\-•\d().]+\s*/, '').trim();
+        if (!s) return;
+        const words = s.split(/\s+/).filter(Boolean);
+        if (words.length >= minWords && words.length <= maxWords) out.push(s);
+      });
+    });
+    return out;
+  }
+
+  function invertArabicSentencePolarity(rawSent) {
+    let s = String(rawSent || '').trim();
+    s = s.replace(/^(?:ثُمَّ|وَ|فَ)\s+/u, '');
+    if (!s.endsWith('.')) s = s.replace(/[.،؛؟!]+$/, '') + '.';
+
+    const words = s.split(/\s+/);
+    const firstBase = baseKey(words[0]);
+
+    if (['لا', 'لم', 'لن', 'ليس', 'ليست', 'ما'].includes(firstBase)) {
+      let mainPart = s.replace(/\s*،?\s*\bبَلْ[\u064B-\u0652]*\s+.*$/u, '.');
+      let mw = mainPart.split(/\s+/);
+      mw.shift();
+      if (firstBase === 'لم' && mw[0]) mw[0] = mw[0].replace(/[\u0652\u0650]$/, '\u064F');
+      if (firstBase === 'لن' && mw[0]) mw[0] = mw[0].replace(/\u064E$/, '\u064F');
+      return { text: mw.join(' ') };
+    }
+
+    const lastChar = words[0].slice(-1);
+    const isDefiniteNoun = firstBase.startsWith('ال') || /^(?:كال|بال|لل|فال|وال)/.test(firstBase) || words[0].includes('ة') || /[\u064B\u064C\u064D]/.test(words[0]);
+
+    if (!isDefiniteNoun && /^[أنيت]/.test(firstBase) && lastChar === '\u064F') {
+      return { text: 'لَا ' + s };
+    }
+    if (!isDefiniteNoun && firstBase.length >= 3 && lastChar !== '\u064F') {
+      return { text: 'مَا ' + s };
+    }
+    if (/\s+هُوَ\s+/u.test(s)) {
+      return { text: s.replace(/\s+هُوَ\s+/u, ' لَيْسَ ') };
+    }
+    if (/\s+هِيَ\s+/u.test(s)) {
+      return { text: s.replace(/\s+هِيَ\s+/u, ' لَيْسَتْ ') };
+    }
+    const fem = words[0].includes('ة');
+    return { text: `${fem ? 'لَيْسَتْ' : 'لَيْسَ'} ${s}` };
+  }
+
+  function generateDynamicQuestion(curriculumData, year, week, seal) {
+    const yearObj = curriculumData[year] || {};
+    const sealObj = yearObj?.[week]?.[seal];
+    const slides = sealObj?.learn?.slides || [];
+
+    // أولوية الأسئلة المرجعية المحقونة إن اختار المعلم أو توفرت صيغة خاصة، مع التنوع الديناميكي
+    // ١. الختم ١ (المنطق والقرآن): ترتيب مقاطع الآية أو فقرة البيان
+    if (seal === 1) {
+      const poolSlides = slides.filter(sl => sl.text && sl.text.split(/\s+/).length >= 4);
+      const chosen = poolSlides[Math.floor(Math.random() * poolSlides.length)] || slides[0] || { text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ' };
+      let rawTxt = chosen.text.replace(/[﴿﴾]/g, '').replace(/۝[٠-٩\d]+/g, '|').trim();
+      let parts = rawTxt.split(/\||\s*[،؛.]\s*/).map(p => p.trim()).filter(p => p.split(/\s+/).length >= 2);
+
+      if (parts.length >= 3) {
+        const picked = parts.slice(0, Math.min(4, parts.length));
+        let scrambled = shuffle(picked.map((c, idx) => ({ id: idx, label: c })));
+        if (scrambled.every((it, idx) => it.id === idx)) scrambled.reverse();
+        return {
+          type: 'order',
+          modeLabel: 'رَتِّبِ المَقَاطِعَ التَّالِيَةَ حَسَبَ وُرُودِهَا فِي نَصِّ الدَّرْسِ:',
+          correctOrder: picked,
+          tiles: scrambled
+        };
+      }
+
+      const wTokens = rawTxt.split(/\s+/).filter(Boolean).slice(0, 7);
+      let scrambled = shuffle(wTokens.map((w, idx) => ({ id: idx, label: w })));
+      if (scrambled.every((it, idx) => it.id === idx) && scrambled.length > 1) scrambled.reverse();
+      return {
+        type: 'order',
+        modeLabel: 'رَتِّبْ كَلِمَاتِ العِبَارَةِ كَمَا وَرَدَتْ فِي نَصِّ الدَّرْسِ:',
+        correctOrder: wTokens,
+        tiles: scrambled
+      };
+    }
+
+    // ٢. الختم ٢ (البصيرة والفن الهندسي): إكمال النصف الثاني من ٤ خيارات متوازنة
+    if (seal === 2) {
+      const sents = extractCleanSentences(slides, 5, 26);
+      const chosen = sents[Math.floor(Math.random() * sents.length)] || (slides[0]?.text || '');
+      const words = chosen.trim().split(/\s+/).filter(Boolean);
+      const half = Math.ceil(words.length / 2);
+      const stem = words.slice(0, half).join(' ') + ' ...';
+      const correctHalf = words.slice(half).join(' ');
+
+      const distractors = [];
+      const allWeeks = Object.keys(yearObj).map(Number).filter(w => w !== week);
+      for (const ow of shuffle(allWeeks)) {
+        if (distractors.length >= 3) break;
+        const oSlides = yearObj?.[ow]?.[2]?.learn?.slides || [];
+        const oSents = extractCleanSentences(oSlides, 5, 26);
+        if (!oSents.length) continue;
+        const oWords = oSents[0].split(/\s+/).filter(Boolean);
+        const oHalf = oWords.slice(Math.ceil(oWords.length / 2)).join(' ');
+        if (oHalf && oHalf !== correctHalf && !distractors.includes(oHalf)) distractors.push(oHalf);
+      }
+      while (distractors.length < 3) {
+        distractors.push('يَتَرَاجَعُ عَنِ التَّأَمُّلِ وَيَتْرُكُ مِيزَانَ الحِكْمَةِ.');
+        break;
+      }
+
+      return {
+        type: 'mcq_half',
+        prompt: 'أَكْمِلِ النِّصْفَ الثَّانِيَ لِلْعِبَارَةِ مِنْ شَرَائِحِ الدَّرْسِ:',
+        stem,
+        options: shuffle([
+          { text: correctHalf, correct: true },
+          ...distractors.slice(0, 3).map(d => ({ text: d, correct: false }))
+        ])
+      };
+    }
+
+    // ٣. الختم ٣ (التجويد والصوت): صح أو خطأ بنظام النفي النحوي السليم
+    if (seal === 3) {
+      const sents = extractCleanSentences(slides, 5, 28);
+      const baseSent = sents[Math.floor(Math.random() * sents.length)] || (slides[0]?.text || '');
+      const targetTrue = Math.random() < 0.5;
+      if (targetTrue) {
+        return {
+          type: 'true_false',
+          prompt: 'مَيِّزْ بِدِقَّةٍ: هَلْ هٰذِهِ العِبَارَةُ الصَّوْتِيَّةُ صَحِيحَةٌ أَمْ خَاطِئَةٌ حَسَبَ الدَّرْسِ؟',
+          statement: baseSent,
+          correctBool: true
+        };
+      } else {
+        const inv = invertArabicSentencePolarity(baseSent);
+        return {
+          type: 'true_false',
+          prompt: 'مَيِّزْ بِدِقَّةٍ: هَلْ هٰذِهِ العِبَارَةُ الصَّوْتِيَّةُ صَحِيحَةٌ أَمْ خَاطِئَةٌ حَسَبَ الدَّرْسِ؟',
+          statement: inv.text,
+          correctBool: false
+        };
+      }
+    }
+
+    // ٤. الختم ٤ (الرياضيات والمقدار لعمر ٨–١٤): سلال العمليات الحسابية (جمع، طرح، ضرب، قسمة، مربعات)
+    if (seal === 4) {
+      if (sealObj?.mathBaskets && Array.isArray(sealObj.mathBaskets.baskets)) {
+        return {
+          type: 'math_baskets',
+          prompt: 'ضَعْ كُلَّ دَائِرَةٍ رِيَاضِيَّةٍ فِي سَلَّةِ النَّاتِجِ الصَّحِيحِ لَهَا:',
+          baskets: sealObj.mathBaskets.baskets,
+          circles: shuffle(sealObj.mathBaskets.circles)
+        };
+      }
+      const f1 = ((week - 1) % 8) + 2;
+      const f2 = ((week + 2) % 7) + 2;
+      const prod = f1 * f2;
+      const sqBase = ((week % 6) + 3);
+      const sqVal = sqBase * sqBase;
+      let sumVal = week * 3 + 14;
+      if (sumVal === prod || sumVal === sqVal) sumVal += 5;
+
+      const baskets = [
+        { id: 'b0', value: prod, label: toAr(prod) },
+        { id: 'b1', value: sqVal, label: toAr(sqVal) },
+        { id: 'b2', value: sumVal, label: toAr(sumVal) }
+      ];
+      const pSumA = Math.floor(sumVal / 2);
+      const circles = [
+        { id: 'c0_1', expr: `${toAr(f1)} × ${toAr(f2)}`, answer: prod },
+        { id: 'c0_2', expr: `${toAr(prod * 2)} ÷ ٢`, answer: prod },
+        { id: 'c1_1', expr: `${toAr(sqBase)} × ${toAr(sqBase)}`, answer: sqVal },
+        { id: 'c1_2', expr: `${toAr(sqVal + 5)} - ٥`, answer: sqVal },
+        { id: 'c2_1', expr: `${toAr(pSumA)} + ${toAr(sumVal - pSumA)}`, answer: sumVal },
+        { id: 'c2_2', expr: `${toAr(sumVal + 8)} - ٨`, answer: sumVal }
+      ];
+      return {
+        type: 'math_baskets',
+        prompt: 'ضَعْ كُلَّ دَائِرَةٍ رِيَاضِيَّةٍ فِي سَلَّةِ النَّاتِجِ الصَّحِيحِ لَهَا:',
+        baskets,
+        circles: shuffle(circles)
+      };
+    }
+
+    // ٥. الختم ٥ (الحركة والاتزان البدني): سؤال مرجعي تفاعلي أو عدد خطوات/ثواني التمرين
+    if (seal === 5) {
+      if (Array.isArray(sealObj?.play?.questions) && sealObj.play.questions.length > 0 && Math.random() < 0.65) {
+        const refQ = sealObj.play.questions[0];
+        return {
+          type: 'mcq_half',
+          prompt: 'اخْتَرِ الإِجَابَةَ العِلْمِيَّةَ الصَّحِيحَةَ لِلتَّمْرِينِ البَدَنِيِّ:',
+          stem: refQ.q,
+          options: shuffle(refQ.options)
+        };
+      }
+      const applyTxt = sealObj?.apply?.steps?.[0] || slides.map(s => s.text).join(' ');
+      const numMatch = applyTxt.match(/([٠-٩\d]+)\s*(ثَانِيَةً|ثَوَانٍ|دَقَائِقَ|تَكْرَارًا|تَكْرَارَاتٍ|مَرَّاتٍ)/u);
+      const count = numMatch ? parseInt(toWest(numMatch[1]), 10) : (sealObj?.stepCount || 5);
+      const unitWord = numMatch ? numMatch[2] : 'دَقَائِقَ';
+
+      const cands = new Set([count]);
+      for (const d of [2, -2, 5, -3, 4, 10]) {
+        if (cands.size >= 4) break;
+        if (count + d > 0) cands.add(count + d);
+      }
+      return {
+        type: 'sport_steps',
+        prompt: 'مَا المِقْدَارُ الزَّمَنِيُّ أَوِ العَدَدِيُّ المَضْبُوطُ فِي تَطْبِيقِ هٰذَا التَّمْرِينِ؟',
+        stem: applyTxt.replace(numMatch ? numMatch[0] : '', `(...) ${unitWord}`),
+        options: shuffle([...cands].map(n => ({
+          text: `${toAr(n)} ${unitWord}`,
+          correct: n === count
+        })))
+      };
+    }
+
+    // ٦. الختم ٦ (العلوم وسنن الكون): ملء الفراغ العلمي من ٤ خيارات علوية
+    if (seal === 6) {
+      const STOP = new Set(['يدرس', 'العلم', 'الذي', 'التي', 'يتكون', 'تتكون', 'كيف', 'بين', 'داخل', 'خارج', 'جميع', 'فوق', 'تحت', 'منها', 'فيها', 'لوحة', 'رسم', 'مشهد', 'مقطع']);
+      const mainSlides = slides.filter(sl => sl.text && !sl.isImagePrompt);
+      const chosenSlide = mainSlides[0] || slides[0] || { text: '' };
+      const tokens = chosenSlide.text.split(/\s+/).filter(Boolean);
+      const candidates = [];
+      tokens.forEach((tok, idx) => {
+        if (idx < 1) return;
+        const cleanTok = tok.replace(/^[«"(\[]+|[.،؛:!؟»")\]]+$/g, '');
+        const b = baseKey(cleanTok);
+        if (b.length >= 4 && !STOP.has(b) && !/\d|[٠-٩]/.test(cleanTok)) {
+          candidates.push({ idx, cleanWord: cleanTok, base: b });
+        }
+      });
+      const picked = candidates[Math.floor(Math.random() * candidates.length)] || { idx: Math.max(0, tokens.length - 1), cleanWord: (tokens[tokens.length - 1] || 'الخَلِيَّةُ').replace(/[.،]/g, ''), base: 'الخلية' };
+      const beforeText = tokens.slice(0, picked.idx).join(' ');
+      const trailingPunct = ((tokens[picked.idx] || '').match(/([.،؛:!؟»")\]]+)$/) || ['', ''])[1];
+      const afterText = (trailingPunct ? trailingPunct + ' ' : '') + tokens.slice(picked.idx + 1).join(' ');
+
+      const distractors = [];
+      const usedBases = new Set([picked.base]);
+      const allWeeks = Object.keys(yearObj).map(Number).filter(w => w !== week);
+      for (const ow of shuffle(allWeeks)) {
+        if (distractors.length >= 3) break;
+        const oText = yearObj?.[ow]?.[6]?.learn?.slides?.[0]?.text || '';
+        const oToks = oText.split(/\s+/);
+        for (const ot of oToks) {
+          const cl = ot.replace(/^[«"(\[]+|[.،؛:!؟»")\]]+$/g, '');
+          const b = baseKey(cl);
+          if (b.length >= 4 && !STOP.has(b) && !usedBases.has(b)) {
+            usedBases.add(b);
+            distractors.push(cl);
+            break;
+          }
+        }
+      }
+      while (distractors.length < 3) {
+        distractors.push('المَجَرَّاتِ', 'البِلَّوْرَاتِ', 'الأَنْسِجَةِ');
+        break;
+      }
+
+      return {
+        type: 'science_cloze',
+        prompt: 'اخْتَرِ الكَلِمَةَ العِلْمِيَّةَ المُنَاسِبَةَ مِنَ الخِيَارَاتِ العُلْوِيَّةِ لِمَلْءِ الفَرَاغِ:',
+        beforeText,
+        afterText,
+        targetWord: picked.cleanWord,
+        choices: shuffle([
+          { word: picked.cleanWord, correct: true },
+          ...distractors.slice(0, 3).map(d => ({ word: d, correct: false }))
+        ])
+      };
+    }
+
+    // ٧. الختم ٧ (الآداب وتزكية السلوك): اختيار ٣ إلى ٤ عبارات صحيحة من بين ٧ عبارات من القصة
+    const correctCount = (Math.random() < 0.5) ? 3 : 4;
+    const rawClauses = [];
+    slides.forEach(sl => {
+      if (!sl || !sl.text) return;
+      sl.text.split(/(?<=[.؟!])\s+|\s*؛\s*/g).forEach(part => {
+        let c = part.replace(/[«»"']/g, '').trim();
+        if (!c || c.includes('﴿') || c.endsWith(':')) return;
+        const wLen = c.split(/\s+/).filter(Boolean).length;
+        if (wLen >= 4 && wLen <= 24) rawClauses.push(c.endsWith('.') ? c : c + '.');
+      });
+    });
+
+    const uniqueClauses = [...new Set(rawClauses)];
+    const shuffled = shuffle(uniqueClauses);
+    const truePicked = shuffled.slice(0, Math.min(correctCount, shuffled.length));
+    const rem = shuffled.slice(truePicked.length);
+    const targetWrong = Math.max(2, 7 - truePicked.length);
+
+    const falseOptions = [];
+    for (const src of rem) {
+      if (falseOptions.length >= targetWrong) break;
+      const inv = invertArabicSentencePolarity(src).text;
+      if (inv && inv !== src && !truePicked.includes(inv) && !falseOptions.includes(inv)) {
+        falseOptions.push(inv);
+      }
+    }
+    while (falseOptions.length < targetWrong) {
+      falseOptions.push('أَطَاعَ البَطَلُ وَسْوَسَةَ الهَوَى وَتَرَكَ حُكْمَ العَقْلِ.');
+      if (falseOptions.length < targetWrong) falseOptions.push('أَخْفَى الخَطَأَ عَنْ أَهْلِهِ وَلَمْ يُبَادِرْ إِلَى إِصْلَاحِهِ.');
+      break;
+    }
+
+    const allOpts = shuffle([
+      ...truePicked.map(t => ({ text: t, correct: true })),
+      ...falseOptions.slice(0, targetWrong).map(f => ({ text: f, correct: false }))
+    ]);
+
+    return {
+      type: 'adab_multiselect',
+      prompt: `اخْتَرِ العِبَارَاتِ الصَّحِيحَةَ الوَارِدَةَ فِي القِصَّةِ وَعَدَدُهَا (${toAr(truePicked.length)}):`,
+      requiredCorrect: truePicked.length,
+      options: allOpts
+    };
+  }
+
+  exports.generateDynamicQuestion = generateDynamicQuestion;
+})(window.Stage2QuestionEngine = {});
+    </script>
+
+    <script>
+// ============================================================================
+// المحرك التفاعلي الحي للمختبرات (الرياضيات والعلوم والرياضة لمرحلة عبد)
+// ============================================================================
+window.Stage2LabEngine = (function() {
+    let animId = null;
+    function stop() { if (animId) { cancelAnimationFrame(animId); animId = null; } }
+
+    function render(container, seal, week, sealObj) {
+        stop();
+        container.innerHTML = '';
+        const box = document.createElement('div');
+        box.className = 'stage2-lab-box';
+
+        const pill = document.createElement('div');
+        pill.className = 'lab-header-pill';
+        const wrap = document.createElement('div');
+        wrap.className = 'lab-canvas-wrap';
+        const ctrl = document.createElement('div');
+        ctrl.className = 'lab-controls-bar';
+
+        box.appendChild(pill);
+        box.appendChild(wrap);
+        box.appendChild(ctrl);
+        container.appendChild(box);
+
+        const toAr = (s) => String(s).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+        if (seal === 4) {
+            if (week >= 8 && week <= 10) {
+                pill.textContent = 'مُخْتَبَرُ الكُسُورِ وَالأَجْزَاءِ البَصَرِيُّ';
+                let num = 2, den = 6;
+                const cv = document.createElement('canvas');
+                cv.width = 500; cv.height = 230;
+                wrap.appendChild(cv);
+                const ctx = cv.getContext('2d');
+                const draw = () => {
+                    if (num > den) num = den;
+                    ctx.clearRect(0, 0, cv.width, cv.height);
+                    const cx = 145, cy = 115, r = 88;
+                    for (let i = 0; i < den; i++) {
+                        const a1 = (i / den) * Math.PI * 2 - Math.PI / 2;
+                        const a2 = ((i + 1) / den) * Math.PI * 2 - Math.PI / 2;
+                        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, a1, a2); ctx.closePath();
+                        ctx.fillStyle = (i < num) ? '#10b981' : 'rgba(255,255,255,0.12)';
+                        ctx.fill(); ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2; ctx.stroke();
+                    }
+                    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 30px Cairo, sans-serif'; ctx.textAlign = 'center';
+                    ctx.fillText(`${toAr(num)} / ${toAr(den)}`, 365, 95);
+                    ctx.fillStyle = '#6ee7b7'; ctx.font = 'bold 20px Cairo, sans-serif';
+                    ctx.fillText(`النِّسْبَةُ: ${toAr(Math.round((num / den) * 100))}٪`, 365, 145);
+                };
+                ctrl.innerHTML = `
+                    <label class="lab-ctrl-group">البَسْطُ <input type="range" id="lb-n" min="0" max="12" value="${num}"><span class="lab-val-badge" id="lb-nv">${toAr(num)}</span></label>
+                    <label class="lab-ctrl-group">المَقَامُ <input type="range" id="lb-d" min="1" max="12" value="${den}"><span class="lab-val-badge" id="lb-dv">${toAr(den)}</span></label>
+                `;
+                const nIn = ctrl.querySelector('#lb-n'), dIn = ctrl.querySelector('#lb-d');
+                nIn.oninput = () => { num = +nIn.value; if (num > den) { den = num; dIn.value = den; } ctrl.querySelector('#lb-nv').textContent = toAr(num); ctrl.querySelector('#lb-dv').textContent = toAr(den); draw(); };
+                dIn.oninput = () => { den = +dIn.value; if (num > den) { num = den; nIn.value = num; } ctrl.querySelector('#lb-nv').textContent = toAr(num); ctrl.querySelector('#lb-dv').textContent = toAr(den); draw(); };
+                draw();
+            } else {
+                pill.textContent = 'مُخْتَبَرُ المِسَاحَةِ وَالمَصْفُوفَةِ الهَنْدَسِيَّةِ';
+                let rows = 3, cols = 4;
+                const cv = document.createElement('canvas');
+                cv.width = 500; cv.height = 230;
+                wrap.appendChild(cv);
+                const ctx = cv.getContext('2d');
+                const drawGrid = () => {
+                    ctx.clearRect(0, 0, cv.width, cv.height);
+                    const cell = 22, ox = 45, oy = 25;
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            ctx.fillStyle = 'rgba(16, 185, 129, 0.38)';
+                            ctx.strokeStyle = '#fde047';
+                            ctx.lineWidth = 1.8;
+                            ctx.fillRect(ox + c * cell, oy + r * cell, cell - 2, cell - 2);
+                            ctx.strokeRect(ox + c * cell, oy + r * cell, cell - 2, cell - 2);
+                        }
+                    }
+                    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 24px Cairo, sans-serif'; ctx.textAlign = 'center';
+                    ctx.fillText(`المِسَاحَةُ: ${toAr(rows)} × ${toAr(cols)} = ${toAr(rows * cols)}`, 365, 95);
+                    ctx.fillStyle = '#6ee7b7'; ctx.font = 'bold 20px Cairo, sans-serif';
+                    ctx.fillText(`المُحِيطُ: ${toAr(2 * (rows + cols))}`, 365, 145);
+                };
+                ctrl.innerHTML = `
+                    <label class="lab-ctrl-group">الطُّولُ <input type="range" id="g-r" min="1" max="8" value="${rows}"><span class="lab-val-badge" id="g-rv">${toAr(rows)}</span></label>
+                    <label class="lab-ctrl-group">العَرْضُ <input type="range" id="g-c" min="1" max="9" value="${cols}"><span class="lab-val-badge" id="g-cv">${toAr(cols)}</span></label>
+                `;
+                ctrl.querySelector('#g-r').oninput = (e) => { rows = +e.target.value; ctrl.querySelector('#g-rv').textContent = toAr(rows); drawGrid(); };
+                ctrl.querySelector('#g-c').oninput = (e) => { cols = +e.target.value; ctrl.querySelector('#g-cv').textContent = toAr(cols); drawGrid(); };
+                drawGrid();
+            }
+            return;
+        }
+
+        // المدرب الحركي والتنفسي لختم الرياضة (٥) أو التجويد والتنفس (٣)
+        pill.textContent = (seal === 3) ? 'مُخْتَبَرُ التَّنَفُّسِ الحِجَابِيِّ وَالرَّنِينِ الصَّوْتِيِّ' : 'المُدَرِّبُ الحَرَكِيُّ وَإِيقَاعُ التَّنَفُّسِ';
+        let poseIdx = 0;
+        const POSES = [
+            { name: 'الِاسْتِقَامَةُ وَالشَّهِيقُ الهَادِئُ مِنَ الأَنْفِ', lA: -140, rA: 140, lL: -8, rL: 8 },
+            { name: 'التَّوَازُنُ الثَّابِتُ حَوْلَ مَرْكَزِ الثِّقَلِ', lA: -90, rA: 90, lL: 0, rL: 52 },
+            { name: 'القُرْفُصَاءُ المُتَّزِنَةُ مَعَ اسْتِقَامَةِ الظَّهْرِ', lA: -75, rA: 75, lL: -32, rL: 32 },
+            { name: 'الإِطَالَةُ وَالزَّفِيرُ المُنْتَظِمُ مِنَ الفَمِ', lA: -30, rA: 30, lL: -10, rL: 10 }
+        ];
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 420 220');
+        svg.style.width = '100%';
+        wrap.appendChild(svg);
+
+        let phase = 0;
+        const loop = () => {
+            const p = POSES[poseIdx % POSES.length];
+            phase += 0.04;
+            const r = 26 + Math.sin(phase) * 11;
+            const bTxt = Math.cos(phase) >= 0 ? 'شَهِيقٌ' : 'زَفِيرٌ';
+            svg.innerHTML = `
+                <circle cx="330" cy="105" r="${r}" fill="rgba(16,185,129,0.28)" stroke="#fde047" stroke-width="2.5"/>
+                <text x="330" y="111" fill="#fef08a" font-size="14" font-weight="900" text-anchor="middle">${bTxt}</text>
+                <text x="210" y="24" fill="#a7f3d0" font-size="14" font-weight="900" text-anchor="middle">${p.name}</text>
+                <line x1="60" y1="202" x2="240" y2="202" stroke="#34d399" stroke-width="3"/>
+                <circle cx="150" cy="62" r="15" fill="#fde047" stroke="#ffffff" stroke-width="2"/>
+                <line x1="150" y1="77" x2="150" y2="138" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+                <g transform="translate(150, 88) rotate(${p.lA})"><line x1="0" y1="0" x2="0" y2="44" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/></g>
+                <g transform="translate(150, 88) rotate(${p.rA})"><line x1="0" y1="0" x2="0" y2="44" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/></g>
+                <g transform="translate(150, 138) rotate(${p.lL})"><line x1="0" y1="0" x2="0" y2="56" stroke="#eab308" stroke-width="7" stroke-linecap="round"/></g>
+                <g transform="translate(150, 138) rotate(${p.rL})"><line x1="0" y1="0" x2="0" y2="56" stroke="#eab308" stroke-width="7" stroke-linecap="round"/></g>
+            `;
+            animId = requestAnimationFrame(loop);
+        };
+        ctrl.innerHTML = `
+            <button type="button" class="lab-action-mini-btn" id="p-prev">الوَضْعِيَّةُ السَّابِقَةُ</button>
+            <button type="button" class="lab-action-mini-btn" id="p-next">الوَضْعِيَّةُ التَّالِيَةُ</button>
+        `;
+        ctrl.querySelector('#p-prev').onclick = () => { poseIdx = (poseIdx + POSES.length - 1) % POSES.length; };
+        ctrl.querySelector('#p-next').onclick = () => { poseIdx = (poseIdx + 1) % POSES.length; };
+        loop();
+    }
+
+    return { render, stop };
+})();
+    </script>
+
+    <script>
+// ============================================================================
+// التطبيق الموحد لمرحلة عبد (٨ – ١٤ سنة) بنظام الكبسولتين والمحطات الثلاث
+// ============================================================================
+(function initStage2UnifiedApp() {
+    const ABJAD = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي','ك','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
+    const SEAL_NAMES = {
+        1: 'المَنْطِقُ وَالبَيَانُ',
+        2: 'البَصِيرَةُ وَالفَنُّ الهَنْدَسِيُّ',
+        3: 'الرَّنِينُ وَالتَّجْوِيدُ وَالصَّوْتُ',
+        4: 'الرِّيَاضِيَّاتُ وَالمِقْدَارُ',
+        5: 'الحَرَكَةُ وَالِاتِّزَانُ البَدَنِيُّ',
+        6: 'العُلُومُ وَسُنَنُ الكَوْنِ',
+        7: 'الآدَابُ وَتَزْكِيَةُ السُّلُوكِ'
+    };
+    const YEAR_CYCLES_MAP = { 8: 1, 9: 1, 10: 1, 11: 1, 12: 1, 13: 2, 14: 2 };
+    const CYCLE_AR_NAMES = ['', 'الأُولَى', 'الثَّانِيَةُ'];
+    const toAr = (s) => String(s).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramYear = parseInt(urlParams.get('year'), 10);
+    const savedYear = parseInt(SafeStore.get('selected_school_year') || '8', 10);
+    let activeYear = (!isNaN(paramYear) && paramYear >= 8 && paramYear <= 14)
+        ? paramYear
+        : ((!isNaN(savedYear) && savedYear >= 8 && savedYear <= 14) ? savedYear : 8);
+    SafeStore.set('selected_school_year', activeYear);
+
+    let isFreeExplore = SafeStore.get('stage2_explore_mode') === 'true';
+    let isTTSActive = SafeStore.get('tts_enabled_state') !== 'false';
+    let isAutoFlip = SafeStore.get('stage2_auto_flip') !== 'false';
+
+    let playWeek = 1;
+    let selectedMapCycle = 1;
+    let activeSeal = 1;
+    let activeStation = 0; // 0: درس | 1: سؤال | 2: تطبيق
+    let currentSlideIdx = 0;
+    let isVideoMode = false;
+    let isLabMode = false;
+    let currentQuestionResolved = false;
+    let currentQuizData = null;
+
+    let zoomScale = 1, panX = 0, panY = 0, forceHandPan = false, isImageExpanded = false;
+
+    const getTotalCycles = () => YEAR_CYCLES_MAP[activeYear] || 1;
+    const getTotalWeeks = () => getTotalCycles() * 28;
+    const getCycleOfWeek = (w) => Math.ceil(w / 28);
+
+    let toastTimer = null;
+    function showToast(msg) {
+        const t = document.getElementById('app-toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+    }
+
+    function getAudioCtx() {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        if (!window._s2AudioCtx) window._s2AudioCtx = new Ctx();
+        if (window._s2AudioCtx.state === 'suspended') window._s2AudioCtx.resume().catch(() => {});
+        return window._s2AudioCtx;
+    }
+
+    function playChime(ok = true) {
+        try {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+            const freqs = ok ? [523.25, 659.25, 783.99, 1046.5] : [250, 185];
+            freqs.forEach((f, idx) => {
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = ok ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(f, now + idx * 0.065);
+                g.gain.setValueAtTime(0.001, now + idx * 0.065);
+                g.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.065 + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.065 + (ok ? 0.36 : 0.24));
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(now + idx * 0.065); osc.stop(now + idx * 0.065 + 0.4);
+            });
+        } catch (e) {}
+    }
+
+    // حفظ النصوص المشكولة ١٠٠٪ دون أي تقطيع بـ span أو تشويه للأرقام أو الحركات!
+    function safeRenderText(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    // معالجة صوتية نقية تقرأ التشكيل الأصلي كما هو دون تخمين عشوائي يفسد الحركات
+    const ARABIC_LETTER_NAMES = {
+        'أ': 'الأَلِف', 'ا': 'الأَلِف', 'ب': 'البَاء', 'ت': 'التَّاء', 'ث': 'الثَّاء',
+        'ج': 'الجِيم', 'ح': 'الحَاء', 'خ': 'الخَاء', 'د': 'الدَّال', 'ذ': 'الذَّال',
+        'ر': 'الرَّاء', 'ز': 'الزَّاي', 'س': 'السِّين', 'ش': 'الشِّين', 'ص': 'الصَّاد',
+        'ض': 'الضَّاد', 'ط': 'الطَّاء', 'ظ': 'الظَّاء', 'ع': 'العَيْن', 'غ': 'الغَيْن',
+        'ف': 'الفَاء', 'ق': 'القَاف', 'ك': 'الكَاف', 'ل': 'اللَّام', 'م': 'المِيم',
+        'ن': 'النُّون', 'ه': 'الهَاء', 'هـ': 'الهَاء', 'و': 'الوَاو', 'ي': 'اليَاء'
+    };
+
+    function preprocessTTS(text) {
+        if (!text) return '';
+        let clean = String(text).replace(/<[^>]*>/g, ' ');
+        clean = clean.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, ' ');
+        clean = clean.replace(/۝[٠-٩\d]+/g, ' ، ');
+        clean = clean.replace(/[﴿﴾«»"']/g, ' ');
+        clean = clean.replace(/\+/g, ' زَائِد ').replace(/×/g, ' ضَرْب ').replace(/÷/g, ' قِسْمَة ').replace(/=/g, ' يُسَاوِي ').replace(/←|⟵/g, ' يُعْطِي ');
+        clean = clean.replace(/²/g, ' تَرْبِيع ');
+        clean = clean.replace(/(\d|[٠-٩])\s*-\s*(\d|[٠-٩])/g, '$1 نَاقِص $2');
+        const trimmed = clean.trim();
+        if (ARABIC_LETTER_NAMES[trimmed]) return ARABIC_LETTER_NAMES[trimmed];
+        return clean.replace(/\s+/g, ' ').trim();
+    }
+
+    let ttsTimer = null;
+    let ttsSessionId = 0;
+
+    function stopAllTTS() {
+        ttsSessionId++;
+        clearTimeout(ttsTimer);
+        if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+        }
+        const card = document.querySelector('.lesson-text-card');
+        if (card) card.classList.remove('speaking-highlight');
+    }
+
+    function speakSlideTextOnly(rawText, onDone) {
+        stopAllTTS();
+        if (!isTTSActive || isVideoMode || isLabMode) return;
+        const processed = preprocessTTS(rawText);
+        if (!processed) { if (onDone) onDone(); return; }
+
+        const mySession = ttsSessionId;
+        const card = document.querySelector('.lesson-text-card');
+        if (card) card.classList.add('speaking-highlight');
+
+        const startedAt = Date.now();
+        const minReadMs = Math.min(15000, Math.max(4200, processed.length * 55));
+
+        const finish = (allowAuto = true) => {
+            if (mySession !== ttsSessionId) return;
+            clearTimeout(ttsTimer);
+            if (card) card.classList.remove('speaking-highlight');
+            if (allowAuto && onDone) onDone();
+        };
+
+        if (!('speechSynthesis' in window)) {
+            ttsTimer = setTimeout(() => finish(true), minReadMs);
+            return;
+        }
+        try {
+            const u = new SpeechSynthesisUtterance(processed);
+            u.lang = 'ar-SA';
+            u.rate = 0.9;
+            const voices = window.speechSynthesis.getVoices();
+            const arVoice = voices.find(v => v.lang && v.lang.startsWith('ar'));
+            if (arVoice) u.voice = arVoice;
+            u.onend = () => {
+                if (Date.now() - startedAt < 1200) ttsTimer = setTimeout(() => finish(true), minReadMs);
+                else finish(true);
+            };
+            u.onerror = () => { ttsTimer = setTimeout(() => finish(true), minReadMs); };
+            ttsTimer = setTimeout(() => finish(true), Math.min(30000, processed.length * 95 + 3000));
+            window.speechSynthesis.speak(u);
+        } catch (e) { finish(false); }
+    }
+
+    // إدارة النجوم والتقدم
+    function starKey(y, w, s) { return `s2_v2_star_y${y}_w${w}_s${s}`; }
+    function stationKey(y, w, s) { return `s2_v2_st_y${y}_w${w}_s${s}`; }
+
+    function hasSealStar(y, w, s) { return SafeStore.get(starKey(y, w, s)) === '1'; }
+    function setSealStar(y, w, s) {
+        if (isFreeExplore) return false;
+        SafeStore.set(starKey(y, w, s), '1');
+        SafeStore.set(stationKey(y, w, s), '3');
+        return true;
+    }
+    function getSealStationProgress(y, w, s) {
+        if (hasSealStar(y, w, s)) return 3;
+        return parseInt(SafeStore.get(stationKey(y, w, s)) || '0', 10);
+    }
+    function setSealStationProgress(y, w, s, stCount) {
+        if (isFreeExplore) return;
+        if (stCount > getSealStationProgress(y, w, s)) SafeStore.set(stationKey(y, w, s), String(stCount));
+    }
+    function countLessonStars(y, w) {
+        let c = 0;
+        for (let s = 1; s <= 7; s++) if (hasSealStar(y, w, s)) c++;
+        return c;
+    }
+    function countYearStars(y) {
+        let c = 0, totW = (YEAR_CYCLES_MAP[y] || 1) * 28;
+        for (let w = 1; w <= totW; w++) c += countLessonStars(y, w);
+        return c;
+    }
+    function getMaxUnlockedWeek(y) {
+        const totW = (YEAR_CYCLES_MAP[y] || 1) * 28;
+        for (let w = 1; w <= totW; w++) if (countLessonStars(y, w) < 7) return w;
+        return totW;
+    }
+    function getMaxUnlockedSealInWeek(y, w) {
+        for (let s = 1; s <= 7; s++) if (!hasSealStar(y, w, s)) return s;
+        return 7;
+    }
+    function isWeekUnlocked(w) { return isFreeExplore || w <= getMaxUnlockedWeek(activeYear); }
+    function isSealUnlocked(w, s) {
+        if (isFreeExplore) return true;
+        if (!isWeekUnlocked(w)) return false;
+        if (w < getMaxUnlockedWeek(activeYear)) return true;
+        return s <= getMaxUnlockedSealInWeek(activeYear, w);
+    }
+
+    function getSealObj(y, w, s) {
+        const yrObj = (window.curriculumData && window.curriculumData[y]) || {};
+        if (yrObj[w]?.[s]) return yrObj[w][s];
+        const localW = ((w - 1) % 28) + 1;
+        if (yrObj[localW]?.[s] && w <= 28) return yrObj[localW][s];
+        const sealTitle = SEAL_NAMES[s] || 'الدَّرْسُ';
+        return {
+            learn: {
+                introTitle: `${sealTitle} — قَيْدُ التَّحْضِيرِ`,
+                slides: [{ img: '', text: `هٰذَا الدَّرْسُ فِي خَتْمِ (${sealTitle}) قَيْدُ التَّحْضِيرِ.` }]
+            },
+            apply: { steps: [`طَبِّقْ مَا تَعَلَّمْتَهُ فِي خَتْمِ (${sealTitle}) بِإِتْقَانٍ.`] }
+        };
+    }
+
+    function getLessonMeta(y, w) {
+        const yrObj = (window.curriculumData && window.curriculumData[y]) || {};
+        const localIdx = (w - 1) % 28;
+        const ltr = yrObj[w]?.lessonMeta?.ltr || ABJAD[localIdx] || 'أ';
+        const sealObj = getSealObj(y, w, activeSeal);
+        const cyc = getCycleOfWeek(w);
+        const cycPrefix = getTotalCycles() > 1 ? `د${toAr(cyc)} • ` : '';
+        return {
+            ltr: `${cycPrefix}${ltr}`,
+            rawLtr: ABJAD[localIdx] || 'أ',
+            lessonName: sealObj?.learn?.introTitle || yrObj[w]?.lessonMeta?.name || `دَرْسُ (${ABJAD[localIdx]})`,
+            sealTitle: sealObj?.learn?.introTitle || SEAL_NAMES[activeSeal]
+        };
+    }
+
+    function updateChromeUI() {
+        document.body.classList.toggle('explore-mode-active', isFreeExplore);
+        const ageWord = (activeYear >= 8 && activeYear <= 10) ? 'سَنَوَاتٍ' : 'سَنَةً';
+        document.getElementById('hdr-age-label').textContent = `${toAr(activeYear)} ${ageWord}`;
+
+        const meta = getLessonMeta(activeYear, playWeek);
+        document.getElementById('hdr-lesson-letter').textContent = meta.ltr;
+        document.getElementById('hdr-lesson-title').textContent = meta.lessonName;
+        document.getElementById('hdr-lesson-stars').textContent = `⭐ ${toAr(countLessonStars(activeYear, playWeek))}/٧`;
+
+        const maxUnlockedS = getMaxUnlockedSealInWeek(activeYear, playWeek);
+        for (let s = 1; s <= 7; s++) {
+            const btn = document.getElementById(`btn-subj-${s}`);
+            const bat = document.getElementById(`bat-subj-${s}`);
+            if (!btn || !bat) continue;
+            const unlocked = isSealUnlocked(playWeek, s);
+            const starred = hasSealStar(activeYear, playWeek, s);
+            const stProg = getSealStationProgress(activeYear, playWeek, s);
+
+            btn.classList.toggle('active-seal', s === activeSeal);
+            btn.classList.toggle('completed', starred);
+            btn.classList.toggle('locked-seal', !unlocked);
+            btn.classList.toggle('next-illuminated', !isFreeExplore && !starred && s === maxUnlockedS && s !== activeSeal);
+
+            bat.querySelectorAll('.seal-bat-seg').forEach((seg, idx) => {
+                seg.classList.remove('done', 'current');
+                if (starred || idx < stProg) seg.classList.add('done');
+                else if (s === activeSeal && idx === activeStation) seg.classList.add('current');
+            });
+        }
+
+        const stProg = getSealStationProgress(activeYear, playWeek, activeSeal);
+        [0, 1, 2].forEach(stIdx => {
+            const pill = document.getElementById(`st-pill-${stIdx}`);
+            if (!pill) return;
+            const canOpen = isFreeExplore || stIdx <= Math.max(stProg, activeStation);
+            pill.classList.toggle('active', stIdx === activeStation);
+            pill.classList.toggle('done', stIdx < stProg || hasSealStar(activeYear, playWeek, activeSeal));
+            pill.classList.toggle('locked', !canOpen);
+        });
+
+        const mediaBar = document.getElementById('station-media-bar');
+        if (mediaBar) {
+            mediaBar.style.display = (activeStation === 0) ? 'inline-flex' : 'none';
+            const sealObj = getSealObj(activeYear, playWeek, activeSeal);
+            const slides = sealObj?.learn?.slides || [];
+            const hasVid = !!(sealObj?.learn?.video);
+            const hasLab = [3, 4, 5].includes(activeSeal) || !!(sealObj?.learn?.labData);
+
+            document.getElementById('slide-prev-btn').style.display = (!isVideoMode && !isLabMode && slides.length > 1) ? 'inline-flex' : 'none';
+            document.getElementById('slide-next-btn').style.display = (!isVideoMode && !isLabMode && slides.length > 1) ? 'inline-flex' : 'none';
+            document.getElementById('slide-counter-badge').style.display = (!isVideoMode && !isLabMode && slides.length > 0) ? 'inline-block' : 'none';
+            document.getElementById('slide-counter-badge').textContent = `${toAr(currentSlideIdx + 1)} / ${toAr(Math.max(1, slides.length))}`;
+            document.getElementById('slide-prev-btn').disabled = (currentSlideIdx <= 0);
+            document.getElementById('slide-next-btn').disabled = (currentSlideIdx >= slides.length - 1);
+
+            const ttsBtn = document.getElementById('tts-play-btn');
+            ttsBtn.style.display = (isVideoMode || isLabMode) ? 'none' : 'inline-flex';
+            ttsBtn.classList.toggle('active-toggle', isTTSActive);
+            ttsBtn.textContent = isTTSActive ? '🔊' : '🔇';
+
+            const flipBtn = document.getElementById('auto-flip-btn');
+            flipBtn.style.display = (!isVideoMode && !isLabMode && slides.length > 1) ? 'inline-flex' : 'none';
+            flipBtn.classList.toggle('active-toggle', isAutoFlip);
+
+            const labBtn = document.getElementById('lab-mode-btn');
+            labBtn.style.display = hasLab ? 'inline-flex' : 'none';
+            labBtn.classList.toggle('active-toggle', isLabMode);
+
+            const vidBtn = document.getElementById('video-mode-btn');
+            vidBtn.style.display = hasVid ? 'inline-flex' : 'none';
+            vidBtn.classList.toggle('active-toggle', isVideoMode);
+        }
+
+        const cornerBtn = document.getElementById('corner-next-btn');
+        const isFinalStation = (activeStation === 2);
+        cornerBtn.classList.toggle('star-mode', isFinalStation);
+        if (isFinalStation) {
+            cornerBtn.disabled = false;
+            cornerBtn.classList.remove('ready-pulse');
+            cornerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+        } else {
+            const canAdvance = (activeStation === 0) || currentQuestionResolved || isFreeExplore;
+            cornerBtn.disabled = !canAdvance;
+            cornerBtn.classList.toggle('ready-pulse', activeStation === 1 && currentQuestionResolved);
+            cornerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
+        }
+    }
+
+    function applyImageTransform() {
+        const img = document.getElementById('slide-zoom-target');
+        const frame = document.getElementById('slide-image-frame');
+        const lvl = document.getElementById('zoom-level-pill');
+        const panBtn = document.getElementById('zoom-pan-toggle');
+        if (!img || !frame) return;
+        img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+        if (lvl) lvl.textContent = `${Math.round(zoomScale * 100)}%`;
+        const panActive = forceHandPan || zoomScale > 1.01;
+        frame.classList.toggle('pan-enabled', panActive);
+        if (panBtn) panBtn.classList.toggle('pan-on', panActive);
+    }
+
+    function bindImageZoomAndPan(frame) {
+        let dragging = false, startX = 0, startY = 0, originX = 0, originY = 0;
+        frame.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('.img-zoom-toolbar')) return;
+            if (!(forceHandPan || zoomScale > 1.01)) return;
+            dragging = true; frame.classList.add('dragging');
+            startX = e.clientX; startY = e.clientY; originX = panX; originY = panY;
+            try { frame.setPointerCapture(e.pointerId); } catch (err) {}
+            e.preventDefault();
+        });
+        frame.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            panX = originX + (e.clientX - startX); panY = originY + (e.clientY - startY);
+            applyImageTransform();
+        });
+        const end = () => { dragging = false; frame.classList.remove('dragging'); };
+        frame.addEventListener('pointerup', end); frame.addEventListener('pointercancel', end);
+        frame.addEventListener('wheel', (e) => {
+            if (!(forceHandPan || zoomScale > 1.01 || e.ctrlKey)) return;
+            e.preventDefault();
+            zoomScale = Math.min(4.5, Math.max(1, +(zoomScale + (e.deltaY < 0 ? 0.25 : -0.25)).toFixed(2)));
+            if (zoomScale === 1) { panX = 0; panY = 0; }
+            applyImageTransform();
+        }, { passive: false });
+    }
+
+    function renderLessonStation() {
+        window.Stage2LabEngine.stop();
+        const host = document.getElementById('station-body-host');
+        const sealObj = getSealObj(activeYear, playWeek, activeSeal);
+        const meta = getLessonMeta(activeYear, playWeek);
+        const slides = sealObj.learn?.slides || [];
+        const videoSrc = sealObj.learn?.video || '';
+
+        if (isLabMode) {
+            stopAllTTS();
+            host.innerHTML = `<div id="lesson-scroll-box"><div id="lab-mount"></div></div>`;
+            window.Stage2LabEngine.render(document.getElementById('lab-mount'), activeSeal, playWeek, sealObj);
+            setSealStationProgress(activeYear, playWeek, activeSeal, 1);
+            updateChromeUI();
+            return;
+        }
+
+        if (isVideoMode && videoSrc) {
+            stopAllTTS();
+            host.innerHTML = `
+                <div id="lesson-scroll-box">
+                    <div class="universal-video-shell" id="universal-video-shell">
+                        <div class="video-stage-area">
+                            <video id="stage2-video-el" playsinline preload="metadata" src="${videoSrc}"></video>
+                            <button type="button" class="video-big-play-overlay" id="vid-center-play" aria-label="تشغيل الفيديو">
+                                <svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>
+                            </button>
+                            <div class="video-fallback-notice" id="vid-fallback-box">
+                                <div style="font-size:2.4rem;">🎬</div>
+                                <div style="font-weight:900; font-size:1.1rem;">${safeRenderText(meta.sealTitle)}</div>
+                            </div>
+                        </div>
+                        <div class="universal-video-controls">
+                            <input type="range" class="uv-seek-bar" id="uv-seek" min="0" max="100" value="0" step="0.1">
+                            <div class="uv-buttons-row">
+                                <div class="uv-left-grp">
+                                    <button type="button" class="uv-btn" id="uv-play-pause">▶</button>
+                                    <button type="button" class="uv-btn" id="uv-rew-10">-10</button>
+                                    <button type="button" class="uv-btn" id="uv-fwd-10">+10</button>
+                                    <span class="uv-time-txt" id="uv-time-txt">00:00 / 00:00</span>
+                                </div>
+                                <div class="uv-right-grp">
+                                    <button type="button" class="uv-btn" id="uv-mute-btn">🔊</button>
+                                    <input type="range" class="uv-vol-slider" id="uv-vol" min="0" max="1" step="0.05" value="1">
+                                    <button type="button" class="uv-btn" id="uv-fs-btn">⛶</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            const vid = document.getElementById('stage2-video-el');
+            const bigPlay = document.getElementById('vid-center-play');
+            const pp = document.getElementById('uv-play-pause');
+            const seek = document.getElementById('uv-seek');
+            const tTxt = document.getElementById('uv-time-txt');
+            const fmt = (sc) => !isFinite(sc) ? '00:00' : `${String(Math.floor(sc/60)).padStart(2,'0')}:${String(Math.floor(sc%60)).padStart(2,'0')}`;
+            const toggleV = () => { stopAllTTS(); if (vid.paused) vid.play().catch(()=>{}); else vid.pause(); };
+            bigPlay.onclick = toggleV; pp.onclick = toggleV; vid.onclick = toggleV;
+            vid.onplay = () => { pp.textContent = '⏸'; bigPlay.style.display = 'none'; };
+            vid.onpause = () => { pp.textContent = '▶'; bigPlay.style.display = 'flex'; };
+            vid.ontimeupdate = () => { if (vid.duration) seek.value = String((vid.currentTime/vid.duration)*100); tTxt.textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`; };
+            vid.onerror = () => { document.getElementById('vid-fallback-box').style.display = 'flex'; };
+            seek.oninput = () => { if (vid.duration) vid.currentTime = (parseFloat(seek.value)/100)*vid.duration; };
+            document.getElementById('uv-rew-10').onclick = () => { vid.currentTime = Math.max(0, vid.currentTime - 10); };
+            document.getElementById('uv-fwd-10').onclick = () => { vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10); };
+            document.getElementById('uv-mute-btn').onclick = (e) => { vid.muted = !vid.muted; e.target.textContent = vid.muted ? '🔇' : '🔊'; };
+            document.getElementById('uv-vol').oninput = (e) => { vid.volume = parseFloat(e.target.value); };
+            document.getElementById('uv-fs-btn').onclick = () => { const sh = document.getElementById('universal-video-shell'); if (document.fullscreenElement) document.exitFullscreen(); else sh.requestFullscreen?.(); };
+            setSealStationProgress(activeYear, playWeek, activeSeal, 1);
+            updateChromeUI();
+            return;
+        }
+
+        if (currentSlideIdx >= slides.length) currentSlideIdx = 0;
+        const slide = slides[currentSlideIdx] || { img: '', text: '' };
+        const isQuranSlide = slide.text && slide.text.trim().startsWith('﴿') && slide.text.trim().endsWith('﴾');
+        zoomScale = 1; panX = 0; panY = 0;
+
+        host.innerHTML = `
+            <div id="lesson-scroll-box">
+                <div id="top-visual-slot"></div>
+                <div class="lesson-text-card ${isQuranSlide ? 'quran-ayah-card' : ''}" id="slide-text-under-image">${safeRenderText(slide.text)}</div>
+            </div>
+        `;
+
+        const topSlot = document.getElementById('top-visual-slot');
+        const renderBanner = () => {
+            topSlot.innerHTML = `
+                <div class="lesson-title-banner">
+                    <div class="banner-title-main">
+                        <div class="banner-letter-seal">${meta.rawLtr}</div>
+                        <div>
+                            <div class="banner-seal-sub">${SEAL_NAMES[activeSeal]}</div>
+                            <div class="banner-lesson-heading">${safeRenderText(meta.sealTitle)}</div>
+                        </div>
+                    </div>
+                </div>`;
+        };
+
+        if (slide.img && slide.img.trim()) {
+            topSlot.innerHTML = `
+                <div class="slide-image-frame ${isImageExpanded ? 'expanded-frame' : ''}" id="slide-image-frame">
+                    <div class="img-zoom-toolbar">
+                        <button type="button" class="zoom-icon-btn" id="zoom-in-btn" title="تكبير">➕</button>
+                        <button type="button" class="zoom-icon-btn" id="zoom-out-btn" title="تصغير">➖</button>
+                        <span class="zoom-level-pill" id="zoom-level-pill">100%</span>
+                        <button type="button" class="zoom-icon-btn" id="zoom-pan-toggle" title="يد التحريك">✋</button>
+                        <button type="button" class="zoom-icon-btn" id="zoom-reset-btn" title="إعادة الضبط">🔄</button>
+                        <button type="button" class="zoom-icon-btn" id="zoom-expand-btn" title="توسيع الإطار">⛶</button>
+                    </div>
+                    <img id="slide-zoom-target" alt="${meta.sealTitle}" src="${slide.img}">
+                </div>`;
+            const imgEl = document.getElementById('slide-zoom-target');
+            const frameEl = document.getElementById('slide-image-frame');
+            imgEl.onerror = () => renderBanner();
+            bindImageZoomAndPan(frameEl);
+            document.getElementById('zoom-in-btn').onclick = () => { zoomScale = Math.min(4.5, +(zoomScale + 0.5).toFixed(2)); applyImageTransform(); };
+            document.getElementById('zoom-out-btn').onclick = () => { zoomScale = Math.max(1, +(zoomScale - 0.5).toFixed(2)); if (zoomScale === 1) { panX = 0; panY = 0; } applyImageTransform(); };
+            document.getElementById('zoom-pan-toggle').onclick = () => { forceHandPan = !forceHandPan; if (forceHandPan && zoomScale < 1.5) zoomScale = 1.6; applyImageTransform(); };
+            document.getElementById('zoom-reset-btn').onclick = () => { forceHandPan = false; zoomScale = 1; panX = 0; panY = 0; applyImageTransform(); };
+            document.getElementById('zoom-expand-btn').onclick = () => { isImageExpanded = !isImageExpanded; frameEl.classList.toggle('expanded-frame', isImageExpanded); };
+        } else {
+            renderBanner();
+        }
+
+        setSealStationProgress(activeYear, playWeek, activeSeal, 1);
+        updateChromeUI();
+
+        speakSlideTextOnly(slide.text, () => {
+            if (activeStation === 0 && !isVideoMode && !isLabMode && isAutoFlip && currentSlideIdx < slides.length - 1) {
+                currentSlideIdx++;
+                renderLessonStation();
+            }
+        });
+    }
+
+    function markQuestionSolved() {
+        if (currentQuestionResolved) return;
+        currentQuestionResolved = true;
+        playChime(true);
+        setSealStationProgress(activeYear, playWeek, activeSeal, 2);
+        updateChromeUI();
+        showToast('أَحْسَنْتَ! اضْغَطْ سَهْمَ الانْتِقَالِ فِي الزَّاوِيَةِ اليُسْرَى ⬅');
+    }
+
+    function renderQuestionStation(regenerate = true) {
+        stopAllTTS();
+        window.Stage2LabEngine.stop();
+        const host = document.getElementById('station-body-host');
+        if (regenerate || !currentQuizData) {
+            currentQuestionResolved = false;
+            currentQuizData = window.Stage2QuestionEngine.generateDynamicQuestion(
+                window.curriculumData, activeYear, playWeek, activeSeal
+            );
+        }
+        const q = currentQuizData;
+        updateChromeUI();
+
+        host.innerHTML = `
+            <div class="quiz-scroll-area">
+                <div class="quiz-card-shell">
+                    <div class="quiz-prompt-header">
+                        <span class="quiz-prompt-text" id="quiz-prompt-label">${safeRenderText(q.prompt || q.modeLabel || '')}</span>
+                        <div style="display:inline-flex; gap:6px;">
+                            <button type="button" class="icon-ctrl-btn" id="quiz-speak-btn" title="سماع السؤال">🔊</button>
+                            <button type="button" class="icon-ctrl-btn" id="quiz-reroll-btn" title="سؤال جديد من الدرس">🎲</button>
+                        </div>
+                    </div>
+                    <div id="quiz-interactive-body"></div>
+                </div>
+            </div>`;
+
+        const bodyEl = document.getElementById('quiz-interactive-body');
+        document.getElementById('quiz-reroll-btn').onclick = () => renderQuestionStation(true);
+        document.getElementById('quiz-speak-btn').onclick = () => {
+            speakSlideTextOnly((q.prompt || q.modeLabel || '') + ' ' + (q.stem || q.statement || q.beforeText || ''));
+        };
+
+        if (q.type === 'order') {
+            let placed = [], pool = q.tiles.map((t, i) => ({ ...t, uid: i }));
+            const renderOrder = () => {
+                bodyEl.innerHTML = `<div class="order-slots-zone" id="order-slots"></div><div class="order-pool-zone" id="order-pool"></div>`;
+                const sEl = document.getElementById('order-slots'), pEl = document.getElementById('order-pool');
+                if (!placed.length) sEl.innerHTML = `<span style="color:#64748b; font-weight:700;">اضْغَطْ عَلَى المَقَاطِعِ بِالتَّرْتِيبِ الصَّحِيحِ...</span>`;
+                placed.forEach((it, idx) => {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'order-tile-btn placed-tile';
+                    b.textContent = it.label;
+                    b.onclick = () => { if (!currentQuestionResolved) { placed.splice(idx, 1); pool.push(it); renderOrder(); } };
+                    sEl.appendChild(b);
+                });
+                pool.forEach((it, idx) => {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'order-tile-btn';
+                    b.textContent = it.label;
+                    b.onclick = () => {
+                        if (currentQuestionResolved) return;
+                        pool.splice(idx, 1); placed.push(it); renderOrder();
+                        if (pool.length === 0) {
+                            const ok = placed.every((x, k) => x.label === q.correctOrder[k]);
+                            const btns = sEl.querySelectorAll('.order-tile-btn');
+                            if (ok) { btns.forEach(bt => bt.classList.add('tile-correct')); markQuestionSolved(); }
+                            else {
+                                playChime(false);
+                                btns.forEach((bt, k) => { if (placed[k].label !== q.correctOrder[k]) bt.classList.add('tile-wrong'); });
+                                setTimeout(() => { pool = [...placed]; placed = []; renderOrder(); }, 950);
+                            }
+                        }
+                    };
+                    pEl.appendChild(b);
+                });
+            };
+            renderOrder();
+        }
+        else if (q.type === 'mcq_half' || q.type === 'sport_steps') {
+            bodyEl.innerHTML = `${q.stem ? `<div class="quiz-stem-box">${safeRenderText(q.stem)}</div>` : ''}<div class="mcq-options-grid" id="mcq-grid" style="margin-top:12px;"></div>`;
+            const grid = document.getElementById('mcq-grid');
+            q.options.forEach(opt => {
+                const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'quiz-opt-btn';
+                btn.innerHTML = `<span>🔹</span><span>${safeRenderText(opt.text)}</span>`;
+                btn.onclick = () => {
+                    if (currentQuestionResolved) return;
+                    if (opt.correct) { btn.classList.add('correct'); grid.querySelectorAll('button').forEach(b => b.disabled = true); markQuestionSolved(); }
+                    else { btn.classList.add('wrong'); btn.disabled = true; playChime(false); }
+                };
+                grid.appendChild(btn);
+            });
+        }
+        else if (q.type === 'true_false') {
+            bodyEl.innerHTML = `
+                <div class="quiz-stem-box">${safeRenderText(q.statement)}</div>
+                <div class="tf-buttons-row" style="margin-top:14px;">
+                    <button type="button" class="tf-choice-btn tf-true" id="tf-t">✅ صَحٌّ</button>
+                    <button type="button" class="tf-choice-btn tf-false" id="tf-f">❌ خَطَأٌ</button>
+                </div>`;
+            const tB = document.getElementById('tf-t'), fB = document.getElementById('tf-f');
+            const pick = (val, btn) => {
+                if (currentQuestionResolved) return;
+                if (val === q.correctBool) { btn.style.background = '#dcfce7'; btn.style.borderColor = '#16a34a'; tB.disabled = true; fB.disabled = true; markQuestionSolved(); }
+                else { btn.style.background = '#ffe4e6'; btn.style.borderColor = '#e11d48'; btn.disabled = true; playChime(false); }
+            };
+            tB.onclick = () => pick(true, tB); fB.onclick = () => pick(false, fB);
+        }
+        else if (q.type === 'math_baskets') {
+            let rem = q.circles.slice();
+            let selId = rem[0]?.id || null;
+            const solved = {};
+            q.baskets.forEach(b => solved[b.value] = []);
+            const renderMath = () => {
+                bodyEl.innerHTML = `<div class="math-circles-pool" id="m-pool"></div><div class="math-baskets-grid" id="m-baskets" style="margin-top:14px;"></div>`;
+                const pEl = document.getElementById('m-pool'), bEl = document.getElementById('m-baskets');
+                rem.forEach(c => {
+                    const b = document.createElement('button'); b.type = 'button';
+                    b.className = 'math-eq-circle' + (c.id === selId ? ' selected-circle' : '');
+                    b.textContent = c.expr;
+                    b.onclick = () => { selId = c.id; renderMath(); };
+                    pEl.appendChild(b);
+                });
+                q.baskets.forEach(bsk => {
+                    const d = document.createElement('div'); d.className = 'math-basket-box';
+                    const chips = (solved[bsk.value] || []).map(ex => `<span class="mini-solved-eq">${ex}</span>`).join('');
+                    d.innerHTML = `<div class="basket-target-num"><span>🧺</span><span>${bsk.label}</span></div><div class="basket-collected-chips">${chips}</div>`;
+                    d.onclick = () => {
+                        const idx = rem.findIndex(x => x.id === selId);
+                        if (idx === -1) return;
+                        if (rem[idx].answer === bsk.value) {
+                            solved[bsk.value].push(rem[idx].expr);
+                            rem.splice(idx, 1);
+                            selId = rem[0]?.id || null;
+                            playChime(true); renderMath();
+                            if (rem.length === 0) markQuestionSolved();
+                        } else { playChime(false); d.style.borderColor = '#e11d48'; setTimeout(() => d.style.borderColor = '#059669', 450); }
+                    };
+                    bEl.appendChild(d);
+                });
+            };
+            renderMath();
+        }
+        else if (q.type === 'science_cloze') {
+            bodyEl.innerHTML = `
+                <div class="cloze-top-choices" id="clz-top"></div>
+                <div class="quiz-stem-box" style="text-align:justify; margin-top:12px;">
+                    ${safeRenderText(q.beforeText)}
+                    <span class="cloze-blank-slot" id="clz-slot">........</span>
+                    ${safeRenderText(q.afterText)}
+                </div>`;
+            const top = document.getElementById('clz-top'), slot = document.getElementById('clz-slot');
+            q.choices.forEach(ch => {
+                const p = document.createElement('button'); p.type = 'button'; p.className = 'cloze-word-pill';
+                p.textContent = ch.word;
+                p.onclick = () => {
+                    if (currentQuestionResolved) return;
+                    if (ch.correct) {
+                        slot.textContent = ch.word; slot.classList.add('filled-right');
+                        p.style.background = '#dcfce7'; p.style.borderColor = '#16a34a';
+                        top.querySelectorAll('button').forEach(b => b.disabled = true);
+                        markQuestionSolved();
+                    } else { p.style.background = '#ffe4e6'; p.style.borderColor = '#e11d48'; p.disabled = true; playChime(false); }
+                };
+                top.appendChild(p);
+            });
+        }
+        else if (q.type === 'adab_multiselect') {
+            let found = 0;
+            bodyEl.innerHTML = `
+                <div style="display:flex; justify-content:center; margin-bottom:10px;">
+                    <span class="adab-counter-badge" id="adab-cnt">العِبَارَاتُ الصَّحِيحَةُ المُخْتَارَةُ: ٠ / ${toAr(q.requiredCorrect)}</span>
+                </div>
+                <div class="adab-list-stack" id="adab-stack"></div>`;
+            const stack = document.getElementById('adab-stack'), cnt = document.getElementById('adab-cnt');
+            q.options.forEach(opt => {
+                const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'quiz-opt-btn';
+                btn.innerHTML = `<span>▫️</span><span>${safeRenderText(opt.text)}</span>`;
+                btn.onclick = () => {
+                    if (currentQuestionResolved || btn.disabled) return;
+                    btn.disabled = true;
+                    if (opt.correct) {
+                        btn.classList.add('correct'); btn.firstElementChild.textContent = '✅';
+                        found++; cnt.textContent = `العِبَارَاتُ الصَّحِيحَةُ المُخْتَارَةُ: ${toAr(found)} / ${toAr(q.requiredCorrect)}`;
+                        playChime(true);
+                        if (found >= q.requiredCorrect) { stack.querySelectorAll('button').forEach(b => b.disabled = true); markQuestionSolved(); }
+                    } else { btn.classList.add('wrong'); btn.firstElementChild.textContent = '❌'; playChime(false); }
+                };
+                stack.appendChild(btn);
+            });
+        }
+    }
+
+    function renderApplyStation() {
+        stopAllTTS();
+        window.Stage2LabEngine.stop();
+        const host = document.getElementById('station-body-host');
+        const sealObj = getSealObj(activeYear, playWeek, activeSeal);
+        const stepText = sealObj?.apply?.steps?.[0] || 'طَبِّقْ مَا تَعَلَّمْتَهُ فِي هٰذَا الدَّرْسِ بِإِتْقَانٍ وَحُضُورِ قَلْبٍ.';
+        host.innerHTML = `
+            <div id="lesson-scroll-box">
+                <div class="apply-card-box">
+                    <div class="apply-badge-icon">🌱</div>
+                    <h3 style="font-size:1.25rem; font-weight:900; color:#065f46;">مَحَطَّةُ التَّطْبِيقِ العَمَلِيِّ</h3>
+                    <p class="apply-step-text">${safeRenderText(stepText)}</p>
+                </div>
+            </div>`;
+        updateChromeUI();
+        speakSlideTextOnly(stepText);
+    }
+
+    function renderActiveView() {
+        loadStage2CurriculumFiles(activeYear, getCycleOfWeek(playWeek), () => {
+            if (activeStation === 0) renderLessonStation();
+            else if (activeStation === 1) renderQuestionStation(true);
+            else renderApplyStation();
+        });
+    }
+
+    function handleCornerButtonAction() {
+        stopAllTTS();
+        if (activeStation === 0) { activeStation = 1; renderActiveView(); return; }
+        if (activeStation === 1) {
+            if (!currentQuestionResolved && !isFreeExplore) return;
+            activeStation = 2; renderActiveView(); return;
+        }
+
+        if (isFreeExplore) {
+            showToast('وَضْعُ الاسْتِكْشَافِ مُفَعَّلٌ — لَا تُحْتَسَبُ النُّجُومُ حَتَّى العَوْدَةِ لِلتَّسَلْسُلِ');
+            if (activeSeal < 7) { activeSeal++; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false; renderActiveView(); }
+            else if (playWeek < getTotalWeeks()) { playWeek++; activeSeal = 1; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false; renderActiveView(); }
+            return;
+        }
+
+        setSealStar(activeYear, playWeek, activeSeal);
+        playChime(true);
+        updateChromeUI();
+
+        if (activeSeal < 7) {
+            activeSeal++; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
+            renderActiveView();
+        } else {
+            const wStars = countLessonStars(activeYear, playWeek);
+            const yStars = countYearStars(activeYear);
+            const totStars = getTotalWeeks() * 7;
+            const meta = getLessonMeta(activeYear, playWeek);
+            document.getElementById('complete-modal-title').textContent = `أَتْمَمْتَ دَرْسَ (${meta.rawLtr}) بِنَجَاحٍ!`;
+            document.getElementById('complete-stars-row').textContent = '⭐'.repeat(wStars);
+            document.getElementById('complete-modal-summary').textContent =
+                `نُجُومُ هٰذَا الدَّرْسِ: ${toAr(wStars)} / ٧ — مَجْمُوعُ نُجُومِ السَّنَةِ: ${toAr(yStars)} / ${toAr(totStars)}`;
+            document.getElementById('lesson-complete-modal').classList.add('open');
+        }
+    }
+
+    function renderMapModal() {
+        const totCyc = getTotalCycles();
+        const totStars = getTotalWeeks() * 7;
+        document.getElementById('modal-week-stars').textContent = `${toAr(countLessonStars(activeYear, playWeek))} / ٧`;
+        document.getElementById('modal-year-stars').textContent = `${toAr(countYearStars(activeYear))} / ${toAr(totStars)}`;
+
+        const tabsBar = document.getElementById('cycles-tabs-bar');
+        tabsBar.innerHTML = '';
+        if (totCyc > 1) {
+            for (let c = 1; c <= totCyc; c++) {
+                const maxC = getCycleOfWeek(getMaxUnlockedWeek(activeYear));
+                const locked = !isFreeExplore && c > maxC;
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'cycle-tab-pill' + (c === selectedMapCycle ? ' active-cycle' : '') + (locked ? ' locked-cycle' : '');
+                b.textContent = `الدَّوْرَةُ ${CYCLE_AR_NAMES[c]} (${toAr((c-1)*28+1)}–${toAr(c*28)})`;
+                b.onclick = () => {
+                    if (locked) return;
+                    selectedMapCycle = c;
+                    loadStage2CurriculumFiles(activeYear, c, renderMapModal);
+                };
+                tabsBar.appendChild(b);
+            }
+        }
+
+        const modeBtn = document.getElementById('toggle-mode-btn');
+        modeBtn.className = 'setting-pill-btn ' + (isFreeExplore ? 'mode-exp' : 'mode-seq');
+        modeBtn.textContent = isFreeExplore
+            ? '🔓 وَضْعُ الاسْتِكْشَافِ (النُّجُومُ مُعَطَّلَةٌ — اضْغَطْ لِلتَّسَلْسُلِ)'
+            : '🔒 وَضْعُ التَّسَلْسُلِ (تَحْتَسِبُ النُّجُومُ — اضْغَطْ لِلِاسْتِكْشَافِ)';
+
+        document.getElementById('toggle-global-tts-btn').textContent =
+            isTTSActive ? '🔊 القَارِئُ الآلِيُّ: مُفَعَّلٌ' : '🔇 القَارِئُ الآلِيُّ: مُتَوَقِّفٌ';
+
+        const grid = document.getElementById('abjad-map-grid');
+        grid.innerHTML = '';
+        const offset = (selectedMapCycle - 1) * 28;
+        for (let i = 1; i <= 28; i++) {
+            const gw = offset + i;
+            const unlocked = isWeekUnlocked(gw);
+            const stars = countLessonStars(activeYear, gw);
+            const cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = 'map-letter-cell'
+                + (gw === playWeek ? ' current-week' : '')
+                + (stars === 7 ? ' completed-week' : '')
+                + (!unlocked ? ' locked-week' : '');
+            cell.innerHTML = `
+                <span class="cell-ltr">${ABJAD[i - 1]}</span>
+                <span class="cell-stars">${unlocked ? ('⭐ ' + toAr(stars) + '/٧') : '🔒'}</span>
+            `;
+            cell.onclick = () => {
+                if (!unlocked) { showToast('أَتْمِمْ دُرُوسَكَ السَّابِقَةَ أَوَّلًا أَوْ فَعِّلْ وَضْعَ الاسْتِكْشَافِ 🔒'); return; }
+                playWeek = gw;
+                activeSeal = isFreeExplore ? 1 : Math.min(7, getMaxUnlockedSealInWeek(activeYear, gw));
+                activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
+                document.getElementById('map-modal').classList.remove('open');
+                renderActiveView();
+            };
+            grid.appendChild(cell);
+        }
+
+        const endW = selectedMapCycle * 28;
+        const examUnlocked = isFreeExplore || countLessonStars(activeYear, endW) === 7;
+        const exBtn = document.getElementById('cycle-exam-btn');
+        exBtn.classList.toggle('locked', !examUnlocked);
+        document.getElementById('cycle-exam-label').textContent =
+            `الامْتِحَانُ التَّطْبِيقِيُّ الشَّامِلُ لِلدَّوْرَةِ ${CYCLE_AR_NAMES[selectedMapCycle] || 'الأُولَى'}`;
+    }
+
+    function runComprehensiveCycleExam() {
+        const endW = selectedMapCycle * 28;
+        if (!isFreeExplore && countLessonStars(activeYear, endW) < 7) {
+            showToast('أَتْمِمْ جَمِيعَ دُرُوسِ الدَّوْرَةِ أَوَّلًا لِفَتْحِ الامْتِحَانِ الشَّامِلِ 🔒');
+            return;
+        }
+        document.getElementById('map-modal').classList.remove('open');
+        stopAllTTS();
+        const startW = (selectedMapCycle - 1) * 28 + 1;
+        const sampleWeeks = [startW, startW + 6, startW + 13, startW + 20, endW];
+        const examQuestions = sampleWeeks.map((w, idx) =>
+            window.Stage2QuestionEngine.generateDynamicQuestion(window.curriculumData, activeYear, w, [2, 3, 5, 6, 2][idx])
+        );
+        let qIdx = 0, score = 0;
+        const host = document.getElementById('station-body-host');
+
+        const renderStep = () => {
+            if (qIdx >= examQuestions.length) {
+                playChime(true);
+                host.innerHTML = `
+                    <div id="lesson-scroll-box">
+                        <div class="apply-card-box">
+                            <div style="font-size:3.5rem;">🏆🌟</div>
+                            <h2 style="color:#065f46; font-weight:900;">نَتِيجَةُ الامْتِحَانِ الشَّامِلِ لِلدَّوْرَةِ ${CYCLE_AR_NAMES[selectedMapCycle]}</h2>
+                            <p style="font-size:1.5rem; font-weight:900; color:#b45309;">${toAr(score)} / ${toAr(examQuestions.length)}</p>
+                            <button type="button" class="setting-pill-btn mode-seq" id="back-to-lessons-btn">العَوْدَةُ إِلَى الدُّرُوسِ</button>
+                        </div>
+                    </div>`;
+                document.getElementById('back-to-lessons-btn').onclick = () => renderActiveView();
+                return;
+            }
+            const q = examQuestions[qIdx];
+            host.innerHTML = `
+                <div class="quiz-scroll-area">
+                    <div class="quiz-card-shell">
+                        <div class="quiz-prompt-header">
+                            <span class="quiz-prompt-text">🏆 الامْتِحَانُ الشَّامِلُ (${toAr(qIdx + 1)} / ${toAr(examQuestions.length)}): ${safeRenderText(q.prompt || '')}</span>
+                        </div>
+                        <div id="exam-q-body"></div>
+                    </div>
+                </div>`;
+            const bEl = document.getElementById('exam-q-body');
+            if (q.type === 'true_false') {
+                bEl.innerHTML = `<div class="quiz-stem-box">${safeRenderText(q.statement)}</div>
+                    <div class="tf-buttons-row" style="margin-top:14px;">
+                        <button type="button" class="tf-choice-btn tf-true" id="ex-t">✅ صَحٌّ</button>
+                        <button type="button" class="tf-choice-btn tf-false" id="ex-f">❌ خَطَأٌ</button>
+                    </div>`;
+                document.getElementById('ex-t').onclick = () => { if (q.correctBool) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
+                document.getElementById('ex-f').onclick = () => { if (!q.correctBool) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
+            } else if (q.type === 'science_cloze') {
+                bEl.innerHTML = `<div class="cloze-top-choices" id="ex-clz"></div>
+                    <div class="quiz-stem-box" style="margin-top:12px;">${safeRenderText(q.beforeText)} <span class="cloze-blank-slot">........</span> ${safeRenderText(q.afterText)}</div>`;
+                q.choices.forEach(ch => {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'cloze-word-pill'; b.textContent = ch.word;
+                    b.onclick = () => { if (ch.correct) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
+                    document.getElementById('ex-clz').appendChild(b);
+                });
+            } else {
+                bEl.innerHTML = `${q.stem ? `<div class="quiz-stem-box">${safeRenderText(q.stem)}</div>` : ''}<div class="mcq-options-grid" id="ex-mcq" style="margin-top:12px;"></div>`;
+                (q.options || []).forEach(opt => {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'quiz-opt-btn'; b.textContent = opt.text;
+                    b.onclick = () => { if (opt.correct) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
+                    document.getElementById('ex-mcq').appendChild(b);
+                });
+            }
+        };
+        renderStep();
+    }
+
+// ربط الأحداث
+    document.getElementById('home-identity-capsule').onclick = () => { stopAllTTS(); window.location.assign('index.html'); };
+
+    document.getElementById('map-lesson-capsule').onclick = () => {
+        stopAllTTS();
+        selectedMapCycle = getCycleOfWeek(playWeek);
+        renderMapModal();
+        document.getElementById('map-modal').classList.add('open');
+    };
+    document.getElementById('close-map-modal').onclick = () => document.getElementById('map-modal').classList.remove('open');
+    document.getElementById('cycle-exam-btn').onclick = runComprehensiveCycleExam;
+
+    document.getElementById('toggle-mode-btn').onclick = () => {
+        isFreeExplore = !isFreeExplore;
+        SafeStore.set('stage2_explore_mode', isFreeExplore ? 'true' : 'false');
+        if (!isFreeExplore) {
+            playWeek = getMaxUnlockedWeek(activeYear);
+            activeSeal = getMaxUnlockedSealInWeek(activeYear, playWeek);
+        }
+        renderMapModal();
+        renderActiveView();
+    };
+
+    document.getElementById('toggle-global-tts-btn').onclick = () => {
+        isTTSActive = !isTTSActive;
+        SafeStore.set('tts_enabled_state', isTTSActive ? 'true' : 'false');
+        if (!isTTSActive) stopAllTTS();
+        renderMapModal();
+        updateChromeUI();
+    };
+
+    document.getElementById('reset-year-progress-btn').onclick = () => {
+        const totW = getTotalWeeks();
+        for (let w = 1; w <= totW; w++) {
+            for (let s = 1; s <= 7; s++) {
+                SafeStore.remove(starKey(activeYear, w, s));
+                SafeStore.remove(stationKey(activeYear, w, s));
+            }
+        }
+        playWeek = 1; activeSeal = 1; activeStation = 0; currentSlideIdx = 0;
+        renderMapModal(); renderActiveView();
+        showToast('تَمَّ تَصْفِيرُ نُجُومِ السَّنَةِ الحَالِيَّةِ');
+    };
+
+    document.getElementById('next-lesson-arrow-btn').onclick = () => {
+        document.getElementById('lesson-complete-modal').classList.remove('open');
+        if (playWeek < getTotalWeeks()) playWeek++;
+        activeSeal = 1; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
+        renderActiveView();
+    };
+
+    document.querySelectorAll('.seal-btn').forEach(btn => {
+        btn.onclick = () => {
+            const s = parseInt(btn.dataset.seal, 10);
+            if (!isSealUnlocked(playWeek, s)) { showToast('أَتْمِمْ الخَتْمَ السَّابِقَ أَوَّلًا لِيُضَاءَ هٰذَا الخَتْمُ ⭐'); return; }
+            stopAllTTS();
+            activeSeal = s; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
+            renderActiveView();
+        };
+    });
+
+    document.querySelectorAll('.st-pill').forEach(pill => {
+        pill.onclick = () => {
+            const st = parseInt(pill.dataset.st, 10);
+            const stProg = getSealStationProgress(activeYear, playWeek, activeSeal);
+            if (!isFreeExplore && st > Math.max(stProg, activeStation)) { showToast('أَنْجِزِ المَحَطَّةَ الحَالِيَّةَ أَوَّلًا 🔒'); return; }
+            stopAllTTS();
+            activeStation = st;
+            renderActiveView();
+        };
+    });
+
+    document.getElementById('slide-prev-btn').onclick = () => { if (currentSlideIdx > 0) { currentSlideIdx--; renderLessonStation(); } };
+    document.getElementById('slide-next-btn').onclick = () => {
+        const slides = getSealObj(activeYear, playWeek, activeSeal)?.learn?.slides || [];
+        if (currentSlideIdx < slides.length - 1) { currentSlideIdx++; renderLessonStation(); }
+    };
+
+    document.getElementById('tts-play-btn').onclick = () => {
+        isTTSActive = !isTTSActive;
+        SafeStore.set('tts_enabled_state', isTTSActive ? 'true' : 'false');
+        if (!isTTSActive) stopAllTTS();
+        else {
+            const slide = getSealObj(activeYear, playWeek, activeSeal)?.learn?.slides?.[currentSlideIdx];
+            if (slide) speakSlideTextOnly(slide.text);
+        }
+        updateChromeUI();
+    };
+
+    document.getElementById('auto-flip-btn').onclick = () => {
+        isAutoFlip = !isAutoFlip;
+        SafeStore.set('stage2_auto_flip', isAutoFlip ? 'true' : 'false');
+        updateChromeUI();
+        showToast(isAutoFlip ? 'التَّقْلِيبُ الآلِيُّ لِلسَّلَايْدَاتِ: مُفَعَّلٌ 🔄' : 'التَّقْلِيبُ الآلِيُّ: مُتَوَقِّفٌ');
+    };
+
+    document.getElementById('lab-mode-btn').onclick = () => {
+        isLabMode = !isLabMode;
+        if (isLabMode) { isVideoMode = false; stopAllTTS(); }
+        renderLessonStation();
+    };
+
+    document.getElementById('video-mode-btn').onclick = () => {
+        isVideoMode = !isVideoMode;
+        if (isVideoMode) { isLabMode = false; stopAllTTS(); }
+        renderLessonStation();
+    };
+
+    document.getElementById('corner-next-btn').onclick = handleCornerButtonAction;
+
+    // التشغيل الابتدائي
+    playWeek = getMaxUnlockedWeek(activeYear);
+    selectedMapCycle = getCycleOfWeek(playWeek);
+    activeSeal = getMaxUnlockedSealInWeek(activeYear, playWeek);
+    renderActiveView();
+})();
+    </script>
+</body>
+</html>
