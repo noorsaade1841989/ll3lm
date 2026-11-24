@@ -515,7 +515,7 @@
 		</div>
 	</div>
 
-	<!-- النافذة الثالثة (صاحب 15-21 -> stage3.html مع التراجع الذكي إلى stage2.html) -->
+	<!-- النافذة الثالثة (صاحب 15-21 -> stage3.html مباشرةً) -->
 	<input type="checkbox" id="modal-stage3" class="modal-toggle">
 	<div class="modal">
 		<label for="modal-stage3" class="modal-backdrop"></label>
@@ -525,13 +525,13 @@
 				<h2>مرحلة التعلم الثالثة (صاحب)</h2>
 				<p>اختر السنة للبدء:</p>
 				<div class="years-row">
-					<a href="stage2.html?stage=3&year=15" data-year="15" onclick="return selectStageYear(event, 3, 15)" class="year-btn">15</a>
-					<a href="stage2.html?stage=3&year=16" data-year="16" onclick="return selectStageYear(event, 3, 16)" class="year-btn">16</a>
-					<a href="stage2.html?stage=3&year=17" data-year="17" onclick="return selectStageYear(event, 3, 17)" class="year-btn">17</a>
-					<a href="stage2.html?stage=3&year=18" data-year="18" onclick="return selectStageYear(event, 3, 18)" class="year-btn">18</a>
-					<a href="stage2.html?stage=3&year=19" data-year="19" onclick="return selectStageYear(event, 3, 19)" class="year-btn">19</a>
-					<a href="stage2.html?stage=3&year=20" data-year="20" onclick="return selectStageYear(event, 3, 20)" class="year-btn">20</a>
-					<a href="stage2.html?stage=3&year=21" data-year="21" onclick="return selectStageYear(event, 3, 21)" class="year-btn">21</a>
+					<a href="stage3.html?stage=3&year=15" data-year="15" onclick="return selectStageYear(event, 3, 15)" class="year-btn">15</a>
+					<a href="stage3.html?stage=3&year=16" data-year="16" onclick="return selectStageYear(event, 3, 16)" class="year-btn">16</a>
+					<a href="stage3.html?stage=3&year=17" data-year="17" onclick="return selectStageYear(event, 3, 17)" class="year-btn">17</a>
+					<a href="stage3.html?stage=3&year=18" data-year="18" onclick="return selectStageYear(event, 3, 18)" class="year-btn">18</a>
+					<a href="stage3.html?stage=3&year=19" data-year="19" onclick="return selectStageYear(event, 3, 19)" class="year-btn">19</a>
+					<a href="stage3.html?stage=3&year=20" data-year="20" onclick="return selectStageYear(event, 3, 20)" class="year-btn">20</a>
+					<a href="stage3.html?stage=3&year=21" data-year="21" onclick="return selectStageYear(event, 3, 21)" class="year-btn">21</a>
 				</div>
 			</div>
 		</div>
@@ -1065,15 +1065,15 @@
 			}
 		}
 
-		// التوجيه الفوري المباشر بدون أي حظر CORS في file:///
+		// التوجيه المباشر الفوري إلى stage1.html و stage2.html و stage3.html دون أي عائق
 		function resolveAndNavigateStage(stageNum, yearNum, schoolId) {
 			const query = `?stage=${stageNum}&year=${yearNum}&school=${encodeURIComponent(schoolId || 'main')}`;
 			let targetFile = 'stage1.html';
 
-			if (stageNum === 2) {
+			if (stageNum === 2 || (yearNum >= 8 && yearNum <= 14)) {
 				targetFile = 'stage2.html';
-			} else if (stageNum === 3) {
-				targetFile = (localStorage.getItem('has_stage3_installed') === 'true') ? 'stage3.html' : 'stage2.html';
+			} else if (stageNum === 3 || yearNum >= 15) {
+				targetFile = 'stage3.html';
 			}
 
 			window.location.href = targetFile + query;
@@ -2037,6 +2037,7 @@
 		// ====================================================================
 		// ٧. التهيئة الأولية وتسجيل تطبيق الويب التقدمي (PWA)
 		// ====================================================================
+		localStorage.setItem('has_stage3_installed', 'true');
 		refreshAdminUI();
 		if (currentSelectedSchoolId !== 'main') {
 			switchSchoolMode('private', false);
@@ -2052,4 +2053,3 @@
 </body>
 </html>
 <!-- ==================== [ نهاية الجزء 2 من 2 : اكتمال ملف index.html بالكامل ] ==================== -->
-

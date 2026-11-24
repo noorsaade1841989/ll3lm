@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>العِلْم | مَرْحَلَةُ عَبْد — القَالَبُ المُوَحَّدُ التَّفَاعُلِيُّ</title>
+    <title>العِلْم | مَرْحَلَةُ صَاحِب — مِيثَاقُ التَّخَصُّصِ وَالمَدَارَاتِ</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="cc.ico" type="image/x-icon">
     <meta name="theme-color" content="#064e3b">
@@ -15,11 +15,11 @@
             --primary-light: #ecfdf5;
             --accent-gold: #eab308;
             --accent-gold-light: #fef9c3;
+            --accent-bronze: #d97706;
             --accent-green: #10b981;
             --accent-red: #e11d48;
-            --surface-glass: rgba(255, 255, 255, 0.94);
-            --border-glass: rgba(16, 185, 129, 0.45);
-            --shadow-soft: 0 14px 36px rgba(6, 40, 30, 0.24);
+            --surface-glass: rgba(255, 255, 255, 0.95);
+            --shadow-soft: 0 14px 36px rgba(6, 30, 24, 0.28);
             --text-main: #0f172a;
             --text-muted: #475569;
         }
@@ -39,11 +39,130 @@
             font-family: 'Cairo', system-ui, -apple-system, sans-serif;
             letter-spacing: 0;
             background-color: #06281e;
-            background-image: radial-gradient(circle at 18% 15%, rgba(16, 185, 129, 0.28) 0%, rgba(6, 40, 30, 0.94) 55%, rgba(9, 17, 30, 0.97) 100%);
+            background-image: radial-gradient(circle at 18% 15%, rgba(217, 119, 6, 0.24) 0%, rgba(6, 40, 30, 0.94) 55%, rgba(9, 17, 30, 0.98) 100%);
             color: var(--text-main);
             display: flex;
             flex-direction: column;
         }
+
+        /* ================= ٠. بوابة عقد ميثاق التخصص (تظهر مرة واحدة فقط عند أول دخول) ================= */
+        #major-onboarding-gate {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            background: radial-gradient(circle at 50% 20%, rgba(6, 78, 59, 0.96) 0%, rgba(9, 14, 26, 0.98) 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        #major-onboarding-gate.open { display: flex; }
+
+        .gate-card {
+            width: 100%;
+            max-width: 840px;
+            max-height: 94dvh;
+            overflow-y: auto;
+            background: linear-gradient(145deg, #ffffff 0%, #fefce8 100%);
+            border: 3.5px solid #eab308;
+            border-radius: 30px;
+            padding: clamp(18px, 3.5vmin, 30px);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 25px 65px rgba(0, 0, 0, 0.65);
+            text-align: center;
+        }
+
+        .gate-badge-top {
+            align-self: center;
+            padding: 4px 16px;
+            border-radius: 999px;
+            background: #78350f;
+            color: #fef08a;
+            font-weight: 900;
+            font-size: 0.85rem;
+            border: 1.5px solid #fde047;
+        }
+
+        .gate-tracks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+            gap: 10px;
+            text-align: right;
+        }
+
+        .gate-track-option {
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 2.5px solid #cbd5e1;
+            background: #ffffff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.18s ease;
+            font-family: inherit;
+            text-align: right;
+        }
+        .gate-track-option:hover {
+            border-color: #059669;
+            background: #ecfdf5;
+            transform: translateY(-2px);
+        }
+        .gate-track-option.selected {
+            border-color: #b45309;
+            background: linear-gradient(135deg, #fef9c3, #fde047);
+            box-shadow: 0 6px 18px rgba(234, 179, 8, 0.35);
+        }
+
+        .gate-track-title {
+            font-weight: 900;
+            font-size: 0.96rem;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .gate-track-uni {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .gate-warning-note {
+            background: #fff1f2;
+            border: 1.5px solid #fda4af;
+            color: #9f1239;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.84rem;
+            font-weight: 800;
+            line-height: 1.6;
+        }
+
+        .gate-confirm-btn {
+            align-self: center;
+            padding: 12px 32px;
+            border-radius: 999px;
+            border: 2.5px solid #fde047;
+            background: linear-gradient(135deg, #059669, #064e3b);
+            color: #fef08a;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(5, 150, 105, 0.4);
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+        .gate-confirm-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .gate-confirm-btn:hover:not(:disabled) { transform: scale(1.04); }
 
         /* ================= ١. الشريط العلوي الموحد بكبسولتين فقط ================= */
         header.top-bar {
@@ -54,10 +173,10 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            background: rgba(6, 34, 26, 0.88);
+            background: rgba(6, 34, 26, 0.90);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 2px solid rgba(250, 204, 21, 0.45);
+            border-bottom: 2px solid rgba(250, 204, 21, 0.50);
             z-index: 200;
         }
 
@@ -74,8 +193,9 @@
             color: var(--text-main);
             font-family: inherit;
             font-weight: 800;
-            font-size: clamp(0.78rem, 2.1vmin, 0.98rem);
+            font-size: clamp(0.76rem, 2vmin, 0.96rem);
             cursor: pointer;
+            text-decoration: none;
             transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
             max-width: 49%;
             overflow: hidden;
@@ -88,9 +208,9 @@
             border-color: #fde047;
         }
 
-        /* الكبسولة اليمنى: الرمز + المدرسة + المرحلة (عبد) + العمر */
+        /* الكبسولة اليمنى: رابط مباشر وفوري إلى index.html دون أي نافذة وسيطة */
         #home-identity-capsule {
-            background: linear-gradient(135deg, #022c22 0%, #065f46 100%);
+            background: linear-gradient(135deg, #022c22 0%, #065f46 65%, #78350f 100%);
             color: #ffffff;
             border-color: #fde047;
         }
@@ -99,7 +219,7 @@
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #eab308, #10b981);
+            background: linear-gradient(135deg, #eab308, #d97706);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -120,8 +240,8 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: rgba(250, 204, 21, 0.2);
-            border: 1px solid rgba(253, 224, 71, 0.45);
+            background: rgba(250, 204, 21, 0.22);
+            border: 1px solid rgba(253, 224, 71, 0.55);
             padding: 2px 9px;
             border-radius: 999px;
             color: #fef08a;
@@ -135,10 +255,9 @@
             white-space: nowrap;
         }
 
-        /* الكبسولة اليسرى: الخريطة + الدورة + حرف الدرس + اسم الدرس + النجوم */
         #map-lesson-capsule {
-            background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
-            border-color: #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #fefce8 100%);
+            border-color: #eab308;
         }
 
         .abjad-orb {
@@ -150,7 +269,7 @@
             border: 1.5px solid #fde047;
             color: #fef08a;
             font-weight: 900;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -166,7 +285,7 @@
             font-weight: 900;
         }
 
-        .map-star-pill {
+        .map-grade-pill {
             display: inline-flex;
             align-items: center;
             gap: 3px;
@@ -180,7 +299,7 @@
             flex-shrink: 0;
         }
 
-        /* ================= ٢. تخطيط مساحة العمل والشريط العمودي لأختام الهندسة المقدسة ================= */
+        /* ================= ٢. الشريط العمودي للأختام السبعة مع تمييز التخصص المقفل (٧٠٪) ================= */
         .layout-wrapper {
             flex: 1 1 auto;
             min-height: 0;
@@ -192,14 +311,14 @@
         }
 
         aside.sidebar-nav {
-            flex: 0 0 72px;
+            flex: 0 0 78px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             gap: 6px;
-            background: linear-gradient(180deg, rgba(6, 40, 30, 0.90) 0%, rgba(15, 23, 42, 0.92) 100%);
+            background: linear-gradient(180deg, rgba(6, 40, 30, 0.92) 0%, rgba(15, 23, 42, 0.95) 100%);
             backdrop-filter: blur(14px);
-            border: 2px solid rgba(250, 204, 21, 0.42);
+            border: 2px solid rgba(250, 204, 21, 0.45);
             border-radius: 24px;
             padding: 8px 6px;
             box-shadow: var(--shadow-soft);
@@ -211,29 +330,49 @@
             flex: 1 1 0;
             min-height: 0;
             border-radius: 16px;
-            border: 2px solid rgba(110, 231, 183, 0.4);
-            background: rgba(15, 23, 42, 0.82);
+            border: 2px solid rgba(110, 231, 183, 0.35);
+            background: rgba(15, 23, 42, 0.84);
             color: #a7f3d0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 3px;
             cursor: pointer;
             transition: all 0.22s ease;
-            padding: 4px;
+            padding: 3px;
+        }
+
+        .seal-btn.major-seal {
+            border-color: #fde047;
+            background: linear-gradient(145deg, rgba(120, 53, 15, 0.85), rgba(6, 78, 59, 0.92));
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.38);
+        }
+
+        .seal-weight-tag {
+            font-size: 0.62rem;
+            font-weight: 900;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            line-height: 1.3;
+        }
+
+        .seal-btn.major-seal .seal-weight-tag {
+            background: #fde047;
+            color: #713f12;
         }
 
         .seal-svg-wrap {
-            width: clamp(22px, 3.4vmin, 28px);
-            height: clamp(22px, 3.4vmin, 28px);
+            width: clamp(20px, 3vmin, 26px);
+            height: clamp(20px, 3vmin, 26px);
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .seal-svg-wrap svg { width: 100%; height: 100%; }
 
-        /* البطارية الأفقية ثلاثية النقاط (درس • سؤال • تطبيق) */
         .seal-battery {
             display: flex;
             flex-direction: row;
@@ -242,13 +381,13 @@
             gap: 3px;
             padding: 2px 5px;
             border-radius: 999px;
-            background: rgba(0, 0, 0, 0.42);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         .seal-bat-seg {
-            width: 8px;
-            height: 5px;
+            width: 7px;
+            height: 4px;
             border-radius: 3px;
             background: #475569;
             transition: background 0.25s ease, transform 0.25s ease;
@@ -261,8 +400,8 @@
             position: absolute;
             top: -5px;
             left: -5px;
-            width: 22px;
-            height: 22px;
+            width: 21px;
+            height: 21px;
             border-radius: 50%;
             background: linear-gradient(135deg, #fde047, #ca8a04);
             border: 2px solid #ffffff;
@@ -270,13 +409,29 @@
             display: none;
             align-items: center;
             justify-content: center;
-            font-size: 0.74rem;
+            font-size: 0.7rem;
             z-index: 3;
         }
 
+        .seal-major-crown {
+            position: absolute;
+            top: -6px;
+            right: -5px;
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+            border: 1.5px solid #fef08a;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            z-index: 4;
+        }
+        .seal-btn.major-seal .seal-major-crown { display: flex; }
+
         .seal-btn.completed {
             border-color: #34d399;
-            background: linear-gradient(145deg, #064e3b, #022c22);
             color: #6ee7b7;
         }
         .seal-btn.completed .seal-star-stamp { display: flex; }
@@ -285,29 +440,9 @@
             border-color: #fde047;
             background: radial-gradient(circle at 30% 30%, #059669 0%, #064e3b 100%);
             color: #fef08a;
-            box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35), 0 6px 16px rgba(16, 185, 129, 0.35);
-            transform: scale(1.05);
+            box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.42), 0 6px 16px rgba(16, 185, 129, 0.35);
+            transform: scale(1.04);
         }
-
-        .seal-btn.next-illuminated {
-            border-color: #fde047;
-            box-shadow: 0 0 12px rgba(250, 204, 21, 0.55);
-        }
-
-        .seal-btn.locked-seal {
-            opacity: 0.35;
-            filter: grayscale(0.75);
-            cursor: not-allowed;
-        }
-
-        .seal-lock-mini {
-            position: absolute;
-            bottom: 2px;
-            left: 3px;
-            font-size: 0.62rem;
-            display: none;
-        }
-        .seal-btn.locked-seal .seal-lock-mini { display: block; }
 
         /* ================= ٣. مساحة العمل وشريط المحطات الثلاث ================= */
         main.workspace {
@@ -318,7 +453,7 @@
             flex-direction: column;
             background: var(--surface-glass);
             backdrop-filter: blur(16px);
-            border: 2.5px solid rgba(250, 204, 21, 0.6);
+            border: 2.5px solid rgba(250, 204, 21, 0.65);
             border-radius: 26px;
             box-shadow: var(--shadow-soft);
             overflow: hidden;
@@ -341,6 +476,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            flex-wrap: wrap;
         }
 
         .st-pill {
@@ -375,6 +511,28 @@
         .st-pill.locked {
             opacity: 0.42;
             cursor: not-allowed;
+        }
+
+        .depth-mode-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 900;
+            cursor: pointer;
+            border: 1.5px solid #eab308;
+            background: #fef9c3;
+            color: #713f12;
+            transition: all 0.18s ease;
+        }
+        .depth-mode-pill.is-major {
+            background: linear-gradient(135deg, #fef08a, #fde047);
+            border-color: #ca8a04;
+            color: #78350f;
+            cursor: default;
         }
 
         .media-controls-cluster {
@@ -428,21 +586,7 @@
             text-align: center;
         }
 
-        .explore-banner-chip {
-            display: none;
-            align-items: center;
-            gap: 5px;
-            background: #fef3c7;
-            border: 1.5px solid #f59e0b;
-            color: #92400e;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 0.76rem;
-            font-weight: 800;
-        }
-        body.explore-mode-active .explore-banner-chip { display: inline-flex; }
-
-        /* ================= ٤. المحطة الأولى (الدرس + المختبر + الفيديو) بسكرول معزول ================= */
+        /* ================= ٤. عرض الدرس ================= */
         .station-body-host {
             flex: 1 1 auto;
             min-height: 0;
@@ -468,86 +612,11 @@
         #lesson-scroll-box::-webkit-scrollbar-track { background: rgba(209, 250, 229, 0.5); border-radius: 8px; }
         #lesson-scroll-box::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #10b981, #065f46); border-radius: 8px; }
 
-        .slide-image-frame {
-            position: relative;
-            width: 100%;
-            max-width: 840px;
-            height: clamp(210px, 38vh, 360px);
-            margin: 0 auto;
-            border-radius: 22px;
-            background: linear-gradient(145deg, #06281e, #0f172a);
-            border: 2.5px solid #10b981;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(6, 40, 30, 0.16);
-            flex-shrink: 0;
-            user-select: none;
-        }
-
-        .slide-image-frame.expanded-frame { height: clamp(320px, 62vh, 560px); }
-        .slide-image-frame.pan-enabled { cursor: grab; touch-action: none; }
-        .slide-image-frame.pan-enabled.dragging { cursor: grabbing; }
-
-        #slide-zoom-target {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            transform-origin: center center;
-            transition: transform 0.08s ease-out;
-            pointer-events: none;
-            display: block;
-        }
-
-        .img-zoom-toolbar {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(6, 40, 30, 0.84);
-            border: 1px solid rgba(253, 224, 71, 0.45);
-            backdrop-filter: blur(8px);
-            padding: 5px 7px;
-            border-radius: 999px;
-            z-index: 15;
-        }
-
-        .zoom-icon-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            font-size: 0.95rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.15s ease, transform 0.15s ease;
-        }
-        .zoom-icon-btn:hover { background: rgba(16, 185, 129, 0.6); transform: scale(1.08); }
-        .zoom-icon-btn.pan-on { background: #eab308; color: #0f172a; }
-
-        .zoom-level-pill {
-            color: #fde047;
-            font-size: 0.76rem;
-            font-weight: 900;
-            padding: 0 5px;
-            direction: ltr;
-        }
-
-        /* لافتة عنوان الختم الزمردية الذهبية */
         .lesson-title-banner {
             width: 100%;
-            max-width: 840px;
+            max-width: 860px;
             margin: 0 auto;
-            padding: clamp(18px, 3.2vmin, 28px) 22px;
+            padding: clamp(16px, 2.8vmin, 24px) 22px;
             border-radius: 22px;
             background: linear-gradient(135deg, #022c22 0%, #065f46 58%, #047857 100%);
             color: #ffffff;
@@ -558,6 +627,11 @@
             justify-content: space-between;
             gap: 14px;
             flex-shrink: 0;
+        }
+
+        .lesson-title-banner.major-banner {
+            background: linear-gradient(135deg, #451a03 0%, #064e3b 55%, #047857 100%);
+            border-color: #fde047;
         }
 
         .banner-title-main {
@@ -583,7 +657,7 @@
         }
 
         .banner-lesson-heading {
-            font-size: clamp(1.08rem, 2.7vmin, 1.52rem);
+            font-size: clamp(1.05rem, 2.6vmin, 1.46rem);
             font-weight: 900;
             line-height: 1.5;
             color: #fef08a;
@@ -596,40 +670,94 @@
             margin-bottom: 3px;
         }
 
-        /* نص الشريحة بالتشكيل المتصل غير المقطع */
+        .slide-subheading-bar {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 10px 18px;
+            border-radius: 16px;
+            background: linear-gradient(90deg, #fef9c3, #ecfdf5);
+            border-right: 5px solid #059669;
+            color: #064e3b;
+            font-weight: 900;
+            font-size: clamp(1rem, 2.3vmin, 1.24rem);
+        }
+
         .lesson-text-card {
             width: 100%;
-            max-width: 840px;
+            max-width: 860px;
             margin: 0 auto;
             background: #ffffff;
             border: 2px solid #a7f3d0;
             border-radius: 22px;
-            padding: clamp(18px, 3.2vmin, 28px);
+            padding: clamp(18px, 3vmin, 28px);
             font-family: 'Amiri', 'Cairo', serif;
-            font-size: clamp(1.3rem, 3vmin, 1.8rem);
-            line-height: 2.1;
+            font-size: clamp(1.24rem, 2.8vmin, 1.66rem);
+            line-height: 2.05;
             color: #0f172a;
             box-shadow: 0 4px 16px rgba(6, 78, 59, 0.06);
             text-align: justify;
+            white-space: pre-line;
         }
 
         .lesson-text-card.quran-ayah-card {
             background: linear-gradient(145deg, #fffbeb, #fefce8);
             border-color: #eab308;
             text-align: center;
-            font-size: clamp(1.42rem, 3.4vmin, 1.98rem);
+            font-size: clamp(1.38rem, 3.2vmin, 1.92rem);
             color: #064e3b;
         }
 
-        .lesson-text-card.speaking-highlight {
-            border-color: #059669;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+        .summary-outline-card {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 2px solid #cbd5e1;
+            border-radius: 22px;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
         }
 
-        /* حاوية المختبر التفاعلي المدمج لمرحلة عبد */
-        .stage2-lab-box {
+        .summary-outline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #e2e8f0;
+            font-size: 0.92rem;
+            font-weight: 900;
+            color: #065f46;
+        }
+
+        .summary-headings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .summary-heading-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: #ecfdf5;
+            border: 1.5px solid #a7f3d0;
+            font-size: clamp(1.02rem, 2.3vmin, 1.25rem);
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.7;
+        }
+
+        .stage3-lab-box {
             width: 100%;
-            max-width: 840px;
+            max-width: 860px;
             margin: 0 auto;
             border-radius: 22px;
             background: radial-gradient(circle at 50% 30%, #0f2922 0%, #09111e 100%);
@@ -691,98 +819,8 @@
             border-radius: 8px;
             font-weight: 900;
         }
-        .lab-action-mini-btn {
-            background: linear-gradient(135deg, #eab308, #ca8a04);
-            color: #0f172a;
-            border: none;
-            padding: 5px 14px;
-            border-radius: 999px;
-            font-weight: 900;
-            font-size: 0.84rem;
-            cursor: pointer;
-        }
 
-        /* مشغل الفيديو العالمي */
-        .universal-video-shell {
-            width: 100%;
-            max-width: 840px;
-            margin: 0 auto;
-            border-radius: 22px;
-            overflow: hidden;
-            background: #090d16;
-            border: 3px solid #10b981;
-            box-shadow: 0 14px 34px rgba(6, 40, 30, 0.35);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .video-stage-area {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: radial-gradient(circle, #1e293b 0%, #090d16 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .video-stage-area video { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-        .video-big-play-overlay {
-            position: absolute;
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            border: 3px solid #fde047;
-            background: rgba(5, 150, 105, 0.88);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 5;
-        }
-        .video-big-play-overlay svg { width: 30px; height: 30px; fill: #ffffff; }
-
-        .video-fallback-notice {
-            position: absolute;
-            inset: 0;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 20px;
-            text-align: center;
-            color: #e2e8f0;
-            background: rgba(6, 40, 30, 0.94);
-            z-index: 6;
-        }
-
-        .universal-video-controls {
-            direction: ltr;
-            background: linear-gradient(180deg, #06281e 0%, #020617 100%);
-            padding: 10px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            color: #f8fafc;
-        }
-        .uv-seek-bar { width: 100%; height: 6px; accent-color: #10b981; cursor: pointer; }
-        .uv-buttons-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-        .uv-left-grp, .uv-right-grp { display: inline-flex; align-items: center; gap: 6px; }
-        .uv-btn {
-            width: 34px; height: 34px; border-radius: 8px;
-            border: 1px solid rgba(110, 231, 183, 0.3);
-            background: rgba(255, 255, 255, 0.08);
-            color: #ffffff; display: inline-flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 0.85rem; font-weight: 800;
-        }
-        .uv-time-txt { font-family: monospace; font-size: 0.84rem; color: #a7f3d0; padding: 0 4px; }
-        .uv-vol-slider { width: 68px; accent-color: #10b981; cursor: pointer; }
-
-        /* ================= ٥. المحطة الثانية (محطة السؤال السباعي) ================= */
+        /* ================= ٥. محطة السؤال + ركن سؤال الذكاء الاصطناعي المجهز ================= */
         .quiz-scroll-area {
             flex: 1 1 auto;
             min-height: 0;
@@ -795,7 +833,7 @@
 
         .quiz-card-shell {
             width: 100%;
-            max-width: 840px;
+            max-width: 860px;
             margin: 0 auto;
             background: #ffffff;
             border: 2.5px solid #6ee7b7;
@@ -814,13 +852,54 @@
             gap: 10px;
             padding-bottom: 10px;
             border-bottom: 2px dashed #d1fae5;
+            flex-wrap: wrap;
         }
 
         .quiz-prompt-text {
-            font-size: clamp(1.02rem, 2.4vmin, 1.28rem);
+            font-size: clamp(1rem, 2.3vmin, 1.24rem);
             font-weight: 900;
             color: #065f46;
         }
+
+        .quiz-tools-grp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-quiz-trigger-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 13px;
+            border-radius: 999px;
+            border: 2px solid #eab308;
+            background: linear-gradient(135deg, #064e3b, #0f172a);
+            color: #fef08a;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 0.16s ease;
+        }
+        .ai-quiz-trigger-btn:hover { transform: translateY(-1px); }
+        .ai-quiz-trigger-btn.active-ai {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #0f172a;
+        }
+
+        /* حاوية سؤال الذكاء الاصطناعي المهيأة للربط القادم */
+        .ai-question-panel {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #0f172a, #06281e);
+            border: 2px solid #eab308;
+            color: #f8fafc;
+        }
+        .ai-question-panel.open { display: flex; }
 
         .quiz-stem-box {
             background: linear-gradient(145deg, #ecfdf5, #fefce8);
@@ -828,7 +907,7 @@
             border-radius: 18px;
             padding: 16px 18px;
             font-family: 'Amiri', 'Cairo', serif;
-            font-size: clamp(1.26rem, 2.9vmin, 1.68rem);
+            font-size: clamp(1.22rem, 2.8vmin, 1.62rem);
             line-height: 1.95;
             color: #0f172a;
             text-align: center;
@@ -862,13 +941,11 @@
             background: #ffffff;
             color: #0f172a;
             font-family: 'Amiri', 'Cairo', serif;
-            font-size: clamp(1.12rem, 2.6vmin, 1.45rem);
+            font-size: clamp(1.08rem, 2.5vmin, 1.38rem);
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(5, 150, 105, 0.12);
-            transition: all 0.16s ease;
         }
-        .order-tile-btn:hover { transform: translateY(-2px); background: #ecfdf5; }
         .order-tile-btn.placed-tile { background: #d1fae5; border-color: #059669; }
         .order-tile-btn.tile-correct { background: #dcfce7; border-color: #16a34a; color: #14532d; }
         .order-tile-btn.tile-wrong { background: #ffe4e6; border-color: #e11d48; color: #881337; }
@@ -886,21 +963,16 @@
             background: #ffffff;
             color: #0f172a;
             font-family: 'Amiri', 'Cairo', serif;
-            font-size: clamp(1.12rem, 2.6vmin, 1.42rem);
+            font-size: clamp(1.08rem, 2.5vmin, 1.38rem);
             line-height: 1.7;
             font-weight: 700;
             text-align: right;
             cursor: pointer;
-            transition: all 0.18s ease;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .quiz-opt-btn:hover:not(:disabled) {
-            border-color: #059669;
-            background: #ecfdf5;
-            transform: translateY(-1px);
-        }
+        .quiz-opt-btn:hover:not(:disabled) { border-color: #059669; background: #ecfdf5; }
         .quiz-opt-btn.correct { border-color: #16a34a; background: #dcfce7; color: #14532d; }
         .quiz-opt-btn.wrong { border-color: #e11d48; background: #ffe4e6; color: #881337; }
 
@@ -915,17 +987,14 @@
             border: 3px solid #cbd5e1;
             background: #ffffff;
             font-family: inherit;
-            font-size: clamp(1.2rem, 3vmin, 1.6rem);
+            font-size: clamp(1.18rem, 2.8vmin, 1.55rem);
             font-weight: 900;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: all 0.18s ease;
         }
-        .tf-choice-btn.tf-true:hover:not(:disabled) { border-color: #16a34a; background: #f0fdf4; }
-        .tf-choice-btn.tf-false:hover:not(:disabled) { border-color: #e11d48; background: #fff1f2; }
 
         .math-circles-pool {
             display: flex;
@@ -942,27 +1011,24 @@
         .math-eq-circle {
             min-width: 88px;
             height: 88px;
-            padding: 0 10px;
+            padding: 0 12px;
             border-radius: 999px;
             border: 3px solid #059669;
             background: radial-gradient(circle at 30% 30%, #ffffff, #d1fae5);
             color: #0f172a;
             font-weight: 900;
-            font-size: 1.08rem;
+            font-size: 1.02rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             direction: ltr;
             cursor: pointer;
-            box-shadow: 0 6px 14px rgba(5, 150, 105, 0.18);
-            transition: all 0.18s ease;
         }
         .math-eq-circle.selected-circle {
             border-color: #eab308;
             background: #fef9c3;
-            transform: scale(1.08);
-            box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.32);
+            transform: scale(1.07);
         }
 
         .math-baskets-grid {
@@ -972,7 +1038,7 @@
         }
 
         .math-basket-box {
-            min-height: 126px;
+            min-height: 120px;
             border-radius: 22px;
             border: 3px solid #059669;
             background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
@@ -983,12 +1049,10 @@
             justify-content: space-between;
             gap: 8px;
             cursor: pointer;
-            transition: all 0.18s ease;
         }
-        .math-basket-box:hover { transform: translateY(-2px); border-color: #eab308; }
-        .basket-target-num { font-size: 1.45rem; font-weight: 900; color: #064e3b; display: inline-flex; align-items: center; gap: 6px; }
+        .basket-target-num { font-size: 1.35rem; font-weight: 900; color: #064e3b; }
         .basket-collected-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-        .mini-solved-eq { padding: 3px 9px; border-radius: 999px; background: #059669; color: #ffffff; font-size: 0.82rem; font-weight: 800; direction: ltr; }
+        .mini-solved-eq { padding: 3px 9px; border-radius: 999px; background: #059669; color: #ffffff; font-size: 0.8rem; font-weight: 800; direction: ltr; }
 
         .cloze-top-choices {
             display: flex;
@@ -1006,12 +1070,10 @@
             border: 2px solid #059669;
             background: #ffffff;
             font-family: 'Amiri', 'Cairo', serif;
-            font-size: clamp(1.15rem, 2.6vmin, 1.45rem);
+            font-size: clamp(1.1rem, 2.5vmin, 1.4rem);
             font-weight: 800;
             cursor: pointer;
-            transition: all 0.18s ease;
         }
-        .cloze-word-pill:hover:not(:disabled) { background: #d1fae5; transform: translateY(-2px); }
         .cloze-blank-slot {
             display: inline-flex;
             align-items: center;
@@ -1044,10 +1106,10 @@
             font-size: 0.95rem;
         }
 
-        /* ================= ٦. المحطة الثالثة (التطبيق العملي) ================= */
+        /* ================= ٦. محطة التطبيق العملي ================= */
         .apply-card-box {
             width: 100%;
-            max-width: 800px;
+            max-width: 820px;
             margin: auto;
             background: linear-gradient(145deg, #ffffff, #ecfdf5);
             border: 3px solid #10b981;
@@ -1062,13 +1124,13 @@
         }
 
         .apply-badge-icon {
-            width: 68px;
-            height: 68px;
+            width: 66px;
+            height: 66px;
             border-radius: 50%;
             background: linear-gradient(135deg, #059669, #064e3b);
             border: 2.5px solid #fde047;
             color: #fef08a;
-            font-size: 2rem;
+            font-size: 1.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1076,12 +1138,13 @@
 
         .apply-step-text {
             font-family: 'Amiri', 'Cairo', serif;
-            font-size: clamp(1.32rem, 3.2vmin, 1.85rem);
-            line-height: 2.05;
+            font-size: clamp(1.26rem, 3vmin, 1.75rem);
+            line-height: 2.02;
             color: #0f172a;
+            white-space: pre-line;
         }
 
-        /* ================= ٧. زر الزاوية السفلية اليسرى (سهم / نجمة بلا كلام) ================= */
+        /* ================= ٧. زر الانتقال في الزاوية السفلية اليسرى ================= */
         #corner-next-btn {
             position: fixed;
             bottom: 18px;
@@ -1098,45 +1161,40 @@
             cursor: pointer;
             box-shadow: 0 10px 26px rgba(6, 78, 59, 0.55);
             z-index: 500;
-            transition: transform 0.2s ease, background 0.25s ease, opacity 0.2s ease, box-shadow 0.25s ease;
+            transition: transform 0.2s ease, background 0.25s ease, opacity 0.2s ease;
         }
         #corner-next-btn:hover:not(:disabled) { transform: scale(1.09); }
         #corner-next-btn:disabled { background: #64748b; border-color: #cbd5e1; box-shadow: none; opacity: 0.5; cursor: not-allowed; }
-        #corner-next-btn.ready-pulse:not(:disabled) {
-            background: linear-gradient(135deg, #10b981, #047857);
-            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.32), 0 10px 26px rgba(5, 150, 105, 0.5);
-        }
         #corner-next-btn.star-mode:not(:disabled) {
             background: linear-gradient(135deg, #eab308, #ca8a04);
             color: #0f172a;
             border-color: #ffffff;
-            box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.38), 0 10px 28px rgba(202, 138, 4, 0.55);
         }
         #corner-next-btn svg { width: 30px; height: 30px; }
 
-        /* ================= ٨. النوافذ المنبثقة (الخريطة والدورات، النجوم، اختيار العمر ٨-١٤) ================= */
+        /* ================= ٨. نافذة الخريطة وحصيلة التخصص المقفلة ================= */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(4, 20, 15, 0.72);
+            background: rgba(4, 20, 15, 0.76);
             backdrop-filter: blur(10px);
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 14px;
             z-index: 1000;
         }
         .modal-overlay.open { display: flex; }
 
         .modal-card {
             width: 100%;
-            max-width: 760px;
-            max-height: 92dvh;
+            max-width: 820px;
+            max-height: 93dvh;
             overflow-y: auto;
             background: #ffffff;
             border: 3px solid #eab308;
             border-radius: 28px;
-            padding: 22px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 14px;
@@ -1158,21 +1216,73 @@
             cursor: pointer;
         }
 
+        .major-locked-banner {
+            background: linear-gradient(135deg, #fffbeb 0%, #ecfdf5 100%);
+            border: 2px solid #eab308;
+            border-radius: 20px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .locked-major-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-weight: 900;
+            color: #78350f;
+            font-size: 0.94rem;
+        }
+
+        .locked-pill-tag {
+            background: #fef08a;
+            border: 1.5px solid #ca8a04;
+            color: #713f12;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 900;
+        }
+
+        .grade-breakdown-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+            border-top: 1.5px dashed #cbd5e1;
+            font-size: 0.86rem;
+            font-weight: 900;
+        }
+
+        .status-pass-pill {
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 900;
+        }
+        .status-pass-pill.passed { background: #dcfce7; color: #14532d; border: 1.5px solid #16a34a; }
+        .status-pass-pill.pending { background: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; }
+
         .cycles-tabs-bar {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
             flex-wrap: wrap;
         }
         .cycle-tab-pill {
-            padding: 6px 16px;
+            padding: 6px 13px;
             border-radius: 999px;
             border: 2px solid #6ee7b7;
             background: #ecfdf5;
             color: #064e3b;
             font-family: inherit;
             font-weight: 900;
-            font-size: 0.86rem;
+            font-size: 0.82rem;
             cursor: pointer;
         }
         .cycle-tab-pill.active-cycle {
@@ -1182,60 +1292,29 @@
         }
         .cycle-tab-pill.locked-cycle { opacity: 0.4; cursor: not-allowed; }
 
-        .map-stats-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            justify-content: space-between;
-            background: #ecfdf5;
-            border: 1.5px solid #6ee7b7;
-            padding: 12px 16px;
-            border-radius: 18px;
-        }
-
         .abjad-map-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 7px;
         }
 
         .map-letter-cell {
-            padding: 8px 4px;
+            padding: 7px 4px;
             border-radius: 14px;
             border: 2px solid #cbd5e1;
             background: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.16s ease;
         }
-        .map-letter-cell .cell-ltr { font-size: 1.15rem; font-weight: 900; color: #0f172a; }
-        .map-letter-cell .cell-stars { font-size: 0.72rem; font-weight: 800; color: #b45309; }
+        .map-letter-cell .cell-ltr { font-size: 1.08rem; font-weight: 900; color: #0f172a; }
+        .map-letter-cell .cell-stars { font-size: 0.7rem; font-weight: 800; color: #b45309; }
         .map-letter-cell.current-week { border-color: #059669; background: #d1fae5; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.24); }
-        .map-letter-cell.completed-week { border-color: #eab308; background: #fefce8; }
+        .map-letter-cell.major-done-week { border-color: #eab308; background: #fefce8; }
         .map-letter-cell.locked-week { opacity: 0.42; cursor: not-allowed; background: #f1f5f9; }
-
-        .cycle-exam-btn {
-            width: 100%;
-            padding: 10px 16px;
-            border-radius: 16px;
-            border: 2px solid #eab308;
-            background: linear-gradient(135deg, #064e3b, #047857);
-            color: #fef08a;
-            font-family: inherit;
-            font-weight: 900;
-            font-size: 0.94rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .cycle-exam-btn.locked { opacity: 0.4; cursor: not-allowed; }
 
         .settings-row {
             display: flex;
@@ -1252,43 +1331,23 @@
             border: 2px solid #cbd5e1;
             background: #f8fafc;
             font-family: inherit;
-            font-size: 0.86rem;
+            font-size: 0.84rem;
             font-weight: 800;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
         }
         .setting-pill-btn.mode-seq { border-color: #059669; background: #d1fae5; color: #064e3b; }
         .setting-pill-btn.mode-exp { border-color: #f59e0b; background: #fef3c7; color: #92400e; }
 
-        .years-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
-            gap: 8px;
-        }
-        .year-pick-btn {
-            padding: 10px;
-            border-radius: 16px;
-            border: 2px solid #6ee7b7;
-            background: #ecfdf5;
-            color: #064e3b;
-            font-family: inherit;
-            font-weight: 900;
-            cursor: pointer;
-        }
-        .year-pick-btn.active-yr { background: #065f46; color: #fef08a; border-color: #eab308; }
-
         #app-toast {
             position: fixed;
             bottom: 24px;
-            right: 92px;
-            background: rgba(6, 40, 30, 0.95);
+            right: 96px;
+            background: rgba(6, 40, 30, 0.96);
             border: 1.5px solid #fde047;
             color: #fef08a;
             padding: 10px 18px;
             border-radius: 999px;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 800;
             z-index: 1200;
             opacity: 0;
@@ -1302,12 +1361,8 @@
             header.top-bar { padding: 6px 6px; gap: 5px; }
             .hdr-capsule { height: 38px; padding: 2px 7px; gap: 4px; font-size: 0.68rem; max-width: 49.5%; }
             .capsule-sep { display: none; }
-            .stage-age-badge { padding: 1px 6px; gap: 3px; }
-            .school-emblem, .abjad-orb { height: 24px; min-width: 24px; font-size: 0.78rem; }
-            .lesson-text-card { text-align: right; line-height: 1.98; }
             .layout-wrapper { padding: 6px; gap: 6px; }
-            aside.sidebar-nav { flex: 0 0 56px; padding: 6px 4px; border-radius: 18px; }
-            .seal-bat-seg { width: 6px; height: 4px; }
+            aside.sidebar-nav { flex: 0 0 60px; padding: 6px 4px; border-radius: 18px; }
             .abjad-map-grid { grid-template-columns: repeat(4, 1fr); }
             #corner-next-btn { width: 54px; height: 54px; bottom: 12px; left: 12px; }
             #app-toast { right: 16px; bottom: 76px; }
@@ -1335,73 +1390,100 @@
 </head>
 <body>
 
-    <!-- الشريط العلوي الموحد: كبسولتان فقط -->
+    <!-- ٠. بوابة عقد ميثاق التخصص لمرة واحدة فقط في مطلع المرحلة -->
+    <div id="major-onboarding-gate" role="dialog" aria-modal="true">
+        <div class="gate-card">
+            <span class="gate-badge-top">مَرْحَلَةُ «صَاحِب» — مِيثَاقُ التَّخَصُّصِ الأَسَاسِيِّ</span>
+            <h1 style="font-size:clamp(1.25rem, 3vmin, 1.7rem); font-weight:900; color:#064e3b;">
+                اخْتَرْ مَسَارَ تَخَصُّصِكَ المُفَضَّلَ لِمَرَّةٍ وَاحِدَةٍ
+            </h1>
+            <p style="font-size:0.9rem; font-weight:800; color:#334155; line-height:1.65;">
+                المَادَّةُ الَّتِي تَخْتَارُهَا هُنَا سَتَكُونُ هِيَ عَمُودَ تَسَلْسُلِكَ الدِّرَاسِيِّ الكَامِلِ (تُدْرَسُ بِالتَّفْصِيلِ وَتَحْمِلُ <strong>٧٠٪</strong> مِنَ المِيزَانِ وَبِهَا يَتَحَقَّقُ عُبُورُكَ لِلجَامِعَةِ)، بَيْنَمَا تَبْقَى المَوَادُّ السِّتُّ الأُخْرَى رَوَافِدَ خَفِيفَةً بِعَنَاوِينِهَا الرَّئِيسِيَّةِ (<strong>٥٪</strong> لِكُلِّ مَادَّةٍ) لِرَفْعِ تَفَوُّقِكَ.
+            </p>
+            <div class="gate-tracks-grid" id="gate-tracks-grid"></div>
+            <div class="gate-warning-note">
+                ⚠️ تَنْبِيهٌ مُهِمٌّ: هٰذَا الِاخْتِيَارُ يُعْقَدُ مَرَّةً وَاحِدَةً فَقَطْ عِنْدَ بَدْءِ المَسَارِ وَيُقْفَلُ تِلْقَائِيّاً لِتَسِيرَ عَلَيْهِ طِوَالَ السَّنَةِ، وَلَا يُمْكِنُ تَبْدِيلُهُ أَثْنَاءَ السَّيْرِ.
+            </div>
+            <button type="button" class="gate-confirm-btn" id="gate-confirm-btn" disabled>
+                🔒 تَثْبِيتُ مَسَارِ التَّخَصُّصِ وَالدُّخُولُ إِلَى المَنْهَجِ
+            </button>
+        </div>
+    </div>
+
+    <!-- ١. الشريط العلوي الموحد: الكبسولة اليمنى رابط مباشر وفوري إلى index.html -->
     <header class="top-bar">
-        <button type="button" class="hdr-capsule" id="home-identity-capsule" title="الرئيسية واختيار العمر">
+        <a href="index.html" class="hdr-capsule" id="home-identity-capsule" title="العودة المباشرة إلى الصفحة الرئيسية">
             <span class="school-emblem" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 3L2 8l10 5 10-5-10-5zm-7 7.5v5.2c0 1.8 3.1 3.3 7 3.3s7-1.5 7-3.3v-5.2l-7 3.5-7-3.5z"/></svg>
             </span>
             <span class="school-name-txt" id="hdr-school-name">مَدْرَسَةُ العِلْم</span>
             <span class="capsule-sep"></span>
             <span class="stage-age-badge">
-                <span id="hdr-stage-name">عَبْد</span>
+                <span id="hdr-stage-name">صَاحِب</span>
                 <span>•</span>
-                <span id="hdr-age-label">٨ سَنَوَاتٍ</span>
+                <span id="hdr-age-label">١٥ سَنَةً</span>
             </span>
-        </button>
+        </a>
 
-        <button type="button" class="hdr-capsule" id="map-lesson-capsule" title="خريطة الدورات والدروس والإعدادات">
+        <button type="button" class="hdr-capsule" id="map-lesson-capsule" title="خريطة الدورات وحصيلة التخصص">
             <span aria-hidden="true">🧭</span>
-            <span class="abjad-orb" id="hdr-lesson-letter">أ</span>
-            <span class="map-lesson-title" id="hdr-lesson-title">سُورَةُ المَسَدِ</span>
-            <span class="map-star-pill" id="hdr-lesson-stars">⭐ ٠/٧</span>
+            <span class="abjad-orb" id="hdr-lesson-letter">د١ • أ</span>
+            <span class="map-lesson-title" id="hdr-lesson-title">الوَحْدَةُ الأُولَى</span>
+            <span class="map-grade-pill" id="hdr-weighted-grade">⚖️ ٠٪</span>
         </button>
     </header>
 
-    <!-- مساحة العمل + الشريط العمودي لأختام الهندسة المقدسة السبعة -->
+    <!-- ٢. مساحة العمل + الشريط العمودي للأختام السبعة -->
     <div class="layout-wrapper">
-        <aside class="sidebar-nav" id="seals-sidebar" aria-label="الأختام السبعة لمرحلة عبد">
-            <button type="button" class="seal-btn" id="btn-subj-1" data-seal="1" title="المنطق والبيان">
+        <aside class="sidebar-nav" id="seals-sidebar" aria-label="الأختام السبعة وميزان التخصص">
+            <button type="button" class="seal-btn" id="btn-subj-1" data-seal="1" title="المنطق والبيان (أصول الفقه والقانون)">
+                <span class="seal-major-crown">👑</span>
                 <span class="seal-star-stamp">⭐</span>
                 <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="18" r="13"/><line x1="18" y1="3" x2="18" y2="33"/><circle cx="18" cy="18" r="3.5" fill="currentColor"/></svg></span>
+                <span class="seal-weight-tag" id="wt-subj-1">٥٪</span>
                 <span class="seal-battery" id="bat-subj-1"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
-                <span class="seal-lock-mini">🔒</span>
             </button>
-            <button type="button" class="seal-btn" id="btn-subj-2" data-seal="2" title="البصيرة والفن الهندسي">
+            <button type="button" class="seal-btn" id="btn-subj-2" data-seal="2" title="البصيرة والبيان (الفنون والعمارة والأدب)">
+                <span class="seal-major-crown">👑</span>
                 <span class="seal-star-stamp">⭐</span>
                 <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="13.5" cy="18" r="10.5"/><circle cx="22.5" cy="18" r="10.5"/><circle cx="18" cy="18" r="2.3" fill="currentColor"/></svg></span>
+                <span class="seal-weight-tag" id="wt-subj-2">٥٪</span>
                 <span class="seal-battery" id="bat-subj-2"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
-                <span class="seal-lock-mini">🔒</span>
             </button>
-            <button type="button" class="seal-btn" id="btn-subj-3" data-seal="3" title="الرنين والتجويد والصوت">
+            <button type="button" class="seal-btn" id="btn-subj-3" data-seal="3" title="الرنين والصوت (هندسة الصوتيات والصناعات)">
+                <span class="seal-major-crown">👑</span>
                 <span class="seal-star-stamp">⭐</span>
                 <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 18a2 2 0 0 1 2 2 4 4 0 0 1-4 4 7 7 0 0 1-7-7 11 11 0 0 1 11-11 14 14 0 0 1 14 14"/><circle cx="18" cy="18" r="1.8" fill="currentColor"/></svg></span>
+                <span class="seal-weight-tag" id="wt-subj-3">٥٪</span>
                 <span class="seal-battery" id="bat-subj-3"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
-                <span class="seal-lock-mini">🔒</span>
             </button>
-            <button type="button" class="seal-btn" id="btn-subj-4" data-seal="4" title="الرياضيات والمقدار">
+            <button type="button" class="seal-btn" id="btn-subj-4" data-seal="4" title="الرياضيات والمقدار (الهندسة والخوارزميات)">
+                <span class="seal-major-crown">👑</span>
                 <span class="seal-star-stamp">⭐</span>
                 <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.1"><polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5"/><polyline points="5,10.5 18,18 31,10.5"/><line x1="18" y1="18" x2="18" y2="33"/></svg></span>
+                <span class="seal-weight-tag" id="wt-subj-4">٥٪</span>
                 <span class="seal-battery" id="bat-subj-4"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
-                <span class="seal-lock-mini">🔒</span>
             </button>
-            <button type="button" class="seal-btn" id="btn-subj-5" data-seal="5" title="الحركة والاتزان البدني">
+            <button type="button" class="seal-btn" id="btn-subj-5" data-seal="5" title="الحركة والاتزان (الميكانيكا الحيوية والتأهيل)">
+                <span class="seal-major-crown">👑</span>
                 <span class="seal-star-stamp">⭐</span>
                 <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="14"/><polygon points="18,5 21.5,14 31,14.5 23.5,20.5 26,30 18,24.5 10,30 12.5,20.5 5,14.5 14.5,14"/></svg></span>
+                <span class="seal-weight-tag" id="wt-subj-5">٥٪</span>
                 <span class="seal-battery" id="bat-subj-5"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
-                <span class="seal-lock-mini">🔒</span>
             </button>
-            <button type="button" class="seal-btn" id="btn-subj-6" data-seal="6" title="العلوم وسنن الكون">
+            <button type="button" class="seal-btn" id="btn-subj-6" data-seal="6" title="العلوم وسنن الكون (الطب وعلوم الحياة والبيئة)">
+                <span class="seal-major-crown">👑</span>
                 <span class="seal-star-stamp">⭐</span>
                 <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="18" cy="18" r="6"/><circle cx="18" cy="12" r="6"/><circle cx="18" cy="24" r="6"/><circle cx="23.2" cy="15" r="6"/><circle cx="12.8" cy="21" r="6"/><circle cx="23.2" cy="21" r="6"/><circle cx="12.8" cy="15" r="6"/></svg></span>
+                <span class="seal-weight-tag" id="wt-subj-6">٥٪</span>
                 <span class="seal-battery" id="bat-subj-6"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
-                <span class="seal-lock-mini">🔒</span>
             </button>
-            <button type="button" class="seal-btn" id="btn-subj-7" data-seal="7" title="الآداب وتزكية السلوك">
+            <button type="button" class="seal-btn" id="btn-subj-7" data-seal="7" title="الآداب والسلوك (علم النفس والتربية والعمران)">
+                <span class="seal-major-crown">👑</span>
                 <span class="seal-star-stamp">⭐</span>
                 <span class="seal-svg-wrap"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="20" height="20"/><rect x="8" y="8" width="20" height="20" transform="rotate(45 18 18)"/><circle cx="18" cy="18" r="2.6" fill="currentColor"/></svg></span>
+                <span class="seal-weight-tag" id="wt-subj-7">٥٪</span>
                 <span class="seal-battery" id="bat-subj-7"><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span><span class="seal-bat-seg"></span></span>
-                <span class="seal-lock-mini">🔒</span>
             </button>
         </aside>
 
@@ -1411,18 +1493,15 @@
                     <button type="button" class="st-pill active" id="st-pill-0" data-st="0">📖 دَرْسٌ</button>
                     <button type="button" class="st-pill" id="st-pill-1" data-st="1">❓ سُؤَالٌ</button>
                     <button type="button" class="st-pill" id="st-pill-2" data-st="2">🌱 تَطْبِيقٌ</button>
+                    <button type="button" class="depth-mode-pill" id="depth-toggle-pill" title="مستوى العمق المعرفي">👑 التَّفْصِيلُ الكَامِلُ</button>
                 </div>
-
-                <span class="explore-banner-chip" id="explore-chip">🔓 اسْتِكْشَافٌ (النُّجُومُ مُتَوَقِّفَةٌ)</span>
 
                 <div class="media-controls-cluster" id="station-media-bar">
                     <button type="button" class="icon-ctrl-btn" id="slide-prev-btn" title="الشريحة السابقة">▶</button>
                     <span class="slide-counter-badge" id="slide-counter-badge">١ / ١</span>
                     <button type="button" class="icon-ctrl-btn" id="slide-next-btn" title="الشريحة التالية">◀</button>
-                    <button type="button" class="icon-ctrl-btn active-toggle" id="tts-play-btn" title="القارئ الآلي">🔊</button>
-                    <button type="button" class="icon-ctrl-btn active-toggle" id="auto-flip-btn" title="التقليب الآلي للسلايدات">🔄</button>
+                    <button type="button" class="icon-ctrl-btn active-toggle" id="tts-play-btn" title="قراءة العناوين الرئيسية فقط">🔊</button>
                     <button type="button" class="icon-ctrl-btn" id="lab-mode-btn" title="المختبر التفاعلي الحي">🧪</button>
-                    <button type="button" class="icon-ctrl-btn" id="video-mode-btn" title="عرض الفيديو">🎬</button>
                 </div>
             </div>
 
@@ -1438,42 +1517,44 @@
         </svg>
     </button>
 
-    <!-- نافذة خريطة الدورات والدروس الـ ٢٨ والإعدادات -->
+    <!-- نافذة الخريطة وحصيلة التخصص الثابت المقفل -->
     <div class="modal-overlay" id="map-modal">
         <div class="modal-card">
             <button type="button" class="modal-close-btn" id="close-map-modal">×</button>
-            <h2 style="font-size:1.25rem; font-weight:900; color:#065f46; text-align:center;">خَرِيطَةُ المَدَارَاتِ وَالدَّوْرَاتِ وَحَصِيلَةُ النُّجُومِ</h2>
+            <h2 style="font-size:1.2rem; font-weight:900; color:#065f46; text-align:center;">خَرِيطَةُ الدَّوْرَاتِ وَسِجِلُّ مِيثَاقِ التَّخَصُّصِ الثَّابِتِ</h2>
 
-            <div class="cycles-tabs-bar" id="cycles-tabs-bar"></div>
-
-            <div class="map-stats-row">
-                <div style="font-weight:900; color:#0f172a;">⭐ نُجُومُ الدَّرْسِ الحَالِيِّ: <span id="modal-week-stars" style="color:#b45309;">٠ / ٧</span></div>
-                <div style="font-weight:900; color:#0f172a;">🏆 مَجْمُوعُ نُجُومِ السَّنَةِ: <span id="modal-year-stars" style="color:#065f46;">٠ / ١٩٦</span></div>
+            <div class="major-locked-banner">
+                <div class="locked-major-title-row">
+                    <span id="locked-major-name-display">👑 مَسَارُ التَّخَصُّصِ المُثَبَّتُ: —</span>
+                    <span class="locked-pill-tag">🔒 مِيثَاقٌ ثَابِتٌ لَا يُبَدَّلُ (٧٠٪)</span>
+                </div>
+                <div class="grade-breakdown-row">
+                    <span>👑 رَصِيدُ التَّخَصُّصِ: <strong id="calc-major-pts" style="color:#b45309;">٠ / ٧٠</strong></span>
+                    <span>📚 المَوَادُّ المَسَانِدَةُ: <strong id="calc-minor-pts" style="color:#065f46;">٠ / ٣٠</strong></span>
+                    <span>⚖️ المُعَدَّلُ الكُلِّيُّ: <strong id="calc-total-pts" style="color:#0f172a;">٠ / ١٠٠</strong></span>
+                    <span class="status-pass-pill pending" id="calc-pass-status">قَيْدُ الإِنْجَازِ</span>
+                </div>
             </div>
 
+            <div class="cycles-tabs-bar" id="cycles-tabs-bar"></div>
             <div class="abjad-map-grid" id="abjad-map-grid"></div>
 
-            <button type="button" class="cycle-exam-btn" id="cycle-exam-btn">
-                <span>🏆</span>
-                <span id="cycle-exam-label">الامْتِحَانُ التَّطْبِيقِيُّ الشَّامِلُ لِلدَّوْرَةِ الأُولَى</span>
-            </button>
-
             <div class="settings-row">
-                <button type="button" class="setting-pill-btn mode-seq" id="toggle-mode-btn">🔒 وَضْعُ التَّسَلْسُلِ (تَحْتَسِبُ النُّجُومُ)</button>
-                <button type="button" class="setting-pill-btn" id="toggle-global-tts-btn">🔊 القَارِئُ الآلِيُّ: مُفَعَّلٌ</button>
-                <button type="button" class="setting-pill-btn" id="reset-year-progress-btn" style="border-color:#fda4af; color:#be123c;">🗑️ تَصْفِيرُ نُجُومِ السَّنَةِ</button>
+                <button type="button" class="setting-pill-btn mode-seq" id="toggle-mode-btn">🔒 وَضْعُ التَّسَلْسُلِ المُنْضَبِطِ</button>
+                <button type="button" class="setting-pill-btn" id="toggle-global-tts-btn">🔊 قِرَاءَةُ العَنَاوِينِ: مُفَعَّلَةٌ</button>
+                <button type="button" class="setting-pill-btn" id="reset-year-progress-btn" style="border-color:#fda4af; color:#be123c;">🗑️ تَصْفِيرُ السِّجِلِّ الكَامِلِ وَإِعَادَةُ البَدْءِ مِنَ الصِّفْرِ</button>
             </div>
         </div>
     </div>
 
-    <!-- نافذة عد النجوم آخر كل درس -->
+    <!-- نافذة إتمام الوحدة -->
     <div class="modal-overlay" id="lesson-complete-modal">
         <div class="modal-card" style="max-width:460px; text-align:center; align-items:center;">
             <div style="font-size:3.2rem; line-height:1;">🌟</div>
-            <h2 id="complete-modal-title" style="font-size:1.4rem; font-weight:900; color:#065f46;">أَتْمَمْتَ الدَّرْسَ بِنَجَاحٍ!</h2>
-            <div id="complete-stars-row" style="font-size:1.8rem; letter-spacing:4px;">⭐⭐⭐⭐⭐⭐⭐</div>
-            <p id="complete-modal-summary" style="font-weight:800; color:#334155; font-size:1.05rem;"></p>
-            <button type="button" id="next-lesson-arrow-btn" style="width:64px; height:64px; border-radius:50%; border:3px solid #fde047; background:linear-gradient(135deg,#059669,#064e3b); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px rgba(5,150,105,0.4);">
+            <h2 id="complete-modal-title" style="font-size:1.35rem; font-weight:900; color:#065f46;">أَتْمَمْتَ الوَحْدَةَ بِنَجَاحٍ!</h2>
+            <div id="complete-stars-row" style="font-size:1.7rem; letter-spacing:4px;">👑⭐</div>
+            <p id="complete-modal-summary" style="font-weight:800; color:#334155; font-size:1rem;"></p>
+            <button type="button" id="next-lesson-arrow-btn" style="width:64px; height:64px; border-radius:50%; border:3px solid #fde047; background:linear-gradient(135deg,#059669,#064e3b); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;">
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -1482,41 +1563,132 @@
         </div>
     </div>
 
-
     <div id="app-toast"></div>
 
-    <!-- تحميل ملفات مناهج مرحلة عبد بسلاسة وديناميكية -->
+    <!-- نقطة الربط البرمجية المعزولة لسؤال الذكاء الاصطناعي (جاهزة للتطوير في النقاش القادم) -->
+    <script>
+        window.Stage3AIQuestionHook = {
+            isConfigured: false,
+            renderCustomAIPanel: null // يُحقن هنا محرك سؤال الذكاء الاصطناعي المحلي/التفاعلي لاحقاً
+        };
+    </script>
+
+    <!-- تحميل ومزامنة ملفات المناهج للدورات الـ ١٨ -->
     <script>
         window.curriculumData = window.curriculumData || {};
-        window._loadedStage2Scripts = window._loadedStage2Scripts || {};
+        window.STAGE3_CURRICULA = window.STAGE3_CURRICULA || {};
+        window._loadedStage3Scripts = window._loadedStage3Scripts || {};
 
-        function loadStage2CurriculumFiles(year, cycleNum, callback) {
+        const STAGE3_GLOBAL_CYCLE_OFFSET = { 15: 10, 16: 15, 17: 21, 18: 28, 19: 28, 20: 28, 21: 28 };
+
+        function syncStage3PackIntoApp(year, cycleNum) {
             window.curriculumData[year] = window.curriculumData[year] || {};
-            const filesToTry = [`curriculum-y${year}.js`, `curriculum-y${year}-c${cycleNum}.js`];
+            const globalCycleNum = (STAGE3_GLOBAL_CYCLE_OFFSET[year] || 10) + cycleNum;
+            const pack = window.STAGE3_CURRICULA[`Y${year}_C${cycleNum}`]
+                      || window.STAGE3_CURRICULA[`CYCLE_${globalCycleNum}`]
+                      || window.STAGE3_CURRICULA[`D${globalCycleNum - 10}`];
+            if (!pack || !Array.isArray(pack.units)) return;
+
+            const weekOffset = (cycleNum - 1) * 28;
+            pack.units.forEach((u, idx) => {
+                const localU = parseInt(u.unit, 10) || (idx + 1);
+                const gw = weekOffset + localU;
+                window.curriculumData[year][gw] = window.curriculumData[year][gw] || {};
+                if (u.letter || u.title) {
+                    window.curriculumData[year][gw].lessonMeta = { ltr: u.letter || '', name: u.title || '' };
+                }
+                if (!u.seals) return;
+                for (let s = 1; s <= 7; s++) {
+                    if (window.curriculumData[year][gw][s]?._syncedStage3) continue;
+                    const seal = u.seals[s] || u.seals[String(s)];
+                    if (!seal) continue;
+
+                    const slides = [];
+                    if (seal.verses) {
+                        slides.push({
+                            heading: seal.surahRef || 'النَّصُّ القُرْآنِيُّ المَرْجِعِيُّ',
+                            text: seal.basmala ? `${seal.basmala}\n${seal.verses}` : String(seal.verses),
+                            isQuran: true
+                        });
+                    }
+                    if (Array.isArray(seal.slides) && seal.slides.length > 0) {
+                        seal.slides.forEach(sl => slides.push({
+                            img: sl.img || '',
+                            heading: sl.heading || '',
+                            text: sl.text || ''
+                        }));
+                    } else if (seal.content) {
+                        const paras = String(seal.content).split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+                        paras.forEach((p, pIdx) => {
+                            const subMatch = p.match(/^([•▪\-]?\s*[^:\n]{4,75}):\s*([\s\S]+)$/);
+                            if (subMatch) {
+                                slides.push({ heading: subMatch[1].replace(/^[•▪\-]\s*/, '').trim(), text: subMatch[2].trim() });
+                            } else {
+                                slides.push({ heading: (pIdx === 0 ? (seal.subtitle || '') : ''), text: p });
+                            }
+                        });
+                    }
+
+                    const summaryHeadings = Array.isArray(seal.headings) && seal.headings.length > 0
+                        ? seal.headings
+                        : slides.map(sl => sl.heading).filter(Boolean);
+
+                    window.curriculumData[year][gw][s] = {
+                        _syncedStage3: true,
+                        learn: {
+                            introTitle: seal.title || '',
+                            subtitle: seal.subtitle || '',
+                            headings: summaryHeadings,
+                            slides: slides,
+                            labData: seal.labData || null
+                        },
+                        play: {
+                            questions: Array.isArray(seal.questions) ? seal.questions : []
+                        },
+                        mathBaskets: seal.mathBaskets || null,
+                        apply: {
+                            steps: Array.isArray(seal.applySteps) && seal.applySteps.length > 0
+                                ? seal.applySteps
+                                : [seal.apply || 'طَبِّقِ القَاعِدَةَ العِلْمِيَّةَ وَالعَمَلِيَّةَ لِهٰذَا الخَتْمِ بِإِتْقَانٍ.']
+                        }
+                    };
+                }
+            });
+        }
+
+        function loadStage3CurriculumFiles(year, cycleNum, callback) {
+            window.curriculumData[year] = window.curriculumData[year] || {};
+            syncStage3PackIntoApp(year, cycleNum);
+            const s3Idx = ((STAGE3_GLOBAL_CYCLE_OFFSET[year] || 10) - 10) + cycleNum;
+            const filesToTry = [
+                `curriculum-y${year}-c${cycleNum}.js`,
+                `curriculum-s3-d${s3Idx}.js`,
+                `curriculum-y${year}.js`
+            ];
             let pending = 0;
             const checkDone = () => {
-                if (pending <= 0 && typeof callback === 'function') callback();
+                if (pending <= 0) {
+                    syncStage3PackIntoApp(year, cycleNum);
+                    if (typeof callback === 'function') callback();
+                }
             };
             filesToTry.forEach(src => {
-                if (window._loadedStage2Scripts[src]) return;
+                if (window._loadedStage3Scripts[src]) return;
                 pending++;
                 const s = document.createElement('script');
                 s.src = src;
-                s.onload = () => { window._loadedStage2Scripts[src] = true; pending--; checkDone(); };
-                s.onerror = () => { window._loadedStage2Scripts[src] = true; pending--; checkDone(); };
+                s.onload = () => { window._loadedStage3Scripts[src] = true; pending--; checkDone(); };
+                s.onerror = () => { window._loadedStage3Scripts[src] = true; pending--; checkDone(); };
                 document.head.appendChild(s);
             });
             checkDone();
         }
     </script>
 
+    <!-- محرك الأسئلة لمرحلة صاحب -->
     <script>
-// ============================================================================
-// محرك الأسئلة الديناميكي السباعي المطور لمرحلة عبد (يحافظ على الحركات كاملة)
-// ============================================================================
 (function(exports) {
   const toAr = (s) => String(s).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-  const toWest = (s) => String(s).replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -1531,19 +1703,13 @@
     return String(word || '').replace(/[\u064B-\u0652\u0670\u0640]/g, '').replace(/[^\u0621-\u064A]/g, '');
   }
 
-  function extractCleanSentences(slides, minWords = 4, maxWords = 32) {
+  function extractCleanSentences(slides, minWords = 5, maxWords = 34) {
     const out = [];
     (slides || []).forEach(sl => {
-      if (!sl || !sl.text || sl.isImagePrompt) return;
-      let txt = String(sl.text)
-        .replace(/﴿[^﴾]*﴾/g, ' ')
-        .replace(/\([^)]*\)/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-      const parts = txt.split(/(?<=[.؟!؛])\s+|\n+/g);
-      parts.forEach(p => {
-        let s = p.replace(/^[–\-•\d().]+\s*/, '').trim();
-        if (!s) return;
+      if (!sl || !sl.text || sl.isQuran) return;
+      let txt = String(sl.text).replace(/﴿[^﴾]*﴾/g, ' ').replace(/\s+/g, ' ').trim();
+      txt.split(/(?<=[.؟!؛])\s+|\n+/g).forEach(p => {
+        let s = p.replace(/^[–\-•▪\d().]+\s*/, '').trim();
         const words = s.split(/\s+/).filter(Boolean);
         if (words.length >= minWords && words.length <= maxWords) out.push(s);
       });
@@ -1551,461 +1717,255 @@
     return out;
   }
 
-  function invertArabicSentencePolarity(rawSent) {
-    let s = String(rawSent || '').trim();
-    s = s.replace(/^(?:ثُمَّ|وَ|فَ)\s+/u, '');
+  function invertArabicPolarity(rawSent) {
+    let s = String(rawSent || '').trim().replace(/^(?:ثم|و|ف)\s+/u, '');
     if (!s.endsWith('.')) s = s.replace(/[.،؛؟!]+$/, '') + '.';
-
     const words = s.split(/\s+/);
     const firstBase = baseKey(words[0]);
-
     if (['لا', 'لم', 'لن', 'ليس', 'ليست', 'ما'].includes(firstBase)) {
-      let mainPart = s.replace(/\s*،?\s*\bبَلْ[\u064B-\u0652]*\s+.*$/u, '.');
-      let mw = mainPart.split(/\s+/);
-      mw.shift();
-      if (firstBase === 'لم' && mw[0]) mw[0] = mw[0].replace(/[\u0652\u0650]$/, '\u064F');
-      if (firstBase === 'لن' && mw[0]) mw[0] = mw[0].replace(/\u064E$/, '\u064F');
-      return { text: mw.join(' ') };
+      words.shift();
+      return words.join(' ');
     }
-
-    const lastChar = words[0].slice(-1);
-    const isDefiniteNoun = firstBase.startsWith('ال') || /^(?:كال|بال|لل|فال|وال)/.test(firstBase) || words[0].includes('ة') || /[\u064B\u064C\u064D]/.test(words[0]);
-
-    if (!isDefiniteNoun && /^[أنيت]/.test(firstBase) && lastChar === '\u064F') {
-      return { text: 'لَا ' + s };
-    }
-    if (!isDefiniteNoun && firstBase.length >= 3 && lastChar !== '\u064F') {
-      return { text: 'مَا ' + s };
-    }
-    if (/\s+هُوَ\s+/u.test(s)) {
-      return { text: s.replace(/\s+هُوَ\s+/u, ' لَيْسَ ') };
-    }
-    if (/\s+هِيَ\s+/u.test(s)) {
-      return { text: s.replace(/\s+هِيَ\s+/u, ' لَيْسَتْ ') };
-    }
+    if (/^[أنيت]/.test(firstBase) && !firstBase.startsWith('ال')) return 'لا ' + s;
     const fem = words[0].includes('ة');
-    return { text: `${fem ? 'لَيْسَتْ' : 'لَيْسَ'} ${s}` };
+    return (fem ? 'ليست ' : 'ليس ') + s;
   }
 
   function generateDynamicQuestion(curriculumData, year, week, seal) {
     const yearObj = curriculumData[year] || {};
     const sealObj = yearObj?.[week]?.[seal];
     const slides = sealObj?.learn?.slides || [];
+    const refQs = sealObj?.play?.questions || [];
 
-    // أولوية الأسئلة المرجعية المحقونة إن اختار المعلم أو توفرت صيغة خاصة، مع التنوع الديناميكي
-    // ١. الختم ١ (المنطق والقرآن): ترتيب مقاطع الآية أو فقرة البيان
+    if (refQs.length > 0 && seal !== 1 && seal !== 4) {
+      const pickedQ = refQs[Math.floor(Math.random() * refQs.length)];
+      if (pickedQ.type === 'true_false' || typeof pickedQ.correctBool === 'boolean') {
+        return {
+          type: 'true_false',
+          prompt: 'ميز صحة العبارة العلمية التالية حسب ما درست:',
+          statement: pickedQ.statement || pickedQ.q,
+          correctBool: pickedQ.correctBool
+        };
+      }
+      if (Array.isArray(pickedQ.options) && pickedQ.options.length >= 2) {
+        return {
+          type: 'mcq_half',
+          prompt: pickedQ.prompt || 'اختر الإجابة الصحيحة الدقيقة:',
+          stem: pickedQ.q || pickedQ.stem || '',
+          options: shuffle(pickedQ.options)
+        };
+      }
+    }
+
     if (seal === 1) {
-      const poolSlides = slides.filter(sl => sl.text && sl.text.split(/\s+/).length >= 4);
-      const chosen = poolSlides[Math.floor(Math.random() * poolSlides.length)] || slides[0] || { text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ' };
-      let rawTxt = chosen.text.replace(/[﴿﴾]/g, '').replace(/۝[٠-٩\d]+/g, '|').trim();
+      const quranSlide = slides.find(sl => sl.isQuran || (sl.text && sl.text.includes('﴿'))) || slides[0] || { text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ' };
+      let rawTxt = quranSlide.text.replace(/[﴿﴾]/g, '').replace(/\(\d+\)/g, '|').replace(/۝[٠-٩\d]+/g, '|').trim();
       let parts = rawTxt.split(/\||\s*[،؛.]\s*/).map(p => p.trim()).filter(p => p.split(/\s+/).length >= 2);
-
       if (parts.length >= 3) {
         const picked = parts.slice(0, Math.min(4, parts.length));
         let scrambled = shuffle(picked.map((c, idx) => ({ id: idx, label: c })));
         if (scrambled.every((it, idx) => it.id === idx)) scrambled.reverse();
         return {
           type: 'order',
-          modeLabel: 'رَتِّبِ المَقَاطِعَ التَّالِيَةَ حَسَبَ وُرُودِهَا فِي نَصِّ الدَّرْسِ:',
+          modeLabel: 'رتّب المقاطع التالية وفق تسلسلها الصحيح في النص:',
           correctOrder: picked,
           tiles: scrambled
         };
       }
-
       const wTokens = rawTxt.split(/\s+/).filter(Boolean).slice(0, 7);
       let scrambled = shuffle(wTokens.map((w, idx) => ({ id: idx, label: w })));
       if (scrambled.every((it, idx) => it.id === idx) && scrambled.length > 1) scrambled.reverse();
       return {
         type: 'order',
-        modeLabel: 'رَتِّبْ كَلِمَاتِ العِبَارَةِ كَمَا وَرَدَتْ فِي نَصِّ الدَّرْسِ:',
+        modeLabel: 'رتّب الكلمات التالية وفق ورودها في الدرس:',
         correctOrder: wTokens,
         tiles: scrambled
       };
     }
 
-    // ٢. الختم ٢ (البصيرة والفن الهندسي): إكمال النصف الثاني من ٤ خيارات متوازنة
-    if (seal === 2) {
-      const sents = extractCleanSentences(slides, 5, 26);
-      const chosen = sents[Math.floor(Math.random() * sents.length)] || (slides[0]?.text || '');
-      const words = chosen.trim().split(/\s+/).filter(Boolean);
-      const half = Math.ceil(words.length / 2);
-      const stem = words.slice(0, half).join(' ') + ' ...';
-      const correctHalf = words.slice(half).join(' ');
-
-      const distractors = [];
-      const allWeeks = Object.keys(yearObj).map(Number).filter(w => w !== week);
-      for (const ow of shuffle(allWeeks)) {
-        if (distractors.length >= 3) break;
-        const oSlides = yearObj?.[ow]?.[2]?.learn?.slides || [];
-        const oSents = extractCleanSentences(oSlides, 5, 26);
-        if (!oSents.length) continue;
-        const oWords = oSents[0].split(/\s+/).filter(Boolean);
-        const oHalf = oWords.slice(Math.ceil(oWords.length / 2)).join(' ');
-        if (oHalf && oHalf !== correctHalf && !distractors.includes(oHalf)) distractors.push(oHalf);
-      }
-      while (distractors.length < 3) {
-        distractors.push('يَتَرَاجَعُ عَنِ التَّأَمُّلِ وَيَتْرُكُ مِيزَانَ الحِكْمَةِ.');
-        break;
-      }
-
-      return {
-        type: 'mcq_half',
-        prompt: 'أَكْمِلِ النِّصْفَ الثَّانِيَ لِلْعِبَارَةِ مِنْ شَرَائِحِ الدَّرْسِ:',
-        stem,
-        options: shuffle([
-          { text: correctHalf, correct: true },
-          ...distractors.slice(0, 3).map(d => ({ text: d, correct: false }))
-        ])
-      };
-    }
-
-    // ٣. الختم ٣ (التجويد والصوت): صح أو خطأ بنظام النفي النحوي السليم
-    if (seal === 3) {
-      const sents = extractCleanSentences(slides, 5, 28);
-      const baseSent = sents[Math.floor(Math.random() * sents.length)] || (slides[0]?.text || '');
-      const targetTrue = Math.random() < 0.5;
-      if (targetTrue) {
-        return {
-          type: 'true_false',
-          prompt: 'مَيِّزْ بِدِقَّةٍ: هَلْ هٰذِهِ العِبَارَةُ الصَّوْتِيَّةُ صَحِيحَةٌ أَمْ خَاطِئَةٌ حَسَبَ الدَّرْسِ؟',
-          statement: baseSent,
-          correctBool: true
-        };
-      } else {
-        const inv = invertArabicSentencePolarity(baseSent);
-        return {
-          type: 'true_false',
-          prompt: 'مَيِّزْ بِدِقَّةٍ: هَلْ هٰذِهِ العِبَارَةُ الصَّوْتِيَّةُ صَحِيحَةٌ أَمْ خَاطِئَةٌ حَسَبَ الدَّرْسِ؟',
-          statement: inv.text,
-          correctBool: false
-        };
-      }
-    }
-
-    // ٤. الختم ٤ (الرياضيات والمقدار لعمر ٨–١٤): سلال العمليات الحسابية (جمع، طرح، ضرب، قسمة، مربعات)
     if (seal === 4) {
       if (sealObj?.mathBaskets && Array.isArray(sealObj.mathBaskets.baskets)) {
         return {
           type: 'math_baskets',
-          prompt: 'ضَعْ كُلَّ دَائِرَةٍ رِيَاضِيَّةٍ فِي سَلَّةِ النَّاتِجِ الصَّحِيحِ لَهَا:',
+          prompt: 'ضع كل معادلة أو مقدار رياضي في سلة القيمة المطابقة له:',
           baskets: sealObj.mathBaskets.baskets,
           circles: shuffle(sealObj.mathBaskets.circles)
         };
       }
-      const f1 = ((week - 1) % 8) + 2;
-      const f2 = ((week + 2) % 7) + 2;
-      const prod = f1 * f2;
-      const sqBase = ((week % 6) + 3);
-      const sqVal = sqBase * sqBase;
-      let sumVal = week * 3 + 14;
-      if (sumVal === prod || sumVal === sqVal) sumVal += 5;
-
+      if (refQs.length > 0 && Array.isArray(refQs[0].options)) {
+        const rq = refQs[Math.floor(Math.random() * refQs.length)];
+        return { type: 'mcq_half', prompt: 'اختر الحل الرياضي الصحيح:', stem: rq.q, options: shuffle(rq.options) };
+      }
+      const a = ((week % 7) + 3), b = ((week % 5) + 4);
       const baskets = [
-        { id: 'b0', value: prod, label: toAr(prod) },
-        { id: 'b1', value: sqVal, label: toAr(sqVal) },
-        { id: 'b2', value: sumVal, label: toAr(sumVal) }
+        { id: 'b0', value: a * b, label: String(a * b) },
+        { id: 'b1', value: a * a, label: String(a * a) },
+        { id: 'b2', value: a + b * 2, label: String(a + b * 2) }
       ];
-      const pSumA = Math.floor(sumVal / 2);
       const circles = [
-        { id: 'c0_1', expr: `${toAr(f1)} × ${toAr(f2)}`, answer: prod },
-        { id: 'c0_2', expr: `${toAr(prod * 2)} ÷ ٢`, answer: prod },
-        { id: 'c1_1', expr: `${toAr(sqBase)} × ${toAr(sqBase)}`, answer: sqVal },
-        { id: 'c1_2', expr: `${toAr(sqVal + 5)} - ٥`, answer: sqVal },
-        { id: 'c2_1', expr: `${toAr(pSumA)} + ${toAr(sumVal - pSumA)}`, answer: sumVal },
-        { id: 'c2_2', expr: `${toAr(sumVal + 8)} - ٨`, answer: sumVal }
+        { id: 'c1', expr: `${a} × ${b}`, answer: a * b },
+        { id: 'c2', expr: `${a * b * 2} ÷ 2`, answer: a * b },
+        { id: 'c3', expr: `${a}²`, answer: a * a },
+        { id: 'c4', expr: `${a * a + 4} - 4`, answer: a * a },
+        { id: 'c5', expr: `${a} + 2(${b})`, answer: a + b * 2 },
+        { id: 'c6', expr: `|- ${a + b * 2}|`, answer: a + b * 2 }
       ];
+      return { type: 'math_baskets', prompt: 'ضع كل مقدار رياضي في سلة الناتج الصحيح:', baskets, circles: shuffle(circles) };
+    }
+
+    if (seal === 3) {
+      const sents = extractCleanSentences(slides, 5, 30);
+      const baseSent = sents[Math.floor(Math.random() * sents.length)] || (slides[0]?.text || '');
+      const isT = Math.random() < 0.5;
       return {
-        type: 'math_baskets',
-        prompt: 'ضَعْ كُلَّ دَائِرَةٍ رِيَاضِيَّةٍ فِي سَلَّةِ النَّاتِجِ الصَّحِيحِ لَهَا:',
-        baskets,
-        circles: shuffle(circles)
+        type: 'true_false',
+        prompt: 'حدّد صحة أو خطأ العبارة الصوتية والتجويدية التالية:',
+        statement: isT ? baseSent : invertArabicPolarity(baseSent),
+        correctBool: isT
       };
     }
 
-    // ٥. الختم ٥ (الحركة والاتزان البدني): سؤال مرجعي تفاعلي أو عدد خطوات/ثواني التمرين
-    if (seal === 5) {
-      if (Array.isArray(sealObj?.play?.questions) && sealObj.play.questions.length > 0 && Math.random() < 0.65) {
-        const refQ = sealObj.play.questions[0];
-        return {
-          type: 'mcq_half',
-          prompt: 'اخْتَرِ الإِجَابَةَ العِلْمِيَّةَ الصَّحِيحَةَ لِلتَّمْرِينِ البَدَنِيِّ:',
-          stem: refQ.q,
-          options: shuffle(refQ.options)
-        };
-      }
-      const applyTxt = sealObj?.apply?.steps?.[0] || slides.map(s => s.text).join(' ');
-      const numMatch = applyTxt.match(/([٠-٩\d]+)\s*(ثَانِيَةً|ثَوَانٍ|دَقَائِقَ|تَكْرَارًا|تَكْرَارَاتٍ|مَرَّاتٍ)/u);
-      const count = numMatch ? parseInt(toWest(numMatch[1]), 10) : (sealObj?.stepCount || 5);
-      const unitWord = numMatch ? numMatch[2] : 'دَقَائِقَ';
-
-      const cands = new Set([count]);
-      for (const d of [2, -2, 5, -3, 4, 10]) {
-        if (cands.size >= 4) break;
-        if (count + d > 0) cands.add(count + d);
-      }
-      return {
-        type: 'sport_steps',
-        prompt: 'مَا المِقْدَارُ الزَّمَنِيُّ أَوِ العَدَدِيُّ المَضْبُوطُ فِي تَطْبِيقِ هٰذَا التَّمْرِينِ؟',
-        stem: applyTxt.replace(numMatch ? numMatch[0] : '', `(...) ${unitWord}`),
-        options: shuffle([...cands].map(n => ({
-          text: `${toAr(n)} ${unitWord}`,
-          correct: n === count
-        })))
-      };
-    }
-
-    // ٦. الختم ٦ (العلوم وسنن الكون): ملء الفراغ العلمي من ٤ خيارات علوية
     if (seal === 6) {
-      const STOP = new Set(['يدرس', 'العلم', 'الذي', 'التي', 'يتكون', 'تتكون', 'كيف', 'بين', 'داخل', 'خارج', 'جميع', 'فوق', 'تحت', 'منها', 'فيها', 'لوحة', 'رسم', 'مشهد', 'مقطع']);
-      const mainSlides = slides.filter(sl => sl.text && !sl.isImagePrompt);
-      const chosenSlide = mainSlides[0] || slides[0] || { text: '' };
-      const tokens = chosenSlide.text.split(/\s+/).filter(Boolean);
-      const candidates = [];
+      const sents = extractCleanSentences(slides, 6, 30);
+      const chosen = sents[Math.floor(Math.random() * sents.length)] || (slides[0]?.text || '');
+      const tokens = chosen.split(/\s+/).filter(Boolean);
+      const cands = [];
       tokens.forEach((tok, idx) => {
         if (idx < 1) return;
-        const cleanTok = tok.replace(/^[«"(\[]+|[.،؛:!؟»")\]]+$/g, '');
-        const b = baseKey(cleanTok);
-        if (b.length >= 4 && !STOP.has(b) && !/\d|[٠-٩]/.test(cleanTok)) {
-          candidates.push({ idx, cleanWord: cleanTok, base: b });
-        }
+        const cl = tok.replace(/^[«"(\[]+|[.،؛:!؟»")\]]+$/g, '');
+        if (baseKey(cl).length >= 5) cands.push({ idx, cleanWord: cl });
       });
-      const picked = candidates[Math.floor(Math.random() * candidates.length)] || { idx: Math.max(0, tokens.length - 1), cleanWord: (tokens[tokens.length - 1] || 'الخَلِيَّةُ').replace(/[.،]/g, ''), base: 'الخلية' };
-      const beforeText = tokens.slice(0, picked.idx).join(' ');
-      const trailingPunct = ((tokens[picked.idx] || '').match(/([.،؛:!؟»")\]]+)$/) || ['', ''])[1];
-      const afterText = (trailingPunct ? trailingPunct + ' ' : '') + tokens.slice(picked.idx + 1).join(' ');
-
-      const distractors = [];
-      const usedBases = new Set([picked.base]);
-      const allWeeks = Object.keys(yearObj).map(Number).filter(w => w !== week);
-      for (const ow of shuffle(allWeeks)) {
-        if (distractors.length >= 3) break;
-        const oText = yearObj?.[ow]?.[6]?.learn?.slides?.[0]?.text || '';
-        const oToks = oText.split(/\s+/);
-        for (const ot of oToks) {
-          const cl = ot.replace(/^[«"(\[]+|[.،؛:!؟»")\]]+$/g, '');
-          const b = baseKey(cl);
-          if (b.length >= 4 && !STOP.has(b) && !usedBases.has(b)) {
-            usedBases.add(b);
-            distractors.push(cl);
-            break;
-          }
-        }
-      }
-      while (distractors.length < 3) {
-        distractors.push('المَجَرَّاتِ', 'البِلَّوْرَاتِ', 'الأَنْسِجَةِ');
-        break;
-      }
-
+      const picked = cands[Math.floor(Math.random() * cands.length)] || { idx: Math.max(0, tokens.length - 1), cleanWord: (tokens[tokens.length - 1] || 'الخلية').replace(/[.،]/g, '') };
+      const distractors = ['الميتوكوندريا', 'الريبوزومات', 'الهيموغلوبين', 'الكيلومتر', 'البوليميراز'].filter(d => baseKey(d) !== baseKey(picked.cleanWord)).slice(0, 3);
       return {
         type: 'science_cloze',
-        prompt: 'اخْتَرِ الكَلِمَةَ العِلْمِيَّةَ المُنَاسِبَةَ مِنَ الخِيَارَاتِ العُلْوِيَّةِ لِمَلْءِ الفَرَاغِ:',
-        beforeText,
-        afterText,
+        prompt: 'اختر المصطلح العلمي الدقيق لملء الفراغ:',
+        beforeText: tokens.slice(0, picked.idx).join(' '),
+        afterText: tokens.slice(picked.idx + 1).join(' '),
         targetWord: picked.cleanWord,
-        choices: shuffle([
-          { word: picked.cleanWord, correct: true },
-          ...distractors.slice(0, 3).map(d => ({ word: d, correct: false }))
-        ])
+        choices: shuffle([{ word: picked.cleanWord, correct: true }, ...distractors.map(d => ({ word: d, correct: false }))])
       };
     }
 
-    // ٧. الختم ٧ (الآداب وتزكية السلوك): اختيار ٣ إلى ٤ عبارات صحيحة من بين ٧ عبارات من القصة
-    const correctCount = (Math.random() < 0.5) ? 3 : 4;
-    const rawClauses = [];
-    slides.forEach(sl => {
-      if (!sl || !sl.text) return;
-      sl.text.split(/(?<=[.؟!])\s+|\s*؛\s*/g).forEach(part => {
-        let c = part.replace(/[«»"']/g, '').trim();
-        if (!c || c.includes('﴿') || c.endsWith(':')) return;
-        const wLen = c.split(/\s+/).filter(Boolean).length;
-        if (wLen >= 4 && wLen <= 24) rawClauses.push(c.endsWith('.') ? c : c + '.');
-      });
-    });
-
-    const uniqueClauses = [...new Set(rawClauses)];
-    const shuffled = shuffle(uniqueClauses);
-    const truePicked = shuffled.slice(0, Math.min(correctCount, shuffled.length));
-    const rem = shuffled.slice(truePicked.length);
-    const targetWrong = Math.max(2, 7 - truePicked.length);
-
-    const falseOptions = [];
-    for (const src of rem) {
-      if (falseOptions.length >= targetWrong) break;
-      const inv = invertArabicSentencePolarity(src).text;
-      if (inv && inv !== src && !truePicked.includes(inv) && !falseOptions.includes(inv)) {
-        falseOptions.push(inv);
-      }
-    }
-    while (falseOptions.length < targetWrong) {
-      falseOptions.push('أَطَاعَ البَطَلُ وَسْوَسَةَ الهَوَى وَتَرَكَ حُكْمَ العَقْلِ.');
-      if (falseOptions.length < targetWrong) falseOptions.push('أَخْفَى الخَطَأَ عَنْ أَهْلِهِ وَلَمْ يُبَادِرْ إِلَى إِصْلَاحِهِ.');
-      break;
+    if (seal === 7) {
+      const sents = extractCleanSentences(slides, 4, 26);
+      const uniq = [...new Set(sents)];
+      const req = Math.min(3, Math.max(1, uniq.length));
+      const trues = shuffle(uniq).slice(0, req);
+      const falses = trues.map(t => invertArabicPolarity(t));
+      while (falses.length < 3) falses.push('الاندفاع مع الهوى وترك التثبت والدليل العقلي.');
+      return {
+        type: 'adab_multiselect',
+        prompt: `اختر العبارات الصحيحة المتوافقة مع ميزان الخُلُق في الدرس وعددها (${toAr(trues.length)}):`,
+        requiredCorrect: trues.length,
+        options: shuffle([...trues.map(t => ({ text: t, correct: true })), ...falses.slice(0, 3).map(f => ({ text: f, correct: false }))])
+      };
     }
 
-    const allOpts = shuffle([
-      ...truePicked.map(t => ({ text: t, correct: true })),
-      ...falseOptions.slice(0, targetWrong).map(f => ({ text: f, correct: false }))
-    ]);
-
+    const sents = extractCleanSentences(slides, 5, 28);
+    const chosen = sents[Math.floor(Math.random() * sents.length)] || (slides[0]?.text || '');
+    const words = chosen.split(/\s+/).filter(Boolean);
+    const half = Math.ceil(words.length / 2);
     return {
-      type: 'adab_multiselect',
-      prompt: `اخْتَرِ العِبَارَاتِ الصَّحِيحَةَ الوَارِدَةَ فِي القِصَّةِ وَعَدَدُهَا (${toAr(truePicked.length)}):`,
-      requiredCorrect: truePicked.length,
-      options: allOpts
+      type: 'mcq_half',
+      prompt: 'أكمل الشطر الثاني للعبارة العلمية بدقة:',
+      stem: words.slice(0, half).join(' ') + ' ...',
+      options: shuffle([
+        { text: words.slice(half).join(' '), correct: true },
+        { text: 'إهمال الدليل العقلي والاكتفاء بالظن والتقليد.', correct: false },
+        { text: 'تجاوز الحد المعتدل والوقوع في الإفراط أو التفريط.', correct: false },
+        { text: 'تعطيل القاعدة العملية وترك التثبت من النتائج.', correct: false }
+      ])
     };
   }
 
   exports.generateDynamicQuestion = generateDynamicQuestion;
-})(window.Stage2QuestionEngine = {});
+})(window.Stage3QuestionEngine = {});
     </script>
 
+    <!-- محرك المختبرات التفاعلية لمرحلة صاحب -->
     <script>
-// ============================================================================
-// المحرك التفاعلي الحي للمختبرات (الرياضيات والعلوم والرياضة لمرحلة عبد)
-// ============================================================================
-window.Stage2LabEngine = (function() {
+window.Stage3LabEngine = (function() {
     let animId = null;
     function stop() { if (animId) { cancelAnimationFrame(animId); animId = null; } }
 
-    function render(container, seal, week, sealObj) {
+    function render(container, seal) {
         stop();
         container.innerHTML = '';
         const box = document.createElement('div');
-        box.className = 'stage2-lab-box';
-
+        box.className = 'stage3-lab-box';
         const pill = document.createElement('div');
         pill.className = 'lab-header-pill';
         const wrap = document.createElement('div');
         wrap.className = 'lab-canvas-wrap';
         const ctrl = document.createElement('div');
         ctrl.className = 'lab-controls-bar';
-
-        box.appendChild(pill);
-        box.appendChild(wrap);
-        box.appendChild(ctrl);
+        box.append(pill, wrap, ctrl);
         container.appendChild(box);
 
-        const toAr = (s) => String(s).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-
         if (seal === 4) {
-            if (week >= 8 && week <= 10) {
-                pill.textContent = 'مُخْتَبَرُ الكُسُورِ وَالأَجْزَاءِ البَصَرِيُّ';
-                let num = 2, den = 6;
-                const cv = document.createElement('canvas');
-                cv.width = 500; cv.height = 230;
-                wrap.appendChild(cv);
-                const ctx = cv.getContext('2d');
-                const draw = () => {
-                    if (num > den) num = den;
-                    ctx.clearRect(0, 0, cv.width, cv.height);
-                    const cx = 145, cy = 115, r = 88;
-                    for (let i = 0; i < den; i++) {
-                        const a1 = (i / den) * Math.PI * 2 - Math.PI / 2;
-                        const a2 = ((i + 1) / den) * Math.PI * 2 - Math.PI / 2;
-                        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, a1, a2); ctx.closePath();
-                        ctx.fillStyle = (i < num) ? '#10b981' : 'rgba(255,255,255,0.12)';
-                        ctx.fill(); ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2; ctx.stroke();
-                    }
-                    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 30px Cairo, sans-serif'; ctx.textAlign = 'center';
-                    ctx.fillText(`${toAr(num)} / ${toAr(den)}`, 365, 95);
-                    ctx.fillStyle = '#6ee7b7'; ctx.font = 'bold 20px Cairo, sans-serif';
-                    ctx.fillText(`النِّسْبَةُ: ${toAr(Math.round((num / den) * 100))}٪`, 365, 145);
-                };
-                ctrl.innerHTML = `
-                    <label class="lab-ctrl-group">البَسْطُ <input type="range" id="lb-n" min="0" max="12" value="${num}"><span class="lab-val-badge" id="lb-nv">${toAr(num)}</span></label>
-                    <label class="lab-ctrl-group">المَقَامُ <input type="range" id="lb-d" min="1" max="12" value="${den}"><span class="lab-val-badge" id="lb-dv">${toAr(den)}</span></label>
-                `;
-                const nIn = ctrl.querySelector('#lb-n'), dIn = ctrl.querySelector('#lb-d');
-                nIn.oninput = () => { num = +nIn.value; if (num > den) { den = num; dIn.value = den; } ctrl.querySelector('#lb-nv').textContent = toAr(num); ctrl.querySelector('#lb-dv').textContent = toAr(den); draw(); };
-                dIn.oninput = () => { den = +dIn.value; if (num > den) { num = den; nIn.value = num; } ctrl.querySelector('#lb-nv').textContent = toAr(num); ctrl.querySelector('#lb-dv').textContent = toAr(den); draw(); };
-                draw();
-            } else {
-                pill.textContent = 'مُخْتَبَرُ المِسَاحَةِ وَالمَصْفُوفَةِ الهَنْدَسِيَّةِ';
-                let rows = 3, cols = 4;
-                const cv = document.createElement('canvas');
-                cv.width = 500; cv.height = 230;
-                wrap.appendChild(cv);
-                const ctx = cv.getContext('2d');
-                const drawGrid = () => {
-                    ctx.clearRect(0, 0, cv.width, cv.height);
-                    const cell = 22, ox = 45, oy = 25;
-                    for (let r = 0; r < rows; r++) {
-                        for (let c = 0; c < cols; c++) {
-                            ctx.fillStyle = 'rgba(16, 185, 129, 0.38)';
-                            ctx.strokeStyle = '#fde047';
-                            ctx.lineWidth = 1.8;
-                            ctx.fillRect(ox + c * cell, oy + r * cell, cell - 2, cell - 2);
-                            ctx.strokeRect(ox + c * cell, oy + r * cell, cell - 2, cell - 2);
-                        }
-                    }
-                    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 24px Cairo, sans-serif'; ctx.textAlign = 'center';
-                    ctx.fillText(`المِسَاحَةُ: ${toAr(rows)} × ${toAr(cols)} = ${toAr(rows * cols)}`, 365, 95);
-                    ctx.fillStyle = '#6ee7b7'; ctx.font = 'bold 20px Cairo, sans-serif';
-                    ctx.fillText(`المُحِيطُ: ${toAr(2 * (rows + cols))}`, 365, 145);
-                };
-                ctrl.innerHTML = `
-                    <label class="lab-ctrl-group">الطُّولُ <input type="range" id="g-r" min="1" max="8" value="${rows}"><span class="lab-val-badge" id="g-rv">${toAr(rows)}</span></label>
-                    <label class="lab-ctrl-group">العَرْضُ <input type="range" id="g-c" min="1" max="9" value="${cols}"><span class="lab-val-badge" id="g-cv">${toAr(cols)}</span></label>
-                `;
-                ctrl.querySelector('#g-r').oninput = (e) => { rows = +e.target.value; ctrl.querySelector('#g-rv').textContent = toAr(rows); drawGrid(); };
-                ctrl.querySelector('#g-c').oninput = (e) => { cols = +e.target.value; ctrl.querySelector('#g-cv').textContent = toAr(cols); drawGrid(); };
-                drawGrid();
-            }
+            pill.textContent = 'مُخْتَبَرُ الدَّوَالِّ وَالهَنْدَسَةِ التَّحْلِيلِيَّةِ التَّفَاعُلِيُّ';
+            let paramA = 1, paramB = 0;
+            const cv = document.createElement('canvas');
+            cv.width = 520; cv.height = 230;
+            wrap.appendChild(cv);
+            const ctx = cv.getContext('2d');
+            const draw = () => {
+                ctx.clearRect(0, 0, cv.width, cv.height);
+                const ox = 260, oy = 115, sc = 22;
+                ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(20, oy); ctx.lineTo(500, oy); ctx.moveTo(ox, 10); ctx.lineTo(ox, 220); ctx.stroke();
+                ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2.6; ctx.beginPath();
+                for (let px = -10; px <= 10; px += 0.1) {
+                    const py = paramA * px + paramB;
+                    const sx = ox + px * sc, sy = oy - py * sc;
+                    if (px === -10) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+                }
+                ctx.stroke();
+                ctx.fillStyle = '#6ee7b7'; ctx.font = 'bold 18px Cairo, sans-serif'; ctx.textAlign = 'left';
+                ctx.fillText(`f(x) = ${paramA}x + (${paramB})`, 28, 34);
+            };
+            ctrl.innerHTML = `
+                <label class="lab-ctrl-group">المَيْلُ (أ) <input type="range" id="fn-a" min="-4" max="4" step="0.5" value="${paramA}"><span class="lab-val-badge" id="fn-av">${paramA}</span></label>
+                <label class="lab-ctrl-group">الإِزَاحَةُ (ب) <input type="range" id="fn-b" min="-4" max="4" step="0.5" value="${paramB}"><span class="lab-val-badge" id="fn-bv">${paramB}</span></label>
+            `;
+            ctrl.querySelector('#fn-a').oninput = (e) => { paramA = +e.target.value; ctrl.querySelector('#fn-av').textContent = paramA; draw(); };
+            ctrl.querySelector('#fn-b').oninput = (e) => { paramB = +e.target.value; ctrl.querySelector('#fn-bv').textContent = paramB; draw(); };
+            draw();
             return;
         }
 
-        // المدرب الحركي والتنفسي لختم الرياضة (٥) أو التجويد والتنفس (٣)
-        pill.textContent = (seal === 3) ? 'مُخْتَبَرُ التَّنَفُّسِ الحِجَابِيِّ وَالرَّنِينِ الصَّوْتِيِّ' : 'المُدَرِّبُ الحَرَكِيُّ وَإِيقَاعُ التَّنَفُّسِ';
-        let poseIdx = 0;
-        const POSES = [
-            { name: 'الِاسْتِقَامَةُ وَالشَّهِيقُ الهَادِئُ مِنَ الأَنْفِ', lA: -140, rA: 140, lL: -8, rL: 8 },
-            { name: 'التَّوَازُنُ الثَّابِتُ حَوْلَ مَرْكَزِ الثِّقَلِ', lA: -90, rA: 90, lL: 0, rL: 52 },
-            { name: 'القُرْفُصَاءُ المُتَّزِنَةُ مَعَ اسْتِقَامَةِ الظَّهْرِ', lA: -75, rA: 75, lL: -32, rL: 32 },
-            { name: 'الإِطَالَةُ وَالزَّفِيرُ المُنْتَظِمُ مِنَ الفَمِ', lA: -30, rA: 30, lL: -10, rL: 10 }
-        ];
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('viewBox', '0 0 420 220');
-        svg.style.width = '100%';
-        wrap.appendChild(svg);
-
-        let phase = 0;
+        pill.textContent = (seal === 3) ? 'مُخْتَبَرُ التَّرَدُّدِ الصَّوْتِيِّ وَالمَوْجَاتِ (Hz)' : 'مُخْتَبَرُ المِيكَانِيكَا الحَيَوِيَّةِ وَالإِيقَاعِ التَّنَفُّسِيِّ';
+        let freq = 2;
+        const cv = document.createElement('canvas');
+        cv.width = 500; cv.height = 210;
+        wrap.appendChild(cv);
+        const ctx = cv.getContext('2d');
+        let ph = 0;
         const loop = () => {
-            const p = POSES[poseIdx % POSES.length];
-            phase += 0.04;
-            const r = 26 + Math.sin(phase) * 11;
-            const bTxt = Math.cos(phase) >= 0 ? 'شَهِيقٌ' : 'زَفِيرٌ';
-            svg.innerHTML = `
-                <circle cx="330" cy="105" r="${r}" fill="rgba(16,185,129,0.28)" stroke="#fde047" stroke-width="2.5"/>
-                <text x="330" y="111" fill="#fef08a" font-size="14" font-weight="900" text-anchor="middle">${bTxt}</text>
-                <text x="210" y="24" fill="#a7f3d0" font-size="14" font-weight="900" text-anchor="middle">${p.name}</text>
-                <line x1="60" y1="202" x2="240" y2="202" stroke="#34d399" stroke-width="3"/>
-                <circle cx="150" cy="62" r="15" fill="#fde047" stroke="#ffffff" stroke-width="2"/>
-                <line x1="150" y1="77" x2="150" y2="138" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
-                <g transform="translate(150, 88) rotate(${p.lA})"><line x1="0" y1="0" x2="0" y2="44" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/></g>
-                <g transform="translate(150, 88) rotate(${p.rA})"><line x1="0" y1="0" x2="0" y2="44" stroke="#38bdf8" stroke-width="6" stroke-linecap="round"/></g>
-                <g transform="translate(150, 138) rotate(${p.lL})"><line x1="0" y1="0" x2="0" y2="56" stroke="#eab308" stroke-width="7" stroke-linecap="round"/></g>
-                <g transform="translate(150, 138) rotate(${p.rL})"><line x1="0" y1="0" x2="0" y2="56" stroke="#eab308" stroke-width="7" stroke-linecap="round"/></g>
-            `;
+            ph += 0.06;
+            ctx.clearRect(0, 0, cv.width, cv.height);
+            ctx.strokeStyle = '#10b981'; ctx.lineWidth = 3; ctx.beginPath();
+            for (let x = 0; x < cv.width; x++) {
+                const y = 105 + Math.sin((x / 60) * freq + ph) * 48;
+                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.fillStyle = '#fef08a'; ctx.font = 'bold 16px Cairo, sans-serif';
+            ctx.fillText(seal === 3 ? `التَّرَدُّدُ النَّغَمِيُّ: ${freq * 110} Hz` : `مُعَدَّلُ الإِيقَاعِ الحَرَكِيِّ: ${freq}x`, 24, 30);
             animId = requestAnimationFrame(loop);
         };
-        ctrl.innerHTML = `
-            <button type="button" class="lab-action-mini-btn" id="p-prev">الوَضْعِيَّةُ السَّابِقَةُ</button>
-            <button type="button" class="lab-action-mini-btn" id="p-next">الوَضْعِيَّةُ التَّالِيَةُ</button>
-        `;
-        ctrl.querySelector('#p-prev').onclick = () => { poseIdx = (poseIdx + POSES.length - 1) % POSES.length; };
-        ctrl.querySelector('#p-next').onclick = () => { poseIdx = (poseIdx + 1) % POSES.length; };
+        ctrl.innerHTML = `<label class="lab-ctrl-group">التَّرَدُّدُ <input type="range" id="wv-f" min="1" max="6" step="1" value="${freq}"><span class="lab-val-badge" id="wv-fv">${freq}</span></label>`;
+        ctrl.querySelector('#wv-f').oninput = (e) => { freq = +e.target.value; ctrl.querySelector('#wv-fv').textContent = freq; };
         loop();
     }
-
     return { render, stop };
 })();
     </script>
 
+    <!-- المحرك الرئيسي لمرحلة صاحب (التحام مباشر بـ index.html + ميثاق التخصص المقفل لمرة واحدة) -->
     <script>
-// ============================================================================
-// التطبيق الموحد لمرحلة عبد (٨ – ١٤ سنة) بنظام الكبسولتين والمحطات الثلاث
-// ============================================================================
-(function initStage2UnifiedApp() {
+(function initStage3UnifiedApp() {
     const ABJAD = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي','ك','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
     const SEAL_NAMES = {
         1: 'المَنْطِقُ وَالبَيَانُ',
@@ -2016,37 +1976,68 @@ window.Stage2LabEngine = (function() {
         6: 'العُلُومُ وَسُنَنُ الكَوْنِ',
         7: 'الآدَابُ وَتَزْكِيَةُ السُّلُوكِ'
     };
-    const YEAR_CYCLES_MAP = { 8: 1, 9: 1, 10: 1, 11: 1, 12: 1, 13: 2, 14: 2 };
-    const CYCLE_AR_NAMES = ['', 'الأُولَى', 'الثَّانِيَةُ'];
+    const UNIVERSITY_TRACKS = {
+        1: 'أُصُولُ الفِقْهِ وَالمَنْطِقُ البُرْهَانِيُّ وَالقَانُونُ',
+        2: 'العِمَارَةُ الإِسْلَامِيَّةُ وَالفُنُونُ البَصَرِيَّةُ وَفِقْهُ اللُّغَةِ',
+        3: 'هَنْدَسَةُ الصَّوْتِيَّاتِ وَالِاتِّصَالَاتِ وَالصِّنَاعَاتُ الدَّقِيقَةُ',
+        4: 'الهَنْدَسَةُ التَّطْبِيقِيَّةُ وَالخَوَارِزْمِيَّاتُ وَالِاقْتِصَادُ',
+        5: 'المِيكَانِيكَا الحَيَوِيَّةُ وَالعِلَاجُ الطَّبِيعِيُّ وَالتَّأْهِيلُ',
+        6: 'الطِّبُّ البَشَرِيُّ وَالصَّيْدَلَةُ النَّبَاتِيَّةُ وَعُلُومُ الحَيَاةِ',
+        7: 'عِلْمُ النَّفْسِ التَّرْبَوِيُّ وَبِنَاءُ المَنَاهِجِ وَالعُمْرَانُ'
+    };
+
+    const YEAR_CYCLES_MAP = { 15: 5, 16: 6, 17: 7, 18: 1, 19: 1, 20: 1, 21: 1 };
+    const CYCLE_AR_NAMES = ['', 'الأُولَى', 'الثَّانِيَةُ', 'الثَّالِثَةُ', 'الرَّابِعَةُ', 'الخَامِسَةُ', 'السَّادِسَةُ', 'السَّابِعَةُ'];
     const toAr = (s) => String(s).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
 
+    // استلام السنة المختارة مباشرة من index.html عبر الرابط (?year=) أو من المفتاح الموحد selected_school_year
     const urlParams = new URLSearchParams(window.location.search);
     const paramYear = parseInt(urlParams.get('year'), 10);
-    const savedYear = parseInt(SafeStore.get('selected_school_year') || '8', 10);
-    let activeYear = (!isNaN(paramYear) && paramYear >= 8 && paramYear <= 14)
+    const savedGlobalYear = parseInt(SafeStore.get('selected_school_year') || SafeStore.get('selected_stage3_year') || '15', 10);
+    let activeYear = (!isNaN(paramYear) && paramYear >= 15 && paramYear <= 21)
         ? paramYear
-        : ((!isNaN(savedYear) && savedYear >= 8 && savedYear <= 14) ? savedYear : 8);
+        : ((!isNaN(savedGlobalYear) && savedGlobalYear >= 15 && savedGlobalYear <= 21) ? savedGlobalYear : 15);
     SafeStore.set('selected_school_year', activeYear);
+    SafeStore.set('selected_stage3_year', activeYear);
 
-    let isFreeExplore = SafeStore.get('stage2_explore_mode') === 'true';
-    let isTTSActive = SafeStore.get('tts_enabled_state') !== 'false';
-    let isAutoFlip = SafeStore.get('stage2_auto_flip') !== 'false';
+    let isFreeExplore = SafeStore.get('stage3_explore_mode') === 'true';
+    let isTTSActive = SafeStore.get('stage3_tts_titles_only') !== 'false';
+
+    // إدارة ميثاق التخصص المقفل لمرة واحدة طوال المرحلة (غير قابل للتبديل العشوائي)
+    const MAJOR_SEAL_KEY = 's3_committed_major_seal';
+    const MAJOR_LOCKED_KEY = 's3_committed_major_locked';
+
+    function isMajorCommitted() {
+        const val = parseInt(SafeStore.get(MAJOR_SEAL_KEY) || '0', 10);
+        return SafeStore.get(MAJOR_LOCKED_KEY) === '1' && val >= 1 && val <= 7;
+    }
+
+    function getMajorSeal() {
+        const val = parseInt(SafeStore.get(MAJOR_SEAL_KEY) || '0', 10);
+        return (val >= 1 && val <= 7) ? val : 1;
+    }
+
+    function lockMajorChoiceOnce(sealNum) {
+        if (isMajorCommitted()) return;
+        SafeStore.set(MAJOR_SEAL_KEY, String(sealNum));
+        SafeStore.set(MAJOR_LOCKED_KEY, '1');
+    }
 
     let playWeek = 1;
     let selectedMapCycle = 1;
-    let activeSeal = 1;
+    let activeSeal = getMajorSeal();
     let activeStation = 0; // 0: درس | 1: سؤال | 2: تطبيق
     let currentSlideIdx = 0;
-    let isVideoMode = false;
     let isLabMode = false;
+    let forceFullDetailOnMinor = false;
+    let isAIQuestionOpen = false;
     let currentQuestionResolved = false;
     let currentQuizData = null;
 
-    let zoomScale = 1, panX = 0, panY = 0, forceHandPan = false, isImageExpanded = false;
-
-    const getTotalCycles = () => YEAR_CYCLES_MAP[activeYear] || 1;
+    const getTotalCycles = () => YEAR_CYCLES_MAP[activeYear] || 5;
     const getTotalWeeks = () => getTotalCycles() * 28;
     const getCycleOfWeek = (w) => Math.ceil(w / 28);
+    const isUniversityYear = () => activeYear >= 18;
 
     let toastTimer = null;
     function showToast(msg) {
@@ -2055,127 +2046,69 @@ window.Stage2LabEngine = (function() {
         t.textContent = msg;
         t.classList.add('show');
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
-    }
-
-    function getAudioCtx() {
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (!Ctx) return null;
-        if (!window._s2AudioCtx) window._s2AudioCtx = new Ctx();
-        if (window._s2AudioCtx.state === 'suspended') window._s2AudioCtx.resume().catch(() => {});
-        return window._s2AudioCtx;
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
     }
 
     function playChime(ok = true) {
         try {
-            const ctx = getAudioCtx();
-            if (!ctx) return;
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            if (!window._s3AudioCtx) window._s3AudioCtx = new Ctx();
+            const ctx = window._s3AudioCtx;
+            if (ctx.state === 'suspended') ctx.resume().catch(() => {});
             const now = ctx.currentTime;
-            const freqs = ok ? [523.25, 659.25, 783.99, 1046.5] : [250, 185];
+            const freqs = ok ? [523.25, 659.25, 783.99] : [240, 180];
             freqs.forEach((f, idx) => {
-                const osc = ctx.createOscillator();
-                const g = ctx.createGain();
+                const osc = ctx.createOscillator(), g = ctx.createGain();
                 osc.type = ok ? 'sine' : 'triangle';
-                osc.frequency.setValueAtTime(f, now + idx * 0.065);
-                g.gain.setValueAtTime(0.001, now + idx * 0.065);
-                g.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.065 + 0.02);
-                g.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.065 + (ok ? 0.36 : 0.24));
+                osc.frequency.setValueAtTime(f, now + idx * 0.07);
+                g.gain.setValueAtTime(0.001, now + idx * 0.07);
+                g.gain.exponentialRampToValueAtTime(0.15, now + idx * 0.07 + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.07 + 0.32);
                 osc.connect(g); g.connect(ctx.destination);
-                osc.start(now + idx * 0.065); osc.stop(now + idx * 0.065 + 0.4);
+                osc.start(now + idx * 0.07); osc.stop(now + idx * 0.07 + 0.35);
             });
         } catch (e) {}
     }
 
-    // حفظ النصوص المشكولة ١٠٠٪ دون أي تقطيع بـ span أو تشويه للأرقام أو الحركات!
     function safeRenderText(text) {
         if (!text) return '';
-        return String(text)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
-
-    // معالجة صوتية نقية تقرأ التشكيل الأصلي كما هو دون تخمين عشوائي يفسد الحركات
-    const ARABIC_LETTER_NAMES = {
-        'أ': 'الأَلِف', 'ا': 'الأَلِف', 'ب': 'البَاء', 'ت': 'التَّاء', 'ث': 'الثَّاء',
-        'ج': 'الجِيم', 'ح': 'الحَاء', 'خ': 'الخَاء', 'د': 'الدَّال', 'ذ': 'الذَّال',
-        'ر': 'الرَّاء', 'ز': 'الزَّاي', 'س': 'السِّين', 'ش': 'الشِّين', 'ص': 'الصَّاد',
-        'ض': 'الضَّاد', 'ط': 'الطَّاء', 'ظ': 'الظَّاء', 'ع': 'العَيْن', 'غ': 'الغَيْن',
-        'ف': 'الفَاء', 'ق': 'القَاف', 'ك': 'الكَاف', 'ل': 'اللَّام', 'م': 'المِيم',
-        'ن': 'النُّون', 'ه': 'الهَاء', 'هـ': 'الهَاء', 'و': 'الوَاو', 'ي': 'اليَاء'
-    };
-
-    function preprocessTTS(text) {
-        if (!text) return '';
-        let clean = String(text).replace(/<[^>]*>/g, ' ');
-        clean = clean.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, ' ');
-        clean = clean.replace(/۝[٠-٩\d]+/g, ' ، ');
-        clean = clean.replace(/[﴿﴾«»"']/g, ' ');
-        clean = clean.replace(/\+/g, ' زَائِد ').replace(/×/g, ' ضَرْب ').replace(/÷/g, ' قِسْمَة ').replace(/=/g, ' يُسَاوِي ').replace(/←|⟵/g, ' يُعْطِي ');
-        clean = clean.replace(/²/g, ' تَرْبِيع ');
-        clean = clean.replace(/(\d|[٠-٩])\s*-\s*(\d|[٠-٩])/g, '$1 نَاقِص $2');
-        const trimmed = clean.trim();
-        if (ARABIC_LETTER_NAMES[trimmed]) return ARABIC_LETTER_NAMES[trimmed];
-        return clean.replace(/\s+/g, ' ').trim();
-    }
-
-    let ttsTimer = null;
-    let ttsSessionId = 0;
 
     function stopAllTTS() {
-        ttsSessionId++;
-        clearTimeout(ttsTimer);
         if ('speechSynthesis' in window) {
             try { window.speechSynthesis.cancel(); } catch (e) {}
         }
-        const card = document.querySelector('.lesson-text-card');
-        if (card) card.classList.remove('speaking-highlight');
     }
 
-    function speakSlideTextOnly(rawText, onDone) {
+    // القارئ يقرأ العنوان فقط، ولا يقرأ المتون الطويلة ولا الأسئلة
+    function speakHeadingOnly(headingText) {
         stopAllTTS();
-        if (!isTTSActive || isVideoMode || isLabMode) return;
-        const processed = preprocessTTS(rawText);
-        if (!processed) { if (onDone) onDone(); return; }
-
-        const mySession = ttsSessionId;
-        const card = document.querySelector('.lesson-text-card');
-        if (card) card.classList.add('speaking-highlight');
-
-        const startedAt = Date.now();
-        const minReadMs = Math.min(15000, Math.max(4200, processed.length * 55));
-
-        const finish = (allowAuto = true) => {
-            if (mySession !== ttsSessionId) return;
-            clearTimeout(ttsTimer);
-            if (card) card.classList.remove('speaking-highlight');
-            if (allowAuto && onDone) onDone();
-        };
-
-        if (!('speechSynthesis' in window)) {
-            ttsTimer = setTimeout(() => finish(true), minReadMs);
-            return;
-        }
+        if (!isTTSActive || isLabMode || !headingText) return;
+        if (!('speechSynthesis' in window)) return;
+        let clean = String(headingText)
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/[﴿﴾«»"'\[\]()•▪—–|]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const words = clean.split(/\s+/);
+        if (words.length > 18) clean = words.slice(0, 16).join(' ');
+        if (!clean) return;
         try {
-            const u = new SpeechSynthesisUtterance(processed);
+            const u = new SpeechSynthesisUtterance(clean);
             u.lang = 'ar-SA';
             u.rate = 0.9;
+            u.pitch = 0.95;
             const voices = window.speechSynthesis.getVoices();
             const arVoice = voices.find(v => v.lang && v.lang.startsWith('ar'));
             if (arVoice) u.voice = arVoice;
-            u.onend = () => {
-                if (Date.now() - startedAt < 1200) ttsTimer = setTimeout(() => finish(true), minReadMs);
-                else finish(true);
-            };
-            u.onerror = () => { ttsTimer = setTimeout(() => finish(true), minReadMs); };
-            ttsTimer = setTimeout(() => finish(true), Math.min(30000, processed.length * 95 + 3000));
             window.speechSynthesis.speak(u);
-        } catch (e) { finish(false); }
+        } catch (e) {}
     }
 
-    // إدارة النجوم والتقدم
-    function starKey(y, w, s) { return `s2_v2_star_y${y}_w${w}_s${s}`; }
-    function stationKey(y, w, s) { return `s2_v2_st_y${y}_w${w}_s${s}`; }
+    function starKey(y, w, s) { return `s3_star_y${y}_w${w}_s${s}`; }
+    function stationKey(y, w, s) { return `s3_st_y${y}_w${w}_s${s}`; }
 
     function hasSealStar(y, w, s) { return SafeStore.get(starKey(y, w, s)) === '1'; }
     function setSealStar(y, w, s) {
@@ -2192,86 +2125,175 @@ window.Stage2LabEngine = (function() {
         if (isFreeExplore) return;
         if (stCount > getSealStationProgress(y, w, s)) SafeStore.set(stationKey(y, w, s), String(stCount));
     }
-    function countLessonStars(y, w) {
-        let c = 0;
-        for (let s = 1; s <= 7; s++) if (hasSealStar(y, w, s)) c++;
-        return c;
+
+    function calculateYearWeightedScore(y) {
+        const totW = (YEAR_CYCLES_MAP[y] || 5) * 28;
+        const major = getMajorSeal();
+        let majorCompleted = 0;
+        let minorCompletedTotal = 0;
+
+        for (let w = 1; w <= totW; w++) {
+            for (let s = 1; s <= 7; s++) {
+                if (hasSealStar(y, w, s)) {
+                    if (s === major) majorCompleted++;
+                    else minorCompletedTotal++;
+                }
+            }
+        }
+
+        const majorRatio = totW > 0 ? (majorCompleted / totW) : 0;
+        const majorPoints = +(majorRatio * 70).toFixed(1);
+        const minorPoints = +((minorCompletedTotal / (totW * 6)) * 30).toFixed(1);
+        const totalPoints = +(majorPoints + minorPoints).toFixed(1);
+        const passedMajor = (majorRatio >= 0.70);
+
+        return { major, majorCompleted, totW, majorRatio, majorPoints, minorPoints, totalPoints, passedMajor };
     }
-    function countYearStars(y) {
-        let c = 0, totW = (YEAR_CYCLES_MAP[y] || 1) * 28;
-        for (let w = 1; w <= totW; w++) c += countLessonStars(y, w);
-        return c;
-    }
+
     function getMaxUnlockedWeek(y) {
-        const totW = (YEAR_CYCLES_MAP[y] || 1) * 28;
-        for (let w = 1; w <= totW; w++) if (countLessonStars(y, w) < 7) return w;
+        const totW = (YEAR_CYCLES_MAP[y] || 5) * 28;
+        const major = getMajorSeal();
+        for (let w = 1; w <= totW; w++) {
+            if (!hasSealStar(y, w, major)) return w;
+        }
         return totW;
     }
-    function getMaxUnlockedSealInWeek(y, w) {
-        for (let s = 1; s <= 7; s++) if (!hasSealStar(y, w, s)) return s;
-        return 7;
-    }
+
     function isWeekUnlocked(w) { return isFreeExplore || w <= getMaxUnlockedWeek(activeYear); }
-    function isSealUnlocked(w, s) {
-        if (isFreeExplore) return true;
-        if (!isWeekUnlocked(w)) return false;
-        if (w < getMaxUnlockedWeek(activeYear)) return true;
-        return s <= getMaxUnlockedSealInWeek(activeYear, w);
-    }
 
     function getSealObj(y, w, s) {
         const yrObj = (window.curriculumData && window.curriculumData[y]) || {};
         if (yrObj[w]?.[s]) return yrObj[w][s];
-        const localW = ((w - 1) % 28) + 1;
-        if (yrObj[localW]?.[s] && w <= 28) return yrObj[localW][s];
         const sealTitle = SEAL_NAMES[s] || 'الدَّرْسُ';
+        if (y >= 18) {
+            const major = getMajorSeal();
+            const uniTitle = UNIVERSITY_TRACKS[major];
+            return {
+                learn: {
+                    introTitle: `${uniTitle} — الوَحْدَةُ الجَامِعِيَّةُ (${toAr(w)})`,
+                    headings: ['التَّأْصِيلُ التَّخَصُّصِيُّ العَمِيقُ', 'البَحْثُ التَّطْبِيقِيُّ وَالمَيْدَانِيُّ'],
+                    slides: [{ heading: uniTitle, text: `مَسَارُ التَّخَصُّصِ الجَامِعِيِّ الكَامِلِ لِسَنَةِ (${toAr(y)}) فِي: ${uniTitle}.` }]
+                },
+                apply: { steps: [`أَنْجِزْ مَشْرُوعَ البَحْثِ التَّطْبِيقِيِّ لِلوَحْدَةِ (${toAr(w)}) فِي ${uniTitle}.`] }
+            };
+        }
+        const gCycle = (STAGE3_GLOBAL_CYCLE_OFFSET[y] || 10) + Math.ceil(w / 28);
         return {
             learn: {
-                introTitle: `${sealTitle} — قَيْدُ التَّحْضِيرِ`,
-                slides: [{ img: '', text: `هٰذَا الدَّرْسُ فِي خَتْمِ (${sealTitle}) قَيْدُ التَّحْضِيرِ.` }]
+                introTitle: `${sealTitle} — الدَّوْرَةُ (${toAr(gCycle)}) قَيْدُ التَّحْمِيلِ`,
+                headings: [`العُنْوَانُ الرَّئِيسِيُّ: ${sealTitle}`, `الوَحْدَةُ (${toAr(((w - 1) % 28) + 1)}) مِنْ ٢٨`],
+                slides: [{ heading: sealTitle, text: `مُحْتَوَى هٰذِهِ الوَحْدَةِ فِي خَتْمِ (${sealTitle}) جَاهِزٌ لِلرَّبْطِ بِمَلَفِّ الدَّوْرَةِ (curriculum-y${y}-c${Math.ceil(w/28)}.js).` }]
             },
-            apply: { steps: [`طَبِّقْ مَا تَعَلَّمْتَهُ فِي خَتْمِ (${sealTitle}) بِإِتْقَانٍ.`] }
+            apply: { steps: [`طَبِّقْ خُلَاصَةَ مَا تَعَلَّمْتَهُ فِي خَتْمِ (${sealTitle}).`] }
         };
+    }
+
+    function extractOutlineHeadings(sealObj, seal) {
+        if (Array.isArray(sealObj?.learn?.headings) && sealObj.learn.headings.length > 0) {
+            return sealObj.learn.headings;
+        }
+        const out = [];
+        if (sealObj?.learn?.introTitle) out.push(`العُنْوَانُ الرَّئِيسِيُّ: ${sealObj.learn.introTitle}`);
+        if (sealObj?.learn?.subtitle) out.push(`المِحْوَرُ الفَرْعِيُّ: ${sealObj.learn.subtitle}`);
+        (sealObj?.learn?.slides || []).forEach((sl) => {
+            if (sl.heading) out.push(sl.heading);
+            else if (sl.text) {
+                const firstLine = sl.text.split(/[:.\n]/)[0].trim();
+                const words = firstLine.split(/\s+/);
+                out.push(words.length <= 12 ? firstLine : (words.slice(0, 10).join(' ') + '...'));
+            }
+        });
+        return out.length > 0 ? [...new Set(out)] : [`العُنْوَانُ الرَّئِيسِيُّ: ${SEAL_NAMES[seal]}`];
     }
 
     function getLessonMeta(y, w) {
         const yrObj = (window.curriculumData && window.curriculumData[y]) || {};
         const localIdx = (w - 1) % 28;
-        const ltr = yrObj[w]?.lessonMeta?.ltr || ABJAD[localIdx] || 'أ';
+        const rawLtr = yrObj[w]?.lessonMeta?.ltr || ABJAD[localIdx] || 'أ';
         const sealObj = getSealObj(y, w, activeSeal);
         const cyc = getCycleOfWeek(w);
-        const cycPrefix = getTotalCycles() > 1 ? `د${toAr(cyc)} • ` : '';
         return {
-            ltr: `${cycPrefix}${ltr}`,
-            rawLtr: ABJAD[localIdx] || 'أ',
-            lessonName: sealObj?.learn?.introTitle || yrObj[w]?.lessonMeta?.name || `دَرْسُ (${ABJAD[localIdx]})`,
+            ltrBadge: `د${toAr(cyc)} • ${rawLtr}`,
+            rawLtr,
+            lessonName: sealObj?.learn?.introTitle || yrObj[w]?.lessonMeta?.name || `وَحْدَةُ (${rawLtr})`,
             sealTitle: sealObj?.learn?.introTitle || SEAL_NAMES[activeSeal]
         };
     }
 
+    // بوابة اختيار التخصص لمرة واحدة عند أول دخول للمرحلة
+    function checkAndRenderOnboardingGate() {
+        const gate = document.getElementById('major-onboarding-gate');
+        if (isMajorCommitted()) {
+            gate.classList.remove('open');
+            return false;
+        }
+        const grid = document.getElementById('gate-tracks-grid');
+        const confirmBtn = document.getElementById('gate-confirm-btn');
+        let pendingChoice = null;
+        grid.innerHTML = '';
+
+        for (let s = 1; s <= 7; s++) {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'gate-track-option';
+            card.innerHTML = `
+                <div class="gate-track-title">
+                    <span>${SEAL_NAMES[s]}</span>
+                    <span style="color:#b45309;">٧٠٪</span>
+                </div>
+                <div class="gate-track-uni">المَسَارُ الجَامِعِيُّ: ${UNIVERSITY_TRACKS[s]}</div>
+            `;
+            card.onclick = () => {
+                pendingChoice = s;
+                grid.querySelectorAll('.gate-track-option').forEach(el => el.classList.remove('selected'));
+                card.classList.add('selected');
+                confirmBtn.disabled = false;
+            };
+            grid.appendChild(card);
+        }
+
+        confirmBtn.onclick = () => {
+            if (!pendingChoice) return;
+            lockMajorChoiceOnce(pendingChoice);
+            activeSeal = pendingChoice;
+            playWeek = getMaxUnlockedWeek(activeYear);
+            selectedMapCycle = getCycleOfWeek(playWeek);
+            gate.classList.remove('open');
+            playChime(true);
+            showToast(`تَمَّ تَثْبِيتُ مِيثَاقِ تَخَصُّصِكَ فِي: ${SEAL_NAMES[pendingChoice]} 👑`);
+            renderActiveView();
+        };
+
+        gate.classList.add('open');
+        return true;
+    }
+
     function updateChromeUI() {
-        document.body.classList.toggle('explore-mode-active', isFreeExplore);
-        const ageWord = (activeYear >= 8 && activeYear <= 10) ? 'سَنَوَاتٍ' : 'سَنَةً';
-        document.getElementById('hdr-age-label').textContent = `${toAr(activeYear)} ${ageWord}`;
+        const major = getMajorSeal();
+        const scoreInfo = calculateYearWeightedScore(activeYear);
 
+        document.getElementById('hdr-age-label').textContent = `${toAr(activeYear)} سَنَةً`;
         const meta = getLessonMeta(activeYear, playWeek);
-        document.getElementById('hdr-lesson-letter').textContent = meta.ltr;
+        document.getElementById('hdr-lesson-letter').textContent = meta.ltrBadge;
         document.getElementById('hdr-lesson-title').textContent = meta.lessonName;
-        document.getElementById('hdr-lesson-stars').textContent = `⭐ ${toAr(countLessonStars(activeYear, playWeek))}/٧`;
+        document.getElementById('hdr-weighted-grade').textContent = `⚖️ ${toAr(scoreInfo.totalPoints)}٪`;
 
-        const maxUnlockedS = getMaxUnlockedSealInWeek(activeYear, playWeek);
         for (let s = 1; s <= 7; s++) {
             const btn = document.getElementById(`btn-subj-${s}`);
             const bat = document.getElementById(`bat-subj-${s}`);
+            const wt = document.getElementById(`wt-subj-${s}`);
             if (!btn || !bat) continue;
-            const unlocked = isSealUnlocked(playWeek, s);
+
+            btn.style.display = (isUniversityYear() && s !== major) ? 'none' : 'flex';
+
+            const isMaj = (s === major);
             const starred = hasSealStar(activeYear, playWeek, s);
             const stProg = getSealStationProgress(activeYear, playWeek, s);
 
+            btn.classList.toggle('major-seal', isMaj);
             btn.classList.toggle('active-seal', s === activeSeal);
             btn.classList.toggle('completed', starred);
-            btn.classList.toggle('locked-seal', !unlocked);
-            btn.classList.toggle('next-illuminated', !isFreeExplore && !starred && s === maxUnlockedS && s !== activeSeal);
+            if (wt) wt.textContent = isMaj ? '٧٠٪' : '٥٪';
 
             bat.querySelectorAll('.seal-bat-seg').forEach((seg, idx) => {
                 seg.classList.remove('done', 'current');
@@ -2290,37 +2312,40 @@ window.Stage2LabEngine = (function() {
             pill.classList.toggle('locked', !canOpen);
         });
 
+        const depthPill = document.getElementById('depth-toggle-pill');
+        const isMajorActive = (activeSeal === major);
+        const showingFull = isMajorActive || forceFullDetailOnMinor;
+        depthPill.style.display = (activeStation === 0) ? 'inline-flex' : 'none';
+        depthPill.classList.toggle('is-major', isMajorActive);
+        if (isMajorActive) {
+            depthPill.textContent = '👑 مَسَارُ التَّخَصُّصِ الثَّابِتُ (المَادَّةُ الكَامِلَةُ ٧٠٪)';
+        } else {
+            depthPill.textContent = showingFull
+                ? '📑 تَفْصِيلٌ كَامِلٌ (اضْغَطْ لِلعَنَاوِينِ ٥٪)'
+                : '⚡ خُلَاصَةُ العَنَاوِينِ (اضْغَطْ لِلتَّفْصِيلِ ٥٪)';
+        }
+
         const mediaBar = document.getElementById('station-media-bar');
         if (mediaBar) {
             mediaBar.style.display = (activeStation === 0) ? 'inline-flex' : 'none';
             const sealObj = getSealObj(activeYear, playWeek, activeSeal);
             const slides = sealObj?.learn?.slides || [];
-            const hasVid = !!(sealObj?.learn?.video);
             const hasLab = [3, 4, 5].includes(activeSeal) || !!(sealObj?.learn?.labData);
 
-            document.getElementById('slide-prev-btn').style.display = (!isVideoMode && !isLabMode && slides.length > 1) ? 'inline-flex' : 'none';
-            document.getElementById('slide-next-btn').style.display = (!isVideoMode && !isLabMode && slides.length > 1) ? 'inline-flex' : 'none';
-            document.getElementById('slide-counter-badge').style.display = (!isVideoMode && !isLabMode && slides.length > 0) ? 'inline-block' : 'none';
+            document.getElementById('slide-prev-btn').style.display = (!isLabMode && showingFull && slides.length > 1) ? 'inline-flex' : 'none';
+            document.getElementById('slide-next-btn').style.display = (!isLabMode && showingFull && slides.length > 1) ? 'inline-flex' : 'none';
+            document.getElementById('slide-counter-badge').style.display = (!isLabMode && showingFull && slides.length > 0) ? 'inline-block' : 'none';
             document.getElementById('slide-counter-badge').textContent = `${toAr(currentSlideIdx + 1)} / ${toAr(Math.max(1, slides.length))}`;
             document.getElementById('slide-prev-btn').disabled = (currentSlideIdx <= 0);
             document.getElementById('slide-next-btn').disabled = (currentSlideIdx >= slides.length - 1);
 
             const ttsBtn = document.getElementById('tts-play-btn');
-            ttsBtn.style.display = (isVideoMode || isLabMode) ? 'none' : 'inline-flex';
             ttsBtn.classList.toggle('active-toggle', isTTSActive);
             ttsBtn.textContent = isTTSActive ? '🔊' : '🔇';
-
-            const flipBtn = document.getElementById('auto-flip-btn');
-            flipBtn.style.display = (!isVideoMode && !isLabMode && slides.length > 1) ? 'inline-flex' : 'none';
-            flipBtn.classList.toggle('active-toggle', isAutoFlip);
 
             const labBtn = document.getElementById('lab-mode-btn');
             labBtn.style.display = hasLab ? 'inline-flex' : 'none';
             labBtn.classList.toggle('active-toggle', isLabMode);
-
-            const vidBtn = document.getElementById('video-mode-btn');
-            vidBtn.style.display = hasVid ? 'inline-flex' : 'none';
-            vidBtn.classList.toggle('active-toggle', isVideoMode);
         }
 
         const cornerBtn = document.getElementById('corner-next-btn');
@@ -2328,189 +2353,90 @@ window.Stage2LabEngine = (function() {
         cornerBtn.classList.toggle('star-mode', isFinalStation);
         if (isFinalStation) {
             cornerBtn.disabled = false;
-            cornerBtn.classList.remove('ready-pulse');
             cornerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
         } else {
             const canAdvance = (activeStation === 0) || currentQuestionResolved || isFreeExplore;
             cornerBtn.disabled = !canAdvance;
-            cornerBtn.classList.toggle('ready-pulse', activeStation === 1 && currentQuestionResolved);
             cornerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
         }
     }
 
-    function applyImageTransform() {
-        const img = document.getElementById('slide-zoom-target');
-        const frame = document.getElementById('slide-image-frame');
-        const lvl = document.getElementById('zoom-level-pill');
-        const panBtn = document.getElementById('zoom-pan-toggle');
-        if (!img || !frame) return;
-        img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
-        if (lvl) lvl.textContent = `${Math.round(zoomScale * 100)}%`;
-        const panActive = forceHandPan || zoomScale > 1.01;
-        frame.classList.toggle('pan-enabled', panActive);
-        if (panBtn) panBtn.classList.toggle('pan-on', panActive);
-    }
-
-    function bindImageZoomAndPan(frame) {
-        let dragging = false, startX = 0, startY = 0, originX = 0, originY = 0;
-        frame.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.img-zoom-toolbar')) return;
-            if (!(forceHandPan || zoomScale > 1.01)) return;
-            dragging = true; frame.classList.add('dragging');
-            startX = e.clientX; startY = e.clientY; originX = panX; originY = panY;
-            try { frame.setPointerCapture(e.pointerId); } catch (err) {}
-            e.preventDefault();
-        });
-        frame.addEventListener('pointermove', (e) => {
-            if (!dragging) return;
-            panX = originX + (e.clientX - startX); panY = originY + (e.clientY - startY);
-            applyImageTransform();
-        });
-        const end = () => { dragging = false; frame.classList.remove('dragging'); };
-        frame.addEventListener('pointerup', end); frame.addEventListener('pointercancel', end);
-        frame.addEventListener('wheel', (e) => {
-            if (!(forceHandPan || zoomScale > 1.01 || e.ctrlKey)) return;
-            e.preventDefault();
-            zoomScale = Math.min(4.5, Math.max(1, +(zoomScale + (e.deltaY < 0 ? 0.25 : -0.25)).toFixed(2)));
-            if (zoomScale === 1) { panX = 0; panY = 0; }
-            applyImageTransform();
-        }, { passive: false });
-    }
-
     function renderLessonStation() {
-        window.Stage2LabEngine.stop();
+        window.Stage3LabEngine.stop();
         const host = document.getElementById('station-body-host');
         const sealObj = getSealObj(activeYear, playWeek, activeSeal);
         const meta = getLessonMeta(activeYear, playWeek);
+        const major = getMajorSeal();
+        const isMajorActive = (activeSeal === major);
+        const showingFull = isMajorActive || forceFullDetailOnMinor;
         const slides = sealObj.learn?.slides || [];
-        const videoSrc = sealObj.learn?.video || '';
 
         if (isLabMode) {
             stopAllTTS();
             host.innerHTML = `<div id="lesson-scroll-box"><div id="lab-mount"></div></div>`;
-            window.Stage2LabEngine.render(document.getElementById('lab-mount'), activeSeal, playWeek, sealObj);
+            window.Stage3LabEngine.render(document.getElementById('lab-mount'), activeSeal);
             setSealStationProgress(activeYear, playWeek, activeSeal, 1);
             updateChromeUI();
             return;
         }
 
-        if (isVideoMode && videoSrc) {
-            stopAllTTS();
+        if (!showingFull) {
+            const outlineList = extractOutlineHeadings(sealObj, activeSeal);
+            const itemsHtml = outlineList.map((h, i) => `
+                <li class="summary-heading-item">
+                    <span style="color:#059669; font-weight:900;">${toAr(i + 1)}.</span>
+                    <span>${safeRenderText(h)}</span>
+                </li>
+            `).join('');
+
             host.innerHTML = `
                 <div id="lesson-scroll-box">
-                    <div class="universal-video-shell" id="universal-video-shell">
-                        <div class="video-stage-area">
-                            <video id="stage2-video-el" playsinline preload="metadata" src="${videoSrc}"></video>
-                            <button type="button" class="video-big-play-overlay" id="vid-center-play" aria-label="تشغيل الفيديو">
-                                <svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>
-                            </button>
-                            <div class="video-fallback-notice" id="vid-fallback-box">
-                                <div style="font-size:2.4rem;">🎬</div>
-                                <div style="font-weight:900; font-size:1.1rem;">${safeRenderText(meta.sealTitle)}</div>
-                            </div>
-                        </div>
-                        <div class="universal-video-controls">
-                            <input type="range" class="uv-seek-bar" id="uv-seek" min="0" max="100" value="0" step="0.1">
-                            <div class="uv-buttons-row">
-                                <div class="uv-left-grp">
-                                    <button type="button" class="uv-btn" id="uv-play-pause">▶</button>
-                                    <button type="button" class="uv-btn" id="uv-rew-10">-10</button>
-                                    <button type="button" class="uv-btn" id="uv-fwd-10">+10</button>
-                                    <span class="uv-time-txt" id="uv-time-txt">00:00 / 00:00</span>
-                                </div>
-                                <div class="uv-right-grp">
-                                    <button type="button" class="uv-btn" id="uv-mute-btn">🔊</button>
-                                    <input type="range" class="uv-vol-slider" id="uv-vol" min="0" max="1" step="0.05" value="1">
-                                    <button type="button" class="uv-btn" id="uv-fs-btn">⛶</button>
-                                </div>
+                    <div class="lesson-title-banner">
+                        <div class="banner-title-main">
+                            <div class="banner-letter-seal">${meta.rawLtr}</div>
+                            <div>
+                                <div class="banner-seal-sub">${SEAL_NAMES[activeSeal]} — مَادَّةٌ مَسَانِدَةٌ لِلتَّفَوُّقِ (٥ عَلَامَاتٍ)</div>
+                                <div class="banner-lesson-heading">${safeRenderText(meta.sealTitle)}</div>
                             </div>
                         </div>
                     </div>
-                </div>`;
-            const vid = document.getElementById('stage2-video-el');
-            const bigPlay = document.getElementById('vid-center-play');
-            const pp = document.getElementById('uv-play-pause');
-            const seek = document.getElementById('uv-seek');
-            const tTxt = document.getElementById('uv-time-txt');
-            const fmt = (sc) => !isFinite(sc) ? '00:00' : `${String(Math.floor(sc/60)).padStart(2,'0')}:${String(Math.floor(sc%60)).padStart(2,'0')}`;
-            const toggleV = () => { stopAllTTS(); if (vid.paused) vid.play().catch(()=>{}); else vid.pause(); };
-            bigPlay.onclick = toggleV; pp.onclick = toggleV; vid.onclick = toggleV;
-            vid.onplay = () => { pp.textContent = '⏸'; bigPlay.style.display = 'none'; };
-            vid.onpause = () => { pp.textContent = '▶'; bigPlay.style.display = 'flex'; };
-            vid.ontimeupdate = () => { if (vid.duration) seek.value = String((vid.currentTime/vid.duration)*100); tTxt.textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`; };
-            vid.onerror = () => { document.getElementById('vid-fallback-box').style.display = 'flex'; };
-            seek.oninput = () => { if (vid.duration) vid.currentTime = (parseFloat(seek.value)/100)*vid.duration; };
-            document.getElementById('uv-rew-10').onclick = () => { vid.currentTime = Math.max(0, vid.currentTime - 10); };
-            document.getElementById('uv-fwd-10').onclick = () => { vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10); };
-            document.getElementById('uv-mute-btn').onclick = (e) => { vid.muted = !vid.muted; e.target.textContent = vid.muted ? '🔇' : '🔊'; };
-            document.getElementById('uv-vol').oninput = (e) => { vid.volume = parseFloat(e.target.value); };
-            document.getElementById('uv-fs-btn').onclick = () => { const sh = document.getElementById('universal-video-shell'); if (document.fullscreenElement) document.exitFullscreen(); else sh.requestFullscreen?.(); };
+                    <div class="summary-outline-card">
+                        <div class="summary-outline-header">
+                            <span>⚡ خُلَاصَةُ العَنَاوِينِ الرَّئِيسِيَّةِ وَالفَرْعِيَّةِ</span>
+                        </div>
+                        <ul class="summary-headings-list">${itemsHtml}</ul>
+                    </div>
+                </div>
+            `;
             setSealStationProgress(activeYear, playWeek, activeSeal, 1);
             updateChromeUI();
+            speakHeadingOnly(meta.sealTitle);
             return;
         }
 
         if (currentSlideIdx >= slides.length) currentSlideIdx = 0;
-        const slide = slides[currentSlideIdx] || { img: '', text: '' };
-        const isQuranSlide = slide.text && slide.text.trim().startsWith('﴿') && slide.text.trim().endsWith('﴾');
-        zoomScale = 1; panX = 0; panY = 0;
+        const slide = slides[currentSlideIdx] || { img: '', heading: '', text: '' };
+        const isQuranSlide = slide.isQuran || (slide.text && slide.text.includes('﴿'));
 
         host.innerHTML = `
             <div id="lesson-scroll-box">
-                <div id="top-visual-slot"></div>
-                <div class="lesson-text-card ${isQuranSlide ? 'quran-ayah-card' : ''}" id="slide-text-under-image">${safeRenderText(slide.text)}</div>
-            </div>
-        `;
-
-        const topSlot = document.getElementById('top-visual-slot');
-        const renderBanner = () => {
-            topSlot.innerHTML = `
-                <div class="lesson-title-banner">
+                <div class="lesson-title-banner ${isMajorActive ? 'major-banner' : ''}">
                     <div class="banner-title-main">
                         <div class="banner-letter-seal">${meta.rawLtr}</div>
                         <div>
-                            <div class="banner-seal-sub">${SEAL_NAMES[activeSeal]}</div>
+                            <div class="banner-seal-sub">${SEAL_NAMES[activeSeal]} ${isMajorActive ? '— 👑 مَادَّةُ التَّخَصُّصِ المُثَبَّتَةُ (٧٠٪)' : '— عَرْضٌ كَامِلٌ'}</div>
                             <div class="banner-lesson-heading">${safeRenderText(meta.sealTitle)}</div>
                         </div>
                     </div>
-                </div>`;
-        };
-
-        if (slide.img && slide.img.trim()) {
-            topSlot.innerHTML = `
-                <div class="slide-image-frame ${isImageExpanded ? 'expanded-frame' : ''}" id="slide-image-frame">
-                    <div class="img-zoom-toolbar">
-                        <button type="button" class="zoom-icon-btn" id="zoom-in-btn" title="تكبير">➕</button>
-                        <button type="button" class="zoom-icon-btn" id="zoom-out-btn" title="تصغير">➖</button>
-                        <span class="zoom-level-pill" id="zoom-level-pill">100%</span>
-                        <button type="button" class="zoom-icon-btn" id="zoom-pan-toggle" title="يد التحريك">✋</button>
-                        <button type="button" class="zoom-icon-btn" id="zoom-reset-btn" title="إعادة الضبط">🔄</button>
-                        <button type="button" class="zoom-icon-btn" id="zoom-expand-btn" title="توسيع الإطار">⛶</button>
-                    </div>
-                    <img id="slide-zoom-target" alt="${meta.sealTitle}" src="${slide.img}">
-                </div>`;
-            const imgEl = document.getElementById('slide-zoom-target');
-            const frameEl = document.getElementById('slide-image-frame');
-            imgEl.onerror = () => renderBanner();
-            bindImageZoomAndPan(frameEl);
-            document.getElementById('zoom-in-btn').onclick = () => { zoomScale = Math.min(4.5, +(zoomScale + 0.5).toFixed(2)); applyImageTransform(); };
-            document.getElementById('zoom-out-btn').onclick = () => { zoomScale = Math.max(1, +(zoomScale - 0.5).toFixed(2)); if (zoomScale === 1) { panX = 0; panY = 0; } applyImageTransform(); };
-            document.getElementById('zoom-pan-toggle').onclick = () => { forceHandPan = !forceHandPan; if (forceHandPan && zoomScale < 1.5) zoomScale = 1.6; applyImageTransform(); };
-            document.getElementById('zoom-reset-btn').onclick = () => { forceHandPan = false; zoomScale = 1; panX = 0; panY = 0; applyImageTransform(); };
-            document.getElementById('zoom-expand-btn').onclick = () => { isImageExpanded = !isImageExpanded; frameEl.classList.toggle('expanded-frame', isImageExpanded); };
-        } else {
-            renderBanner();
-        }
+                </div>
+                ${slide.heading ? `<div class="slide-subheading-bar">${safeRenderText(slide.heading)}</div>` : ''}
+                <div class="lesson-text-card ${isQuranSlide ? 'quran-ayah-card' : ''}">${safeRenderText(slide.text)}</div>
+            </div>
+        `;
 
         setSealStationProgress(activeYear, playWeek, activeSeal, 1);
         updateChromeUI();
-
-        speakSlideTextOnly(slide.text, () => {
-            if (activeStation === 0 && !isVideoMode && !isLabMode && isAutoFlip && currentSlideIdx < slides.length - 1) {
-                currentSlideIdx++;
-                renderLessonStation();
-            }
-        });
+        speakHeadingOnly(slide.heading || meta.sealTitle);
     }
 
     function markQuestionSolved() {
@@ -2519,16 +2445,17 @@ window.Stage2LabEngine = (function() {
         playChime(true);
         setSealStationProgress(activeYear, playWeek, activeSeal, 2);
         updateChromeUI();
-        showToast('أَحْسَنْتَ! اضْغَطْ سَهْمَ الانْتِقَالِ فِي الزَّاوِيَةِ اليُسْرَى ⬅');
+        showToast('إِجَابَةٌ صَحِيحَةٌ! اضْغَطْ سَهْمَ الزَّاوِيَةِ اليُسْرَى لِلمُتَابَعَةِ ⬅');
     }
 
     function renderQuestionStation(regenerate = true) {
         stopAllTTS();
-        window.Stage2LabEngine.stop();
+        window.Stage3LabEngine.stop();
         const host = document.getElementById('station-body-host');
         if (regenerate || !currentQuizData) {
             currentQuestionResolved = false;
-            currentQuizData = window.Stage2QuestionEngine.generateDynamicQuestion(
+            isAIQuestionOpen = false;
+            currentQuizData = window.Stage3QuestionEngine.generateDynamicQuestion(
                 window.curriculumData, activeYear, playWeek, activeSeal
             );
         }
@@ -2539,10 +2466,16 @@ window.Stage2LabEngine = (function() {
             <div class="quiz-scroll-area">
                 <div class="quiz-card-shell">
                     <div class="quiz-prompt-header">
-                        <span class="quiz-prompt-text" id="quiz-prompt-label">${safeRenderText(q.prompt || q.modeLabel || '')}</span>
-                        <div style="display:inline-flex; gap:6px;">
-                            <button type="button" class="icon-ctrl-btn" id="quiz-speak-btn" title="سماع السؤال">🔊</button>
-                            <button type="button" class="icon-ctrl-btn" id="quiz-reroll-btn" title="سؤال جديد من الدرس">🎲</button>
+                        <span class="quiz-prompt-text">${safeRenderText(q.prompt || q.modeLabel || '')}</span>
+                        <div class="quiz-tools-grp">
+                            <button type="button" class="ai-quiz-trigger-btn" id="ai-quiz-toggle-btn" title="ركن سؤال الذكاء الاصطناعي التفاعلي">🤖 سُؤَالُ الذَّكَاءِ الِاصْطِنَاعِيِّ</button>
+                            <button type="button" class="icon-ctrl-btn" id="quiz-reroll-btn" title="تبديل السؤال">🎲</button>
+                        </div>
+                    </div>
+                    <div class="ai-question-panel" id="ai-question-panel">
+                        <div style="font-weight:900; color:#fde047; font-size:0.95rem;">🤖 بَوَّابَةُ سُؤَالِ الذَّكَاءِ الِاصْطِنَاعِيِّ (مُهَيَّأَةٌ لِلرَّبْطِ البَرْمَجِيِّ):</div>
+                        <div id="ai-question-mount" style="font-size:0.9rem; color:#e2e8f0; line-height:1.7;">
+                            هٰذَا الرُّكْنُ مَحْجُوزٌ وَجَاهِزٌ بِنْيَوِيّاً لِمُحَرِّكِ الحِوَارِ وَالسُّؤَالِ الذَّكِيِّ الَّذِي سَيُضَافُ وَفْقَ المَوَاصَفَاتِ القَادِمَةِ.
                         </div>
                     </div>
                     <div id="quiz-interactive-body"></div>
@@ -2550,10 +2483,22 @@ window.Stage2LabEngine = (function() {
             </div>`;
 
         const bodyEl = document.getElementById('quiz-interactive-body');
-        document.getElementById('quiz-reroll-btn').onclick = () => renderQuestionStation(true);
-        document.getElementById('quiz-speak-btn').onclick = () => {
-            speakSlideTextOnly((q.prompt || q.modeLabel || '') + ' ' + (q.stem || q.statement || q.beforeText || ''));
+        const aiBtn = document.getElementById('ai-quiz-toggle-btn');
+        const aiPanel = document.getElementById('ai-question-panel');
+
+        aiBtn.onclick = () => {
+            isAIQuestionOpen = !isAIQuestionOpen;
+            aiBtn.classList.toggle('active-ai', isAIQuestionOpen);
+            aiPanel.classList.toggle('open', isAIQuestionOpen);
+            if (isAIQuestionOpen && typeof window.Stage3AIQuestionHook?.renderCustomAIPanel === 'function') {
+                window.Stage3AIQuestionHook.renderCustomAIPanel(
+                    document.getElementById('ai-question-mount'),
+                    { year: activeYear, week: playWeek, seal: activeSeal, sealData: getSealObj(activeYear, playWeek, activeSeal), onSolved: markQuestionSolved }
+                );
+            }
         };
+
+        document.getElementById('quiz-reroll-btn').onclick = () => renderQuestionStation(true);
 
         if (q.type === 'order') {
             let placed = [], pool = q.tiles.map((t, i) => ({ ...t, uid: i }));
@@ -2589,7 +2534,7 @@ window.Stage2LabEngine = (function() {
             };
             renderOrder();
         }
-        else if (q.type === 'mcq_half' || q.type === 'sport_steps') {
+        else if (q.type === 'mcq_half') {
             bodyEl.innerHTML = `${q.stem ? `<div class="quiz-stem-box">${safeRenderText(q.stem)}</div>` : ''}<div class="mcq-options-grid" id="mcq-grid" style="margin-top:12px;"></div>`;
             const grid = document.getElementById('mcq-grid');
             q.options.forEach(opt => {
@@ -2607,8 +2552,8 @@ window.Stage2LabEngine = (function() {
             bodyEl.innerHTML = `
                 <div class="quiz-stem-box">${safeRenderText(q.statement)}</div>
                 <div class="tf-buttons-row" style="margin-top:14px;">
-                    <button type="button" class="tf-choice-btn tf-true" id="tf-t">✅ صَحٌّ</button>
-                    <button type="button" class="tf-choice-btn tf-false" id="tf-f">❌ خَطَأٌ</button>
+                    <button type="button" class="tf-choice-btn" id="tf-t">✅ صَحٌّ</button>
+                    <button type="button" class="tf-choice-btn" id="tf-f">❌ خَطَأٌ</button>
                 </div>`;
             const tB = document.getElementById('tf-t'), fB = document.getElementById('tf-f');
             const pick = (val, btn) => {
@@ -2636,7 +2581,7 @@ window.Stage2LabEngine = (function() {
                 q.baskets.forEach(bsk => {
                     const d = document.createElement('div'); d.className = 'math-basket-box';
                     const chips = (solved[bsk.value] || []).map(ex => `<span class="mini-solved-eq">${ex}</span>`).join('');
-                    d.innerHTML = `<div class="basket-target-num"><span>🧺</span><span>${bsk.label}</span></div><div class="basket-collected-chips">${chips}</div>`;
+                    d.innerHTML = `<div class="basket-target-num">🧺 ${bsk.label}</div><div class="basket-collected-chips">${chips}</div>`;
                     d.onclick = () => {
                         const idx = rem.findIndex(x => x.id === selId);
                         if (idx === -1) return;
@@ -2646,7 +2591,7 @@ window.Stage2LabEngine = (function() {
                             selId = rem[0]?.id || null;
                             playChime(true); renderMath();
                             if (rem.length === 0) markQuestionSolved();
-                        } else { playChime(false); d.style.borderColor = '#e11d48'; setTimeout(() => d.style.borderColor = '#059669', 450); }
+                        } else { playChime(false); }
                     };
                     bEl.appendChild(d);
                 });
@@ -2669,10 +2614,9 @@ window.Stage2LabEngine = (function() {
                     if (currentQuestionResolved) return;
                     if (ch.correct) {
                         slot.textContent = ch.word; slot.classList.add('filled-right');
-                        p.style.background = '#dcfce7'; p.style.borderColor = '#16a34a';
                         top.querySelectorAll('button').forEach(b => b.disabled = true);
                         markQuestionSolved();
-                    } else { p.style.background = '#ffe4e6'; p.style.borderColor = '#e11d48'; p.disabled = true; playChime(false); }
+                    } else { p.disabled = true; playChime(false); }
                 };
                 top.appendChild(p);
             });
@@ -2705,24 +2649,24 @@ window.Stage2LabEngine = (function() {
 
     function renderApplyStation() {
         stopAllTTS();
-        window.Stage2LabEngine.stop();
+        window.Stage3LabEngine.stop();
         const host = document.getElementById('station-body-host');
         const sealObj = getSealObj(activeYear, playWeek, activeSeal);
-        const stepText = sealObj?.apply?.steps?.[0] || 'طَبِّقْ مَا تَعَلَّمْتَهُ فِي هٰذَا الدَّرْسِ بِإِتْقَانٍ وَحُضُورِ قَلْبٍ.';
+        const stepText = (sealObj?.apply?.steps || []).join('\n\n') || 'طَبِّقْ مَا تَعَلَّمْتَهُ فِي هٰذِهِ الوَحْدَةِ بِإِتْقَانٍ.';
         host.innerHTML = `
             <div id="lesson-scroll-box">
                 <div class="apply-card-box">
                     <div class="apply-badge-icon">🌱</div>
-                    <h3 style="font-size:1.25rem; font-weight:900; color:#065f46;">مَحَطَّةُ التَّطْبِيقِ العَمَلِيِّ</h3>
+                    <h3 style="font-size:1.22rem; font-weight:900; color:#065f46;">مَحَطَّةُ التَّطْبِيقِ العَمَلِيِّ وَالمَيْدَانِيِّ</h3>
                     <p class="apply-step-text">${safeRenderText(stepText)}</p>
                 </div>
             </div>`;
         updateChromeUI();
-        speakSlideTextOnly(stepText);
+        speakHeadingOnly('محطة التطبيق العملي');
     }
 
     function renderActiveView() {
-        loadStage2CurriculumFiles(activeYear, getCycleOfWeek(playWeek), () => {
+        loadStage3CurriculumFiles(activeYear, getCycleOfWeek(playWeek), () => {
             if (activeStation === 0) renderLessonStation();
             else if (activeStation === 1) renderQuestionStation(true);
             else renderApplyStation();
@@ -2737,66 +2681,78 @@ window.Stage2LabEngine = (function() {
             activeStation = 2; renderActiveView(); return;
         }
 
-        if (isFreeExplore) {
-            showToast('وَضْعُ الاسْتِكْشَافِ مُفَعَّلٌ — لَا تُحْتَسَبُ النُّجُومُ حَتَّى العَوْدَةِ لِلتَّسَلْسُلِ');
-            if (activeSeal < 7) { activeSeal++; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false; renderActiveView(); }
-            else if (playWeek < getTotalWeeks()) { playWeek++; activeSeal = 1; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false; renderActiveView(); }
-            return;
+        const major = getMajorSeal();
+        if (!isFreeExplore) {
+            setSealStar(activeYear, playWeek, activeSeal);
+            playChime(true);
         }
-
-        setSealStar(activeYear, playWeek, activeSeal);
-        playChime(true);
         updateChromeUI();
 
-        if (activeSeal < 7) {
-            activeSeal++; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
-            renderActiveView();
-        } else {
-            const wStars = countLessonStars(activeYear, playWeek);
-            const yStars = countYearStars(activeYear);
-            const totStars = getTotalWeeks() * 7;
+        const sc = calculateYearWeightedScore(activeYear);
+        if (activeSeal === major) {
             const meta = getLessonMeta(activeYear, playWeek);
-            document.getElementById('complete-modal-title').textContent = `أَتْمَمْتَ دَرْسَ (${meta.rawLtr}) بِنَجَاحٍ!`;
-            document.getElementById('complete-stars-row').textContent = '⭐'.repeat(wStars);
+            document.getElementById('complete-modal-title').textContent = `أَتْمَمْتَ خَتْمَ تَخَصُّصِكَ فِي وَحْدَةِ (${meta.rawLtr})!`;
+            document.getElementById('complete-stars-row').textContent = '👑⭐';
             document.getElementById('complete-modal-summary').textContent =
-                `نُجُومُ هٰذَا الدَّرْسِ: ${toAr(wStars)} / ٧ — مَجْمُوعُ نُجُومِ السَّنَةِ: ${toAr(yStars)} / ${toAr(totStars)}`;
+                `رَصِيدُ التَّخَصُّصِ: ${toAr(sc.majorPoints)} / ٧٠ — المُعَدَّلُ الكُلِّيُّ الحَالِيُّ: ${toAr(sc.totalPoints)} / ١٠٠`;
             document.getElementById('lesson-complete-modal').classList.add('open');
+        } else {
+            showToast(`تَمَّ إِضَافَةُ نُقْطَةِ تَفَوُّقٍ مَسَانِدَةٍ! المُعَدَّلُ: ${toAr(sc.totalPoints)}٪`);
+            activeSeal = major;
+            activeStation = 0; currentSlideIdx = 0; isLabMode = false; forceFullDetailOnMinor = false;
+            renderActiveView();
         }
     }
 
+    // عرض الخريطة مع عرض التخصص المثبت فقط دون السماح بتغييره
     function renderMapModal() {
         const totCyc = getTotalCycles();
-        const totStars = getTotalWeeks() * 7;
-        document.getElementById('modal-week-stars').textContent = `${toAr(countLessonStars(activeYear, playWeek))} / ٧`;
-        document.getElementById('modal-year-stars').textContent = `${toAr(countYearStars(activeYear))} / ${toAr(totStars)}`;
+        const major = getMajorSeal();
+        const sc = calculateYearWeightedScore(activeYear);
+
+        document.getElementById('locked-major-name-display').textContent =
+            `👑 مَسَارُ التَّخَصُّصِ المُثَبَّتُ: ${SEAL_NAMES[major]} (${UNIVERSITY_TRACKS[major]})`;
+
+        document.getElementById('calc-major-pts').textContent = `${toAr(sc.majorPoints)} / ٧٠`;
+        document.getElementById('calc-minor-pts').textContent = `${toAr(sc.minorPoints)} / ٣٠`;
+        document.getElementById('calc-total-pts').textContent = `${toAr(sc.totalPoints)} / ١٠٠`;
+        const stEl = document.getElementById('calc-pass-status');
+        if (sc.passedMajor) {
+            stEl.className = 'status-pass-pill passed';
+            stEl.textContent = sc.totalPoints >= 85 ? '🌟 مُتَفَوِّقٌ وَمُؤَهَّلٌ لِلجَامِعَةِ' : '✅ نَاجِحٌ بِالتَّخَصُّصِ لِلجَامِعَةِ';
+        } else {
+            stEl.className = 'status-pass-pill pending';
+            stEl.textContent = `مَطْلُوبٌ ٧٠٪ فِي التَّخَصُّصِ (أَنْجَزْتَ ${toAr(Math.round(sc.majorRatio * 100))}٪)`;
+        }
 
         const tabsBar = document.getElementById('cycles-tabs-bar');
         tabsBar.innerHTML = '';
-        if (totCyc > 1) {
-            for (let c = 1; c <= totCyc; c++) {
-                const maxC = getCycleOfWeek(getMaxUnlockedWeek(activeYear));
-                const locked = !isFreeExplore && c > maxC;
-                const b = document.createElement('button');
-                b.type = 'button';
-                b.className = 'cycle-tab-pill' + (c === selectedMapCycle ? ' active-cycle' : '') + (locked ? ' locked-cycle' : '');
-                b.textContent = `الدَّوْرَةُ ${CYCLE_AR_NAMES[c]} (${toAr((c-1)*28+1)}–${toAr(c*28)})`;
-                b.onclick = () => {
-                    if (locked) return;
-                    selectedMapCycle = c;
-                    loadStage2CurriculumFiles(activeYear, c, renderMapModal);
-                };
-                tabsBar.appendChild(b);
-            }
+        for (let c = 1; c <= totCyc; c++) {
+            const maxC = getCycleOfWeek(getMaxUnlockedWeek(activeYear));
+            const locked = !isFreeExplore && c > maxC;
+            const gCyc = (STAGE3_GLOBAL_CYCLE_OFFSET[activeYear] || 10) + c;
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'cycle-tab-pill' + (c === selectedMapCycle ? ' active-cycle' : '') + (locked ? ' locked-cycle' : '');
+            b.textContent = isUniversityYear()
+                ? `المَدَارُ الجَامِعِيُّ`
+                : `الدَّوْرَةُ ${CYCLE_AR_NAMES[c]} (د${toAr(gCyc)} مِن ٢٨)`;
+            b.onclick = () => {
+                if (locked) return;
+                selectedMapCycle = c;
+                loadStage3CurriculumFiles(activeYear, c, renderMapModal);
+            };
+            tabsBar.appendChild(b);
         }
 
         const modeBtn = document.getElementById('toggle-mode-btn');
         modeBtn.className = 'setting-pill-btn ' + (isFreeExplore ? 'mode-exp' : 'mode-seq');
         modeBtn.textContent = isFreeExplore
-            ? '🔓 وَضْعُ الاسْتِكْشَافِ (النُّجُومُ مُعَطَّلَةٌ — اضْغَطْ لِلتَّسَلْسُلِ)'
-            : '🔒 وَضْعُ التَّسَلْسُلِ (تَحْتَسِبُ النُّجُومُ — اضْغَطْ لِلِاسْتِكْشَافِ)';
+            ? '🔓 وَضْعُ الاسْتِكْشَافِ الحُرِّ (اضْغَطْ لِلتَّسَلْسُلِ)'
+            : '🔒 وَضْعُ التَّسَلْسُلِ المُنْضَبِطِ';
 
         document.getElementById('toggle-global-tts-btn').textContent =
-            isTTSActive ? '🔊 القَارِئُ الآلِيُّ: مُفَعَّلٌ' : '🔇 القَارِئُ الآلِيُّ: مُتَوَقِّفٌ';
+            isTTSActive ? '🔊 قِرَاءَةُ العَنَاوِينِ: مُفَعَّلَةٌ' : '🔇 قِرَاءَةُ العَنَاوِينِ: مُتَوَقِّفَةٌ';
 
         const grid = document.getElementById('abjad-map-grid');
         grid.innerHTML = '';
@@ -2804,108 +2760,36 @@ window.Stage2LabEngine = (function() {
         for (let i = 1; i <= 28; i++) {
             const gw = offset + i;
             const unlocked = isWeekUnlocked(gw);
-            const stars = countLessonStars(activeYear, gw);
+            const majDone = hasSealStar(activeYear, gw, major);
+            let minorCnt = 0;
+            for (let s = 1; s <= 7; s++) if (s !== major && hasSealStar(activeYear, gw, s)) minorCnt++;
+
             const cell = document.createElement('button');
             cell.type = 'button';
             cell.className = 'map-letter-cell'
                 + (gw === playWeek ? ' current-week' : '')
-                + (stars === 7 ? ' completed-week' : '')
+                + (majDone ? ' major-done-week' : '')
                 + (!unlocked ? ' locked-week' : '');
             cell.innerHTML = `
                 <span class="cell-ltr">${ABJAD[i - 1]}</span>
-                <span class="cell-stars">${unlocked ? ('⭐ ' + toAr(stars) + '/٧') : '🔒'}</span>
+                <span class="cell-stars">${unlocked ? `${majDone ? '👑' : '▫️'} +${toAr(minorCnt)}` : '🔒'}</span>
             `;
             cell.onclick = () => {
-                if (!unlocked) { showToast('أَتْمِمْ دُرُوسَكَ السَّابِقَةَ أَوَّلًا أَوْ فَعِّلْ وَضْعَ الاسْتِكْشَافِ 🔒'); return; }
+                if (!unlocked) { showToast('أَتْمِمْ خَتْمَ تَخَصُّصِكَ الثَّابِتَ فِي الوَحْدَةِ السَّابِقَةِ أَوَّلًا 🔒'); return; }
                 playWeek = gw;
-                activeSeal = isFreeExplore ? 1 : Math.min(7, getMaxUnlockedSealInWeek(activeYear, gw));
-                activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
+                activeSeal = major;
+                activeStation = 0; currentSlideIdx = 0; isLabMode = false;
                 document.getElementById('map-modal').classList.remove('open');
                 renderActiveView();
             };
             grid.appendChild(cell);
         }
-
-        const endW = selectedMapCycle * 28;
-        const examUnlocked = isFreeExplore || countLessonStars(activeYear, endW) === 7;
-        const exBtn = document.getElementById('cycle-exam-btn');
-        exBtn.classList.toggle('locked', !examUnlocked);
-        document.getElementById('cycle-exam-label').textContent =
-            `الامْتِحَانُ التَّطْبِيقِيُّ الشَّامِلُ لِلدَّوْرَةِ ${CYCLE_AR_NAMES[selectedMapCycle] || 'الأُولَى'}`;
     }
 
-    function runComprehensiveCycleExam() {
-        const endW = selectedMapCycle * 28;
-        if (!isFreeExplore && countLessonStars(activeYear, endW) < 7) {
-            showToast('أَتْمِمْ جَمِيعَ دُرُوسِ الدَّوْرَةِ أَوَّلًا لِفَتْحِ الامْتِحَانِ الشَّامِلِ 🔒');
-            return;
-        }
-        document.getElementById('map-modal').classList.remove('open');
+    // ربط الأحداث
+    document.getElementById('home-identity-capsule').addEventListener('click', () => {
         stopAllTTS();
-        const startW = (selectedMapCycle - 1) * 28 + 1;
-        const sampleWeeks = [startW, startW + 6, startW + 13, startW + 20, endW];
-        const examQuestions = sampleWeeks.map((w, idx) =>
-            window.Stage2QuestionEngine.generateDynamicQuestion(window.curriculumData, activeYear, w, [2, 3, 5, 6, 2][idx])
-        );
-        let qIdx = 0, score = 0;
-        const host = document.getElementById('station-body-host');
-
-        const renderStep = () => {
-            if (qIdx >= examQuestions.length) {
-                playChime(true);
-                host.innerHTML = `
-                    <div id="lesson-scroll-box">
-                        <div class="apply-card-box">
-                            <div style="font-size:3.5rem;">🏆🌟</div>
-                            <h2 style="color:#065f46; font-weight:900;">نَتِيجَةُ الامْتِحَانِ الشَّامِلِ لِلدَّوْرَةِ ${CYCLE_AR_NAMES[selectedMapCycle]}</h2>
-                            <p style="font-size:1.5rem; font-weight:900; color:#b45309;">${toAr(score)} / ${toAr(examQuestions.length)}</p>
-                            <button type="button" class="setting-pill-btn mode-seq" id="back-to-lessons-btn">العَوْدَةُ إِلَى الدُّرُوسِ</button>
-                        </div>
-                    </div>`;
-                document.getElementById('back-to-lessons-btn').onclick = () => renderActiveView();
-                return;
-            }
-            const q = examQuestions[qIdx];
-            host.innerHTML = `
-                <div class="quiz-scroll-area">
-                    <div class="quiz-card-shell">
-                        <div class="quiz-prompt-header">
-                            <span class="quiz-prompt-text">🏆 الامْتِحَانُ الشَّامِلُ (${toAr(qIdx + 1)} / ${toAr(examQuestions.length)}): ${safeRenderText(q.prompt || '')}</span>
-                        </div>
-                        <div id="exam-q-body"></div>
-                    </div>
-                </div>`;
-            const bEl = document.getElementById('exam-q-body');
-            if (q.type === 'true_false') {
-                bEl.innerHTML = `<div class="quiz-stem-box">${safeRenderText(q.statement)}</div>
-                    <div class="tf-buttons-row" style="margin-top:14px;">
-                        <button type="button" class="tf-choice-btn tf-true" id="ex-t">✅ صَحٌّ</button>
-                        <button type="button" class="tf-choice-btn tf-false" id="ex-f">❌ خَطَأٌ</button>
-                    </div>`;
-                document.getElementById('ex-t').onclick = () => { if (q.correctBool) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
-                document.getElementById('ex-f').onclick = () => { if (!q.correctBool) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
-            } else if (q.type === 'science_cloze') {
-                bEl.innerHTML = `<div class="cloze-top-choices" id="ex-clz"></div>
-                    <div class="quiz-stem-box" style="margin-top:12px;">${safeRenderText(q.beforeText)} <span class="cloze-blank-slot">........</span> ${safeRenderText(q.afterText)}</div>`;
-                q.choices.forEach(ch => {
-                    const b = document.createElement('button'); b.type = 'button'; b.className = 'cloze-word-pill'; b.textContent = ch.word;
-                    b.onclick = () => { if (ch.correct) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
-                    document.getElementById('ex-clz').appendChild(b);
-                });
-            } else {
-                bEl.innerHTML = `${q.stem ? `<div class="quiz-stem-box">${safeRenderText(q.stem)}</div>` : ''}<div class="mcq-options-grid" id="ex-mcq" style="margin-top:12px;"></div>`;
-                (q.options || []).forEach(opt => {
-                    const b = document.createElement('button'); b.type = 'button'; b.className = 'quiz-opt-btn'; b.textContent = opt.text;
-                    b.onclick = () => { if (opt.correct) { score++; playChime(true); } else playChime(false); qIdx++; setTimeout(renderStep, 600); };
-                    document.getElementById('ex-mcq').appendChild(b);
-                });
-            }
-        };
-        renderStep();
-    }
-
-// ربط الأحداث
-    document.getElementById('home-identity-capsule').onclick = () => { stopAllTTS(); window.location.assign('index.html'); };
+    });
 
     document.getElementById('map-lesson-capsule').onclick = () => {
         stopAllTTS();
@@ -2914,53 +2798,64 @@ window.Stage2LabEngine = (function() {
         document.getElementById('map-modal').classList.add('open');
     };
     document.getElementById('close-map-modal').onclick = () => document.getElementById('map-modal').classList.remove('open');
-    document.getElementById('cycle-exam-btn').onclick = runComprehensiveCycleExam;
+
+    document.getElementById('depth-toggle-pill').onclick = () => {
+        const major = getMajorSeal();
+        if (activeSeal === major) {
+            showToast('مَسَارُ تَخَصُّصِكَ الثَّابِتُ يُدْرَسُ دَائِماً بِالتَّفْصِيلِ الكَامِلِ (٧٠٪) 👑');
+            return;
+        }
+        forceFullDetailOnMinor = !forceFullDetailOnMinor;
+        currentSlideIdx = 0;
+        renderLessonStation();
+    };
 
     document.getElementById('toggle-mode-btn').onclick = () => {
         isFreeExplore = !isFreeExplore;
-        SafeStore.set('stage2_explore_mode', isFreeExplore ? 'true' : 'false');
-        if (!isFreeExplore) {
-            playWeek = getMaxUnlockedWeek(activeYear);
-            activeSeal = getMaxUnlockedSealInWeek(activeYear, playWeek);
-        }
+        SafeStore.set('stage3_explore_mode', isFreeExplore ? 'true' : 'false');
         renderMapModal();
         renderActiveView();
     };
 
     document.getElementById('toggle-global-tts-btn').onclick = () => {
         isTTSActive = !isTTSActive;
-        SafeStore.set('tts_enabled_state', isTTSActive ? 'true' : 'false');
+        SafeStore.set('stage3_tts_titles_only', isTTSActive ? 'true' : 'false');
         if (!isTTSActive) stopAllTTS();
         renderMapModal();
         updateChromeUI();
     };
 
     document.getElementById('reset-year-progress-btn').onclick = () => {
-        const totW = getTotalWeeks();
-        for (let w = 1; w <= totW; w++) {
-            for (let s = 1; s <= 7; s++) {
-                SafeStore.remove(starKey(activeYear, w, s));
-                SafeStore.remove(stationKey(activeYear, w, s));
+        if (!confirm('هَلْ أَنْتَ مُتَأَكِّدٌ مِنْ مَسْحِ كَامِلِ السِّجِلِّ وَإِعَادَةِ البَدْءِ مِنَ الصِّفْرِ؟ سَيُؤَدِّي ذٰلِكَ إِلَى حَذْفِ جَمِيعِ الدَّرَجَاتِ وَإِعَادَةِ فَتْحِ مِيثَاقِ التَّخَصُّصِ مِنْ جَدِيدٍ.')) return;
+        for (let y = 15; y <= 21; y++) {
+            const totW = (YEAR_CYCLES_MAP[y] || 5) * 28;
+            for (let w = 1; w <= totW; w++) {
+                for (let s = 1; s <= 7; s++) {
+                    SafeStore.remove(starKey(y, w, s));
+                    SafeStore.remove(stationKey(y, w, s));
+                }
             }
         }
-        playWeek = 1; activeSeal = 1; activeStation = 0; currentSlideIdx = 0;
-        renderMapModal(); renderActiveView();
-        showToast('تَمَّ تَصْفِيرُ نُجُومِ السَّنَةِ الحَالِيَّةِ');
+        SafeStore.remove(MAJOR_SEAL_KEY);
+        SafeStore.remove(MAJOR_LOCKED_KEY);
+        document.getElementById('map-modal').classList.remove('open');
+        playWeek = 1; selectedMapCycle = 1; activeStation = 0; currentSlideIdx = 0;
+        checkAndRenderOnboardingGate();
     };
 
     document.getElementById('next-lesson-arrow-btn').onclick = () => {
         document.getElementById('lesson-complete-modal').classList.remove('open');
         if (playWeek < getTotalWeeks()) playWeek++;
-        activeSeal = 1; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
+        activeSeal = getMajorSeal();
+        activeStation = 0; currentSlideIdx = 0; isLabMode = false; forceFullDetailOnMinor = false;
         renderActiveView();
     };
 
     document.querySelectorAll('.seal-btn').forEach(btn => {
         btn.onclick = () => {
             const s = parseInt(btn.dataset.seal, 10);
-            if (!isSealUnlocked(playWeek, s)) { showToast('أَتْمِمْ الخَتْمَ السَّابِقَ أَوَّلًا لِيُضَاءَ هٰذَا الخَتْمُ ⭐'); return; }
             stopAllTTS();
-            activeSeal = s; activeStation = 0; currentSlideIdx = 0; isVideoMode = false; isLabMode = false;
+            activeSeal = s; activeStation = 0; currentSlideIdx = 0; isLabMode = false; forceFullDetailOnMinor = false;
             renderActiveView();
         };
     });
@@ -2969,7 +2864,7 @@ window.Stage2LabEngine = (function() {
         pill.onclick = () => {
             const st = parseInt(pill.dataset.st, 10);
             const stProg = getSealStationProgress(activeYear, playWeek, activeSeal);
-            if (!isFreeExplore && st > Math.max(stProg, activeStation)) { showToast('أَنْجِزِ المَحَطَّةَ الحَالِيَّةَ أَوَّلًا 🔒'); return; }
+            if (!isFreeExplore && st > Math.max(stProg, activeStation)) { showToast('أَتْمِمْ المَحَطَّةَ الحَالِيَّةَ أَوَّلًا 🔒'); return; }
             stopAllTTS();
             activeStation = st;
             renderActiveView();
@@ -2984,41 +2879,30 @@ window.Stage2LabEngine = (function() {
 
     document.getElementById('tts-play-btn').onclick = () => {
         isTTSActive = !isTTSActive;
-        SafeStore.set('tts_enabled_state', isTTSActive ? 'true' : 'false');
+        SafeStore.set('stage3_tts_titles_only', isTTSActive ? 'true' : 'false');
         if (!isTTSActive) stopAllTTS();
         else {
-            const slide = getSealObj(activeYear, playWeek, activeSeal)?.learn?.slides?.[currentSlideIdx];
-            if (slide) speakSlideTextOnly(slide.text);
+            const meta = getLessonMeta(activeYear, playWeek);
+            speakHeadingOnly(meta.sealTitle);
         }
         updateChromeUI();
     };
 
-    document.getElementById('auto-flip-btn').onclick = () => {
-        isAutoFlip = !isAutoFlip;
-        SafeStore.set('stage2_auto_flip', isAutoFlip ? 'true' : 'false');
-        updateChromeUI();
-        showToast(isAutoFlip ? 'التَّقْلِيبُ الآلِيُّ لِلسَّلَايْدَاتِ: مُفَعَّلٌ 🔄' : 'التَّقْلِيبُ الآلِيُّ: مُتَوَقِّفٌ');
-    };
-
     document.getElementById('lab-mode-btn').onclick = () => {
         isLabMode = !isLabMode;
-        if (isLabMode) { isVideoMode = false; stopAllTTS(); }
-        renderLessonStation();
-    };
-
-    document.getElementById('video-mode-btn').onclick = () => {
-        isVideoMode = !isVideoMode;
-        if (isVideoMode) { isLabMode = false; stopAllTTS(); }
+        if (isLabMode) stopAllTTS();
         renderLessonStation();
     };
 
     document.getElementById('corner-next-btn').onclick = handleCornerButtonAction;
 
-    // التشغيل الابتدائي
-    playWeek = getMaxUnlockedWeek(activeYear);
-    selectedMapCycle = getCycleOfWeek(playWeek);
-    activeSeal = getMaxUnlockedSealInWeek(activeYear, playWeek);
-    renderActiveView();
+    // التشغيل الابتدائي: إن لم يكن الطالب قد عقد ميثاق التخصص بعد، تفتح له البوابة لمرة واحدة أولاً
+    if (!checkAndRenderOnboardingGate()) {
+        activeSeal = getMajorSeal();
+        playWeek = getMaxUnlockedWeek(activeYear);
+        selectedMapCycle = getCycleOfWeek(playWeek);
+        renderActiveView();
+    }
 })();
     </script>
 </body>

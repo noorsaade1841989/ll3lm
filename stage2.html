@@ -4252,5 +4252,535 @@
     });
 </script>
 
+<!-- ==================== [ بداية وحدة المعلم المحاور الذكي لمرحلة عبد stage2.html ] ==================== -->
+<style>
+    /* ١. زر الاستفهام (؟) في الأعلى تحت شريط العنوان من الجهة اليسرى (مقابل عمود الأختام) وشبه شفاف حتى الاقتراب منه */
+    #ai-tutor-q-btn {
+        position: fixed;
+        top: calc(clamp(54px, 8.2dvh, 68px) + 12px);
+        left: 18px;
+        right: auto;
+        bottom: auto;
+        width: clamp(42px, 6.8vmin, 50px);
+        height: clamp(42px, 6.8vmin, 50px);
+        border-radius: 50%;
+        background: rgba(15, 23, 42, 0.28);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(250, 204, 21, 0.35);
+        color: rgba(254, 240, 138, 0.7);
+        font-family: 'Cairo', 'Tajawal', sans-serif;
+        font-size: clamp(1.35rem, 3.4vmin, 1.75rem);
+        font-weight: 900;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 550;
+        opacity: 0.32;
+        box-shadow: none;
+        transition: opacity 0.25s ease, transform 0.22s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+    }
+    #ai-tutor-q-btn:hover,
+    #ai-tutor-q-btn:focus-visible,
+    #ai-tutor-q-btn:active {
+        opacity: 1;
+        transform: scale(1.08);
+        background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+        border-color: #ecfdf5;
+        color: #06281e;
+        box-shadow: 0 8px 22px rgba(234, 179, 8, 0.55);
+    }
+    /* إخفاؤه أثناء وضع التعديل السري للمعلم */
+    body.edit-mode-active #ai-tutor-q-btn {
+        display: none !important;
+    }
+
+    /* ٢. نافذة المحادثة مع المعلم */
+    #ai-tutor-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9600;
+        background: rgba(4, 20, 15, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+    }
+    #ai-tutor-modal.open { display: flex; }
+
+    .tutor-dialog-box {
+        width: 100%;
+        max-width: 720px;
+        height: min(88dvh, 680px);
+        background: linear-gradient(145deg, #09221a 0%, #0f172a 100%);
+        border: 2.5px solid #eab308;
+        border-radius: 26px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .tutor-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, rgba(6, 78, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+        border-bottom: 2px solid rgba(250, 204, 21, 0.45);
+    }
+    .tutor-identity {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+    .tutor-avatar-ring {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #fef08a, #eab308);
+        border: 2.5px solid #ffffff;
+        box-shadow: 0 0 14px rgba(250, 204, 21, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        padding: 4px;
+    }
+    .tutor-avatar-ring svg { width: 100%; height: 100%; }
+    .tutor-title-wrap {
+        display: flex;
+        flex-direction: column;
+        text-align: right;
+        min-width: 0;
+    }
+    .tutor-main-name {
+        color: #fef08a;
+        font-size: clamp(0.95rem, 2.2vmin, 1.18rem);
+        font-weight: 900;
+    }
+    .tutor-lesson-sub {
+        color: #a7f3d0;
+        font-size: clamp(0.76rem, 1.7vmin, 0.88rem);
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .tutor-close-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        font-size: 1.35rem;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .tutor-close-btn:hover { background: #ef4444; border-color: #fecaca; }
+
+    .tutor-messages-area {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: #10b981 rgba(255, 255, 255, 0.08);
+    }
+    .tutor-msg-row {
+        display: flex;
+        flex-direction: column;
+        max-width: 88%;
+        gap: 4px;
+    }
+    .tutor-msg-row.teacher { align-self: flex-start; }
+    .tutor-msg-row.student { align-self: flex-end; }
+
+    .tutor-bubble {
+        padding: 12px 16px;
+        border-radius: 18px;
+        font-size: clamp(0.96rem, 2.1vmin, 1.15rem);
+        font-weight: 700;
+        line-height: 1.85;
+        text-align: right;
+        white-space: pre-line;
+        user-select: text;
+        -webkit-user-select: text;
+    }
+    .tutor-msg-row.teacher .tutor-bubble {
+        background: rgba(240, 253, 244, 0.96);
+        color: #0f172a;
+        border: 2px solid #10b981;
+        border-top-right-radius: 4px;
+    }
+    .tutor-msg-row.student .tutor-bubble {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: #ffffff;
+        border: 1.5px solid #fde047;
+        border-top-left-radius: 4px;
+    }
+    .tutor-speak-mini {
+        align-self: flex-start;
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid #34d399;
+        color: #a7f3d0;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .tutor-speak-mini:hover { background: #10b981; color: #ffffff; }
+
+    .tutor-input-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        background: rgba(6, 30, 23, 0.95);
+        border-top: 1.5px solid rgba(110, 231, 183, 0.3);
+    }
+    #tutor-user-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0f172a;
+        border: 2px solid #10b981;
+        border-radius: 18px;
+        padding: 9px 14px;
+        font-size: 0.98rem;
+        font-weight: 700;
+        outline: none;
+        resize: none;
+        max-height: 95px;
+    }
+    #tutor-user-input:focus { border-color: #fde047; }
+    .tutor-send-btn, .tutor-mic-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid #fde047;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        font-size: 1.15rem;
+    }
+    .tutor-send-btn {
+        background: linear-gradient(135deg, #10b981, #047857);
+        color: #ffffff;
+    }
+    .tutor-mic-btn {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fef08a;
+    }
+    .tutor-mic-btn.recording {
+        background: #dc2626;
+        color: #ffffff;
+    }
+
+    @media (max-width: 680px) {
+        #ai-tutor-q-btn { width: 38px; height: 38px; top: 64px; left: 10px; font-size: 1.25rem; }
+    }
+</style>
+
+<!-- الزر الهادئ الدائم (؟) -->
+<button type="button" id="ai-tutor-q-btn" title="اسأل المعلم عن الدرس" onclick="openAiTutorModal()">؟</button>
+
+<!-- شاشة المحادثة مع المعلم -->
+<div id="ai-tutor-modal" onclick="if(event.target===this) closeAiTutorModal()">
+    <div class="tutor-dialog-box" onclick="event.stopPropagation()">
+        <div class="tutor-header">
+            <div class="tutor-identity">
+                <div class="tutor-avatar-ring" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" fill="none">
+                        <circle cx="32" cy="32" r="30" fill="#064e3b"/>
+                        <path d="M16 24C16 15 23 10 32 10C41 10 48 15 48 24H16Z" fill="#f8fafc" stroke="#eab308" stroke-width="2"/>
+                        <path d="M15 23C22 19 42 19 49 23" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="32" cy="31" r="11" fill="#fde68a"/>
+                        <circle cx="28" cy="29" r="1.6" fill="#0f172a"/>
+                        <circle cx="36" cy="29" r="1.6" fill="#0f172a"/>
+                        <path d="M28 35Q32 38 36 35" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M22 33C22 41 27 45 32 45C37 45 42 41 42 33" fill="#334155" opacity="0.85"/>
+                        <path d="M14 56C16 46 23 43 32 43C41 43 48 46 50 56" fill="#059669"/>
+                        <path d="M22 50L32 53L42 50V57L32 60L22 57V50Z" fill="#fef08a" stroke="#06281e" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <div class="tutor-title-wrap">
+                    <span class="tutor-main-name">مُعَلِّمُ مَدْرَسَةِ العِلْمِ</span>
+                    <span class="tutor-lesson-sub" id="tutor-lesson-label">شَرْحُ الدَّرْسِ وَالحِوَارُ</span>
+                </div>
+            </div>
+            <button type="button" class="tutor-close-btn" onclick="closeAiTutorModal()">×</button>
+        </div>
+
+        <div class="tutor-messages-area" id="tutor-messages-area"></div>
+
+        <div class="tutor-input-bar">
+            <button type="button" class="tutor-mic-btn" id="tutor-mic-btn" title="تحدث بصوتك" onclick="toggleTutorVoiceInput()">🎙️</button>
+            <textarea id="tutor-user-input" rows="1" placeholder="اكْتُبْ سُؤَالَكَ لِلْمُعَلِّمِ هُنَا..."></textarea>
+            <button type="button" class="tutor-send-btn" id="tutor-send-btn" title="إرسال" onclick="sendStudentMessageToTutor()">➤</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function initStage2SmartTutor() {
+    // رابط الجسر السحابي الخاص بالمنصة يعمل تلقائياً لجميع الطلاب دون أي إعداد
+    const PLATFORM_TUTOR_WORKER_URL = localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+
+    let tutorConversation = [];
+    let currentLessonContextKey = '';
+    let isTutorBusy = false;
+
+    function stopPageSpeechSafely() {
+        if (typeof stopAllSpeech === 'function') {
+            stopAllSpeech();
+        } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+        const aud = document.getElementById('custom-audio');
+        if (aud) aud.pause();
+    }
+
+    // تنقية النص الموجه للقارئ الآلي من أي أحرف إنجليزية حتى لا يرتبك بالنطق أبداً
+    function cleanArabicForSpeech(rawText) {
+        if (!rawText) return '';
+        return String(rawText)
+            .replace(/[A-Za-z_\/\\@#%^&*+=<>~`|\[\]{}]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function speakReplySafely(text) {
+        const arabicOnly = cleanArabicForSpeech(text);
+        if (!arabicOnly) return;
+
+        if (typeof speakText === 'function') {
+            speakText(arabicOnly);
+        } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(arabicOnly);
+            u.lang = 'ar-SA';
+            u.rate = 0.9;
+            window.speechSynthesis.speak(u);
+        }
+    }
+
+    // قراءة بيانات الدرس الحالي مباشرة من كائن المنهج أو من نصوص الصفحة المعروضة أمام الطالب
+    function extractCurrentLessonDetails() {
+        const defData = (typeof getActiveCurriculumObj === 'function') ? getActiveCurriculumObj() : null;
+        const headerTitle = document.getElementById('header-lesson-title')?.innerText?.trim() || 'الدرس الحالي';
+        const yearNum = document.getElementById('hdr-year-num')?.innerText?.trim() || (typeof RAW_YEAR !== 'undefined' ? String(RAW_YEAR) : '10');
+        const mapKey = document.getElementById('week-badge-map-part')?.innerText?.trim() || '';
+
+        const lessonTitle = defData?.learn?.introTitle
+            ? String(defData.learn.introTitle).replace(/<[^>]*>/g, '').trim()
+            : headerTitle;
+        const lessonGoal = defData?.learn?.introGoal
+            ? String(defData.learn.introGoal).replace(/<[^>]*>/g, '').trim()
+            : '';
+
+        let slidesText = '';
+        if (Array.isArray(defData?.learn?.slides) && defData.learn.slides.length > 0) {
+            slidesText = defData.learn.slides.map((s, i) => `(${i + 1}) ${String(s.text || '').replace(/<[^>]*>/g, '')}`).join('\n');
+        } else {
+            const visibleText = document.getElementById('main-content')?.innerText?.trim() || '';
+            slidesText = visibleText;
+        }
+
+        const applyText = Array.isArray(defData?.apply?.steps)
+            ? defData.apply.steps.map(s => String(s).replace(/<[^>]*>/g, '')).join('\n')
+            : '';
+
+        const contextKey = `${yearNum}_${mapKey}_${lessonTitle}`;
+        return { yearNum, lessonTitle, lessonGoal, slidesText, applyText, contextKey };
+    }
+
+    function buildLessonSystemInstruction(info) {
+        return [
+            `أنت معلم حكيم، عطوف، وصبور في "مدرسة العلم"، تحاور طالباً عمره (${info.yearNum}) سنوات في مرحلة "عبد".`,
+            `عنوان الدرس الحالي: ${info.lessonTitle}.`,
+            info.lessonGoal ? `هدف الدرس: ${info.lessonGoal}` : '',
+            info.slidesText ? `محتوى شرائح الدرس:\n${info.slidesText}` : '',
+            info.applyText ? `التطبيق العملي للدرس:\n${info.applyText}` : '',
+            `قواعد الشرح والحوار الصارمة:`,
+            `1- تحدث بعربية فصيحة مشرقة خالصة بدون أي كلمات أو حروف إنجليزية إطلاقاً، مشكولة الحركات الأساسية ما أمكن، ومناسبة لطالب عمره ${info.yearNum} سنوات.`,
+            `2- اشرح الفكرة بأمثلة حسية قريبة من حياته اليومية والطبيعة دون إطالة مملة (من 4 إلى 7 أسطر في كل رد).`,
+            `3- اختم شرحك دائماً بسؤال لطيف واحد تتأكد به من فهمه وتشجعه على التفكير والحوار.`,
+            `4- التزم بمضمون الدرس وقيم الإخلاص والعقل والأدب، ولا تخرج إلى مواضيع لا تناسب عمره.`
+        ].filter(Boolean).join('\n');
+    }
+
+    function appendMessageBubble(role, text, withSpeakBtn = true) {
+        const area = document.getElementById('tutor-messages-area');
+        if (!area) return null;
+        const row = document.createElement('div');
+        row.className = `tutor-msg-row ${role}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'tutor-bubble';
+        bubble.innerText = text;
+        row.appendChild(bubble);
+
+        if (role === 'teacher' && withSpeakBtn) {
+            const spk = document.createElement('button');
+            spk.type = 'button';
+            spk.className = 'tutor-speak-mini';
+            spk.innerText = '🔊 اسْتَمِعْ لِلشَّرْحِ';
+            spk.onclick = () => speakReplySafely(bubble.innerText);
+            row.appendChild(spk);
+        }
+
+        area.appendChild(row);
+        area.scrollTop = area.scrollHeight;
+        return { row, bubble };
+    }
+
+    async function callTutorBackend(systemInstruction, historyMessages) {
+        const workerUrl = localStorage.getItem('al3lm_tutor_worker_url') || PLATFORM_TUTOR_WORKER_URL;
+        const res = await fetch(workerUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ systemInstruction, messages: historyMessages })
+        });
+        if (!res.ok) {
+            throw new Error('NETWORK_OR_SERVER_ERROR');
+        }
+        const data = await res.json();
+        if (data && typeof data.reply === 'string' && data.reply.trim().length > 0) {
+            return data.reply.trim();
+        }
+        throw new Error('EMPTY_REPLY');
+    }
+
+    async function requestTeacherReply(info, isInitialGreeting = false) {
+        if (isTutorBusy) return;
+        isTutorBusy = true;
+        const lessonInfo = info || extractCurrentLessonDetails();
+        const pendingMsg = appendMessageBubble('teacher', 'يَتَأَمَّلُ المُعَلِّمُ الدَّرْسَ لِيَشْرَحَهُ لَكَ بِبَسَاطَةٍ...', true);
+        try {
+            const sysPrompt = buildLessonSystemInstruction(lessonInfo);
+            const reply = await callTutorBackend(sysPrompt, tutorConversation);
+            tutorConversation.push({ role: 'teacher', text: reply });
+            if (pendingMsg && pendingMsg.bubble) pendingMsg.bubble.innerText = reply;
+            const area = document.getElementById('tutor-messages-area');
+            if (area) area.scrollTop = area.scrollHeight;
+            speakReplySafely(reply);
+        } catch (_) {
+            if (pendingMsg && pendingMsg.row) {
+                pendingMsg.row.remove();
+            }
+            if (tutorConversation.length > 0 && tutorConversation[tutorConversation.length - 1].role === 'student') {
+                tutorConversation.pop();
+            }
+            if (isInitialGreeting) {
+                currentLessonContextKey = '';
+            }
+        } finally {
+            isTutorBusy = false;
+        }
+    }
+
+    window.openAiTutorModal = function() {
+        stopPageSpeechSafely();
+        const info = extractCurrentLessonDetails();
+        const modal = document.getElementById('ai-tutor-modal');
+        const lbl = document.getElementById('tutor-lesson-label');
+        if (lbl) lbl.innerText = info.lessonTitle;
+        if (modal) modal.classList.add('open');
+
+        if (currentLessonContextKey !== info.contextKey || tutorConversation.length === 0) {
+            currentLessonContextKey = info.contextKey;
+            tutorConversation = [];
+            const area = document.getElementById('tutor-messages-area');
+            if (area) area.innerHTML = '';
+
+            tutorConversation.push({
+                role: 'student',
+                text: `يَا أُسْتَاذِي، أَنَا لَمْ أَفْهَمْ دَرْسَ «${info.lessonTitle}» جَيِّداً، هَلْ يُمْكِنُكَ أَنْ تُعِيدَ شَرْحَهُ لِي بِطَرِيقَةٍ مُبَسَّطَةٍ وَمُشَوِّقَةٍ؟`
+            });
+            requestTeacherReply(info, true);
+        }
+    };
+
+    window.closeAiTutorModal = function() {
+        stopPageSpeechSafely();
+        const modal = document.getElementById('ai-tutor-modal');
+        if (modal) modal.classList.remove('open');
+    };
+
+    window.sendStudentMessageToTutor = function() {
+        if (isTutorBusy) return;
+        const inputEl = document.getElementById('tutor-user-input');
+        if (!inputEl) return;
+        const txt = inputEl.value.trim();
+        if (!txt) return;
+        inputEl.value = '';
+        stopPageSpeechSafely();
+        appendMessageBubble('student', txt, false);
+        tutorConversation.push({ role: 'student', text: txt });
+        requestTeacherReply(null, false);
+    };
+
+    const inputField = document.getElementById('tutor-user-input');
+    if (inputField) {
+        inputField.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                window.sendStudentMessageToTutor();
+            }
+        });
+    }
+
+    let recognition = null;
+    window.toggleTutorVoiceInput = function() {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const micBtn = document.getElementById('tutor-mic-btn');
+        if (!SpeechRec) return;
+
+        if (recognition) {
+            recognition.stop();
+            recognition = null;
+            if (micBtn) micBtn.classList.remove('recording');
+            return;
+        }
+        stopPageSpeechSafely();
+        recognition = new SpeechRec();
+        recognition.lang = 'ar-SA';
+        recognition.interimResults = false;
+        if (micBtn) micBtn.classList.add('recording');
+
+        recognition.onresult = function(event) {
+            const transcript = event.results?.[0]?.[0]?.transcript || '';
+            const inp = document.getElementById('tutor-user-input');
+            if (inp && transcript) {
+                inp.value = (inp.value ? inp.value + ' ' : '') + transcript;
+            }
+        };
+        recognition.onend = function() {
+            recognition = null;
+            if (micBtn) micBtn.classList.remove('recording');
+        };
+        recognition.onerror = function() {
+            recognition = null;
+            if (micBtn) micBtn.classList.remove('recording');
+        };
+        recognition.start();
+    };
+})();
+</script>
+<!-- ==================== [ نهاية وحدة المعلم المحاور الذكي لمرحلة عبد stage2.html ] ==================== -->
+
 </body>
 </html>
