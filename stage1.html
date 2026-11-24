@@ -1564,13 +1564,7 @@
 
     <!-- الشريط العلوي الموحد بكبسولتين فقط (يمين: الخريطة والختم وعنوان الدرس | يسار: أيقونة واسم المدرسة والمرحلة والعمر) -->
     <header class="two-capsule-header">
-        <button type="button" class="week-badge merged-map-lesson-capsule" id="week-badge" onclick="openWeekModal()">
-            <span class="map-key-part" id="week-badge-map-part">🧭 أ (1)</span>
-            <span class="id-divider"></span>
-            <span class="seal-inline-icon" id="header-subj-emoji">🗣️</span>
-            <span class="lesson-inline-title" id="header-lesson-title">المَنْطِقُ وَالقِصَّةُ</span>
-        </button>
-
+	
         <a href="index.html" class="unified-identity-capsule" id="header-year-badge">
             <img src="icon-512.png" id="brand-home-link" onerror="if(!this.dataset.triedIco){this.dataset.triedIco='1';this.src='cc.ico';}else{this.style.display='none';}" alt="" class="brand-logo-icon">
             <span class="id-school-part" id="header-logo">مدرسة العلم</span>
@@ -1581,6 +1575,15 @@
                 <span id="hdr-year-word">سنوات</span>
             </span>
         </a>
+		
+		
+        <button type="button" class="week-badge merged-map-lesson-capsule" id="week-badge" onclick="openWeekModal()">
+            <span class="map-key-part" id="week-badge-map-part">🧭 أ (1)</span>
+            <span class="id-divider"></span>
+            <span class="seal-inline-icon" id="header-subj-emoji">🗣️</span>
+            <span class="lesson-inline-title" id="header-lesson-title">المَنْطِقُ وَالقِصَّةُ</span>
+        </button>
+
     </header>
 
     <!-- مساحة العمل والشريط الجانبي للأختام السبعة ببطارية الشحن الثلاثية -->
@@ -2775,6 +2778,7 @@
             if (confirm("هل أنت متأكد من مسح إنجازات الطالب في هذه المدرسة فقط والبدء من جديد؟")) {
                 localStorage.removeItem(`student_week_${SAVE_KEY}`);
                 localStorage.removeItem(`student_subj_${SAVE_KEY}`);
+                localStorage.removeItem(`custom_curriculum_edits_y${RAW_YEAR}`);
                 for (let w = 1; w <= TOTAL_WEEKS; w++) {
                     for (let s = 1; s <= 7; s++) {
                         localStorage.removeItem(`subj_score_${SAVE_KEY}_w${w}_s${s}`);
@@ -3480,10 +3484,10 @@
 
             const yFolder = `assets/y${RAW_YEAR}`;
             const defaultVidPath = `${yFolder}/videos/v${playWeek}.mp4`;
-            const defaultArtPath = `assets/y4/art/art${playWeek}.jpg`;
-            const defaultSportPath = (RAW_YEAR >= 6) ? `assets/y6/sports/sprt${playWeek}.jpg` : `assets/y4/sports/sprt${playWeek}.jpg`;
-            const defaultSciPath = (RAW_YEAR >= 7) ? `assets/y7/scince/s${playWeek}.1.jpg` : ((RAW_YEAR === 6) ? `assets/y6/scince/s${playWeek}.jpg` : `assets/y4/scince/s${playWeek}.jpg`);
-            const defaultRightPath = (RAW_YEAR >= 7) ? `assets/y7/rights/r${playWeek}.jpg` : `assets/y4/rights/r${playWeek}.jpg`;
+            const defaultArtPath = `${yFolder}/art/art${playWeek}.jpg`;
+            const defaultSportPath = `${yFolder}/sports/sprt${playWeek}.jpg`;
+            const defaultSciPath = (RAW_YEAR >= 7) ? `${yFolder}/scince/s${playWeek}.1.jpg` : `${yFolder}/scince/s${playWeek}.jpg`;
+            const defaultRightPath = `${yFolder}/rights/r${playWeek}.jpg`;
 
             const subjDefaultImgMap = {
                 1: defaultArtPath, 2: defaultArtPath, 3: defaultArtPath, 4: defaultArtPath,
@@ -4103,15 +4107,23 @@
             }
         }
 
-        // ================= ٦. محرك التوريث الذكي للمسارات والامتدادات (y7 -> y6 -> y4) دون تكرار طلبات 404 =================
+        // ================= ٦. محرك التوريث التنازلي الشامل للصور (y7 -> y6 -> ... -> y1) دون تكرار طلبات 404 =================
         (function setupUnifiedCascadingAssetEngine() {
-            const EXT_LIST = ['.jpg', '.png', '.webp', '.jpeg'];
+            const EXT_LIST = ['.jpg', '.png', '.webp', '.jpeg', '.gif'];
             const resolvedCache = {};
             let lastWorkingSlideSrc = '';
             let lastLessonKey = '';
 
             function getLessonKey() {
                 return `y${RAW_YEAR}_w${playWeek}_s${activeViewSubj}`;
+            }
+
+            function getFolderAliases(folderName) {
+                const f = String(folderName || '').toLowerCase();
+                if (f === 'sports' || f === 'sport') return ['sports', 'sport'];
+                if (f === 'scince' || f === 'science') return ['scince', 'science'];
+                if (f === 'rights' || f === 'right') return ['rights', 'right'];
+                return [f];
             }
 
             function buildOrderedCandidates(rawSrc) {
@@ -4121,38 +4133,47 @@
                 const candidates = [];
                 const add = (u) => { if (u && u !== rawSrc && !candidates.includes(u)) candidates.push(u); };
 
+                if (resolvedCache[cleanSrc]) add(resolvedCache[cleanSrc]);
                 if (resolvedCache[baseNoExt]) add(resolvedCache[baseNoExt]);
 
                 // 1) نفس المسار الأساسي بجميع الامتدادات القياسية
                 EXT_LIST.forEach(ext => add(baseNoExt + ext));
 
-                // 2) إذا كانت شريحة فرعية في العلوم (مثل s1.2) ولم توجد، نرجع لشريحة s1.1 أو s1
-                if (/\/scince\/s\d+\.\d+$/i.test(baseNoExt)) {
-                    const stemMain = baseNoExt.replace(/\.\d+$/, '');
-                    EXT_LIST.forEach(ext => add(stemMain + '.1' + ext));
-                    EXT_LIST.forEach(ext => add(stemMain + ext));
-                }
-
-                // 3) سلسلة التوريث المعتمدة بين السنوات حسب نوع المجلد:
-                //    art -> y4 | rights -> y7 ثم y4 | sports -> y6 ثم y4 | scince -> y7 ثم y6 ثم y4
-                const folderMatch = baseNoExt.match(/^assets\/y(\d+)\/(art|rights|sports|scince|science)\/(.+)$/i);
+                // 2) التوريث التدريجي سنةً بسنة من السنة الحالية نزولاً حتى y1 دون القفز فوق أي سنة
+                const folderMatch = baseNoExt.match(/^(.*\/)?y(\d+)\/([^\/]+)\/(.+)$/i);
                 if (folderMatch) {
-                    const cat = folderMatch[2].toLowerCase() === 'science' ? 'scince' : folderMatch[2].toLowerCase();
-                    const fileStem = folderMatch[3].replace(/\.\d+$/, '');
-                    const fallbackYears = (cat === 'art') ? [4]
-                        : (cat === 'rights' ? (RAW_YEAR >= 7 ? [7, 4] : [4])
-                        : (cat === 'sports' ? (RAW_YEAR >= 6 ? [6, 4] : [4])
-                        : (RAW_YEAR >= 7 ? [7, 6, 4] : (RAW_YEAR === 6 ? [6, 4] : [4]))));
+                    const prefix = folderMatch[1] || 'assets/';
+                    const pathYear = parseInt(folderMatch[2], 10) || 1;
+                    const startYear = Math.max(RAW_YEAR, pathYear);
+                    const catAliases = getFolderAliases(folderMatch[3]);
+                    const exactFile = folderMatch[4];
+                    const mainStem = exactFile.replace(/\.\d+$/, '');
 
-                    fallbackYears.forEach(yr => {
+                    for (let yr = startYear; yr >= 1; yr--) {
+                        catAliases.forEach(cat => {
+                            EXT_LIST.forEach(ext => {
+                                add(`${prefix}y${yr}/${cat}/${exactFile}${ext}`);
+                            });
+                        });
+                        if (mainStem !== exactFile) {
+                            catAliases.forEach(cat => {
+                                EXT_LIST.forEach(ext => {
+                                    add(`${prefix}y${yr}/${cat}/${mainStem}.1${ext}`);
+                                    add(`${prefix}y${yr}/${cat}/${mainStem}${ext}`);
+                                });
+                            });
+                        }
+                    }
+
+                    catAliases.forEach(cat => {
                         EXT_LIST.forEach(ext => {
-                            if (cat === 'scince' && yr === 7) add(`assets/y7/scince/${fileStem}.1${ext}`);
-                            add(`assets/y${yr}/${cat}/${fileStem}${ext}`);
+                            add(`${prefix}${cat}/${exactFile}${ext}`);
+                            if (mainStem !== exactFile) add(`${prefix}${cat}/${mainStem}${ext}`);
                         });
                     });
                 }
 
-                // 4) تثبيت آخر صورة شريحة ناجحة لنفس الدرس قبل الرجوع لخلفية المرحلة
+                // 3) تثبيت آخر صورة شريحة ناجحة لنفس الدرس قبل الرجوع لخلفية المرحلة
                 if (lastWorkingSlideSrc && lastLessonKey === getLessonKey()) {
                     add(lastWorkingSlideSrc);
                 }
@@ -4161,20 +4182,22 @@
             }
 
             window.handleSmartImageFallback = function(img) {
-                if (!img) return;
+                if (!img || img.id === 'brand-home-link') return;
                 const currentSrc = img.getAttribute('src') || '';
                 if (!currentSrc || currentSrc.startsWith('data:') || currentSrc.startsWith('blob:')) return;
 
-                const key = `${getLessonKey()}_${img.dataset.origSrc || currentSrc}`;
-                if (img._assetTryKey !== key) {
+                img.dataset.extTried = 'true';
+
+                if (img._lastFallbackAssigned !== currentSrc) {
                     img.dataset.origSrc = currentSrc;
-                    img._assetTryKey = key;
                     img._assetQueue = buildOrderedCandidates(currentSrc);
                     img._assetIdx = 0;
                 }
+
                 while (img._assetIdx < img._assetQueue.length) {
                     const nextUrl = img._assetQueue[img._assetIdx++];
                     if (nextUrl && nextUrl !== currentSrc) {
+                        img._lastFallbackAssigned = nextUrl;
                         img.src = nextUrl;
                         return;
                     }
@@ -5612,7 +5635,6 @@
         });
     })();
     </script>
-
 </body>
 </html>
 <!-- ==================== [ نهاية القسم 6 من 6 : اكتمال ملف stage1.html ] ==================== -->

@@ -1370,6 +1370,9 @@
             .slider-text-box { padding: 10px 12px 10px 62px; }
             .corner-action-btn { width: 48px; height: 48px; bottom: 10px; left: 10px; }
         }
+		
+		
+		
     </style>
 </head>
 <!-- ==================== [ نهاية القسم 1 من 6 ] ==================== -->
@@ -3810,33 +3813,69 @@
                 }
             }
         }
+(function enableSmartMultiExtensionImages() {
+    const EXT_LIST = ['.jpg', '.png', '.webp', '.jpeg', '.gif'];
+    const resolvedCache = {};
 
-        (function enableSmartMultiExtensionImages() {
-            const EXT_LIST = ['.jpg', '.png', '.webp', '.jpeg', '.gif'];
-            const resolvedCache = {};
-            window.addEventListener('error', function(e) {
-                const el = e.target;
-                if (!el || el.tagName !== 'IMG') return;
-                const currentSrc = el.getAttribute('src') || '';
-                if (currentSrc.startsWith('data:') || currentSrc.startsWith('blob:')) return;
-                const baseMatch = currentSrc.match(/^(.*)\.(jpg|png|webp|jpeg|gif)$/i);
-                if (!baseMatch) return;
-                const basePath = baseMatch[1];
-                if (resolvedCache[basePath] && resolvedCache[basePath] !== currentSrc) { el.src = resolvedCache[basePath]; return; }
-                let tryIdx = parseInt(el.dataset.extTryIdx || '0', 10) + 1;
-                if (tryIdx < EXT_LIST.length) {
-                    el.dataset.extTryIdx = tryIdx; el.dataset.extTried = 'true';
-                    const nextCandidate = basePath + EXT_LIST[tryIdx];
-                    el.onload = function() { resolvedCache[basePath] = nextCandidate; };
-                    el.src = nextCandidate;
-                } else if (currentSrc.includes(`/y${RAW_YEAR}/`)) {
-                    el.dataset.extTryIdx = '0';
-                    el.src = basePath.replace(`/y${RAW_YEAR}/`, '/y7/') + '.jpg';
-                } else {
-                    el.src = STAGE_FALLBACK_IMG[STAGE_GROUP] || STAGE_FALLBACK_IMG[2];
-                }
-            }, true);
-        })();
+    window.addEventListener('error', function(e) {
+        const el = e.target;
+        if (!el || el.tagName !== 'IMG') return;
+
+        const currentSrc = el.getAttribute('src') || '';
+        if (!currentSrc || currentSrc.startsWith('data:') || currentSrc.startsWith('blob:')) return;
+
+        if (!el.dataset.origRequestedSrc) el.dataset.origRequestedSrc = currentSrc;
+        const origKey = el.dataset.origRequestedSrc;
+
+        if (resolvedCache[origKey] && resolvedCache[origKey] !== currentSrc) {
+            el.src = resolvedCache[origKey];
+            return;
+        }
+        if (el.dataset.finalFallbackReached === 'true') return;
+
+        const fallbackBg = (typeof STAGE_FALLBACK_IMG !== 'undefined' && typeof STAGE_GROUP !== 'undefined')
+            ? (STAGE_FALLBACK_IMG[STAGE_GROUP] || STAGE_FALLBACK_IMG[1])
+            : 'assets/stage1-bg.jpg';
+
+        const baseMatch = currentSrc.match(/^(.*)\.(jpg|png|webp|jpeg|gif)$/i);
+        if (!baseMatch) {
+            el.dataset.finalFallbackReached = 'true';
+            el.src = fallbackBg;
+            return;
+        }
+
+        const basePath = baseMatch[1];
+        let tryIdx = parseInt(el.dataset.extTryIdx || '0', 10) + 1;
+
+        if (tryIdx < EXT_LIST.length) {
+            el.dataset.extTryIdx = String(tryIdx);
+            el.dataset.extTried = 'true';
+            const nextCandidate = basePath + EXT_LIST[tryIdx];
+            el.onload = function() { resolvedCache[origKey] = nextCandidate; };
+            el.src = nextCandidate;
+            return;
+        }
+
+        const yearMatch = basePath.match(/^(.*\/)y(\d+)(\/.*)$/i);
+        if (yearMatch) {
+            const prefix = yearMatch[1];
+            const curY = parseInt(yearMatch[2], 10);
+            const suffix = yearMatch[3];
+
+            if (curY > 1) {
+                el.dataset.extTryIdx = '0';
+                el.dataset.extTried = 'true';
+                const prevYearCandidate = `${prefix}y${curY - 1}${suffix}${EXT_LIST[0]}`;
+                el.onload = function() { resolvedCache[origKey] = prevYearCandidate; };
+                el.src = prevYearCandidate;
+                return;
+            }
+        }
+
+        el.dataset.finalFallbackReached = 'true';
+        el.src = fallbackBg;
+    }, true);
+})();
 // ==================== [ نهاية القسم 5 من 6 ] ====================
 </script>
 
@@ -4108,6 +4147,110 @@
         updateNavButtons(false);
 // ==================== [ نهاية القسم 6 من 6 ] ====================
 </script>
-<script src="interactive-labs.js"></script>
+<style>
+    /* ١. جعل سطح الدرس بالكامل (.workspace) هو منطقة التمرير الموحدة */
+    .workspace {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        justify-content: flex-start !important;
+        overscroll-behavior: contain;
+        scroll-behavior: smooth;
+        scrollbar-width: auto;
+        scrollbar-color: #10b981 rgba(6, 40, 30, 0.35);
+    }
+    .workspace::-webkit-scrollbar {
+        width: 10px;
+    }
+    .workspace::-webkit-scrollbar-track {
+        background: rgba(6, 40, 30, 0.35);
+        border-radius: 999px;
+    }
+    .workspace::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #10b981, #047857);
+        border-radius: 999px;
+        border: 2px solid #fde047;
+    }
+
+    /* ٢. تحرير البطاقة وجميع الحاويات الداخلية لتتمدد طبيعياً مع المحتوى دون شريط تمرير فرعي */
+    .content-area {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow: visible !important;
+        justify-content: flex-start !important;
+    }
+    .fancy-card {
+        flex: 1 1 auto !important;
+        height: auto !important;
+        min-height: calc(100dvh - 78px) !important;
+        overflow: visible !important;
+        padding-bottom: 84px !important;
+    }
+    .fancy-card:has(.intro-reveal-stage) {
+        padding: 0 !important;
+    }
+    .intro-reveal-stage {
+        flex: 1 1 auto !important;
+        height: auto !important;
+        min-height: calc(100dvh - 78px) !important;
+        padding-bottom: 84px !important;
+    }
+
+    /* ٣. ضبط أبعاد الفيديو والشرائح والمختبر والنصوص لتعرض كاملةً بسلاسة */
+    .fancy-card > div[style*="flex-direction:column"],
+    .fancy-card > div[style*="flex-direction: column"],
+    .slider-container,
+    .quiz-card,
+    .apply-structured-card {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    .video-wrapper-box {
+        height: clamp(240px, 58dvh, 540px) !important;
+        min-height: 240px !important;
+    }
+    .slider-image-box {
+        flex: 0 0 auto !important;
+        height: clamp(230px, 46dvh, 420px) !important;
+        min-height: 230px !important;
+    }
+    .slider-image-box:has(.interactive-lab-stage[style*="flex"]),
+    .slider-image-box:has(.auto-flashcard-stage[style*="flex"]) {
+        height: clamp(320px, 56dvh, 460px) !important;
+        min-height: 320px !important;
+    }
+    .slider-text-box {
+        flex: 0 0 auto !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        padding: 14px 18px !important;
+    }
+    .slider-text-content {
+        white-space: pre-line !important;
+    }
+    .quiz-options-grid.grid-2x1 {
+        max-height: none !important;
+    }
+
+    /* ٤. تثبيت زر الانتقال العائم في الزاوية السفلية اليسرى بعيداً عن شريط التمرير */
+    .corner-action-btn {
+        position: fixed !important;
+        bottom: 18px !important;
+        left: 24px !important;
+    }
+</style>
+
+<script>
+    /* إعادة سطح الدرس إلى الأعلى تلقائياً عند الانتقال لشريحة أو خطوة أو ختم جديد */
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.slider-nav-btn, .corner-action-btn, .nav-arrow-btn, .station-icon, .subject-btn, .layer-tab-btn')) {
+            const ws = document.querySelector('.workspace');
+            if (ws) ws.scrollTop = 0;
+        }
+    });
+</script>
+
 </body>
 </html>
