@@ -1039,7 +1039,7 @@
                 اخْتَرْ مَادَّتَكَ الأَسَاسِيَّةَ لِمَرَّةٍ وَاحِدَةٍ
             </h1>
             <p style="font-size:0.9rem; font-weight:800; color:#334155; line-height:1.65;">
-                المَادَّةُ الأَسَاسِيَّةُ الَّتِي تَخْتَارُهَا هُنَا تَأْخُذُ <strong>المَنْهَجَ التَّفْصِيلِيَّ بِأَكْمَلِهِ</strong> وَتَحْمِلُ <strong>٧٠٪</strong> مِنَ المِيزَانِ وَتَعْمَلُ أَسْئِلَتُهَا كَشُعَاعٍ يَشْمَلُ الأَنْمَاطَ السَّبْعَةَ مَعَ المُجِيبِ الآلِيِّ، بَيْنَمَا تَبْقَى المَوَادُّ السِّتُّ الأُخْرَى مَوَادَّ ثَقَافَةٍ عَامَّةٍ مُقْتَضَبَةٍ (<strong>٥٪</strong> لِكُلِّ مَادَّةٍ).
+                يُتَاحُ التَّخَصُّصُ الأَسَاسِيُّ حَصْراً فِي المَوَادِّ الأَرْبَعِ: <strong>(البَيَانُ، الرِّيَاضِيَّاتُ، العُلُومُ، الآدَابُ)</strong>؛ فَتَأْخُذُ المَادَّةُ الَّتِي تَخْتَارُهَا <strong>كِتَابَهَا التَّخَصُّصِيَّ الكَامِلَ بَدَلَ المُحْتَوَى العَامِّ</strong> بِوَزْنِ <strong>٧٠٪</strong>، بَيْنَمَا تَبْقَى بَقِيَّةُ المَوَادِّ (وَمِنْهَا القُرْآنُ وَالصَّوْتُ وَالرِّيَاضَةُ وَالمَنْطِقُ) مَوَادَّ عَامَّةً فَقَطْ (<strong>٥٪</strong> لِكُلِّ مَادَّةٍ).
             </p>
             <div class="gate-tracks-grid" id="gate-tracks-grid"></div>
             <div class="gate-warning-note">
@@ -1215,13 +1215,54 @@
         window.curriculumData      = window.curriculumData      || {};
         window._loadedS3Files      = window._loadedS3Files      || {};
 
+        const STAGE3_MAJOR_BOOK_FILES = {
+            2: 'كتاب البيان',
+            4: 'كتاب_الرياضيات_سن',
+            6: 'كتاب علوم',
+            7: 'كتاب الأداب'
+        };
+
+        function loadScriptWithCandidates(candidates, cacheKey, cb) {
+            if (window._loadedS3Files[cacheKey]) { cb(); return; }
+            const list = Array.isArray(candidates) ? candidates.filter(Boolean) : [candidates];
+            function tryAt(i) {
+                if (i >= list.length) {
+                    window._loadedS3Files[cacheKey] = true;
+                    cb();
+                    return;
+                }
+                const url = list[i];
+                if (url.endsWith('.json')) {
+                    fetch(url).then(r => {
+                        if (!r.ok) throw new Error('HTTP_' + r.status);
+                        return r.json();
+                    }).then(jsonData => {
+                        window.STAGE3_SPECIALIZED_JSON_PACKS = window.STAGE3_SPECIALIZED_JSON_PACKS || {};
+                        window.STAGE3_SPECIALIZED_JSON_PACKS[cacheKey] = jsonData;
+                        window._loadedS3Files[cacheKey] = true;
+                        cb();
+                    }).catch(() => tryAt(i + 1));
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = url;
+                s.onload = () => { window._loadedS3Files[cacheKey] = true; cb(); };
+                s.onerror = () => tryAt(i + 1);
+                document.head.appendChild(s);
+            }
+            tryAt(0);
+        }
+
         function loadScriptOnce(src, cb) {
-            if (window._loadedS3Files[src]) { cb(); return; }
-            const s = document.createElement('script');
-            s.src = src;
-            s.onload = () => { window._loadedS3Files[src] = true; cb(); };
-            s.onerror = () => { window._loadedS3Files[src] = true; cb(); };
-            document.head.appendChild(s);
+            const altCurr = src.startsWith('curriculum') ? `curriculums/${src}` : null;
+            const altBook = src.includes('major-y') ? (() => {
+                const m = src.match(/major-y(\d+)-s(\d+)\.js$/);
+                if (!m) return null;
+                const yr = m[1], sl = m[2];
+                return `books/year${yr}-book/curriculum-s3-major-y${yr}-s${sl}.js`;
+            })() : null;
+            const candidates = [altBook, altCurr, src].filter(Boolean);
+            loadScriptWithCandidates(candidates, src, cb);
         }
 
         function syncLegacyPacksIfPresent(year, cycleNum) {
@@ -1593,17 +1634,20 @@ window.Stage3LabEngine = (function() {
 
     const MAJOR_SEAL_KEY = 's3_committed_major_seal';
     const MAJOR_LOCKED_KEY = 's3_committed_major_locked';
+    // التخصص محصور حصراً في المواد الأربع: البيان (2)، الرياضيات (4)، العلوم (6)، الآداب (7)
+    // بينما تبقى: المنطق (1)، الصوت والقرآن (3)، والرياضة (5) مواداً عامة فقط (٥٪)
+    const ELIGIBLE_MAJOR_SEALS = [2, 4, 6, 7];
 
     function isMajorCommitted() {
         const val = parseInt(SafeStore.get(MAJOR_SEAL_KEY) || '0', 10);
-        return SafeStore.get(MAJOR_LOCKED_KEY) === '1' && val >= 1 && val <= 7;
+        return SafeStore.get(MAJOR_LOCKED_KEY) === '1' && ELIGIBLE_MAJOR_SEALS.includes(val);
     }
     function getMajorSeal() {
         const val = parseInt(SafeStore.get(MAJOR_SEAL_KEY) || '0', 10);
-        return (val >= 1 && val <= 7) ? val : 1;
+        return ELIGIBLE_MAJOR_SEALS.includes(val) ? val : 2;
     }
     function lockMajorChoiceOnce(sealNum) {
-        if (isMajorCommitted()) return;
+        if (isMajorCommitted() || !ELIGIBLE_MAJOR_SEALS.includes(sealNum)) return;
         SafeStore.set(MAJOR_SEAL_KEY, String(sealNum));
         SafeStore.set(MAJOR_LOCKED_KEY, '1');
     }
@@ -1775,7 +1819,7 @@ window.Stage3LabEngine = (function() {
         let pendingChoice = null;
         grid.innerHTML = '';
 
-        for (let s = 1; s <= 7; s++) {
+        ELIGIBLE_MAJOR_SEALS.forEach(s => {
             const card = document.createElement('button');
             card.type = 'button';
             card.className = 'gate-track-option';
@@ -1793,7 +1837,7 @@ window.Stage3LabEngine = (function() {
                 confirmBtn.disabled = false;
             };
             grid.appendChild(card);
-        }
+        });
 
         confirmBtn.onclick = () => {
             if (!pendingChoice) return;
@@ -1849,10 +1893,10 @@ window.Stage3LabEngine = (function() {
         [0, 1, 2].forEach(stIdx => {
             const pill = document.getElementById(`st-pill-${stIdx}`);
             if (!pill) return;
-            const canOpen = isFreeExplore || stIdx <= Math.max(stProg, activeStation);
+            pill.style.display = 'inline-flex';
+            pill.classList.remove('locked');
             pill.classList.toggle('active', stIdx === activeStation);
             pill.classList.toggle('done', stIdx < stProg || hasSealStar(activeYear, playWeek, activeSeal));
-            pill.classList.toggle('locked', !canOpen);
         });
 
         const srcBadge = document.getElementById('book-source-badge');
@@ -1881,13 +1925,12 @@ window.Stage3LabEngine = (function() {
 
         const cornerBtn = document.getElementById('corner-next-btn');
         const isFinalStation = (activeStation === 2);
+        cornerBtn.style.display = 'flex';
+        cornerBtn.disabled = false;
         cornerBtn.classList.toggle('star-mode', isFinalStation);
         if (isFinalStation) {
-            cornerBtn.disabled = false;
             cornerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
         } else {
-            const canAdvance = (activeStation === 0) || currentQuestionResolved || isFreeExplore;
-            cornerBtn.disabled = !canAdvance;
             cornerBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`;
         }
     }
@@ -2183,16 +2226,29 @@ window.Stage3LabEngine = (function() {
 
         const major = getMajorSeal();
         const isMajorActive = (activeSeal === major);
-        const genEntry = getGeneralBookEntry(activeYear, playWeek, activeSeal);
+        const genEntry = isMajorActive
+            ? {
+                title: majLessonObj?.title || getGeneralBookEntry(activeYear, playWeek, activeSeal).title,
+                essence: (majLessonObj?.slides || []).map(s => s.text).join('\n\n'),
+                apply: majLessonObj?.apply || ''
+              }
+            : getGeneralBookEntry(activeYear, playWeek, activeSeal);
 
-        const sourceTexts = [genEntry.essence];
-        if (isMajorActive) {
-            const majSlides = getMajorBookLesson(activeYear, playWeek, major).slides || [];
-            majSlides.forEach(s => { if (s.text) sourceTexts.push(s.text); });
-        }
+        const majLessonObj = isMajorActive ? getMajorBookLesson(activeYear, playWeek, major) : null;
+        const sourceTexts = isMajorActive
+            ? (majLessonObj?.slides || []).map(s => s.text).filter(Boolean)
+            : [genEntry.essence];
+        if (sourceTexts.length === 0) sourceTexts.push(genEntry.essence);
 
         if (!currentQuizData || forceRayShift) {
-            if (isMajorActive && forceRayShift) {
+            const majQs = isMajorActive && Array.isArray(majLessonObj?.questions) ? majLessonObj.questions : [];
+            if (isMajorActive && majQs.length > 0 && !forceRayShift) {
+                const picked = majQs[Math.floor(Math.random() * majQs.length)];
+                currentQuizData = JSON.parse(JSON.stringify(picked));
+                if (Array.isArray(currentQuizData.options)) {
+                    currentQuizData.options.sort(() => Math.random() - 0.5);
+                }
+            } else if (isMajorActive && forceRayShift) {
                 majorRayIndex = (majorRayIndex % 7) + 1;
                 currentQuizData = window.Stage3QuestionEngine.buildQuestionByPattern(
                     { _mode: majorRayIndex, _forceRay: true }, sourceTexts, genEntry, playWeek
@@ -2396,8 +2452,13 @@ window.Stage3LabEngine = (function() {
         window.Stage3LabEngine.stop();
         const host = document.getElementById('station-body-host');
         host.scrollTop = 0;
+        const major = getMajorSeal();
+        const isMajorActive = (activeSeal === major);
+        const majLesson = isMajorActive ? getMajorBookLesson(activeYear, playWeek, major) : null;
         const genEntry = getGeneralBookEntry(activeYear, playWeek, activeSeal);
-        const stepText = genEntry.apply || 'طَبِّقْ مَا تَعَلَّمْتَهُ فِي هٰذِهِ الوَحْدَةِ بِإِتْقَانٍ.';
+        const stepText = (isMajorActive && majLesson?.apply)
+            ? majLesson.apply
+            : (genEntry.apply || 'طَبِّقْ مَا تَعَلَّمْتَهُ فِي هٰذِهِ الوَحْدَةِ بِإِتْقَانٍ.');
 
         host.innerHTML = `
             <div class="apply-card-box">
@@ -2419,10 +2480,7 @@ window.Stage3LabEngine = (function() {
 
     function handleCornerButtonAction() {
         if (activeStation === 0) { activeStation = 1; currentQuizData = null; renderActiveView(); return; }
-        if (activeStation === 1) {
-            if (!currentQuestionResolved && !isFreeExplore) return;
-            activeStation = 2; renderActiveView(); return;
-        }
+        if (activeStation === 1) { activeStation = 2; renderActiveView(); return; }
 
         const major = getMajorSeal();
         if (!isFreeExplore) {
@@ -2432,7 +2490,33 @@ window.Stage3LabEngine = (function() {
         updateChromeUI();
 
         const sc = calculateYearWeightedScore(activeYear);
-        if (activeSeal === major) {
+        // في وضع التسلسل: الانتقال من ختم إلى ختم يتم عبر زر التالي في المحطة الأخيرة للتطبيق
+        if (!isFreeExplore && !isUniversityYear()) {
+            let nextUnfinishedSeal = null;
+            for (let step = 1; step <= 7; step++) {
+                const cand = ((activeSeal - 1 + step) % 7) + 1;
+                if (cand !== major && !hasSealStar(activeYear, playWeek, cand)) {
+                    nextUnfinishedSeal = cand;
+                    break;
+                }
+            }
+            if (nextUnfinishedSeal !== null) {
+                showToast(`تَمَّ إِتْمَامُ الخَتْمِ! الِانْتِقَالُ إِلَى: ${SEAL_NAMES[nextUnfinishedSeal]} ⬅`);
+                activeSeal = nextUnfinishedSeal;
+                activeStation = 0; currentSlideIdx = 0; isLabMode = false; currentQuizData = null;
+                renderActiveView();
+                return;
+            }
+            if (activeSeal !== major && !hasSealStar(activeYear, playWeek, major)) {
+                showToast(`الِانْتِقَالُ إِلَى مَادَّتِكَ الأَسَاسِيَّةِ: ${SEAL_NAMES[major]} 👑`);
+                activeSeal = major;
+                activeStation = 0; currentSlideIdx = 0; isLabMode = false; currentQuizData = null;
+                renderActiveView();
+                return;
+            }
+        }
+
+        if (activeSeal === major || hasSealStar(activeYear, playWeek, major)) {
             const meta = getLessonMeta(activeYear, playWeek);
             document.getElementById('complete-modal-title').textContent = `أَتْمَمْتَ خَتْمَ مَادَّتِكَ الأَسَاسِيَّةِ فِي وَحْدَةِ (${meta.rawLtr})!`;
             document.getElementById('complete-stars-row').textContent = '👑⭐';
@@ -2568,6 +2652,10 @@ window.Stage3LabEngine = (function() {
     document.querySelectorAll('.seal-btn').forEach(btn => {
         btn.onclick = () => {
             const s = parseInt(btn.dataset.seal, 10);
+            if (!isFreeExplore && s !== activeSeal && !hasSealStar(activeYear, playWeek, s)) {
+                showToast('فِي وَضْعِ التَّسَلْسُلِ يَتِمُّ الِانْتِقَالُ بَيْنَ الأَخْتَامِ عَبْرَ زِرِّ التَّالِي فِي مَحَطَّةِ التَّطْبِيقِ 🔒');
+                return;
+            }
             activeSeal = s; activeStation = 0; currentSlideIdx = 0; isLabMode = false; currentQuizData = null;
             renderActiveView();
         };
@@ -2576,8 +2664,6 @@ window.Stage3LabEngine = (function() {
     document.querySelectorAll('.st-pill').forEach(pill => {
         pill.onclick = () => {
             const st = parseInt(pill.dataset.st, 10);
-            const stProg = getSealStationProgress(activeYear, playWeek, activeSeal);
-            if (!isFreeExplore && st > Math.max(stProg, activeStation)) { showToast('أَتْمِمْ المَحَطَّةَ الحَالِيَّةَ أَوَّلًا 🔒'); return; }
             activeStation = st;
             if (st === 1) currentQuizData = null;
             renderActiveView();

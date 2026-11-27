@@ -1840,7 +1840,6 @@
                 return;
             }
 
-            const scriptSrc = `curriculum-y${year}-c${safeCycle}.js`;
             const existing = document.querySelector(`script[data-cycle-key="${cacheKey}"]`);
             if (existing) {
                 syncStage2CurriculaIntoApp(year, safeCycle);
@@ -1849,20 +1848,33 @@
                 return;
             }
 
-            const s = document.createElement('script');
-            s.src = scriptSrc;
-            s.async = false;
-            s.dataset.cycleKey = cacheKey;
-            s.onload = () => {
-                syncStage2CurriculaIntoApp(year, safeCycle);
-                window._loadedStage2Cycles[cacheKey] = true;
-                if (typeof onComplete === 'function') onComplete();
-            };
-            s.onerror = () => {
-                window._loadedStage2Cycles[cacheKey] = true;
-                if (typeof onComplete === 'function') onComplete();
-            };
-            document.head.appendChild(s);
+            const candidates = [
+                `curriculums/curriculum-y${year}-c${safeCycle}.js`,
+                `curriculum-y${year}-c${safeCycle}.js`
+            ];
+
+            function tryLoadCandidate(idx) {
+                if (idx >= candidates.length) {
+                    window._loadedStage2Cycles[cacheKey] = true;
+                    if (typeof onComplete === 'function') onComplete();
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = candidates[idx];
+                s.async = false;
+                s.dataset.cycleKey = cacheKey;
+                s.onload = () => {
+                    syncStage2CurriculaIntoApp(year, safeCycle);
+                    window._loadedStage2Cycles[cacheKey] = true;
+                    if (typeof onComplete === 'function') onComplete();
+                };
+                s.onerror = () => {
+                    tryLoadCandidate(idx + 1);
+                };
+                document.head.appendChild(s);
+            }
+
+            tryLoadCandidate(0);
         }
 
         (function() {
@@ -1873,10 +1885,10 @@
             window._isPrivateSchoolTemplateMode = (activeBranch !== 'main');
 
             if (activeBranch === 'main') {
-                document.write('<script src="curriculum-y' + RAW_YEAR + '.js"><\/script>');
-                document.write('<script src="curriculum-y' + RAW_YEAR + '-c1.js" data-cycle-key="' + RAW_YEAR + '_c1"><\/script>');
+                document.write('<script src="curriculums/curriculum-y' + RAW_YEAR + '.js" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-y' + RAW_YEAR + '.js\';document.head.appendChild(s);}"><\/script>');
+                document.write('<script src="curriculums/curriculum-y' + RAW_YEAR + '-c1.js" data-cycle-key="' + RAW_YEAR + '_c1" onload="if(typeof syncStage2CurriculaIntoApp===\'function\')syncStage2CurriculaIntoApp(' + RAW_YEAR + ',1);" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-y' + RAW_YEAR + '-c1.js\';s.onload=function(){if(typeof syncStage2CurriculaIntoApp===\'function\')syncStage2CurriculaIntoApp(' + RAW_YEAR + ',1);};document.head.appendChild(s);}"><\/script>');
             } else {
-                document.write('<script src="curriculum-master.js"><\/script>');
+                document.write('<script src="curriculums/curriculum-master.js" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-master.js\';document.head.appendChild(s);}"><\/script>');
             }
         })();
     </script>
@@ -2602,7 +2614,10 @@
             let prevBtn = document.getElementById('prev-btn');
             let nextBtn = document.getElementById('next-btn');
             if (prevBtn) prevBtn.disabled = (globalStep === 0);
-            if (nextBtn) nextBtn.disabled = !(enableNext || isFreeExplore || isSecretEditMode);
+            if (nextBtn) {
+                nextBtn.style.display = 'inline-flex';
+                nextBtn.disabled = false;
+            }
 
             let defData = getActiveCurriculumObj();
             for (let i = 0; i < 4; i++) {
@@ -3342,8 +3357,10 @@
             card.appendChild(optsGrid);
             contentDiv.appendChild(card);
 
+            updateNavButtons(true);
+            showCornerAction(() => handleNextClick(), false);
             let spokenQ = (focus && focus !== stem) ? `${stem} ، ${focus}` : stem;
-            speakText(spokenQ, () => { if (isFreeExplore || isSecretEditMode) updateNavButtons(true); });
+            speakText(spokenQ, () => { updateNavButtons(true); showCornerAction(() => handleNextClick(), false); });
             if (isSecretEditMode) attachEditHooksToCurrentStation(defData);
         }
 
@@ -3684,10 +3701,8 @@
                                 imgEl.src = s.img || activeDefaultImg || defaultImg;
                                 zoomCornerBtn.style.display = isSecretEditMode ? 'none' : 'inline-flex';
                             }
-                            if (currentSlide >= slides.length - 1 || isFreeExplore) {
-                                updateNavButtons(true);
-                                showCornerAction(() => handleNextClick(), false);
-                            }
+                            updateNavButtons(true);
+                            showCornerAction(() => handleNextClick(), false);
                         }
 
                         textContent.innerHTML = colorizeHarakaAndMadd(s.text || `هٰذَا دَرْسُ (${subjName}) قَيْدُ التَّحْضِيرِ`);
@@ -3756,7 +3771,7 @@
             if (existingCorner) existingCorner.remove();
 
             let contentDiv = document.getElementById('main-content');
-            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').disabled = false;
             document.getElementById('prev-btn').disabled = true;
 
             if (isFreeExplore || isSecretEditMode) {
@@ -4261,16 +4276,16 @@
         left: 18px;
         right: auto;
         bottom: auto;
-        width: clamp(42px, 6.8vmin, 50px);
-        height: clamp(42px, 6.8vmin, 50px);
+        width: clamp(44px, 7vmin, 52px);
+        height: clamp(44px, 7vmin, 52px);
         border-radius: 50%;
-        background: rgba(15, 23, 42, 0.28);
+        background: linear-gradient(135deg, #065f46 0%, #022c22 100%);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        border: 1.5px solid rgba(250, 204, 21, 0.35);
-        color: rgba(254, 240, 138, 0.7);
+        border: 2.5px solid #fde047;
+        color: #fef08a;
         font-family: 'Cairo', 'Tajawal', sans-serif;
-        font-size: clamp(1.35rem, 3.4vmin, 1.75rem);
+        font-size: clamp(1.4rem, 3.5vmin, 1.85rem);
         font-weight: 900;
         line-height: 1;
         display: flex;
@@ -4278,8 +4293,8 @@
         justify-content: center;
         cursor: pointer;
         z-index: 9500;
-        opacity: 0.32;
-        box-shadow: none;
+        opacity: 0.96;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 12px rgba(250, 204, 21, 0.35);
         transition: opacity 0.25s ease, transform 0.22s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
     }
     #ai-tutor-q-btn:hover,
@@ -4489,7 +4504,7 @@
     }
 
     @media (max-width: 680px) {
-        #ai-tutor-q-btn { width: 38px; height: 38px; top: 64px; left: 10px; font-size: 1.25rem; }
+        #ai-tutor-q-btn { width: 40px; height: 40px; top: 58px; left: 10px; font-size: 1.3rem; opacity: 0.96; }
     }
 </style>
 
