@@ -1,13 +1,15 @@
 {
-  "name": "مَدْرَسَةُ العِلْمِ",
-  "short_name": "العِلْم",
-  "description": "منصة اطلب العلم التعليمية اللامركزية",
-  "start_url": "./face.html",
+  "name": "مدرسة العلم | اطلبوا العلم من المهد إلى اللحد",
+  "short_name": "مدرسة العلم",
+  "description": "المنصة التعليمية التفاعلية للمراحل الثلاث: سيد وعبد وصاحب (من 1 إلى 21 سنة)",
+  "start_url": "./index.html",
   "scope": "./",
-  "display": "fullscreen",
-  "orientation": "landscape",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "any",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#06281e",
+  "theme_color": "#064e3b",
   "icons": [
     {
       "src": "icon-192.png",

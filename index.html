@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>
+    (function autoRefreshStaleCacheV6() {
+        try {
+            var VER = 'al3lm_layout_v8';
+            if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
+                localStorage.setItem('al3lm_ui_cache_ver', VER);
+                if ('caches' in window) {
+                    caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
+                }
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(regs) { regs.forEach(function(r) { r.update(); }); });
+                }
+            }
+        } catch (e) {}
+    })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>مدرسة العلم | بوابة الدخول والاشتراك</title>
@@ -350,10 +366,18 @@
             <p class="brand-sub">اطلبوا العلم من المهد إلى اللحد — بوابة التلميذ والمعلم</p>
         </div>
 
-        <button type="button" class="install-app-btn" id="install-pwa-btn" onclick="triggerInstallApp()">
-            <span>📲</span>
-            <span>تنزيل المنصة كتطبيق على الهاتف</span>
-        </button>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <button type="button" class="install-app-btn" id="install-pwa-btn" onclick="triggerInstallApp()">
+                <span>📲</span>
+                <span>تنزيل المنصة كتطبيق على الهاتف</span>
+            </button>
+            <div class="orient-picker-bar" role="group" aria-label="اختيار اتجاه شاشة الهاتف">
+                <span class="orient-picker-lbl">📱 اتجاه الشاشة:</span>
+                <button type="button" class="orient-chip-btn active" data-orient-choice="any" onclick="setAl3lmOrientation('any')">🔄 تلقائي</button>
+                <button type="button" class="orient-chip-btn" data-orient-choice="landscape" onclick="setAl3lmOrientation('landscape')">↔️ أفقي</button>
+                <button type="button" class="orient-chip-btn" data-orient-choice="portrait" onclick="setAl3lmOrientation('portrait')">↕️ عمودي</button>
+            </div>
+        </div>
 
         <!-- ١. اختيار الصفة أولاً: تلميذ أو معلم -->
         <div class="role-tabs" role="tablist" aria-label="اختر نوع الحساب">
@@ -898,5 +922,214 @@
         }
     })();
     </script>
+
+<style id="al3lm-orientation-styles">
+.orient-picker-bar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #ecfdf5;
+    border: 1.5px solid #6ee7b7;
+    border-radius: 999px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+}
+.orient-picker-lbl {
+    font-size: 0.76rem;
+    font-weight: 900;
+    color: #065f46;
+    margin-left: 3px;
+}
+.orient-chip-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    background: #ffffff;
+    color: #334155;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.orient-chip-btn.active {
+    background: linear-gradient(135deg, #059669, #064e3b);
+    color: #fef08a;
+    border-color: #eab308;
+    box-shadow: 0 3px 8px rgba(6,78,59,0.28);
+}
+/* تنبيه لطيف قابل للإغلاق عندما يختار المستخدم وضعاً محدداً (أفقي أو عمودي) على متصفح يمنع التدوير البرمجي التلقائي (مثل iOS) */
+#al3lm-rotate-hint-banner {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12000;
+    background: rgba(6, 40, 30, 0.96);
+    color: #fef08a;
+    border: 2px solid #eab308;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    max-width: 94vw;
+}
+#al3lm-rotate-hint-banner button {
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-weight: 900;
+    cursor: pointer;
+}
+</style>
+<script>
+(function initAl3lmOrientationManager() {
+    const KEY = 'al3lm_screen_orientation'; // 'any' | 'landscape' | 'portrait'
+    const LABELS = {
+        any: '🔄 تلقائي (حر)',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+    const SHORT_LABELS = {
+        any: '🔄 حر',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+
+    function getPref() {
+        const v = localStorage.getItem(KEY);
+        return (v === 'landscape' || v === 'portrait') ? v : 'any';
+    }
+
+    let hintDismissedForMode = '';
+
+    function checkPhysicalMismatchHint(mode) {
+        let banner = document.getElementById('al3lm-rotate-hint-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'al3lm-rotate-hint-banner';
+            banner.innerHTML = '<span id="al3lm-rotate-hint-txt"></span><button type="button" title="إخفاء">×</button>';
+            banner.querySelector('button').onclick = function() {
+                hintDismissedForMode = getPref();
+                banner.style.display = 'none';
+            };
+            document.body.appendChild(banner);
+        }
+        if (mode === 'any' || hintDismissedForMode === mode) {
+            banner.style.display = 'none';
+            return;
+        }
+        const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
+        if (mode === 'landscape' && !isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↔️ أدر الهاتف أفقياً للعرض بالوضع الأفقي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else if (mode === 'portrait' && isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↕️ أدر الهاتف عمودياً للعرض بالوضع العمودي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    async function applyOrientationLock(mode, fromUserGesture = false) {
+        try {
+            if (mode === 'any') {
+                if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+                    screen.orientation.unlock();
+                }
+                if (fromUserGesture && document.fullscreenElement && document.exitFullscreen) {
+                    await document.exitFullscreen().catch(() => {});
+                }
+            } else {
+                const lockTarget = mode === 'landscape' ? 'landscape' : 'portrait';
+                let lockedOk = false;
+                if (screen.orientation && typeof screen.orientation.lock === 'function') {
+                    try {
+                        await screen.orientation.lock(lockTarget);
+                        lockedOk = true;
+                    } catch (err) {
+                        // في المتصفح العادي على أندرويد (خارج التطبيق المثبّت)، قد يتطلب قفل الشاشة تفعيل ملء الشاشة أولاً عند نقر المستخدم
+                        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                        if (fromUserGesture && !isStandalone && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+                            try {
+                                await document.documentElement.requestFullscreen();
+                                await screen.orientation.lock(lockTarget);
+                                lockedOk = true;
+                            } catch (_) {}
+                        }
+                    }
+                }
+            }
+        } catch (_) {}
+        updateAllOrientationButtonsUI(mode);
+        setTimeout(() => checkPhysicalMismatchHint(mode), 220);
+    }
+
+    function updateAllOrientationButtonsUI(mode) {
+        document.querySelectorAll('[data-orient-choice]').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-orient-choice') === mode);
+        });
+        document.querySelectorAll('.al3lm-orient-cycle-btn').forEach(btn => {
+            const isCompact = btn.classList.contains('compact-orient');
+            const lblEl = btn.querySelector('.btn-lbl');
+            const icoEl = btn.querySelector('.btn-ico');
+            if (lblEl && icoEl) {
+                icoEl.textContent = mode === 'landscape' ? '↔️' : (mode === 'portrait' ? '↕️' : '🔄');
+                lblEl.textContent = mode === 'landscape' ? 'أفقي' : (mode === 'portrait' ? 'عمودي' : 'تلقائي');
+            } else {
+                btn.innerHTML = isCompact ? SHORT_LABELS[mode] : `📱 الاتجاه: ${LABELS[mode]}`;
+            }
+            btn.title = `اتجاه شاشة الهاتف الحالي: ${LABELS[mode]} (اضغط للتبديل بين حر / أفقي / عمودي)`;
+        });
+    }
+
+    window.setAl3lmOrientation = function(mode) {
+        const clean = (mode === 'landscape' || mode === 'portrait') ? mode : 'any';
+        hintDismissedForMode = '';
+        localStorage.setItem(KEY, clean);
+        applyOrientationLock(clean, true);
+    };
+
+    window.cycleAl3lmOrientation = function() {
+        const cur = getPref();
+        const next = cur === 'any' ? 'landscape' : (cur === 'landscape' ? 'portrait' : 'any');
+        window.setAl3lmOrientation(next);
+    };
+
+    window.addEventListener('resize', () => checkPhysicalMismatchHint(getPref()));
+    window.addEventListener('orientationchange', () => setTimeout(() => checkPhysicalMismatchHint(getPref()), 200));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = getPref();
+        updateAllOrientationButtonsUI(saved);
+        if (saved !== 'any') {
+            applyOrientationLock(saved, false);
+            // إعادة تطبيق القفل عند أول لمسة للمستخدم إذا كان التطبيق المثبّت يحتاج تفاعلاً أولياً
+            const onceLock = () => {
+                const cur = getPref();
+                if (cur !== 'any' && screen.orientation && typeof screen.orientation.lock === 'function') {
+                    screen.orientation.lock(cur).catch(() => {});
+                }
+                document.removeEventListener('click', onceLock);
+            };
+            document.addEventListener('click', onceLock, { once: true });
+        }
+    });
+})();
+</script>
+
 </body>
 </html>

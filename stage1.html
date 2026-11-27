@@ -1605,6 +1605,9 @@
                 </button>
 
                 <div class="map-settings-drawer" id="map-settings-drawer">
+                    <button type="button" class="setting-glass-btn al3lm-orient-cycle-btn" onclick="cycleAl3lmOrientation()">
+                        📱 الاتجاه: 🔄 تلقائي (حر)
+                    </button>
                     <button type="button" id="tts-toggle" class="setting-glass-btn" onclick="toggleTTS()">
                         <span id="tts-icon-span">🔊</span>
                         <span id="tts-label-span">القارئ: مفعل</span>
@@ -1711,53 +1714,200 @@
 
     </script>
 
-    <!-- تحميل ملف السنة المستقل لمدرسة العلم فقط، أو تحميل القالب الإرشادي للمدارس الخاصة -->
+    <!-- محرك التحميل المضمون ١٠٠٪ لملفات مناهج المرحلة الأولى (يدعم curriculums/curriculum-y1..y7.js و .json وجميع المدارس العامة والخاصة دون document.write) -->
     <script>
-        (function() {
+        window.curriculumData = window.curriculumData || {};
+        window._s1CurriculumReady = false;
+        window._s1ReadyCallbacks = [];
+
+        window.ensureStage1CurriculumLoaded = function(onReady) {
+            // فحص إن كانت بيانات السنة محمّلة فعلاً وبها وحدات
+            const hasYearData = (yr) => {
+                try {
+                    if (typeof curriculumData !== 'undefined' && curriculumData && curriculumData[yr] && Object.keys(curriculumData[yr]).length > 0) {
+                        window.curriculumData = curriculumData;
+                        return true;
+                    }
+                } catch (_) {}
+                return Boolean(window.curriculumData && window.curriculumData[yr] && Object.keys(window.curriculumData[yr]).length > 0);
+            };
+
+            if (window._s1CurriculumReady && (hasYearData(RAW_YEAR) || hasYearData(SCHOOL_YEAR) || hasYearData(7))) {
+                if (typeof onReady === 'function') onReady();
+                return;
+            }
+            if (typeof onReady === 'function') window._s1ReadyCallbacks.push(onReady);
+            if (window._s1LoadingInProgress) return;
+            window._s1LoadingInProgress = true;
+
+            const flushReady = () => {
+                try {
+                    if (typeof curriculumData !== 'undefined' && curriculumData) {
+                        Object.assign(window.curriculumData, curriculumData);
+                    }
+                } catch (_) {}
+                window._s1CurriculumReady = true;
+                window._s1LoadingInProgress = false;
+                const cbs = window._s1ReadyCallbacks.splice(0);
+                cbs.forEach(fn => { try { fn(); } catch (_) {} });
+            };
+
             let blocked = [];
             try { blocked = JSON.parse(localStorage.getItem('blocked_schools_list') || '[]'); } catch (e) {}
             const rawBranch = urlParams.get('school') || localStorage.getItem('selected_school_branch') || 'main';
             const activeBranch = blocked.includes(rawBranch) ? 'main' : rawBranch;
 
-            window._loadedCurriculumFiles = window._loadedCurriculumFiles || {};
-            window.loadCurriculumScriptWithFallback = function(fileName, onDone) {
-                if (window._loadedCurriculumFiles[fileName]) {
-                    if (typeof onDone === 'function') onDone();
-                    return;
+            // قائمة المسارات المرشحة بالترتيب: تحمل دائماً ملف السنة الحقيقي حتى في المدارس الخاصة إذا لم يوجد curriculum-master!
+            const jsCandidates = [];
+            if (activeBranch !== 'main') {
+                jsCandidates.push('curriculums/curriculum-master.js', 'curriculum-master.js');
+            }
+            jsCandidates.push(
+                `curriculums/curriculum-y${RAW_YEAR}.js`,
+                `curriculum-y${RAW_YEAR}.js`,
+                `curriculums/curriculum_y${RAW_YEAR}.js`,
+                `curriculums/curriculum-y${SCHOOL_YEAR}.js`,
+                `curriculums/curriculum-y7.js`
+            );
+
+            const jsonCandidates = [
+                `curriculums/curriculum-y${RAW_YEAR}.json`,
+                `curriculum-y${RAW_YEAR}.json`,
+                `curriculums/curriculum_y${RAW_YEAR}.json`
+            ];
+
+            // استيعاب أي صيغة JSON خام أو كائن منهج وتحويلها فوراً إلى window.curriculumData[RAW_YEAR]
+            function ingestRawParsedCurriculum(parsed, yr) {
+                if (!parsed || typeof parsed !== 'object') return false;
+                window.curriculumData = window.curriculumData || {};
+                // الصيغة ١: { "1": { "1": { learn, play, apply } } } أو { "7": { "1": { "1": ... } } }
+                if (parsed[yr] && typeof parsed[yr] === 'object' && (parsed[yr][1] || parsed[yr]['1'])) {
+                    window.curriculumData[yr] = parsed[yr];
+                    return true;
                 }
-                const candidates = [
-                    'curriculums/' + fileName,
-                    './' + fileName
-                ];
-                function tryAt(idx) {
-                    if (idx >= candidates.length) {
-                        window._loadedCurriculumFiles[fileName] = true;
-                        if (typeof onDone === 'function') onDone();
+                if ((parsed[1] || parsed['1']) && (parsed[1]?.[1] || parsed['1']?.['1'] || parsed[1]?.learn || parsed['1']?.learn)) {
+                    window.curriculumData[yr] = parsed;
+                    return true;
+                }
+                // الصيغة ٢: بنية units + seals (مثل { units: [ { unit: 1, seals: { "1": {...} } } ] })
+                if (Array.isArray(parsed.units)) {
+                    window.curriculumData[yr] = window.curriculumData[yr] || {};
+                    parsed.units.forEach((u, idx) => {
+                        const w = parseInt(u.unit, 10) || (idx + 1);
+                        window.curriculumData[yr][w] = window.curriculumData[yr][w] || {};
+                        const seals = u.seals || {};
+                        for (let s = 1; s <= 7; s++) {
+                            const sl = seals[s] || seals[String(s)];
+                            if (!sl) continue;
+                            if (sl.learn || sl.play || sl.apply) {
+                                window.curriculumData[yr][w][s] = sl;
+                            } else {
+                                const paras = String(sl.content || sl.text || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+                                window.curriculumData[yr][w][s] = {
+                                    learn: {
+                                        introTitle: sl.title || sl.introTitle || '',
+                                        introGoal: sl.goal || sl.introGoal || paras[0] || '',
+                                        slides: Array.isArray(sl.slides) ? sl.slides : paras.map(p => ({ text: p }))
+                                    },
+                                    play: {
+                                        questions: Array.isArray(sl.questions) ? sl.questions.map(q => ({
+                                            q: q.q || q.question || '',
+                                            options: Array.isArray(q.options) ? q.options : [
+                                                { text: q.answer || 'صَحّ ✔️', correct: true },
+                                                { text: 'خَطَأ ✖️', correct: false }
+                                            ]
+                                        })) : []
+                                    },
+                                    apply: {
+                                        steps: Array.isArray(sl.steps) ? sl.steps : (sl.apply ? [sl.apply] : [paras[paras.length - 1] || ''])
+                                    }
+                                };
+                            }
+                        }
+                    });
+                    return Object.keys(window.curriculumData[yr]).length > 0;
+                }
+                return false;
+            }
+
+            // معالجة ملفات .js التي قد تعرّف `const curriculumData = ...` (والتي لا ترتبط بـ window تلقائياً) أو تحتوي JSON صريحاً
+            async function tryFetchAndEvalCandidate(urlList, idx, onFail) {
+                if (idx >= urlList.length) { onFail(); return; }
+                const url = urlList[idx];
+                try {
+                    const res = await fetch(url, { cache: 'no-cache' });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const rawTxt = await res.text();
+                    const trimmed = rawTxt.trim();
+                    if (!trimmed || trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
+                        throw new Error('HTML_FALLBACK');
+                    }
+                    // إذا كان ملف JSON صريحاً يبدأ بـ { أو [
+                    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                        const j = JSON.parse(trimmed);
+                        if (ingestRawParsedCurriculum(j, RAW_YEAR)) {
+                            flushReady();
+                            return;
+                        }
+                    }
+                    // إذا كان ملف JS يعرّف const/let/var curriculumData أو window.curriculumData
+                    const fn = new Function(
+                        rawTxt +
+                        '\n;if(typeof curriculumData!=="undefined"){window.curriculumData=Object.assign(window.curriculumData||{},curriculumData);}' +
+                        '\n;if(typeof STAGE1_CURRICULA!=="undefined"){window.STAGE1_CURRICULA=STAGE1_CURRICULA;}'
+                    );
+                    fn();
+                    if (hasYearData(RAW_YEAR) || hasYearData(SCHOOL_YEAR)) {
+                        flushReady();
                         return;
                     }
-                    const sc = document.createElement('script');
-                    sc.src = candidates[idx];
-                    sc.async = false;
-                    sc.onload = function() {
-                        window._loadedCurriculumFiles[fileName] = true;
-                        if (typeof onDone === 'function') onDone();
-                    };
-                    sc.onerror = function() {
-                        tryAt(idx + 1);
-                    };
-                    document.head.appendChild(sc);
-                }
-                tryAt(0);
-            };
-
-            if (activeBranch === 'main') {
-                document.write('<script src="curriculums/curriculum-y' + RAW_YEAR + '.js" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-y' + RAW_YEAR + '.js\';document.head.appendChild(s);}"><\/script>');
-            } else {
-                document.write('<script src="curriculums/curriculum-master.js" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-master.js\';document.head.appendChild(s);}"><\/script>');
+                } catch (_) {}
+                tryFetchAndEvalCandidate(urlList, idx + 1, onFail);
             }
-        })();
+
+            function tryScriptTagCandidates(idx) {
+                if (hasYearData(RAW_YEAR) || hasYearData(SCHOOL_YEAR)) {
+                    flushReady();
+                    return;
+                }
+                if (idx >= jsCandidates.length) {
+                    // محاولة أخيرة عبر fetch (تحل مشكلة ملفات JSON أو ملفات JS المكتوبة بـ const بدون window)
+                    tryFetchAndEvalCandidate([...jsCandidates, ...jsonCandidates], 0, flushReady);
+                    return;
+                }
+                const sc = document.createElement('script');
+                sc.src = jsCandidates[idx];
+                sc.onload = function() {
+                    try {
+                        if (typeof curriculumData !== 'undefined' && curriculumData) {
+                            window.curriculumData = Object.assign(window.curriculumData || {}, curriculumData);
+                        }
+                    } catch (_) {}
+                    if (hasYearData(RAW_YEAR) || hasYearData(SCHOOL_YEAR)) {
+                        flushReady();
+                    } else {
+                        // قد يكون الملف حُمّل لكنه بصيغة JSON خام أو const محلي، نجرب المسار التالي أو fetch
+                        tryScriptTagCandidates(idx + 1);
+                    }
+                };
+                sc.onerror = function() {
+                    tryScriptTagCandidates(idx + 1);
+                };
+                document.head.appendChild(sc);
+            }
+
+            tryScriptTagCandidates(0);
+        };
+
+        // بدء التحميل فوراً منذ اللحظة الأولى لفتح الصفحة
+        window.ensureStage1CurriculumLoaded(function() {
+            if (typeof loadCustomCurriculumEdits === 'function') loadCustomCurriculumEdits();
+            if (typeof updateHeaderScoreUI === 'function') updateHeaderScoreUI();
+            if (document.getElementById('welcome-screen') && document.getElementById('welcome-screen').style.display === 'none') {
+                if (typeof initApp === 'function') initApp();
+            }
+        });
     </script>
-    <script src="games-engine.js"></script>
 
     <script>
         // إظهار جميع المدارس الخاصة في قائمة شاشة الترحيب حتى قبل حفظ أي درس جديد فيها
@@ -2414,14 +2564,17 @@
 
         // ================= التنقل بين المواد والمحطات والخريطة ودرج الإعدادات =================
         function startLesson() {
-            document.getElementById('welcome-screen').style.opacity = '0';
+            const ws = document.getElementById('welcome-screen');
+            if (ws) ws.style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('welcome-screen').style.display = 'none';
+                if (ws) ws.style.display = 'none';
                 if (typeof GameEngine !== 'undefined') GameEngine.initAudio();
                 getSharedAudioCtx();
-                loadCustomCurriculumEdits();
-                initApp();
-            }, 450);
+                window.ensureStage1CurriculumLoaded(() => {
+                    loadCustomCurriculumEdits();
+                    initApp();
+                });
+            }, 250);
         }
 
         function toggleMapSettingsDrawer() {
@@ -2547,10 +2700,15 @@
         }
 
         function getActiveCurriculumObj() {
-            if (typeof curriculumData === 'undefined') return null;
-            let yearKey = curriculumData[RAW_YEAR] ? RAW_YEAR : (curriculumData[SCHOOL_YEAR] ? SCHOOL_YEAR : 7);
-            if (!yearKey || !curriculumData[yearKey] || !curriculumData[yearKey][playWeek]) return null;
-            return curriculumData[yearKey][playWeek][activeViewSubj] || null;
+            const db = (window.curriculumData && Object.keys(window.curriculumData).length > 0)
+                ? window.curriculumData
+                : (typeof curriculumData !== 'undefined' ? curriculumData : null);
+            if (!db) return null;
+            let yearKey = db[RAW_YEAR] ? RAW_YEAR : (db[SCHOOL_YEAR] ? SCHOOL_YEAR : (db[7] ? 7 : Number(Object.keys(db)[0])));
+            if (!yearKey || !db[yearKey]) return null;
+            const weekObj = db[yearKey][playWeek] || db[yearKey][String(playWeek)];
+            if (!weekObj) return null;
+            return weekObj[activeViewSubj] || weekObj[String(activeViewSubj)] || null;
         }
 
         function isAssessmentSkippedForCurrent(defData) {
@@ -4933,7 +5091,10 @@
                     updateHeaderSchoolAndTeacherLabel('مدرسة العلم', null);
                     const mainSaved = localStorage.getItem(`custom_curriculum_edits_y${yearKey}`);
                     if (mainSaved && window.curriculumData) {
-                        window.curriculumData[yearKey] = JSON.parse(mainSaved);
+                        const parsedSaved = JSON.parse(mainSaved);
+                        if (parsedSaved && typeof parsedSaved === 'object' && Object.keys(parsedSaved).length > 0) {
+                            window.curriculumData[yearKey] = Object.assign(window.curriculumData[yearKey] || {}, parsedSaved);
+                        }
                     }
                     return;
                 }
@@ -5824,6 +5985,215 @@
             if (typeof startLesson === 'function') {
                 try { startLesson(); } catch (_) {}
             }
+        }
+    });
+})();
+</script>
+
+
+<style id="al3lm-orientation-styles">
+.orient-picker-bar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #ecfdf5;
+    border: 1.5px solid #6ee7b7;
+    border-radius: 999px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+}
+.orient-picker-lbl {
+    font-size: 0.76rem;
+    font-weight: 900;
+    color: #065f46;
+    margin-left: 3px;
+}
+.orient-chip-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    background: #ffffff;
+    color: #334155;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.orient-chip-btn.active {
+    background: linear-gradient(135deg, #059669, #064e3b);
+    color: #fef08a;
+    border-color: #eab308;
+    box-shadow: 0 3px 8px rgba(6,78,59,0.28);
+}
+/* تنبيه لطيف قابل للإغلاق عندما يختار المستخدم وضعاً محدداً (أفقي أو عمودي) على متصفح يمنع التدوير البرمجي التلقائي (مثل iOS) */
+#al3lm-rotate-hint-banner {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12000;
+    background: rgba(6, 40, 30, 0.96);
+    color: #fef08a;
+    border: 2px solid #eab308;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    max-width: 94vw;
+}
+#al3lm-rotate-hint-banner button {
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-weight: 900;
+    cursor: pointer;
+}
+</style>
+<script>
+(function initAl3lmOrientationManager() {
+    const KEY = 'al3lm_screen_orientation'; // 'any' | 'landscape' | 'portrait'
+    const LABELS = {
+        any: '🔄 تلقائي (حر)',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+    const SHORT_LABELS = {
+        any: '🔄 حر',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+
+    function getPref() {
+        const v = localStorage.getItem(KEY);
+        return (v === 'landscape' || v === 'portrait') ? v : 'any';
+    }
+
+    let hintDismissedForMode = '';
+
+    function checkPhysicalMismatchHint(mode) {
+        let banner = document.getElementById('al3lm-rotate-hint-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'al3lm-rotate-hint-banner';
+            banner.innerHTML = '<span id="al3lm-rotate-hint-txt"></span><button type="button" title="إخفاء">×</button>';
+            banner.querySelector('button').onclick = function() {
+                hintDismissedForMode = getPref();
+                banner.style.display = 'none';
+            };
+            document.body.appendChild(banner);
+        }
+        if (mode === 'any' || hintDismissedForMode === mode) {
+            banner.style.display = 'none';
+            return;
+        }
+        const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
+        if (mode === 'landscape' && !isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↔️ أدر الهاتف أفقياً للعرض بالوضع الأفقي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else if (mode === 'portrait' && isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↕️ أدر الهاتف عمودياً للعرض بالوضع العمودي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    async function applyOrientationLock(mode, fromUserGesture = false) {
+        try {
+            if (mode === 'any') {
+                if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+                    screen.orientation.unlock();
+                }
+                if (fromUserGesture && document.fullscreenElement && document.exitFullscreen) {
+                    await document.exitFullscreen().catch(() => {});
+                }
+            } else {
+                const lockTarget = mode === 'landscape' ? 'landscape' : 'portrait';
+                let lockedOk = false;
+                if (screen.orientation && typeof screen.orientation.lock === 'function') {
+                    try {
+                        await screen.orientation.lock(lockTarget);
+                        lockedOk = true;
+                    } catch (err) {
+                        // في المتصفح العادي على أندرويد (خارج التطبيق المثبّت)، قد يتطلب قفل الشاشة تفعيل ملء الشاشة أولاً عند نقر المستخدم
+                        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                        if (fromUserGesture && !isStandalone && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+                            try {
+                                await document.documentElement.requestFullscreen();
+                                await screen.orientation.lock(lockTarget);
+                                lockedOk = true;
+                            } catch (_) {}
+                        }
+                    }
+                }
+            }
+        } catch (_) {}
+        updateAllOrientationButtonsUI(mode);
+        setTimeout(() => checkPhysicalMismatchHint(mode), 220);
+    }
+
+    function updateAllOrientationButtonsUI(mode) {
+        document.querySelectorAll('[data-orient-choice]').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-orient-choice') === mode);
+        });
+        document.querySelectorAll('.al3lm-orient-cycle-btn').forEach(btn => {
+            const isCompact = btn.classList.contains('compact-orient');
+            const lblEl = btn.querySelector('.btn-lbl');
+            const icoEl = btn.querySelector('.btn-ico');
+            if (lblEl && icoEl) {
+                icoEl.textContent = mode === 'landscape' ? '↔️' : (mode === 'portrait' ? '↕️' : '🔄');
+                lblEl.textContent = mode === 'landscape' ? 'أفقي' : (mode === 'portrait' ? 'عمودي' : 'تلقائي');
+            } else {
+                btn.innerHTML = isCompact ? SHORT_LABELS[mode] : `📱 الاتجاه: ${LABELS[mode]}`;
+            }
+            btn.title = `اتجاه شاشة الهاتف الحالي: ${LABELS[mode]} (اضغط للتبديل بين حر / أفقي / عمودي)`;
+        });
+    }
+
+    window.setAl3lmOrientation = function(mode) {
+        const clean = (mode === 'landscape' || mode === 'portrait') ? mode : 'any';
+        hintDismissedForMode = '';
+        localStorage.setItem(KEY, clean);
+        applyOrientationLock(clean, true);
+    };
+
+    window.cycleAl3lmOrientation = function() {
+        const cur = getPref();
+        const next = cur === 'any' ? 'landscape' : (cur === 'landscape' ? 'portrait' : 'any');
+        window.setAl3lmOrientation(next);
+    };
+
+    window.addEventListener('resize', () => checkPhysicalMismatchHint(getPref()));
+    window.addEventListener('orientationchange', () => setTimeout(() => checkPhysicalMismatchHint(getPref()), 200));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = getPref();
+        updateAllOrientationButtonsUI(saved);
+        if (saved !== 'any') {
+            applyOrientationLock(saved, false);
+            // إعادة تطبيق القفل عند أول لمسة للمستخدم إذا كان التطبيق المثبّت يحتاج تفاعلاً أولياً
+            const onceLock = () => {
+                const cur = getPref();
+                if (cur !== 'any' && screen.orientation && typeof screen.orientation.lock === 'function') {
+                    screen.orientation.lock(cur).catch(() => {});
+                }
+                document.removeEventListener('click', onceLock);
+            };
+            document.addEventListener('click', onceLock, { once: true });
         }
     });
 })();

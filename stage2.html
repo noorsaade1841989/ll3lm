@@ -1561,6 +1561,9 @@
                 </button>
 
                 <div class="map-settings-drawer" id="map-settings-drawer">
+                    <button type="button" class="setting-glass-btn al3lm-orient-cycle-btn" onclick="cycleAl3lmOrientation()">
+                        📱 الاتجاه: 🔄 تلقائي (حر)
+                    </button>
                     <button type="button" id="tts-toggle" class="setting-glass-btn" onclick="toggleTTS()">
                         <span id="tts-icon-span">🔊</span>
                         <span id="tts-label-span">القارئ: مفعل</span>
@@ -1832,31 +1835,77 @@
             const safeCycle = Math.max(1, parseInt(cycleNum, 10) || 1);
             const cacheKey = `${year}_c${safeCycle}`;
 
-            // تحويل البيانات إن كانت محملة مسبقاً في الذاكرة
             syncStage2CurriculaIntoApp(year, safeCycle);
 
-            if (window._loadedStage2Cycles[cacheKey]) {
-                if (typeof onComplete === 'function') onComplete();
-                return;
-            }
+            const hasCycleLoaded = () => {
+                const startW = (safeCycle - 1) * WEEKS_PER_CYCLE + 1;
+                return Boolean(window.curriculumData?.[year]?.[startW] && Object.keys(window.curriculumData[year][startW]).length > 0);
+            };
 
-            const existing = document.querySelector(`script[data-cycle-key="${cacheKey}"]`);
-            if (existing) {
-                syncStage2CurriculaIntoApp(year, safeCycle);
-                window._loadedStage2Cycles[cacheKey] = true;
+            if (window._loadedStage2Cycles[cacheKey] && hasCycleLoaded()) {
                 if (typeof onComplete === 'function') onComplete();
                 return;
             }
 
             const candidates = [
                 `curriculums/curriculum-y${year}-c${safeCycle}.js`,
-                `curriculum-y${year}-c${safeCycle}.js`
+                `curriculums/curriculum_y${year}_c${safeCycle}.js`,
+                `curriculum-y${year}-c${safeCycle}.js`,
+                `curriculums/curriculum-y${year}.js`,
+                `curriculum-y${year}.js`
+            ];
+            const jsonCandidates = [
+                `curriculums/curriculum-y${year}-c${safeCycle}.json`,
+                `curriculums/curriculum-y${year}.json`
             ];
 
-            function tryLoadCandidate(idx) {
-                if (idx >= candidates.length) {
+            async function tryFetchStage2Fallback(list, idx) {
+                if (idx >= list.length) {
                     window._loadedStage2Cycles[cacheKey] = true;
                     if (typeof onComplete === 'function') onComplete();
+                    return;
+                }
+                try {
+                    const r = await fetch(list[idx], { cache: 'no-cache' });
+                    if (!r.ok) throw new Error('HTTP');
+                    const txt = (await r.text()).trim();
+                    if (!txt || txt.startsWith('<!DOCTYPE') || txt.startsWith('<html')) throw new Error('HTML');
+                    if (txt.startsWith('{')) {
+                        const j = JSON.parse(txt);
+                        window.STAGE2_CURRICULA = window.STAGE2_CURRICULA || {};
+                        if (Array.isArray(j.units)) {
+                            window.STAGE2_CURRICULA[`Y${year}_C${safeCycle}`] = j;
+                        } else if (j[`Y${year}_C${safeCycle}`]) {
+                            Object.assign(window.STAGE2_CURRICULA, j);
+                        } else {
+                            window.curriculumData[year] = Object.assign(window.curriculumData[year] || {}, j[year] || j);
+                        }
+                    } else {
+                        const fn = new Function(
+                            txt +
+                            '\n;if(typeof STAGE2_CURRICULA!=="undefined"){window.STAGE2_CURRICULA=Object.assign(window.STAGE2_CURRICULA||{},STAGE2_CURRICULA);}' +
+                            '\n;if(typeof curriculumData!=="undefined"){window.curriculumData=Object.assign(window.curriculumData||{},curriculumData);}'
+                        );
+                        fn();
+                    }
+                    syncStage2CurriculaIntoApp(year, safeCycle);
+                    if (hasCycleLoaded()) {
+                        window._loadedStage2Cycles[cacheKey] = true;
+                        if (typeof onComplete === 'function') onComplete();
+                        return;
+                    }
+                } catch (_) {}
+                tryFetchStage2Fallback(list, idx + 1);
+            }
+
+            function tryLoadCandidate(idx) {
+                if (hasCycleLoaded()) {
+                    window._loadedStage2Cycles[cacheKey] = true;
+                    if (typeof onComplete === 'function') onComplete();
+                    return;
+                }
+                if (idx >= candidates.length) {
+                    tryFetchStage2Fallback([...candidates, ...jsonCandidates], 0);
                     return;
                 }
                 const s = document.createElement('script');
@@ -1864,9 +1913,17 @@
                 s.async = false;
                 s.dataset.cycleKey = cacheKey;
                 s.onload = () => {
+                    try {
+                        if (typeof STAGE2_CURRICULA !== 'undefined') Object.assign(window.STAGE2_CURRICULA, STAGE2_CURRICULA);
+                        if (typeof curriculumData !== 'undefined') Object.assign(window.curriculumData, curriculumData);
+                    } catch (_) {}
                     syncStage2CurriculaIntoApp(year, safeCycle);
-                    window._loadedStage2Cycles[cacheKey] = true;
-                    if (typeof onComplete === 'function') onComplete();
+                    if (hasCycleLoaded()) {
+                        window._loadedStage2Cycles[cacheKey] = true;
+                        if (typeof onComplete === 'function') onComplete();
+                    } else {
+                        tryLoadCandidate(idx + 1);
+                    }
                 };
                 s.onerror = () => {
                     tryLoadCandidate(idx + 1);
@@ -1877,19 +1934,21 @@
             tryLoadCandidate(0);
         }
 
-        (function() {
+        (function initStage2InitialCurriculumLoader() {
             let blocked = [];
             try { blocked = JSON.parse(localStorage.getItem('blocked_schools_list') || '[]'); } catch (e) {}
             const rawBranch = urlParams.get('school') || localStorage.getItem('selected_school_branch') || 'main';
             const activeBranch = blocked.includes(rawBranch) ? 'main' : rawBranch;
             window._isPrivateSchoolTemplateMode = (activeBranch !== 'main');
 
-            if (activeBranch === 'main') {
-                document.write('<script src="curriculums/curriculum-y' + RAW_YEAR + '.js" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-y' + RAW_YEAR + '.js\';document.head.appendChild(s);}"><\/script>');
-                document.write('<script src="curriculums/curriculum-y' + RAW_YEAR + '-c1.js" data-cycle-key="' + RAW_YEAR + '_c1" onload="if(typeof syncStage2CurriculaIntoApp===\'function\')syncStage2CurriculaIntoApp(' + RAW_YEAR + ',1);" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-y' + RAW_YEAR + '-c1.js\';s.onload=function(){if(typeof syncStage2CurriculaIntoApp===\'function\')syncStage2CurriculaIntoApp(' + RAW_YEAR + ',1);};document.head.appendChild(s);}"><\/script>');
-            } else {
-                document.write('<script src="curriculums/curriculum-master.js" onerror="if(!this.dataset.fb){this.dataset.fb=1;var s=document.createElement(\'script\');s.src=\'curriculum-master.js\';document.head.appendChild(s);}"><\/script>');
-            }
+            // تحميل فوري للدورة الأولى وملف السنة بدون document.write ويشمل المدارس الخاصة والعامة معاً
+            loadCycleScriptIfNeeded(RAW_YEAR, 1, function() {
+                if (typeof loadCustomCurriculumEdits === 'function') loadCustomCurriculumEdits();
+                if (typeof updateHeaderScoreUI === 'function') updateHeaderScoreUI();
+                if (document.getElementById('welcome-screen') && document.getElementById('welcome-screen').style.display === 'none') {
+                    if (typeof initApp === 'function') initApp();
+                }
+            });
         })();
     </script>
     <script>
@@ -5167,6 +5226,215 @@
             if (typeof startLesson === 'function') {
                 try { startLesson(); } catch (_) {}
             }
+        }
+    });
+})();
+</script>
+
+
+<style id="al3lm-orientation-styles">
+.orient-picker-bar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #ecfdf5;
+    border: 1.5px solid #6ee7b7;
+    border-radius: 999px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+}
+.orient-picker-lbl {
+    font-size: 0.76rem;
+    font-weight: 900;
+    color: #065f46;
+    margin-left: 3px;
+}
+.orient-chip-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    background: #ffffff;
+    color: #334155;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.orient-chip-btn.active {
+    background: linear-gradient(135deg, #059669, #064e3b);
+    color: #fef08a;
+    border-color: #eab308;
+    box-shadow: 0 3px 8px rgba(6,78,59,0.28);
+}
+/* تنبيه لطيف قابل للإغلاق عندما يختار المستخدم وضعاً محدداً (أفقي أو عمودي) على متصفح يمنع التدوير البرمجي التلقائي (مثل iOS) */
+#al3lm-rotate-hint-banner {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12000;
+    background: rgba(6, 40, 30, 0.96);
+    color: #fef08a;
+    border: 2px solid #eab308;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    max-width: 94vw;
+}
+#al3lm-rotate-hint-banner button {
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-weight: 900;
+    cursor: pointer;
+}
+</style>
+<script>
+(function initAl3lmOrientationManager() {
+    const KEY = 'al3lm_screen_orientation'; // 'any' | 'landscape' | 'portrait'
+    const LABELS = {
+        any: '🔄 تلقائي (حر)',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+    const SHORT_LABELS = {
+        any: '🔄 حر',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+
+    function getPref() {
+        const v = localStorage.getItem(KEY);
+        return (v === 'landscape' || v === 'portrait') ? v : 'any';
+    }
+
+    let hintDismissedForMode = '';
+
+    function checkPhysicalMismatchHint(mode) {
+        let banner = document.getElementById('al3lm-rotate-hint-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'al3lm-rotate-hint-banner';
+            banner.innerHTML = '<span id="al3lm-rotate-hint-txt"></span><button type="button" title="إخفاء">×</button>';
+            banner.querySelector('button').onclick = function() {
+                hintDismissedForMode = getPref();
+                banner.style.display = 'none';
+            };
+            document.body.appendChild(banner);
+        }
+        if (mode === 'any' || hintDismissedForMode === mode) {
+            banner.style.display = 'none';
+            return;
+        }
+        const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
+        if (mode === 'landscape' && !isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↔️ أدر الهاتف أفقياً للعرض بالوضع الأفقي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else if (mode === 'portrait' && isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↕️ أدر الهاتف عمودياً للعرض بالوضع العمودي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    async function applyOrientationLock(mode, fromUserGesture = false) {
+        try {
+            if (mode === 'any') {
+                if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+                    screen.orientation.unlock();
+                }
+                if (fromUserGesture && document.fullscreenElement && document.exitFullscreen) {
+                    await document.exitFullscreen().catch(() => {});
+                }
+            } else {
+                const lockTarget = mode === 'landscape' ? 'landscape' : 'portrait';
+                let lockedOk = false;
+                if (screen.orientation && typeof screen.orientation.lock === 'function') {
+                    try {
+                        await screen.orientation.lock(lockTarget);
+                        lockedOk = true;
+                    } catch (err) {
+                        // في المتصفح العادي على أندرويد (خارج التطبيق المثبّت)، قد يتطلب قفل الشاشة تفعيل ملء الشاشة أولاً عند نقر المستخدم
+                        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                        if (fromUserGesture && !isStandalone && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+                            try {
+                                await document.documentElement.requestFullscreen();
+                                await screen.orientation.lock(lockTarget);
+                                lockedOk = true;
+                            } catch (_) {}
+                        }
+                    }
+                }
+            }
+        } catch (_) {}
+        updateAllOrientationButtonsUI(mode);
+        setTimeout(() => checkPhysicalMismatchHint(mode), 220);
+    }
+
+    function updateAllOrientationButtonsUI(mode) {
+        document.querySelectorAll('[data-orient-choice]').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-orient-choice') === mode);
+        });
+        document.querySelectorAll('.al3lm-orient-cycle-btn').forEach(btn => {
+            const isCompact = btn.classList.contains('compact-orient');
+            const lblEl = btn.querySelector('.btn-lbl');
+            const icoEl = btn.querySelector('.btn-ico');
+            if (lblEl && icoEl) {
+                icoEl.textContent = mode === 'landscape' ? '↔️' : (mode === 'portrait' ? '↕️' : '🔄');
+                lblEl.textContent = mode === 'landscape' ? 'أفقي' : (mode === 'portrait' ? 'عمودي' : 'تلقائي');
+            } else {
+                btn.innerHTML = isCompact ? SHORT_LABELS[mode] : `📱 الاتجاه: ${LABELS[mode]}`;
+            }
+            btn.title = `اتجاه شاشة الهاتف الحالي: ${LABELS[mode]} (اضغط للتبديل بين حر / أفقي / عمودي)`;
+        });
+    }
+
+    window.setAl3lmOrientation = function(mode) {
+        const clean = (mode === 'landscape' || mode === 'portrait') ? mode : 'any';
+        hintDismissedForMode = '';
+        localStorage.setItem(KEY, clean);
+        applyOrientationLock(clean, true);
+    };
+
+    window.cycleAl3lmOrientation = function() {
+        const cur = getPref();
+        const next = cur === 'any' ? 'landscape' : (cur === 'landscape' ? 'portrait' : 'any');
+        window.setAl3lmOrientation(next);
+    };
+
+    window.addEventListener('resize', () => checkPhysicalMismatchHint(getPref()));
+    window.addEventListener('orientationchange', () => setTimeout(() => checkPhysicalMismatchHint(getPref()), 200));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = getPref();
+        updateAllOrientationButtonsUI(saved);
+        if (saved !== 'any') {
+            applyOrientationLock(saved, false);
+            // إعادة تطبيق القفل عند أول لمسة للمستخدم إذا كان التطبيق المثبّت يحتاج تفاعلاً أولياً
+            const onceLock = () => {
+                const cur = getPref();
+                if (cur !== 'any' && screen.orientation && typeof screen.orientation.lock === 'function') {
+                    screen.orientation.lock(cur).catch(() => {});
+                }
+                document.removeEventListener('click', onceLock);
+            };
+            document.addEventListener('click', onceLock, { once: true });
         }
     });
 })();

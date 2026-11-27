@@ -2,6 +2,26 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+	<script>
+	(function autoRefreshStaleCacheV6() {
+		try {
+			var VER = 'al3lm_layout_v8';
+			if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
+				localStorage.setItem('al3lm_ui_cache_ver', VER);
+				if ('caches' in window) {
+					caches.keys().then(function(names) {
+						names.forEach(function(n) { caches.delete(n); });
+					});
+				}
+				if ('serviceWorker' in navigator) {
+					navigator.serviceWorker.getRegistrations().then(function(regs) {
+						regs.forEach(function(r) { r.update(); });
+					});
+				}
+			}
+		} catch (e) {}
+	})();
+	</script>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>اطلب العلم | المدرسة اللامركزية</title>
@@ -33,73 +53,157 @@
 			100% { background-position: 0% 50%; }
 		}
 
-		/* ================= ١. تنسيق الترويسة وشريط المدارس العلوي ================= */
+		/* ================= ١. تنسيق الترويسة المرن ذي الصفوف المنفصلة (بدون أي تراكب) ================= */
 		header {
-			position: relative; flex: 0 0 auto;
+			position: relative;
+			flex: 0 0 auto;
 			background: linear-gradient(45deg, #e6eff5, #a3c1ad, #dbeafe, #8fbc8f);
-			background-size: 300% 300%; animation: wavyGradient 10s ease infinite;
-			text-align: center; padding: clamp(8px, 1.4dvh, 14px) 10px;
-			border-bottom: 2px solid #8fbc8f; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-			z-index: 10; display: flex; flex-direction: column;
-			align-items: center; justify-content: center; gap: 4px;
+			background-size: 300% 300%;
+			animation: wavyGradient 10s ease infinite;
+			padding: 8px 14px 10px 14px;
+			border-bottom: 2px solid #8fbc8f;
+			box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+			z-index: 500;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 7px;
+		}
+
+		/* الصف الأول في الترويسة: العنوان يميناً وأزرار الإدارة والحساب يساراً */
+		.hdr-top-row {
+			width: 100%;
+			max-width: 1280px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			flex-wrap: nowrap;
 		}
 
 		header h1 {
 			font-family: 'Aref Ruqaa', serif;
-			font-size: clamp(1.3rem, 3.6vmin, 2.2rem); color: #1b5e20;
-			line-height: 1.1; text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+			font-size: clamp(1.35rem, 3.8vmin, 2.1rem);
+			color: #1b5e20;
+			line-height: 1.15;
+			text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6);
+			margin: 0;
+			white-space: nowrap;
+			flex-shrink: 0;
 		}
 
+		/* الصف الثاني المستقل: أزرار اختيار المدرسة (لا تصطدم أبداً بأزرار الإدارة) */
 		.school-selector-bar {
-			position: fixed; top: 10px; right: 12px; z-index: 9000;
-			display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap;
+			position: relative;
+			width: 100%;
+			max-width: 1280px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 6px;
+			flex-wrap: wrap;
+			z-index: 600;
 		}
 		.private-school-menu-wrap {
-			position: relative; display: inline-flex; flex-direction: column; align-items: flex-start;
+			position: relative;
+			display: inline-flex;
+			flex-direction: column;
+			align-items: center;
 		}
 		.school-mode-btn {
-			background: rgba(15, 23, 42, 0.88); color: #f8fafc;
-			border: 2px solid #64748b; border-radius: 25px;
-			padding: 5px 14px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.82rem; cursor: pointer;
-			transition: 0.25s; backdrop-filter: blur(6px);
-			box-shadow: 0 4px 15px rgba(0,0,0,0.3); white-space: nowrap;
+			background: rgba(15, 23, 42, 0.88);
+			color: #f8fafc;
+			border: 1.8px solid #64748b;
+			border-radius: 999px;
+			height: 32px;
+			padding: 0 13px;
+			font-family: 'Cairo', sans-serif;
+			font-weight: 800;
+			font-size: 0.8rem;
+			cursor: pointer;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+			transition: 0.2s;
+			backdrop-filter: blur(6px);
+			box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+			white-space: nowrap;
 		}
-		.school-mode-btn:hover { transform: scale(1.04); }
+		.school-mode-btn:hover { transform: translateY(-1px); }
 		.school-mode-btn.active {
-			background: #166534; color: #ffffff; border-color: #4ade80;
-			box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+			background: #166534;
+			color: #ffffff;
+			border-color: #4ade80;
+			box-shadow: 0 0 12px rgba(74, 222, 128, 0.45);
 		}
 		.student-import-pill {
-			background: rgba(15, 23, 42, 0.88); color: #7dd3fc;
-			border: 1.5px solid #38bdf8; border-radius: 25px;
-			padding: 5px 12px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.78rem; cursor: pointer;
-			display: none; align-items: center; gap: 4px;
-			box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.25s;
-			backdrop-filter: blur(6px); white-space: nowrap;
+			background: rgba(15, 23, 42, 0.88);
+			color: #7dd3fc;
+			border: 1.5px solid #38bdf8;
+			border-radius: 999px;
+			height: 32px;
+			padding: 0 12px;
+			font-family: 'Cairo', sans-serif;
+			font-weight: 800;
+			font-size: 0.76rem;
+			cursor: pointer;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			gap: 4px;
+			box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+			transition: 0.2s;
+			backdrop-filter: blur(6px);
+			white-space: nowrap;
 		}
-		.student-import-pill:hover { background: #0284c7; color: #ffffff; transform: scale(1.04); }
+		.student-import-pill:hover { background: #0284c7; color: #ffffff; }
 
 		#private-school-dropdown {
-			display: none; position: absolute; top: calc(100% + 6px); right: 0;
-			min-width: 250px; background: rgba(15, 23, 42, 0.98); color: #fde047;
-			border: 2px solid #f59e0b; border-radius: 16px;
-			padding: 6px 12px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.82rem; cursor: pointer;
-			outline: none; box-shadow: 0 10px 25px rgba(0,0,0,0.6); z-index: 9500;
+			display: none;
+			position: absolute;
+			top: calc(100% + 6px);
+			left: 50%;
+			transform: translateX(-50%);
+			width: min(280px, 90vw);
+			background: rgba(15, 23, 42, 0.98);
+			color: #fde047;
+			border: 2px solid #f59e0b;
+			border-radius: 14px;
+			padding: 6px 10px;
+			font-family: 'Cairo', sans-serif;
+			font-weight: 800;
+			font-size: 0.8rem;
+			cursor: pointer;
+			outline: none;
+			box-shadow: 0 12px 28px rgba(0,0,0,0.65);
+			z-index: 9500;
 		}
 		.active-school-hint {
-			font-size: clamp(0.68rem, 1.55vmin, 0.84rem); font-weight: 800;
-			color: #1e293b; background: rgba(254, 240, 138, 0.95);
-			padding: 3px 14px; border-radius: 12px; border: 1.5px solid #eab308;
-			display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+			max-width: 98%;
+			font-size: clamp(0.68rem, 1.5vmin, 0.8rem);
+			font-weight: 800;
+			color: #1e293b;
+			background: rgba(254, 240, 138, 0.96);
+			padding: 3px 12px;
+			border-radius: 999px;
+			border: 1.5px solid #eab308;
+			display: none;
+			box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+			line-height: 1.35;
+			text-align: center;
 		}
 		.school-warning-banner {
-			font-size: clamp(0.68rem, 1.5vmin, 0.82rem); font-weight: 900;
-			color: #ffffff; background: #dc2626;
-			padding: 4px 14px; border-radius: 12px; border: 2px solid #fca5a5;
-			display: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+			max-width: 98%;
+			font-size: clamp(0.68rem, 1.5vmin, 0.8rem);
+			font-weight: 900;
+			color: #ffffff;
+			background: #dc2626;
+			padding: 4px 12px;
+			border-radius: 12px;
+			border: 2px solid #fca5a5;
+			display: none;
+			box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
 		}
 
 		/* ================= ٢. تنسيق بطاقات المراحل الثلاث (سيد • عبد • صاحب) ================= */
@@ -243,36 +347,81 @@
 			box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #ffffff;
 		}
 
-		/* ================= ٤. تنسيق بوابات المعلمين والمالك الأساسي والمدارس الخاصة ================= */
+		/* ================= ٤. تنسيق أزرار الإدارة وبوابات المعلمين والمالك ================= */
 		.top-left-controls {
-			position: fixed; top: 10px; left: 12px; z-index: 9000;
-			display: flex; align-items: center; gap: 6px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: flex-end;
+			gap: 6px;
+			flex-wrap: nowrap;
+			min-width: 0;
+		}
+		#admin-lock-trigger,
+		.portal-top-btn {
+			height: 32px;
+			padding: 0 12px;
+			border-radius: 999px;
+			font-family: 'Cairo', sans-serif;
+			font-weight: 800;
+			font-size: 0.78rem;
+			cursor: pointer;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+			white-space: nowrap;
+			text-decoration: none;
+			box-shadow: 0 3px 10px rgba(0,0,0,0.24);
+			transition: transform 0.2s ease, background 0.2s ease;
+			backdrop-filter: blur(6px);
+			flex-shrink: 0;
 		}
 		#admin-lock-trigger {
-			background: rgba(15, 23, 42, 0.88); color: #fcd34d;
-			border: 2px solid #f59e0b; border-radius: 25px;
-			padding: 5px 14px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.82rem; cursor: pointer;
-			display: none; align-items: center; gap: 6px;
-			box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s;
-			backdrop-filter: blur(6px);
+			background: rgba(15, 23, 42, 0.9);
+			color: #fcd34d;
+			border: 1.8px solid #f59e0b;
+			display: none;
 		}
-		#admin-lock-trigger:hover { transform: scale(1.05); background: #1e293b; }
+		#admin-lock-trigger:hover, .portal-top-btn:hover { transform: translateY(-1px); }
 		#admin-lock-trigger.edit-on {
-			background: #166534; color: #ffffff; border-color: #4ade80;
-			box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+			background: #166534;
+			color: #ffffff;
+			border-color: #4ade80;
+			box-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
 		}
-
+		#admin-lock-text {
+			max-width: 135px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		.portal-users-btn {
+			background: rgba(15, 23, 42, 0.9);
+			color: #86efac;
+			border: 1.5px solid #22c55e;
+		}
+		.portal-login-btn {
+			background: rgba(15, 23, 42, 0.9);
+			color: #fde047;
+			border: 1.5px solid #eab308;
+		}
 		#owner-square-trigger {
-			width: 30px; height: 30px;
-			background: rgba(15, 23, 42, 0.75); color: #94a3b8;
-			border: 1.5px solid rgba(148, 163, 184, 0.4); border-radius: 8px;
-			font-size: 0.85rem; cursor: pointer;
-			display: flex; align-items: center; justify-content: center;
-			box-shadow: 0 4px 10px rgba(0,0,0,0.25); transition: 0.25s;
-			backdrop-filter: blur(6px);
+			width: 31px;
+			height: 31px;
+			background: rgba(15, 23, 42, 0.82);
+			color: #94a3b8;
+			border: 1.5px solid rgba(148, 163, 184, 0.45);
+			border-radius: 9px;
+			font-size: 0.82rem;
+			cursor: pointer;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+			transition: 0.2s;
+			flex-shrink: 0;
 		}
-		#owner-square-trigger:hover { color: #f8fafc; border-color: #cbd5e1; transform: scale(1.06); }
+		#owner-square-trigger:hover { color: #f8fafc; border-color: #cbd5e1; }
 		#owner-square-trigger.owner-active { background: #166534; color: #4ade80; border-color: #4ade80; }
 
 		#admin-pass-modal, #owner-secret-modal {
@@ -378,155 +527,74 @@
 			font-family: 'Cairo', sans-serif; font-size: 0.72rem; font-weight: 900; cursor: pointer; white-space: nowrap;
 		}
 
-		/* ================= ٥. التجاوب مع الهواتف والشاشات العمودية ================= */
-		@media (orientation: portrait), (max-width: 700px) {
-			header { padding-top: 48px; }
-			.school-selector-bar { top: 8px; right: 8px; gap: 4px; }
-			.school-mode-btn, .student-import-pill { padding: 4px 10px; font-size: 0.72rem; }
-			.top-left-controls { top: 8px; left: 8px; gap: 4px; }
-			#admin-lock-trigger { padding: 4px 10px; font-size: 0.74rem; }
-			#owner-square-trigger { width: 26px; height: 26px; font-size: 0.75rem; }
+		
+		/* ================= ٥. التجاوب النظيف ١٠٠٪ مع الهواتف والشاشات العمودية ================= */
+		@media (orientation: portrait), (max-width: 720px) {
+			header {
+				padding: 6px 10px 8px 10px;
+				gap: 6px;
+			}
+			header h1 {
+				font-size: clamp(1.22rem, 4.8vw, 1.55rem);
+			}
+			.top-left-controls {
+				gap: 5px;
+			}
+			/* تحويل أزرار المستخدمين وبوابة الدخول إلى أيقونات دائرية أنيقة على الهاتف لمنع أي تزاحم */
+			.portal-top-btn .btn-lbl {
+				display: none !important;
+			}
+			.portal-top-btn {
+				width: 31px;
+				height: 31px;
+				padding: 0;
+				border-radius: 50%;
+				font-size: 0.85rem;
+			}
+			#admin-lock-trigger {
+				height: 30px;
+				padding: 0 10px;
+				font-size: 0.73rem;
+			}
+			#admin-lock-text {
+				max-width: 86px;
+			}
+			#owner-square-trigger {
+				width: 29px;
+				height: 29px;
+				font-size: 0.76rem;
+			}
+			.school-selector-bar {
+				gap: 5px;
+			}
+			.school-mode-btn, .student-import-pill {
+				height: 30px;
+				padding: 0 10px;
+				font-size: 0.73rem;
+			}
+			.active-school-hint {
+				border-radius: 12px;
+				padding: 3px 10px;
+				font-size: 0.7rem;
+			}
 			.container { flex-direction: column; }
 			.stage-btn { border-left: none; border-bottom: 2px solid rgba(255, 255, 255, 0.15); }
 			.stage-btn:last-child { border-bottom: none; }
 			.stage-btn:hover .details { max-height: 0; opacity: 0; margin-top: 0; }
 		}
-
-		/* ================= ٦. تنظيم شريط الأزرار العلوي المرن لمنع التراكب على الهاتف والشاشات الصغيرة ================= */
-		header {
-			padding: 8px 12px 10px 12px !important;
-			gap: 5px !important;
-		}
-		.header-top-toolbar {
-			width: 100%;
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 8px;
-			flex-wrap: nowrap;
-			z-index: 9000;
-		}
-		.school-selector-bar,
-		.top-left-controls {
-			position: static !important;
-			top: auto !important;
-			right: auto !important;
-			left: auto !important;
-			display: inline-flex !important;
-			align-items: center !important;
-			gap: 6px !important;
-			flex-wrap: nowrap !important;
-			min-width: 0;
-		}
-		.school-mode-btn,
-		.student-import-pill,
-		#admin-lock-trigger,
-		.portal-top-btn {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			gap: 5px;
-			height: 32px;
-			padding: 0 12px;
-			border-radius: 999px;
-			font-family: 'Cairo', sans-serif;
-			font-weight: 800;
-			font-size: 0.78rem;
-			white-space: nowrap;
-			flex-shrink: 0;
-			text-decoration: none;
-			cursor: pointer;
-			box-shadow: 0 3px 10px rgba(0,0,0,0.22);
-		}
-		.portal-users-btn {
-			background: rgba(15, 23, 42, 0.88);
-			color: #86efac;
-			border: 1.5px solid #22c55e;
-		}
-		.portal-login-btn {
-			background: rgba(15, 23, 42, 0.88);
-			color: #fde047;
-			border: 1.5px solid #eab308;
-		}
-		#private-school-dropdown {
-			max-width: min(260px, 88vw);
-		}
-
-		/* الشاشات المتوسطة والصغيرة والهواتف: تحويل الأزرار إلى كبسولات أيقونية رشيقة أو سطر مرن نظيف دون تداخل مطلقاً */
-		@media (max-width: 820px) {
-			header {
-				padding: 6px 8px 8px 8px !important;
-			}
-			.header-top-toolbar {
-				gap: 5px;
-			}
-			.school-selector-bar,
-			.top-left-controls {
-				gap: 4px !important;
-			}
-			.school-mode-btn,
-			.student-import-pill,
-			#admin-lock-trigger,
-			.portal-top-btn {
-				height: 30px;
-				padding: 0 9px;
-				font-size: 0.72rem;
-				gap: 4px;
-			}
-			#owner-square-trigger {
-				width: 28px !important;
-				height: 28px !important;
-				flex-shrink: 0;
-			}
-		}
-
-		@media (max-width: 560px) {
-			/* على الهاتف الصغير: إخفاء النصوص الطويلة للأزرار الثانوية والإبقاء على الأيقونات الواضحة أو النص المختصر لمنع التزاحم كلياً */
-			.portal-top-btn .btn-lbl,
-			.student-import-pill .btn-lbl {
-				display: none !important;
-			}
-			.portal-top-btn,
-			.student-import-pill {
-				width: 31px;
-				height: 31px;
-				padding: 0 !important;
-				border-radius: 50%;
-			}
-			#admin-lock-trigger .btn-lbl {
-				max-width: 78px;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				display: inline-block;
-			}
-			.school-mode-btn {
-				padding: 0 8px !important;
-				font-size: 0.7rem !important;
-				height: 30px !important;
-			}
-		}
-
 	</style>
 </head>
 <body>
 
 	<header>
-		<div class="header-top-toolbar">
-			<!-- اليمين: التبديل بين مدرسة العلم والمدارس الخاصة -->
-			<div class="school-selector-bar">
-				<button id="btn-public-school" class="school-mode-btn active" onclick="switchSchoolMode('main', true)"><span class="btn-ico">🏫</span><span class="btn-lbl">مدرسة العلم</span></button>
-				<div class="private-school-menu-wrap">
-					<button id="btn-private-school" class="school-mode-btn" onclick="switchSchoolMode('private', true)"><span class="btn-ico">🌟</span><span class="btn-lbl">مدرسة خاصة</span></button>
-					<select id="private-school-dropdown" onchange="selectPrivateSchool(this.value, true)"></select>
-				</div>
-				<label id="student-import-school-btn" class="student-import-pill" title="إضافة حزمة مدرسة خاصة من ملف JSON أرسله المعلم">
-					<span class="btn-ico">📥</span><span class="btn-lbl">ملف مدرسة</span>
-					<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
-				</label>
-			</div>
+		<!-- الصف العلوي الأول: عنوان المنصة يميناً وأدوات الإدارة والحساب يساراً -->
+		<div class="hdr-top-row">
+			<h1>اطلب العلم</h1>
 
-			<!-- اليسار: أدوات التعديل وسجل المستخدمين وبوابة الدخول والمالك -->
 			<div class="top-left-controls" id="top-left-controls-bar">
+				<button type="button" class="portal-top-btn al3lm-orient-cycle-btn" style="background:rgba(15,23,42,0.9);color:#7dd3fc;border:1.5px solid #38bdf8;" onclick="cycleAl3lmOrientation()">
+					<span class="btn-ico">🔄</span><span class="btn-lbl">تلقائي</span>
+				</button>
 				<button id="admin-lock-trigger" onclick="openAdminPassModal()" title="وضع التعديل">
 					<span id="admin-lock-icon">🔒</span>
 					<span id="admin-lock-text" class="btn-lbl">وضع التعديل</span>
@@ -535,7 +603,19 @@
 			</div>
 		</div>
 
-		<h1>اطلب العلم</h1>
+		<!-- الصف الثاني المستقل: شريط التبديل بين مدرسة العلم والمدارس الخاصة -->
+		<div class="school-selector-bar">
+			<button id="btn-public-school" class="school-mode-btn active" onclick="switchSchoolMode('main', true)"><span class="btn-ico">🏫</span><span class="btn-lbl">مدرسة العلم</span></button>
+			<div class="private-school-menu-wrap">
+				<button id="btn-private-school" class="school-mode-btn" onclick="switchSchoolMode('private', true)"><span class="btn-ico">🌟</span><span class="btn-lbl">مدرسة خاصة</span></button>
+				<select id="private-school-dropdown" onchange="selectPrivateSchool(this.value, true)"></select>
+			</div>
+			<label id="student-import-school-btn" class="student-import-pill" title="إضافة حزمة مدرسة خاصة من ملف JSON أرسله المعلم">
+				<span class="btn-ico">📥</span><span class="btn-lbl">ملف مدرسة</span>
+				<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
+			</label>
+		</div>
+
 		<span id="active-school-hint" class="active-school-hint"></span>
 		<div id="school-warning-banner" class="school-warning-banner"></div>
 	</header>
@@ -1128,11 +1208,27 @@
 			const isOwnerEditingThisSchool = isSchoolEditModeActive() && editOwner === found.id;
 			const codeLabel = found.code ? ` [${found.code}]` : '';
 
+			function formatCompactYears(arr) {
+				if (!arr || arr.length === 0) return 'لا يوجد';
+				if (arr.length === 21 && arr[0] === 1 && arr[20] === 21) return 'جميع الصفوف 1–21';
+				const ranges = [];
+				let start = arr[0], prev = arr[0];
+				for (let i = 1; i <= arr.length; i++) {
+					if (i < arr.length && arr[i] === prev + 1) {
+						prev = arr[i];
+					} else {
+						ranges.push(start === prev ? `${start}` : `${start}–${prev}`);
+						if (i < arr.length) { start = arr[i]; prev = arr[i]; }
+					}
+				}
+				return ranges.join('، ');
+			}
+			const compactYrs = formatCompactYears(builtYears);
 			hint.style.display = 'inline-block';
 			if (isOwnerEditingThisSchool) {
-				hint.innerText = `✏️ تعديل (${found.name}${codeLabel} — المعلم: ${found.owner}): الصفوف المضاءة (${builtYears.join('، ') || 'أضئ صفوفك من زر التعديل'})`;
+				hint.innerText = `✏️ تعديل: ${found.name}${codeLabel} (${found.owner}) | الصفوف: ${compactYrs}`;
 			} else {
-				hint.innerText = `✨ ${found.name}${codeLabel} — المعلم: ${found.owner} | الصفوف المفعّلة: (${builtYears.join('، ') || 'لا يوجد'})`;
+				hint.innerText = `✨ ${found.name}${codeLabel} — المعلم: ${found.owner} | الصفوف: ${compactYrs}`;
 			}
 
 			if (warnBanner) {
@@ -2364,6 +2460,215 @@
 		};
 	})();
 	</script>
+
+
+<style id="al3lm-orientation-styles">
+.orient-picker-bar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #ecfdf5;
+    border: 1.5px solid #6ee7b7;
+    border-radius: 999px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+}
+.orient-picker-lbl {
+    font-size: 0.76rem;
+    font-weight: 900;
+    color: #065f46;
+    margin-left: 3px;
+}
+.orient-chip-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    background: #ffffff;
+    color: #334155;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.orient-chip-btn.active {
+    background: linear-gradient(135deg, #059669, #064e3b);
+    color: #fef08a;
+    border-color: #eab308;
+    box-shadow: 0 3px 8px rgba(6,78,59,0.28);
+}
+/* تنبيه لطيف قابل للإغلاق عندما يختار المستخدم وضعاً محدداً (أفقي أو عمودي) على متصفح يمنع التدوير البرمجي التلقائي (مثل iOS) */
+#al3lm-rotate-hint-banner {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 12000;
+    background: rgba(6, 40, 30, 0.96);
+    color: #fef08a;
+    border: 2px solid #eab308;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    max-width: 94vw;
+}
+#al3lm-rotate-hint-banner button {
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-weight: 900;
+    cursor: pointer;
+}
+</style>
+<script>
+(function initAl3lmOrientationManager() {
+    const KEY = 'al3lm_screen_orientation'; // 'any' | 'landscape' | 'portrait'
+    const LABELS = {
+        any: '🔄 تلقائي (حر)',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+    const SHORT_LABELS = {
+        any: '🔄 حر',
+        landscape: '↔️ أفقي',
+        portrait: '↕️ عمودي'
+    };
+
+    function getPref() {
+        const v = localStorage.getItem(KEY);
+        return (v === 'landscape' || v === 'portrait') ? v : 'any';
+    }
+
+    let hintDismissedForMode = '';
+
+    function checkPhysicalMismatchHint(mode) {
+        let banner = document.getElementById('al3lm-rotate-hint-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'al3lm-rotate-hint-banner';
+            banner.innerHTML = '<span id="al3lm-rotate-hint-txt"></span><button type="button" title="إخفاء">×</button>';
+            banner.querySelector('button').onclick = function() {
+                hintDismissedForMode = getPref();
+                banner.style.display = 'none';
+            };
+            document.body.appendChild(banner);
+        }
+        if (mode === 'any' || hintDismissedForMode === mode) {
+            banner.style.display = 'none';
+            return;
+        }
+        const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
+        if (mode === 'landscape' && !isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↔️ أدر الهاتف أفقياً للعرض بالوضع الأفقي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else if (mode === 'portrait' && isCurrentlyLandscape) {
+            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↕️ أدر الهاتف عمودياً للعرض بالوضع العمودي الذي اخترته';
+            banner.style.display = 'inline-flex';
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    async function applyOrientationLock(mode, fromUserGesture = false) {
+        try {
+            if (mode === 'any') {
+                if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+                    screen.orientation.unlock();
+                }
+                if (fromUserGesture && document.fullscreenElement && document.exitFullscreen) {
+                    await document.exitFullscreen().catch(() => {});
+                }
+            } else {
+                const lockTarget = mode === 'landscape' ? 'landscape' : 'portrait';
+                let lockedOk = false;
+                if (screen.orientation && typeof screen.orientation.lock === 'function') {
+                    try {
+                        await screen.orientation.lock(lockTarget);
+                        lockedOk = true;
+                    } catch (err) {
+                        // في المتصفح العادي على أندرويد (خارج التطبيق المثبّت)، قد يتطلب قفل الشاشة تفعيل ملء الشاشة أولاً عند نقر المستخدم
+                        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                        if (fromUserGesture && !isStandalone && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+                            try {
+                                await document.documentElement.requestFullscreen();
+                                await screen.orientation.lock(lockTarget);
+                                lockedOk = true;
+                            } catch (_) {}
+                        }
+                    }
+                }
+            }
+        } catch (_) {}
+        updateAllOrientationButtonsUI(mode);
+        setTimeout(() => checkPhysicalMismatchHint(mode), 220);
+    }
+
+    function updateAllOrientationButtonsUI(mode) {
+        document.querySelectorAll('[data-orient-choice]').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-orient-choice') === mode);
+        });
+        document.querySelectorAll('.al3lm-orient-cycle-btn').forEach(btn => {
+            const isCompact = btn.classList.contains('compact-orient');
+            const lblEl = btn.querySelector('.btn-lbl');
+            const icoEl = btn.querySelector('.btn-ico');
+            if (lblEl && icoEl) {
+                icoEl.textContent = mode === 'landscape' ? '↔️' : (mode === 'portrait' ? '↕️' : '🔄');
+                lblEl.textContent = mode === 'landscape' ? 'أفقي' : (mode === 'portrait' ? 'عمودي' : 'تلقائي');
+            } else {
+                btn.innerHTML = isCompact ? SHORT_LABELS[mode] : `📱 الاتجاه: ${LABELS[mode]}`;
+            }
+            btn.title = `اتجاه شاشة الهاتف الحالي: ${LABELS[mode]} (اضغط للتبديل بين حر / أفقي / عمودي)`;
+        });
+    }
+
+    window.setAl3lmOrientation = function(mode) {
+        const clean = (mode === 'landscape' || mode === 'portrait') ? mode : 'any';
+        hintDismissedForMode = '';
+        localStorage.setItem(KEY, clean);
+        applyOrientationLock(clean, true);
+    };
+
+    window.cycleAl3lmOrientation = function() {
+        const cur = getPref();
+        const next = cur === 'any' ? 'landscape' : (cur === 'landscape' ? 'portrait' : 'any');
+        window.setAl3lmOrientation(next);
+    };
+
+    window.addEventListener('resize', () => checkPhysicalMismatchHint(getPref()));
+    window.addEventListener('orientationchange', () => setTimeout(() => checkPhysicalMismatchHint(getPref()), 200));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = getPref();
+        updateAllOrientationButtonsUI(saved);
+        if (saved !== 'any') {
+            applyOrientationLock(saved, false);
+            // إعادة تطبيق القفل عند أول لمسة للمستخدم إذا كان التطبيق المثبّت يحتاج تفاعلاً أولياً
+            const onceLock = () => {
+                const cur = getPref();
+                if (cur !== 'any' && screen.orientation && typeof screen.orientation.lock === 'function') {
+                    screen.orientation.lock(cur).catch(() => {});
+                }
+                document.removeEventListener('click', onceLock);
+            };
+            document.addEventListener('click', onceLock, { once: true });
+        }
+    });
+})();
+</script>
 
 </body>
 </html>
