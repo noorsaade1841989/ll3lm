@@ -1253,15 +1253,24 @@
             tryAt(0);
         }
 
+        const STAGE3_MAJOR_SLUGS = { 2: 'bayan', 4: 'math', 6: 'science', 7: 'adab' };
+
         function loadScriptOnce(src, cb) {
             const altCurr = src.startsWith('curriculum') ? `curriculums/${src}` : null;
-            const altBook = src.includes('major-y') ? (() => {
+            let altPrivate12 = null;
+            let altBook = null;
+            if (src.includes('major-y')) {
                 const m = src.match(/major-y(\d+)-s(\d+)\.js$/);
-                if (!m) return null;
-                const yr = m[1], sl = m[2];
-                return `books/year${yr}-book/curriculum-s3-major-y${yr}-s${sl}.js`;
-            })() : null;
-            const candidates = [altBook, altCurr, src].filter(Boolean);
+                if (m) {
+                    const yr = m[1], sl = parseInt(m[2], 10);
+                    const slug = STAGE3_MAJOR_SLUGS[sl] || '';
+                    if (slug) {
+                        altPrivate12 = `curriculums_12/curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
+                    }
+                    altBook = `books/year${yr}-book/curriculum-s3-major-y${yr}-s${sl}.js`;
+                }
+            }
+            const candidates = [altPrivate12, altBook, altCurr, src].filter(Boolean);
             loadScriptWithCandidates(candidates, src, cb);
         }
 
