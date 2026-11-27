@@ -391,24 +391,150 @@
 			.stage-btn:last-child { border-bottom: none; }
 			.stage-btn:hover .details { max-height: 0; opacity: 0; margin-top: 0; }
 		}
+
+		/* ================= ٦. تنظيم شريط الأزرار العلوي المرن لمنع التراكب على الهاتف والشاشات الصغيرة ================= */
+		header {
+			padding: 8px 12px 10px 12px !important;
+			gap: 5px !important;
+		}
+		.header-top-toolbar {
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			flex-wrap: nowrap;
+			z-index: 9000;
+		}
+		.school-selector-bar,
+		.top-left-controls {
+			position: static !important;
+			top: auto !important;
+			right: auto !important;
+			left: auto !important;
+			display: inline-flex !important;
+			align-items: center !important;
+			gap: 6px !important;
+			flex-wrap: nowrap !important;
+			min-width: 0;
+		}
+		.school-mode-btn,
+		.student-import-pill,
+		#admin-lock-trigger,
+		.portal-top-btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+			height: 32px;
+			padding: 0 12px;
+			border-radius: 999px;
+			font-family: 'Cairo', sans-serif;
+			font-weight: 800;
+			font-size: 0.78rem;
+			white-space: nowrap;
+			flex-shrink: 0;
+			text-decoration: none;
+			cursor: pointer;
+			box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+		}
+		.portal-users-btn {
+			background: rgba(15, 23, 42, 0.88);
+			color: #86efac;
+			border: 1.5px solid #22c55e;
+		}
+		.portal-login-btn {
+			background: rgba(15, 23, 42, 0.88);
+			color: #fde047;
+			border: 1.5px solid #eab308;
+		}
+		#private-school-dropdown {
+			max-width: min(260px, 88vw);
+		}
+
+		/* الشاشات المتوسطة والصغيرة والهواتف: تحويل الأزرار إلى كبسولات أيقونية رشيقة أو سطر مرن نظيف دون تداخل مطلقاً */
+		@media (max-width: 820px) {
+			header {
+				padding: 6px 8px 8px 8px !important;
+			}
+			.header-top-toolbar {
+				gap: 5px;
+			}
+			.school-selector-bar,
+			.top-left-controls {
+				gap: 4px !important;
+			}
+			.school-mode-btn,
+			.student-import-pill,
+			#admin-lock-trigger,
+			.portal-top-btn {
+				height: 30px;
+				padding: 0 9px;
+				font-size: 0.72rem;
+				gap: 4px;
+			}
+			#owner-square-trigger {
+				width: 28px !important;
+				height: 28px !important;
+				flex-shrink: 0;
+			}
+		}
+
+		@media (max-width: 560px) {
+			/* على الهاتف الصغير: إخفاء النصوص الطويلة للأزرار الثانوية والإبقاء على الأيقونات الواضحة أو النص المختصر لمنع التزاحم كلياً */
+			.portal-top-btn .btn-lbl,
+			.student-import-pill .btn-lbl {
+				display: none !important;
+			}
+			.portal-top-btn,
+			.student-import-pill {
+				width: 31px;
+				height: 31px;
+				padding: 0 !important;
+				border-radius: 50%;
+			}
+			#admin-lock-trigger .btn-lbl {
+				max-width: 78px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				display: inline-block;
+			}
+			.school-mode-btn {
+				padding: 0 8px !important;
+				font-size: 0.7rem !important;
+				height: 30px !important;
+			}
+		}
+
 	</style>
 </head>
 <body>
 
-	<!-- شريط اختيار المدرسة في اليمين + زر الطالب لإدراج ملف مدرسة معلمه بضغطة واحدة -->
-	<div class="school-selector-bar">
-		<button id="btn-public-school" class="school-mode-btn active" onclick="switchSchoolMode('main', true)">🏫 مدرسة العلم</button>
-		<div class="private-school-menu-wrap">
-			<button id="btn-private-school" class="school-mode-btn" onclick="switchSchoolMode('private', true)">🌟 مدرسة خاصة</button>
-			<select id="private-school-dropdown" onchange="selectPrivateSchool(this.value, true)"></select>
-		</div>
-		<label id="student-import-school-btn" class="student-import-pill" title="إضافة حزمة مدرسة خاصة من ملف JSON أرسله المعلم">
-			<span>📥 إضافة ملف مدرسة</span>
-			<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
-		</label>
-	</div>
-
 	<header>
+		<div class="header-top-toolbar">
+			<!-- اليمين: التبديل بين مدرسة العلم والمدارس الخاصة -->
+			<div class="school-selector-bar">
+				<button id="btn-public-school" class="school-mode-btn active" onclick="switchSchoolMode('main', true)"><span class="btn-ico">🏫</span><span class="btn-lbl">مدرسة العلم</span></button>
+				<div class="private-school-menu-wrap">
+					<button id="btn-private-school" class="school-mode-btn" onclick="switchSchoolMode('private', true)"><span class="btn-ico">🌟</span><span class="btn-lbl">مدرسة خاصة</span></button>
+					<select id="private-school-dropdown" onchange="selectPrivateSchool(this.value, true)"></select>
+				</div>
+				<label id="student-import-school-btn" class="student-import-pill" title="إضافة حزمة مدرسة خاصة من ملف JSON أرسله المعلم">
+					<span class="btn-ico">📥</span><span class="btn-lbl">ملف مدرسة</span>
+					<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
+				</label>
+			</div>
+
+			<!-- اليسار: أدوات التعديل وسجل المستخدمين وبوابة الدخول والمالك -->
+			<div class="top-left-controls" id="top-left-controls-bar">
+				<button id="admin-lock-trigger" onclick="openAdminPassModal()" title="وضع التعديل">
+					<span id="admin-lock-icon">🔒</span>
+					<span id="admin-lock-text" class="btn-lbl">وضع التعديل</span>
+				</button>
+				<button id="owner-square-trigger" onclick="openOwnerSecretModal()" title="بوابة المالك الأساسي">◼</button>
+			</div>
+		</div>
+
 		<h1>اطلب العلم</h1>
 		<span id="active-school-hint" class="active-school-hint"></span>
 		<div id="school-warning-banner" class="school-warning-banner"></div>
@@ -540,14 +666,7 @@
 
 <!-- ==================== [ بداية الجزء 2 من 2 : بوابات المستخدمين والمدارس الخاصة والتشفير والتعديل لـ index.html ] ==================== -->
 
-	<!-- أزرار الزاوية اليسرى العلوية: زر المعلمين (يظهر في وضع المدارس الخاصة) + زر المربع الخاص بالمالك الأساسي -->
-	<div class="top-left-controls">
-		<button id="admin-lock-trigger" onclick="openAdminPassModal()">
-			<span id="admin-lock-icon">🔒</span>
-			<span id="admin-lock-text">وضع التعديل</span>
-		</button>
-		<button id="owner-square-trigger" onclick="openOwnerSecretModal()">◼</button>
-	</div>
+
 
 	<!-- ١. بوابة المدارس الخاصة للمعلمين (المعرّف الفريد ELM-XXXX + التشفير + حزمتا الطلاب والمعلم + النقل بين الأجهزة) -->
 	<div id="admin-pass-modal" onclick="closeAdminPassModal(event)">
@@ -2085,17 +2204,19 @@
 		if (leftCtrl) {
 			const usersBtn = document.createElement('button');
 			usersBtn.type = 'button';
-			usersBtn.style.cssText = 'background:rgba(15,23,42,0.88);color:#86efac;border:1.5px solid #22c55e;border-radius:20px;padding:4px 12px;font-family:Cairo,sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;';
-			usersBtn.innerHTML = '👥 المستخدمون';
+			usersBtn.className = 'portal-top-btn portal-users-btn';
+			usersBtn.title = 'سجل المستخدمين والمدارس';
+			usersBtn.innerHTML = '<span class="btn-ico">👥</span><span class="btn-lbl">المستخدمون</span>';
 			usersBtn.onclick = () => { renderPlatformUsersModal(); document.getElementById('platform-users-modal').style.display = 'flex'; };
 
 			const loginBtn = document.createElement('a');
 			loginBtn.href = 'index.html?switchAccount=1';
-			loginBtn.style.cssText = 'background:rgba(15,23,42,0.88);color:#fde047;border:1.5px solid #eab308;border-radius:20px;padding:4px 12px;font-family:Cairo,sans-serif;font-weight:800;font-size:0.78rem;text-decoration:none;';
-			loginBtn.innerHTML = '🔑 بوابة الدخول';
+			loginBtn.className = 'portal-top-btn portal-login-btn';
+			loginBtn.title = 'بوابة الدخول وتبديل الحساب';
+			loginBtn.innerHTML = '<span class="btn-ico">🔑</span><span class="btn-lbl">بوابة الدخول</span>';
 
-			leftCtrl.prepend(usersBtn);
-			leftCtrl.prepend(loginBtn);
+			leftCtrl.appendChild(usersBtn);
+			leftCtrl.appendChild(loginBtn);
 		}
 
 		const CLOUD_SYNC_API = localStorage.getItem('al3lm_sync_api_url') || localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
@@ -2147,7 +2268,7 @@
 			const curTchObj = teachers[String(activeTch).toLowerCase()];
 			const profBox = document.getElementById('active-teacher-profile-box');
 			if (curTchObj) {
-				profBox.innerHTML = `👨‍🏫 حساب المعلم النشط: <strong style="color:#fde047;">${curTchObj.name} (@${curTchObj.username})</strong> — المدرسة: <strong>${curTchObj.schoolName || 'مدرسة العلم'}</strong> ${curTchObj.schoolCode ? `[${curTchObj.schoolCode}]` : ''}`;
+				profBox.innerHTML = `👨‍🏫 حساب المعلم النشط: <strong style="color:#fde047;">${curTchObj.username}</strong> — المدرسة: <strong>${curTchObj.schoolName || 'مدرسة العلم'}</strong> ${curTchObj.schoolCode ? `[${curTchObj.schoolCode}]` : ''}`;
 			} else {
 				profBox.innerHTML = `👨‍🏫 الوضع الحالي: <strong style="color:#fde047;">${activeTch}</strong> — عدد المدارس الخاصة المسجلة: (${schools.length})`;
 			}
@@ -2159,7 +2280,7 @@
 				? '<div style="color:#94a3b8;font-size:0.8rem;padding:6px;">لا توجد حسابات معلمين مسجلة باسم مستخدم بعد.</div>'
 				: tKeys.map(k => {
 					const t = teachers[k];
-					return `<div class="school-manage-item"><div class="school-manage-info">👨‍🏫 <span>${t.name}</span> (@${t.username}) — المدرسة: ${t.schoolName || 'العامة'} ${t.schoolCode ? `[${t.schoolCode}]` : ''}</div></div>`;
+					return `<div class="school-manage-item"><div class="school-manage-info">👨‍🏫 <span>${t.username}</span> — المدرسة: ${t.schoolName || 'العامة'} ${t.schoolCode ? `[${t.schoolCode}]` : ''}</div></div>`;
 				}).join('');
 
 			const sKeys = Object.keys(students);
@@ -2171,7 +2292,7 @@
 					const s = students[k];
 					const pct = s.stats?.pct ?? 0;
 					const scLbl = s.stats?.scoreLabel || s.lastScore || '0%';
-					return `<div class="school-manage-item"><div class="school-manage-info">🎓 <span>${s.name}</span> (@${s.username}) — السنة: <span>${s.assignedYear || 1}</span> | الإنجاز: <span>${pct}%</span> (${scLbl})</div></div>`;
+					return `<div class="school-manage-item"><div class="school-manage-info">🎓 <span>${s.username}</span> — السنة: <span>${s.assignedYear || 1}</span> | الإنجاز: <span>${pct}%</span> (${scLbl})</div></div>`;
 				}).join('');
 		};
 

@@ -464,7 +464,7 @@
 
             <div class="stats-grid">
                 <div class="stat-tile">
-                    <span class="stat-lbl">اسم التلميذ والمستخدم</span>
+                    <span class="stat-lbl">اسم التلميذ</span>
                     <span class="stat-val" id="st-name-val">—</span>
                 </div>
                 <div class="stat-tile">
@@ -1025,7 +1025,7 @@
                     `درسك الحالي: حرف (${ABJAD[(m.curWeek - 1) % 28]}) — الوحدة (${m.curWeek}) • الختم (${m.curSubj} من 7)`;
             }
 
-            document.getElementById('st-name-val').textContent = `${stu.name} (@${stu.username})`;
+            document.getElementById('st-name-val').textContent = (stu.name && stu.name.toLowerCase() !== String(stu.username || '').toLowerCase()) ? `${stu.name} (${stu.username})` : (stu.name || stu.username);
             document.getElementById('st-class-val').textContent = `${STAGE_NAMES[m.stg]} — السنة ${m.yr}`;
             document.getElementById('st-unit-val').textContent = `حرف (${ABJAD[(m.curWeek - 1) % 28]}) • وحدة ${m.curWeek}`;
             document.getElementById('st-score-val').textContent = m.scoreLabel;

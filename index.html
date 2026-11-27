@@ -369,7 +369,6 @@
 
         <!-- ٣. الحقول الأساسية -->
         <div class="field-col" id="auth-form-fields">
-            <input type="text" id="auth-display-name" class="auth-input" placeholder="الاسم المحبّب (مثال: نور / الأستاذ علي)" style="display:none;">
             <input type="text" id="auth-username" class="auth-input" placeholder="اسم المستخدم (Username)" autocomplete="username">
             <input type="password" id="auth-password" class="auth-input" placeholder="كلمة المرور (Password)" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleAuthSubmit()">
 
@@ -625,10 +624,9 @@
 
             const isReg = (currentMode === 'register');
 
-            document.getElementById('auth-display-name').style.display = isReg ? 'block' : 'none';
             document.getElementById('auth-username').placeholder = currentRole === 'teacher'
-                ? 'اسم مستخدم المعلم أو معرّف المدرسة (ELM-XXXX)'
-                : 'اسم المستخدم الخاص بك (Username)';
+                ? 'اسم المعلم / المستخدم أو معرّف المدرسة (ELM-XXXX)'
+                : 'اسمك الموحّد للدخول والحساب (مثال: نور أو noor)';
 
             document.getElementById('student-class-picker').style.display = (isReg && currentRole === 'student') ? 'flex' : 'none';
             document.getElementById('auth-school-name').style.display = (isReg && currentRole === 'teacher') ? 'block' : 'none';
@@ -659,7 +657,6 @@
             const rawUser = (document.getElementById('auth-username').value || '').trim();
             const username = rawUser.toLowerCase();
             const password = (document.getElementById('auth-password').value || '').trim();
-            const displayName = (document.getElementById('auth-display-name').value || '').trim();
             const schoolName = (document.getElementById('auth-school-name').value || '').trim();
             const stuSchoolBranch = document.getElementById('student-school-branch')?.value || 'main';
             const submitBtn = document.getElementById('auth-submit-btn');
@@ -685,7 +682,7 @@
                         const newStu = {
                             accountType: 'student',
                             username,
-                            name: displayName || rawUser,
+                            name: rawUser,
                             pwHash,
                             assignedYear: pickedStudentYear,
                             schoolBranch: stuSchoolBranch,
@@ -782,7 +779,7 @@
                             id: linkedSchoolId,
                             code: linkedSchoolCode,
                             name: schoolName,
-                            owner: displayName || rawUser,
+                            owner: rawUser,
                             targetYears: yrs,
                             pinHash: computeHash(password, linkedSchoolId),
                             warnings: 0,
@@ -800,7 +797,7 @@
                     const newTch = {
                         accountType: 'teacher',
                         username,
-                        name: displayName || rawUser,
+                        name: rawUser,
                         pwHash,
                         schoolId: linkedSchoolId,
                         schoolCode: linkedSchoolCode,
