@@ -1257,6 +1257,8 @@
 
         function loadScriptOnce(src, cb) {
             const altCurr = src.startsWith('curriculum') ? `curriculums/${src}` : null;
+            let altPrivteExact = null;
+            let altPrivateExact = null;
             let altPrivate12 = null;
             let altBook = null;
             if (src.includes('major-y')) {
@@ -1265,12 +1267,14 @@
                     const yr = m[1], sl = parseInt(m[2], 10);
                     const slug = STAGE3_MAJOR_SLUGS[sl] || '';
                     if (slug) {
+                        altPrivteExact = `curriculums/privte/curriculums_12_curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
+                        altPrivateExact = `curriculums/private/curriculums_12_curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
                         altPrivate12 = `curriculums_12/curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
                     }
                     altBook = `books/year${yr}-book/curriculum-s3-major-y${yr}-s${sl}.js`;
                 }
             }
-            const candidates = [altPrivate12, altBook, altCurr, src].filter(Boolean);
+            const candidates = [altPrivteExact, altPrivateExact, altPrivate12, altBook, altCurr, src].filter(Boolean);
             loadScriptWithCandidates(candidates, src, cb);
         }
 
