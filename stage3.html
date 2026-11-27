@@ -674,6 +674,105 @@
         .lab-ctrl-group { display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; font-weight: 800; color: #e2e8f0; }
         .lab-val-badge { background: #065f46; color: #fde047; padding: 2px 9px; border-radius: 8px; font-weight: 900; }
 
+
+        .major-stacked-bundle {
+            width: 100%;
+            max-width: 880px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .major-unit-lesson-block {
+            background: #ffffff;
+            border: 2.5px solid #eab308;
+            border-radius: 22px;
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 6px 18px rgba(6, 40, 30, 0.08);
+        }
+        .major-lesson-seq-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #fef08a, #fde047);
+            border: 1.5px solid #ca8a04;
+            color: #78350f;
+            font-size: 0.82rem;
+            font-weight: 900;
+        }
+        .major-lesson-block-title {
+            font-size: clamp(1.06rem, 2.4vmin, 1.35rem);
+            font-weight: 900;
+            color: #064e3b;
+            line-height: 1.5;
+        }
+        .major-lesson-block-body {
+            font-family: 'Amiri', 'Cairo', serif;
+            font-size: clamp(1.18rem, 2.6vmin, 1.52rem);
+            line-height: 2.0;
+            color: #0f172a;
+            white-space: pre-line;
+            text-align: justify;
+        }
+
+
+        .book-source-badge.major-map-trigger {
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+        .book-source-badge.major-map-trigger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(202, 138, 4, 0.35);
+        }
+        .major-map-letter-cell {
+            padding: 8px 4px;
+            border-radius: 14px;
+            border: 2px solid #eab308;
+            background: linear-gradient(145deg, #fffbeb, #fef9c3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.14s ease;
+        }
+        .major-map-letter-cell:hover:not(.locked-week) {
+            transform: translateY(-2px);
+            background: #fde047;
+        }
+        .major-map-letter-cell .cell-ltr {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #78350f;
+        }
+        .major-map-letter-cell .cell-sub {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: #065f46;
+        }
+        .major-map-letter-cell.current-week {
+            border-color: #059669;
+            background: #d1fae5;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
+        }
+        .major-map-letter-cell.major-done-week {
+            border-color: #16a34a;
+            background: #dcfce7;
+        }
+        .major-map-letter-cell.locked-week {
+            opacity: 0.38;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
         /* ================= ٥. محطة السؤال والمحاورة (القالب + المجيب الآلي المفتوح كاملاً بالأسفل) ================= */
         .quiz-card-shell {
             width: 100%;
@@ -1186,6 +1285,22 @@
         </div>
     </div>
 
+
+    <!-- نافذة الخريطة التخصصية (٢٨ حرفاً — حزمة دروس متسلسلة لكل حرف بحسب السنة) -->
+    <div class="modal-overlay" id="major-map-modal">
+        <div class="modal-card">
+            <button type="button" class="modal-close-btn" id="close-major-map-modal">×</button>
+            <h2 style="font-size:1.2rem; font-weight:900; color:#78350f; text-align:center;" id="major-map-modal-title">
+                👑 الخَرِيطَةُ التَّخَصُّصِيَّةُ (٢٨ حَرْفاً)
+            </h2>
+            <p style="font-size:0.88rem; font-weight:800; color:#334155; text-align:center;" id="major-map-modal-sub"></p>
+            <div class="abjad-map-grid" id="major-abjad-map-grid"></div>
+            <div class="settings-row">
+                <button type="button" class="setting-pill-btn mode-seq" id="major-toggle-mode-btn">🔒 وَضْعُ التَّسَلْسُلِ المُنْضَبِطِ</button>
+            </div>
+        </div>
+    </div>
+
     <!-- نافذة إتمام الوحدة -->
     <div class="modal-overlay" id="lesson-complete-modal">
         <div class="modal-card" style="max-width:460px; text-align:center; align-items:center;">
@@ -1257,8 +1372,7 @@
 
         function loadScriptOnce(src, cb) {
             const altCurr = src.startsWith('curriculum') ? `curriculums/${src}` : null;
-            let altPrivteExact = null;
-            let altPrivateExact = null;
+            let altPrivte = null;
             let altPrivate12 = null;
             let altBook = null;
             if (src.includes('major-y')) {
@@ -1267,14 +1381,13 @@
                     const yr = m[1], sl = parseInt(m[2], 10);
                     const slug = STAGE3_MAJOR_SLUGS[sl] || '';
                     if (slug) {
-                        altPrivteExact = `curriculums/privte/curriculums_12_curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
-                        altPrivateExact = `curriculums/private/curriculums_12_curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
+                        altPrivte = `curriculums/privte/curriculums_12_curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
                         altPrivate12 = `curriculums_12/curriculum-s3-major-y${yr}-s${sl}-${slug}.js`;
                     }
                     altBook = `books/year${yr}-book/curriculum-s3-major-y${yr}-s${sl}.js`;
                 }
             }
-            const candidates = [altPrivteExact, altPrivateExact, altPrivate12, altBook, altCurr, src].filter(Boolean);
+            const candidates = [altPrivte, altPrivate12, altBook, altCurr, src].filter(Boolean);
             loadScriptWithCandidates(candidates, src, cb);
         }
 
@@ -1786,6 +1899,59 @@ window.Stage3LabEngine = (function() {
     }
 
     // قراءة المادة التخصصية بدون أي جملة ملاحظة إضافية في آخر النص نهائياً!
+
+    function extractSequentialMajorLessons(y, majorSeal) {
+        const collected = [];
+        const seen = new Set();
+        const pushItem = (title, text, applyTxt, qs) => {
+            const t = String(title || '').trim();
+            const b = String(text || '').trim();
+            if (!t && !b) return;
+            const k = (t + '|' + b).slice(0, 140);
+            if (seen.has(k)) return;
+            seen.add(k);
+            collected.push({
+                title: t || SEAL_NAMES[majorSeal],
+                text: b,
+                apply: String(applyTxt || '').trim(),
+                questions: Array.isArray(qs) ? qs : []
+            });
+        };
+        const bookMap = window.STAGE3_MAJOR_BOOKS?.[`${y}_${majorSeal}`] || {};
+        const nums = Object.keys(bookMap).map(x => parseInt(x, 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+        nums.forEach(slot => {
+            const mb = bookMap[slot] || bookMap[String(slot)];
+            if (mb) {
+                const body = Array.isArray(mb.slides)
+                    ? mb.slides.map(s => [s.heading, s.text].filter(Boolean).join('\n')).filter(Boolean).join('\n\n')
+                    : (mb.text || mb.essence || '');
+                pushItem(mb.title, body, mb.apply, mb.questions);
+            }
+        });
+        return collected;
+    }
+
+    function getUnitMajorBundle(y, unitIdx1To28, majorSeal) {
+        const u = Math.max(1, Math.min(28, parseInt(unitIdx1To28, 10) || 1));
+        const perUnit = YEAR_CYCLES_MAP[y] || 5; // 5 for y15, 6 for y16, 7 for y17
+        const all = extractSequentialMajorLessons(y, majorSeal);
+        const start = (u - 1) * perUnit;
+        const out = [];
+        for (let k = 0; k < perUnit; k++) {
+            const seqNum = start + k + 1;
+            if (all[start + k]) {
+                out.push({ ...all[start + k], seqNum, slotInUnit: k + 1, perUnit });
+            } else if (all.length > 0) {
+                const wrapItem = all[(start + k) % all.length];
+                out.push({ ...wrapItem, seqNum, slotInUnit: k + 1, perUnit });
+            } else {
+                const gen = getGeneralBookEntry(y, u, majorSeal);
+                out.push({ title: gen.title, text: gen.essence, apply: gen.apply || '', questions: [], seqNum, slotInUnit: k + 1, perUnit });
+            }
+        }
+        return out;
+    }
+
     function getMajorBookLesson(y, w, majorSeal) {
         const mBook = window.STAGE3_MAJOR_BOOKS?.[`${y}_${majorSeal}`]?.[w]
                    || window.STAGE3_MAJOR_BOOKS?.[majorSeal]?.[`${y}_${w}`];
@@ -1914,8 +2080,11 @@ window.Stage3LabEngine = (function() {
 
         const srcBadge = document.getElementById('book-source-badge');
         srcBadge.classList.toggle('major-book', isMajorActive);
+        srcBadge.classList.toggle('major-map-trigger', isMajorActive);
+        srcBadge.setAttribute('role', isMajorActive ? 'button' : 'status');
+        srcBadge.title = isMajorActive ? 'افتح الخريطة التخصصية (٢٨ حرفاً)' : 'الثقافة العامة';
         srcBadge.textContent = isMajorActive
-            ? '👑 التَّخَصُّصُ الأَسَاسِيُّ (٧٠٪)'
+            ? '👑 خَرِيطَةُ التَّخَصُّصِ (٧٠٪)'
             : '📚 الثَّقَافَةُ العَامَّةُ (٥٪)';
 
         const mediaBar = document.getElementById('station-media-bar');
@@ -1994,24 +2163,29 @@ window.Stage3LabEngine = (function() {
             return;
         }
 
-        const majLesson = getMajorBookLesson(activeYear, playWeek, major);
-        const slides = majLesson.slides || [];
-        if (currentSlideIdx >= slides.length) currentSlideIdx = 0;
-        const slide = slides[currentSlideIdx] || { heading: '', text: '' };
-        const isQuranSlide = slide.isQuran || (slide.text && slide.text.includes('﴿'));
+        const bundle = getUnitMajorBundle(activeYear, playWeek, major);
+        const perUnit = bundle.length;
+        const startSeq = bundle[0]?.seqNum || 1;
+        const endSeq = bundle[bundle.length - 1]?.seqNum || perUnit;
+        const blocksHtml = bundle.map((item) => `
+            <section class="major-unit-lesson-block">
+                <span class="major-lesson-seq-badge">👑 الدَّرْسُ التَّخَصُّصِيُّ (${toAr(item.seqNum)}) — ضِمْنَ حُزْمَةِ الوَحْدَةِ (${toAr(item.slotInUnit)} مِنْ ${toAr(perUnit)})</span>
+                <div class="major-lesson-block-title">${safeRenderText(item.title)}</div>
+                <div class="major-lesson-block-body">${safeRenderText(item.text)}</div>
+            </section>
+        `).join('');
 
         host.innerHTML = `
             <div class="lesson-title-banner major-banner">
                 <div class="banner-title-main">
                     <div class="banner-letter-seal">${meta.rawLtr}</div>
                     <div>
-                        <div class="banner-seal-sub">${SEAL_NAMES[activeSeal]} — 👑 المَادَّةُ الأَسَاسِيَّةُ الكَامِلَةُ (٧٠٪)</div>
-                        <div class="banner-lesson-heading">${safeRenderText(majLesson.title || meta.sealTitle)}</div>
+                        <div class="banner-seal-sub">${SEAL_NAMES[activeSeal]} — 👑 حُزْمَةُ الدُّرُوسِ التَّخَصُّصِيَّةِ (${toAr(perUnit)} دُرُوسٍ: ${toAr(startSeq)} ← ${toAr(endSeq)})</div>
+                        <div class="banner-lesson-heading">وَحْدَةُ حَرْفِ (${meta.rawLtr}) — رَقْمُ الوَحْدَةِ (${toAr(playWeek)} مِنْ ٢٨)</div>
                     </div>
                 </div>
             </div>
-            ${slide.heading ? `<div class="slide-subheading-bar">${safeRenderText(slide.heading)}</div>` : ''}
-            <div class="lesson-text-card ${isQuranSlide ? 'quran-ayah-card' : ''}">${safeRenderText(slide.text)}</div>
+            <div class="major-stacked-bundle">${blocksHtml}</div>
         `;
         setSealStationProgress(activeYear, playWeek, activeSeal, 1);
         updateChromeUI();
@@ -2239,22 +2413,23 @@ window.Stage3LabEngine = (function() {
 
         const major = getMajorSeal();
         const isMajorActive = (activeSeal === major);
+        const majorBundle = isMajorActive ? getUnitMajorBundle(activeYear, playWeek, major) : null;
+        const baseGen = getGeneralBookEntry(activeYear, playWeek, activeSeal);
         const genEntry = isMajorActive
             ? {
-                title: majLessonObj?.title || getGeneralBookEntry(activeYear, playWeek, activeSeal).title,
-                essence: (majLessonObj?.slides || []).map(s => s.text).join('\n\n'),
-                apply: majLessonObj?.apply || ''
+                title: `وَحْدَةُ (${toAr(playWeek)}) — ${SEAL_NAMES[major]} (${toAr(majorBundle.length)} دُرُوسٍ مُتَسَلْسِلَةٍ)`,
+                essence: majorBundle.map(b => `${b.title}\n${b.text}`).join('\n\n---\n\n'),
+                apply: majorBundle.map(b => b.apply).filter(Boolean).join('\n') || baseGen.apply || ''
               }
-            : getGeneralBookEntry(activeYear, playWeek, activeSeal);
+            : baseGen;
 
-        const majLessonObj = isMajorActive ? getMajorBookLesson(activeYear, playWeek, major) : null;
         const sourceTexts = isMajorActive
-            ? (majLessonObj?.slides || []).map(s => s.text).filter(Boolean)
+            ? majorBundle.map(b => b.text).filter(Boolean)
             : [genEntry.essence];
         if (sourceTexts.length === 0) sourceTexts.push(genEntry.essence);
 
         if (!currentQuizData || forceRayShift) {
-            const majQs = isMajorActive && Array.isArray(majLessonObj?.questions) ? majLessonObj.questions : [];
+            const majQs = isMajorActive ? majorBundle.flatMap(b => Array.isArray(b.questions) ? b.questions : []) : [];
             if (isMajorActive && majQs.length > 0 && !forceRayShift) {
                 const picked = majQs[Math.floor(Math.random() * majQs.length)];
                 currentQuizData = JSON.parse(JSON.stringify(picked));
@@ -2467,10 +2642,10 @@ window.Stage3LabEngine = (function() {
         host.scrollTop = 0;
         const major = getMajorSeal();
         const isMajorActive = (activeSeal === major);
-        const majLesson = isMajorActive ? getMajorBookLesson(activeYear, playWeek, major) : null;
+        const majorBundle = isMajorActive ? getUnitMajorBundle(activeYear, playWeek, major) : null;
         const genEntry = getGeneralBookEntry(activeYear, playWeek, activeSeal);
-        const stepText = (isMajorActive && majLesson?.apply)
-            ? majLesson.apply
+        const stepText = isMajorActive
+            ? (majorBundle.map((b, i) => b.apply ? `(${toAr(i + 1)}) ${b.apply}` : `(${toAr(i + 1)}) طَبِّقْ مَفْهُومَ دَرْسِ: ${b.title}`).join('\n\n'))
             : (genEntry.apply || 'طَبِّقْ مَا تَعَلَّمْتَهُ فِي هٰذِهِ الوَحْدَةِ بِإِتْقَانٍ.');
 
         host.innerHTML = `
@@ -2629,9 +2804,81 @@ window.Stage3LabEngine = (function() {
     };
     document.getElementById('close-map-modal').onclick = () => document.getElementById('map-modal').classList.remove('open');
 
+
+    function syncModeButtonsUI() {
+        const txt = isFreeExplore
+            ? '🔓 وَضْعُ الاسْتِكْشَافِ الحُرِّ (اضْغَطْ لِلتَّسَلْسُلِ)'
+            : '🔒 وَضْعُ التَّسَلْسُلِ المُنْضَبِطِ';
+        const cls = 'setting-pill-btn ' + (isFreeExplore ? 'mode-exp' : 'mode-seq');
+        const mBtn = document.getElementById('toggle-mode-btn');
+        const mjBtn = document.getElementById('major-toggle-mode-btn');
+        if (mBtn) { mBtn.className = cls; mBtn.textContent = txt; }
+        if (mjBtn) { mjBtn.className = cls; mjBtn.textContent = txt; }
+    }
+
+    function renderMajorMapModal() {
+        const major = getMajorSeal();
+        const perUnit = YEAR_CYCLES_MAP[activeYear] || 5;
+        document.getElementById('major-map-modal-title').textContent =
+            `👑 الخَرِيطَةُ التَّخَصُّصِيَّةُ لِمَادَّةِ: ${SEAL_NAMES[major]} (${toAr(activeYear)} سَنَةً)`;
+        document.getElementById('major-map-modal-sub').textContent =
+            `٢٨ حَرْفاً — كُلُّ حَرْفٍ يَفْتَحُ (${toAr(perUnit)}) دُرُوسٍ تَخَصُّصِيَّةٍ مُتَسَلْسِلَةٍ`;
+
+        const grid = document.getElementById('major-abjad-map-grid');
+        grid.innerHTML = '';
+        for (let i = 1; i <= 28; i++) {
+            const unlocked = isWeekUnlocked(i);
+            const done = hasSealStar(activeYear, i, major);
+            const startN = (i - 1) * perUnit + 1;
+            const endN = i * perUnit;
+
+            const cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = 'major-map-letter-cell'
+                + (i === playWeek ? ' current-week' : '')
+                + (done ? ' major-done-week' : '')
+                + (!unlocked ? ' locked-week' : '');
+            cell.innerHTML = `
+                <span class="cell-ltr">${ABJAD[i - 1]}</span>
+                <span class="cell-sub">${unlocked ? `${done ? '✅' : '👑'} ${toAr(startN)}–${toAr(endN)}` : '🔒'}</span>
+            `;
+            cell.onclick = () => {
+                if (!unlocked) {
+                    showToast('هٰذَا الحَرْفُ مُغْلَقٌ فِي وَضْعِ التَّسَلْسُلِ؛ أَتْمِمْ مَا قَبْلَهُ أَوْ فَعِّلِ الاسْتِكْشَافَ الحُرَّ 🔒');
+                    return;
+                }
+                playWeek = i;
+                activeSeal = major;
+                activeStation = 0; currentSlideIdx = 0; isLabMode = false; currentQuizData = null;
+                document.getElementById('major-map-modal').classList.remove('open');
+                renderActiveView();
+            };
+            grid.appendChild(cell);
+        }
+        syncModeButtonsUI();
+    }
+
+    document.getElementById('book-source-badge').onclick = () => {
+        const major = getMajorSeal();
+        if (activeSeal !== major) return;
+        renderMajorMapModal();
+        document.getElementById('major-map-modal').classList.add('open');
+    };
+    document.getElementById('close-major-map-modal').onclick = () => {
+        document.getElementById('major-map-modal').classList.remove('open');
+    };
+    document.getElementById('major-toggle-mode-btn').onclick = () => {
+        isFreeExplore = !isFreeExplore;
+        SafeStore.set('stage3_explore_mode', isFreeExplore ? 'true' : 'false');
+        syncModeButtonsUI();
+        renderMajorMapModal();
+        renderActiveView();
+    };
+
     document.getElementById('toggle-mode-btn').onclick = () => {
         isFreeExplore = !isFreeExplore;
         SafeStore.set('stage3_explore_mode', isFreeExplore ? 'true' : 'false');
+        syncModeButtonsUI();
         renderMapModal();
         renderActiveView();
     };
