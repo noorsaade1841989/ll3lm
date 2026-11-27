@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v12';
+            var VER = 'al3lm_layout_v13';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -444,6 +444,10 @@
         </div>
 
         <button type="button" class="submit-auth-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">دخول</button>
+        <div id="google-signin-section" style="display:none; flex-direction:column; align-items:center; gap:8px; padding-top:4px; border-top:1.5px dashed #cbd5e1;">
+            <span style="font-size:0.78rem; font-weight:800; color:#475569;">أو ادخل بضغطة واحدة بحسابك الحالي دون كلمة مرور جديدة:</span>
+            <div id="google-btn-mount"></div>
+        </div>
         <div class="feedback-box" id="auth-feedback"></div>
     </div>
 
@@ -506,6 +510,8 @@
             localStorage.removeItem('al3lm_active_role');
             localStorage.removeItem('al3lm_active_student_user');
             localStorage.removeItem('al3lm_active_teacher_user');
+            localStorage.removeItem('al3lm_owner_gate1_passed');
+            try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
         }
 
         const activeRole = localStorage.getItem('al3lm_active_role');
@@ -546,6 +552,8 @@
             localStorage.removeItem('al3lm_active_role');
             localStorage.removeItem('al3lm_active_student_user');
             localStorage.removeItem('al3lm_active_teacher_user');
+            localStorage.removeItem('al3lm_owner_gate1_passed');
+            try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
             localStorage.setItem('school_edit_mode', 'false');
             document.getElementById('active-session-bar').style.display = 'none';
             showMsg('تم تسجيل الخروج بنجاح.', true);
@@ -579,6 +587,10 @@
             if (!sel) return;
             // مزامنة قائمة المدارس الخاصة من السحابة تلقائياً
             const dirRes = await callCloudApi({ action: 'list_directory' }, 5000);
+            const gClientId = (dirRes && dirRes.googleClientId) || localStorage.getItem('al3lm_google_client_id') || '';
+            if (gClientId) {
+                initGoogleOneTapButton(gClientId);
+            }
             if (dirRes && dirRes.ok && Array.isArray(dirRes.schools)) {
                 const localSc = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
                 dirRes.schools.forEach(inc => {
@@ -601,6 +613,67 @@
                 }
             });
         }
+
+        function initGoogleOneTapButton(clientId) {
+            const sec = document.getElementById('google-signin-section');
+            const mount = document.getElementById('google-btn-mount');
+            if (!sec || !mount || window._gsiLoaded) return;
+            window._gsiLoaded = true;
+            const sc = document.createElement('script');
+            sc.src = 'https://accounts.google.com/gsi/client';
+            sc.async = true;
+            sc.defer = true;
+            sc.onload = () => {
+                if (!window.google || !window.google.accounts) return;
+                sec.style.display = 'flex';
+                window.google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: async (resp) => {
+                        if (!resp || !resp.credential) return;
+                        showMsg('⏳ جاري الدخول بحساب Google...', true);
+                        const stuSchoolBranch = document.getElementById('student-school-branch')?.value || 'main';
+                        const r = await callCloudApi({
+                            action: 'oauth_google_login',
+                            credential: resp.credential,
+                            clientId,
+                            role: currentRole,
+                            assignedYear: pickedStudentYear,
+                            schoolBranch: stuSchoolBranch
+                        });
+                        if (r && r.ok && r.profile) {
+                            if (r.role === 'student') {
+                                const accounts = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+                                accounts[r.profile.username] = r.profile;
+                                localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+                                localStorage.setItem('al3lm_active_student_user', r.profile.username);
+                                localStorage.setItem('al3lm_active_role', 'student');
+                                restoreStudentSnapshotToLocal(r.profile);
+                                window.location.href = 'student.html';
+                            } else {
+                                const teachers = JSON.parse(localStorage.getItem('al3lm_teacher_accounts_v1') || '{}');
+                                teachers[r.profile.username] = r.profile;
+                                localStorage.setItem('al3lm_teacher_accounts_v1', JSON.stringify(teachers));
+                                localStorage.removeItem('al3lm_owner_gate1_passed');
+                                localStorage.setItem('al3lm_active_teacher_user', r.profile.username);
+                                localStorage.setItem('al3lm_active_role', 'teacher');
+                                window.location.href = 'teachers.html';
+                            }
+                        } else {
+                            showMsg('❌ تعذّر إكمال الدخول عبر Google.');
+                        }
+                    }
+                });
+                window.google.accounts.id.renderButton(mount, {
+                    theme: 'outline',
+                    size: 'large',
+                    shape: 'pill',
+                    text: 'continue_with',
+                    locale: 'ar'
+                });
+            };
+            document.head.appendChild(sc);
+        }
+
         populateStudentSchools();
 
         let currentRole = params.get('role') === 'teacher' ? 'teacher' : 'student';
@@ -864,7 +937,9 @@
                     teachers[username] = cloudTchReg.profile || newTch;
                     localStorage.setItem('al3lm_teacher_accounts_v1', JSON.stringify(teachers));
                     localStorage.setItem('al3lm_active_role', 'teacher');
-                    localStorage.setItem('al3lm_active_teacher_user', username);
+                    localStorage.removeItem('al3lm_owner_gate1_passed');
+                        try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
+                        localStorage.setItem('al3lm_active_teacher_user', username);
                     window.location.href = 'teachers.html';
                     return;
                 } else {
@@ -881,6 +956,8 @@
                             localStorage.setItem('private_schools_directory', JSON.stringify(schools));
                         }
                         localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.removeItem('al3lm_owner_gate1_passed');
+                        try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
                         localStorage.setItem('al3lm_active_teacher_user', username);
                         if (tProf.schoolId && tProf.schoolId !== 'main') {
                             localStorage.setItem('selected_school_branch', tProf.schoolId);
@@ -895,6 +972,8 @@
                     if (tAcc && tAcc.pwHash === pwHash) {
                         callCloudApi({ action: 'sync_teacher', username, pwHash, profile: tAcc, schoolMeta: tAcc.schoolMeta || null });
                         localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.removeItem('al3lm_owner_gate1_passed');
+                        try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
                         localStorage.setItem('al3lm_active_teacher_user', username);
                         if (tAcc.schoolId && tAcc.schoolId !== 'main') {
                             localStorage.setItem('selected_school_branch', tAcc.schoolId);
@@ -912,6 +991,8 @@
                     );
                     if (matchedSchool) {
                         localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.removeItem('al3lm_owner_gate1_passed');
+                        try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
                         localStorage.setItem('al3lm_active_teacher_user', matchedSchool.owner || matchedSchool.code);
                         localStorage.setItem('selected_school_branch', matchedSchool.id);
                         localStorage.setItem('active_private_school_meta', JSON.stringify(matchedSchool));
@@ -921,11 +1002,22 @@
                         return;
                     }
 
+                    // البوابة الأولى للإدارة العليا: تتحقق من اسم المستخدم وكلمة المرور الأولى للإدارة لكشف زر المالك السري في teachers.html
+                    const gate1Cloud = await callCloudApi({ action: 'verify_admin_gate1', username, password });
+                    const savedGate1User = (localStorage.getItem('owner_gate1_username') || '').trim().toLowerCase();
+                    const savedGate1PassHash = localStorage.getItem('owner_gate1_pass_hash') || '';
                     const savedOwnerHash = localStorage.getItem('school_admin_pin_hash');
-                    const isMaster = savedOwnerHash ? (computeHash(password, 'owner_master') === savedOwnerHash) : (password === '1234');
-                    if (isMaster) {
+
+                    const localUserOk = savedGate1User ? (username === savedGate1User) : ['admin', 'الإدارة', 'الادارة'].includes(username);
+                    const localPassOk = savedGate1PassHash
+                        ? (computeHash(password, 'owner_gate1') === savedGate1PassHash)
+                        : (password === 'admin1234' || (savedOwnerHash ? computeHash(password, 'owner_master') === savedOwnerHash : password === '1234'));
+
+                    if ((gate1Cloud && gate1Cloud.ok && gate1Cloud.isOwnerGate1) || (!gate1Cloud?.status && localUserOk && localPassOk)) {
                         localStorage.setItem('al3lm_active_role', 'teacher');
                         localStorage.setItem('al3lm_active_teacher_user', rawUser || 'الإدارة');
+                        localStorage.setItem('al3lm_owner_gate1_passed', '1');
+                        try { sessionStorage.setItem('al3lm_owner_gate1_passed', '1'); } catch (_) {}
                         window.location.href = 'teachers.html';
                         return;
                     }

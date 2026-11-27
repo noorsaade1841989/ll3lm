@@ -1,5 +1,5 @@
 // Service Worker المحدّث لمنصة مدرسة العلم (v11 — إشعارات الجرس على الهاتف + Network-First للصفحات)
-const CACHE_NAME = 'al3lm-pwa-v11';
+const CACHE_NAME = 'al3lm-pwa-v13';
 const CORE_ASSETS = [
   './manifest.json',
   './icon-192.png',

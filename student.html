@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v11';
+            var VER = 'al3lm_layout_v13';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -517,10 +517,30 @@
                 <select id="stu-school-selector" class="alarm-time-input" style="font-size:0.84rem; padding:6px 12px;" onchange="changeStudentSchool(this.value)">
                     <option value="main">🏫 مدرسة العلم (المنهج الأساسي)</option>
                 </select>
+                <button type="button" class="action-pill-btn secondary" style="font-size:0.8rem; padding:6px 12px; border-color:#eab308; background:#fefce8; color:#713f12;" onclick="toggleStudentPackageExchangeBox()">
+                    📨 صندوق الحزم والتراسل (<span id="stu-inbox-badge-cnt">0</span>)
+                </button>
                 <label class="action-pill-btn secondary" style="cursor:pointer; font-size:0.8rem; padding:6px 12px;">
-                    <span>📥 إضافة ملف مدرسة معلمي</span>
+                    <span>📥 إضافة ملف JSON يدوياً</span>
                     <input type="file" accept=".json" style="display:none;" onchange="importTeacherSchoolForStudent(event)">
                 </label>
+            </div>
+
+            <!-- صندوق استقبال حزم المعلم وإرسال سجل التلميذ مباشرةً عبر المنصة -->
+            <div id="stu-pkg-exchange-box" style="display:none; width:100%; max-width:660px; background:#f8fafc; border:2px solid #10b981; border-radius:20px; padding:12px 14px; text-align:right; flex-direction:column; gap:8px; margin-top:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                    <span style="font-weight:900; font-size:0.86rem; color:#064e3b;">📦 الحزم الواردة إليك وإرسال سجلّك لمعلمك:</span>
+                    <button type="button" class="action-pill-btn secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="refreshStudentDirectInbox()">🔄 تحديث الوارد</button>
+                </div>
+                <div id="stu-direct-inbox-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding-top:6px; border-top:1px dashed #cbd5e1;">
+                    <input type="text" id="stu-send-target-user" class="alarm-time-input" style="flex:1; min-width:155px; font-size:0.82rem; padding:6px 12px; background:#fff;" placeholder="اكتب اسم مستخدم معلمك أو الإدارة...">
+                    <button type="button" class="action-pill-btn" style="font-size:0.78rem; padding:7px 14px;" onclick="sendMyStudentRecordDirect()">📤 إرسال سجلّي وعلاماتي</button>
+                    <label class="action-pill-btn secondary" style="cursor:pointer; font-size:0.76rem; padding:6px 12px;">
+                        📎 إرسال ملف JSON
+                        <input type="file" accept=".json" style="display:none;" onchange="sendStudentLocalJsonDirect(event)">
+                    </label>
+                </div>
             </div>
         </section>
 
@@ -584,6 +604,11 @@
                 <div style="font-size:0.78rem; font-weight:800; color:#64748b;" id="st-class-lock-note">
                     🔒 صفك الدراسي مثبّت لضمان التسلسل، ويُفتح لك الانتقال للصف التالي تلقائياً عند إتمام هذا الصف.
                 </div>
+            </div>
+
+            <div id="stu-strength-insight-bar" style="background:linear-gradient(135deg,#f0fdf4,#fefce8);border:1.8px solid #86efac;border-radius:16px;padding:10px 16px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-size:0.86rem;font-weight:900;color:#064e3b;">
+                <span id="stu-strongest-lbl">🌟 أقوى جانب لديك: سيظهر بعد أول درس</span>
+                <span id="stu-focus-lbl" style="color:#b45309;">💪 جانب يحتاج تركيزاً: واصل التقدم</span>
             </div>
 
             <div>
@@ -826,11 +851,54 @@
                 }
             }
 
+            // تحليل بسيط لأقوى ختم (مادة) وأكثر ختم يحتاج تركيزاً بناءً على سجل التلميذ
+            const SEAL_SHORT_NAMES = {
+                1: 'المنطق والبيان 🗣️',
+                2: 'البصيرة والفن 👁️',
+                3: 'الرنين والصوت 👂',
+                4: 'الرياضيات والمقدار ✋',
+                5: 'الحركة والاتزان 👣',
+                6: 'العلوم والحياة 🍏',
+                7: 'الآداب والسلوك 💧'
+            };
+            const sealEarned = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+            const sealCounted = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+            const maxCheckW = Math.max(1, curWeek);
+            for (let w = 1; w <= maxCheckW; w++) {
+                for (let s = 1; s <= 7; s++) {
+                    if (w === curWeek && s > curSubj) continue;
+                    if (stg === 1) {
+                        const sc = parseInt(localStorage.getItem(`subj_score_${saveKey}_w${w}_s${s}`), 10);
+                        if (!isNaN(sc)) { sealEarned[s] += sc; sealCounted[s]++; }
+                        else if (w < curWeek || s < curSubj) { sealEarned[s] += 1; sealCounted[s]++; }
+                    } else if (stg === 2) {
+                        const st = localStorage.getItem(`subj_star_${saveKey}_w${w}_s${s}`) === '1';
+                        sealEarned[s] += (st || w < curWeek || s < curSubj) ? 1 : 0;
+                        sealCounted[s]++;
+                    } else {
+                        const s3P = `s3_u_${String(stu.username || activeUser).toLowerCase()}_`;
+                        const st3 = localStorage.getItem(`${s3P}star_y${yr}_w${w}_s${s}`) === '1' || localStorage.getItem(`s3_star_y${yr}_w${w}_s${s}`) === '1';
+                        sealEarned[s] += st3 ? 1 : 0;
+                        sealCounted[s]++;
+                    }
+                }
+            }
+            let strongestSeal = null, weakestSeal = null, bestR = -1, worstR = 999;
+            const anySealData = Object.values(sealEarned).some(v => v > 0);
+            if (anySealData) {
+                for (let s = 1; s <= 7; s++) {
+                    const ratio = sealCounted[s] > 0 ? (sealEarned[s] / sealCounted[s]) : 0;
+                    if (ratio > bestR) { bestR = ratio; strongestSeal = s; }
+                    if (ratio < worstR) { worstR = ratio; weakestSeal = s; }
+                }
+            }
+
             if (pct >= 100) stu.completed = true;
-            stu.stats = { curWeek, curSubj, pct, scoreLabel };
+            stu.lastActiveAt = new Date().toISOString();
+            stu.stats = { curWeek, curSubj, pct, scoreLabel, strongestSeal, weakestSeal };
             accounts[activeUser] = stu;
             localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
-            return { yr, stg, curWeek, curSubj, pct, scoreLabel, cycleUnitStates };
+            return { yr, stg, curWeek, curSubj, pct, scoreLabel, cycleUnitStates, strongestSeal, weakestSeal, SEAL_SHORT_NAMES };
         }
 
         function populateSchoolDropdown() {
@@ -850,7 +918,188 @@
             sel.value = stu.schoolBranch || 'main';
         }
 
+        
+        // مزامنة دروس المدرسة الخاصة تلقائياً من السحابة دون حاجة لملف يدوي + صندوق الحزم المباشر
+        async function pullEnrolledSchoolLessonsFromCloud(branchId) {
+            const targetId = branchId || stu.schoolBranch || 'main';
+            if (!navigator.onLine || !targetId || targetId === 'main') return;
+            try {
+                const r = await fetch(CLOUD_SYNC_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'pull_school_package', schoolId: targetId })
+                });
+                if (!r.ok) return;
+                const d = await r.json();
+                const pkg = d && d.ok ? d.packageData : null;
+                if (pkg && pkg.schoolMeta && pkg.schoolMeta.id) {
+                    const inc = pkg.schoolMeta;
+                    const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                    const idx = allSchools.findIndex(s => s.id === inc.id);
+                    if (idx >= 0) allSchools[idx] = { ...allSchools[idx], ...inc }; else allSchools.push(inc);
+                    localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
+                    if (pkg.lessonsByYear) {
+                        Object.keys(pkg.lessonsByYear).forEach(y => {
+                            localStorage.setItem(`custom_curriculum_edits_${inc.id}_y${y}`, pkg.lessonsByYear[y]);
+                        });
+                    }
+                    populateSchoolDropdown();
+                }
+            } catch (_) {}
+        }
+
+        let _stuInboxItems = [];
+        window.toggleStudentPackageExchangeBox = function() {
+            const box = document.getElementById('stu-pkg-exchange-box');
+            if (!box) return;
+            const open = box.style.display !== 'flex';
+            box.style.display = open ? 'flex' : 'none';
+            if (open) window.refreshStudentDirectInbox();
+        };
+
+        window.refreshStudentDirectInbox = async function() {
+            if (!navigator.onLine || !stu || !stu.username) return;
+            const listEl = document.getElementById('stu-direct-inbox-list');
+            const badgeCnt = document.getElementById('stu-inbox-badge-cnt');
+            try {
+                const r = await fetch(CLOUD_SYNC_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'check_inbox', username: stu.username })
+                });
+                const d = await r.json();
+                _stuInboxItems = (d && d.ok && Array.isArray(d.items)) ? d.items : [];
+                if (badgeCnt) badgeCnt.textContent = _stuInboxItems.length;
+                if (_stuInboxItems.length > 0 && document.getElementById('stu-pkg-exchange-box').style.display === 'none') {
+                    document.getElementById('stu-pkg-exchange-box').style.display = 'flex';
+                }
+                if (!listEl) return;
+                if (_stuInboxItems.length === 0) {
+                    listEl.innerHTML = '<div style="font-size:0.78rem; color:#64748b;">لا توجد حزم واردة جديدة حالياً.</div>';
+                    return;
+                }
+                listEl.innerHTML = _stuInboxItems.map((it, idx) => `
+                    <div class="history-row" style="background:#fffbeb; border-color:#fde047; flex-wrap:wrap;">
+                        <span>📦 <strong>${it.title}</strong> — من: ${it.fromUser}</span>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" class="action-pill-btn" style="font-size:0.74rem; padding:4px 10px;" onclick="acceptStudentInboxPkg(${idx})">📥 قبول وتفعيل</button>
+                            <button type="button" class="action-pill-btn secondary" style="font-size:0.74rem; padding:4px 8px;" onclick="removeStudentInboxPkg(${idx})">✖</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (_) {}
+        };
+
+        window.acceptStudentInboxPkg = async function(idx) {
+            const item = _stuInboxItems[idx];
+            if (!item || !item.packagePayload) return;
+            const data = item.packagePayload;
+            if (data.schoolMeta && data.schoolMeta.id) {
+                const inc = data.schoolMeta;
+                const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                const i = allSchools.findIndex(s => s.id === inc.id);
+                if (i >= 0) allSchools[i] = { ...allSchools[i], ...inc }; else allSchools.push(inc);
+                localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
+                if (data.lessonsByYear) {
+                    Object.keys(data.lessonsByYear).forEach(y => {
+                        localStorage.setItem(`custom_curriculum_edits_${inc.id}_y${y}`, data.lessonsByYear[y]);
+                    });
+                }
+                stu.schoolBranch = inc.id;
+                localStorage.setItem('selected_school_branch', inc.id);
+                accounts[activeUser] = stu;
+                localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+                populateSchoolDropdown();
+                renderDashboard();
+                pushStudentProfileToCloud();
+                await window.removeStudentInboxPkg(idx);
+                showToast(`✅ تم تفعيل حزمة مدرسة (${inc.name}) في حسابك فوراً!`);
+            } else {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${(item.title || 'package').replace(/\s+/g, '_')}.json`;
+                a.click();
+            }
+        };
+
+        window.removeStudentInboxPkg = async function(idx) {
+            const item = _stuInboxItems[idx];
+            if (!item) return;
+            try {
+                await fetch(CLOUD_SYNC_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete_inbox_item', username: stu.username, itemId: item.id })
+                });
+            } catch (_) {}
+            window.refreshStudentDirectInbox();
+        };
+
+        window.sendMyStudentRecordDirect = async function() {
+            const toU = (document.getElementById('stu-send-target-user')?.value || '').trim();
+            if (!toU) { showToast('⚠️ اكتب اسم مستخدم معلمك أو الإدارة أولاً.'); return; }
+            computeStudentLiveMetrics();
+            try {
+                const r = await fetch(CLOUD_SYNC_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'send_package',
+                        fromUser: stu.username,
+                        fromRole: 'student',
+                        toUsername: toU,
+                        title: `سجل وعلامات التلميذ (${stu.username})`,
+                        packagePayload: stu
+                    })
+                });
+                const d = await r.json();
+                if (d && d.ok) {
+                    document.getElementById('stu-send-target-user').value = '';
+                    showToast(`✅ تم إرسال سجلّك وعلاماتك إلى (${toU}) عبر المنصة!`);
+                } else {
+                    showToast('❌ لم يُعثر على اسم المستلم، تأكد من كتابة اسمه الصحيح.');
+                }
+            } catch (_) {
+                showToast('❌ تعذّر الإرسال، تأكد من الاتصال بالإنترنت.');
+            }
+        };
+
+        window.sendStudentLocalJsonDirect = function(ev) {
+            const file = ev.target.files?.[0];
+            if (!file) return;
+            const toU = (document.getElementById('stu-send-target-user')?.value || '').trim();
+            if (!toU) { showToast('⚠️ اكتب اسم المستلم في الخانة أولاً.'); ev.target.value = ''; return; }
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const r = await fetch(CLOUD_SYNC_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'send_package',
+                            fromUser: stu.username,
+                            fromRole: 'student',
+                            toUsername: toU,
+                            title: file.name,
+                            packagePayload: parsed
+                        })
+                    });
+                    const d = await r.json();
+                    if (d && d.ok) showToast(`✅ تم إرسال الملف إلى (${toU}) بنجاح!`);
+                    else showToast('❌ لم يُعثر على اسم المستلم.');
+                } catch (_) {
+                    showToast('❌ الملف غير صالح.');
+                } finally {
+                    ev.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        };
+
         window.changeStudentSchool = function(branchId) {
+            pullEnrolledSchoolLessonsFromCloud(branchId);
             stu.schoolBranch = branchId || 'main';
             localStorage.setItem('selected_school_branch', stu.schoolBranch);
             accounts[activeUser] = stu;
@@ -1292,6 +1541,20 @@
             document.getElementById('st-pct-label').textContent = `${m.pct}%`;
             document.getElementById('st-pct-fill').style.width = `${m.pct}%`;
 
+            const strLbl = document.getElementById('stu-strongest-lbl');
+            const focLbl = document.getElementById('stu-focus-lbl');
+            if (strLbl && focLbl) {
+                if (m.strongestSeal) {
+                    strLbl.textContent = `🌟 أقوى مادة لديك: ${m.SEAL_SHORT_NAMES[m.strongestSeal]}`;
+                    focLbl.textContent = (m.weakestSeal && m.weakestSeal !== m.strongestSeal)
+                        ? `💪 مادة تحتاج تركيزاً إضافياً: ${m.SEAL_SHORT_NAMES[m.weakestSeal]}`
+                        : `✨ أداؤك متوازن في جميع الأختام السبعة!`;
+                } else {
+                    strLbl.textContent = `🌟 ابدأ درسك الأول ليظهر تحليل نقاط قوتك هنا`;
+                    focLbl.textContent = `🧭 ٢٨ وحدة بانتظار همّتك`;
+                }
+            }
+
             const promBtn = document.getElementById('promote-next-year-btn');
             const lockNote = document.getElementById('st-class-lock-note');
             if (stu.completed || m.pct >= 100) {
@@ -1335,6 +1598,8 @@
         populateSchoolDropdown();
         renderDashboard();
         pullLatestStudentFromCloudOnOpen();
+        pullEnrolledSchoolLessonsFromCloud(stu.schoolBranch);
+        window.refreshStudentDirectInbox();
         pushStudentProfileToCloud();
 
         getReadyServiceWorkerReg();

@@ -5,7 +5,7 @@
 	<script>
 	(function autoRefreshStaleCacheV6() {
 		try {
-			var VER = 'al3lm_layout_v11';
+			var VER = 'al3lm_layout_v13';
 			if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
 				localStorage.setItem('al3lm_ui_cache_ver', VER);
 				if ('caches' in window) {
@@ -424,7 +424,8 @@
 		#owner-square-trigger:hover { color: #f8fafc; border-color: #cbd5e1; }
 		#owner-square-trigger.owner-active { background: #166534; color: #4ade80; border-color: #4ade80; }
 
-		#admin-pass-modal, #owner-secret-modal {
+		#admin-pass-modal, #owner-secret-modal .admin-modal-card { max-width: 700px; }
+		#owner-secret-modal {
 			position: fixed; inset: 0; z-index: 10000;
 			background: rgba(0, 0, 0, 0.82); backdrop-filter: blur(6px);
 			display: none; justify-content: center; align-items: center;
@@ -688,6 +689,22 @@
 			}
 		}
 
+
+		/* إخفاء زر خزنة المالك تماماً عن جميع المعلمين، ولا يظهر إلا لمن اجتاز البوابة الإدارية الأولى في صفحة الدخول */
+		#owner-square-trigger {
+			display: none !important;
+			width: auto !important;
+			height: 32px !important;
+			padding: 0 13px !important;
+			border-radius: 999px !important;
+			background: linear-gradient(135deg, #451a03, #78350f) !important;
+			color: #fde047 !important;
+			border: 1.8px solid #fde047 !important;
+		}
+		body.owner-gate1-verified #owner-square-trigger {
+			display: inline-flex !important;
+		}
+
 	</style>
 </head>
 <body>
@@ -709,7 +726,7 @@
 						<span id="admin-lock-icon">🔒</span>
 						<span id="admin-lock-text" class="btn-lbl">وضع التعديل</span>
 					</button>
-					<button id="owner-square-trigger" onclick="openOwnerSecretModal()" title="بوابة المالك الأساسي">◼</button>
+					<button id="owner-square-trigger" class="portal-top-btn" onclick="openOwnerSecretModal()" title="خزنة المالك والتحليلات (البوابة السرية الثانية)"><span class="btn-ico">👑</span><span class="btn-lbl">خزنة الإدارة</span></button>
 				</div>
 			</div>
 		</div>
@@ -885,9 +902,10 @@
 
 				<!-- أدوات المعلم النشط بعد فتح القفل بالرمز السري -->
 				<div id="teacher-active-tools" style="display:none; flex-direction:column; gap:6px; margin-bottom:10px;">
+					<button type="button" class="admin-action-btn" style="background:linear-gradient(135deg,#059669,#047857); border:1.5px solid #fde047; font-size:0.82rem; padding:9px;" onclick="window.publishActiveSchoolToCloud()">☁️ نشر دروس مدرستي سحابياً لطلابي بضغطة واحدة</button>
 					<div style="display:flex; gap:6px; flex-wrap:wrap;">
-						<button type="button" class="admin-action-btn" style="background:#059669; font-size:0.78rem; flex:1; padding:8px;" onclick="exportSinglePrivateSchoolPackage(false)">🎓 تصدير حزمة للطلاب (للقراءة)</button>
-						<button type="button" class="admin-action-btn" style="background:#0284c7; font-size:0.78rem; flex:1; padding:8px;" onclick="exportSinglePrivateSchoolPackage(true)">🔐 تصدير حزمة المعلم (للنقل)</button>
+						<button type="button" class="admin-action-btn" style="background:#059669; font-size:0.78rem; flex:1; padding:8px;" onclick="exportSinglePrivateSchoolPackage(false)">🎓 تنزيل ملف للطلاب (JSON)</button>
+						<button type="button" class="admin-action-btn" style="background:#0284c7; font-size:0.78rem; flex:1; padding:8px;" onclick="exportSinglePrivateSchoolPackage(true)">🔐 تنزيل حزمة المعلم (JSON)</button>
 					</div>
 					<label class="admin-action-btn" style="background:#7c3aed; font-size:0.8rem; padding:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
 						📤 تحديث دروس مدرستي من ملف (JSON)
@@ -975,18 +993,50 @@
 				<div id="owner-edit-status-badge" class="admin-status-pill">تعديل مدرسة العلم: مغلق 🔒</div>
 				<button id="owner-main-edit-btn" class="admin-action-btn" onclick="toggleMainSchoolEditMode()">✏️ تفعيل التعديل لمدرسة العلم الأساسية</button>
 
+				<button class="admin-action-btn" style="background:linear-gradient(135deg,#0284c7,#0369a1);border:1.5px solid #7dd3fc;margin-top:4px;" onclick="toggleSubSection('owner-analytics-section'); if(document.getElementById('owner-analytics-section').style.display==='flex') window.loadAndRenderOwnerAnalytics();">📊 التحليلات التربوية وإدارة الحسابات الخاملة</button>
+				<div id="owner-analytics-section" class="sub-section-box" style="text-align:right; background:rgba(9,17,30,0.72); border:1.5px solid #38bdf8; border-radius:16px; padding:12px;">
+					<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+						<span style="color:#7dd3fc; font-weight:900; font-size:0.9rem;">📈 ملخص المستويات وتشخيص المناهج السحابي</span>
+						<div style="display:flex; gap:6px; flex-wrap:wrap;">
+							<button type="button" class="reset-pin-btn" onclick="window.loadAndRenderOwnerAnalytics()">🔄 تحديث من السحابة</button>
+							<button type="button" class="clear-warn-btn" onclick="window.exportAnalyticsCSVReport()">📥 تنزيل جدول التحليل (CSV)</button>
+						</div>
+					</div>
+
+					<!-- البطاقات التشخيصية الثلاث البسيطة -->
+					<div id="owner-kpi-cards" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(195px,1fr)); gap:8px; margin:6px 0;"></div>
+
+					<!-- شريط الفلترة السريع لكشف الحسابات الخاملة أو الصفرية -->
+					<div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding:6px 0; border-top:1px dashed rgba(255,255,255,0.18);">
+						<span style="font-size:0.78rem; color:#fde047; font-weight:900;">فرز الحسابات:</span>
+						<button type="button" class="warn-school-btn owner-flt-btn" data-flt="all" style="background:#eab308;" onclick="window.setOwnerAnalyticsFilter('all')">الكل</button>
+						<button type="button" class="warn-school-btn owner-flt-btn" data-flt="active" style="background:#334155;color:#fff;" onclick="window.setOwnerAnalyticsFilter('active')">🟢 النشطون فقط</button>
+						<button type="button" class="warn-school-btn owner-flt-btn" data-flt="inactive" style="background:#334155;color:#fff;" onclick="window.setOwnerAnalyticsFilter('inactive')">⚪ الخاملون (+30 يوم أو 0%)</button>
+					</div>
+
+					<h4 style="color:#fde047; font-size:0.84rem; margin:4px 0;">🏫 تقييم المعلمين ونشاطهم (<span id="oa-tch-cnt">0</span>):</h4>
+					<div id="oa-teachers-list" class="schools-manage-list" style="max-height:175px;"></div>
+
+					<h4 style="color:#7dd3fc; font-size:0.84rem; margin:6px 0 4px;">🎓 مستويات التلاميذ ونقاط التوقف (<span id="oa-stu-cnt">0</span>):</h4>
+					<div id="oa-students-list" class="schools-manage-list" style="max-height:210px;"></div>
+				</div>
+
 				<button class="admin-action-btn secondary-btn" style="color:#fca5a5; border-color:rgba(248,113,113,0.4);" onclick="toggleSubSection('manage-schools-section'); renderManageSchoolsList();">🛡️ رقابة وتحذير وإنقاذ رموز المدارس الخاصة</button>
 				<div id="manage-schools-section" class="sub-section-box">
 					<div id="schools-manage-list" class="schools-manage-list"></div>
 				</div>
 
-				<button class="admin-action-btn secondary-btn" onclick="toggleSubSection('change-pin-section')">🔑 الإعدادات وتغيير الرمز السري وكلمة الأمان</button>
-				<div id="change-pin-section" class="sub-section-box">
-					<input type="password" id="admin-new-pass" class="admin-pass-field" placeholder="الرمز السري الأساسي الجديد (اتركه فارغاً إن لم ترد تغييره)">
-					<input type="password" id="admin-confirm-pass" class="admin-pass-field" placeholder="تأكيد الرمز السري الأساسي الجديد">
+				<button class="admin-action-btn secondary-btn" onclick="toggleSubSection('change-pin-section')">🔑 إعدادات البوابتين السريتين للمالك (البوابة ١ + البوابة ٢)</button>
+				<div id="change-pin-section" class="sub-section-box" style="text-align:right;">
+					<div style="font-size:0.78rem; color:#7dd3fc; font-weight:800;">١. بيانات البوابة الأولى (في صفحة الدخول index لإظهار زر خزنة الإدارة):</div>
+					<input type="text" id="admin-gate1-user" class="admin-pass-field" placeholder="اسم مستخدم الإدارة للبوابة الأولى (الافتراضي: الإدارة أو admin)">
+					<input type="password" id="admin-gate1-pass" class="admin-pass-field" placeholder="كلمة المرور الأولى للدخول العام (الافتراضي: admin1234)">
+					<div style="font-size:0.78rem; color:#fde047; font-weight:800; margin-top:4px;">٢. الرمز السري الثاني (لفتح هذه الخزنة والتحليلات والحذف):</div>
+					<input type="password" id="admin-new-pass" class="admin-pass-field" placeholder="الرمز السري الثاني الجديد (الافتراضي: 1234 — اتركه فارغاً إن لم ترد تغييره)">
+					<input type="password" id="admin-confirm-pass" class="admin-pass-field" placeholder="تأكيد الرمز السري الثاني الجديد">
 					<input type="text" id="admin-owner-recovery" class="admin-pass-field" placeholder="كلمة أمان المالك لاسترداد الرمز عند النسيان">
 					<input type="password" id="admin-pinata-jwt" class="admin-pass-field" placeholder="مفتاح Pinata JWT للرفع اللامركزي التلقائي (اختياري)">
-					<button class="admin-action-btn" style="background:#0284c7;" onclick="saveOwnerSettings()">💾 حفظ الإعدادات المشفرة</button>
+					<button class="admin-action-btn" style="background:#0284c7;" onclick="saveOwnerSettings()">💾 حفظ بيانات البوابتين في السحابة والجهاز</button>
 				</div>
 
 				<button class="admin-action-btn secondary-btn" onclick="toggleSubSection('backup-tools-section')">📦 النسخ الاحتياطي الشامل للمنصة</button>
@@ -2038,16 +2088,34 @@
 			document.getElementById('owner-secret-modal').style.display = 'none';
 		}
 
-		function unlockOwnerPanel() {
+		window._ownerMasterPinSession = '';
+		async function unlockOwnerPanel() {
 			const entered = document.getElementById('owner-master-pin-input').value.trim();
-			if (verifyOwnerMasterPin(entered)) {
+			if (!entered) return;
+			const syncApi = localStorage.getItem('al3lm_sync_api_url') || localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+			let cloudVerified = null;
+			if (navigator.onLine) {
+				try {
+					const r = await fetch(syncApi, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ action: 'verify_owner_gate2', masterPin: entered })
+					});
+					if (r.status === 200) cloudVerified = true;
+					else if (r.status === 403) cloudVerified = false;
+				} catch (_) {}
+			}
+			const isOk = (cloudVerified !== null) ? cloudVerified : verifyOwnerMasterPin(entered);
+			if (isOk) {
 				isOwnerSessionUnlocked = true;
+				window._ownerMasterPinSession = entered;
+				localStorage.setItem('school_admin_pin_hash', computeSecureHash(entered, 'owner_master'));
 				document.getElementById('owner-master-pin-input').value = '';
 				document.getElementById('owner-auth-step').style.display = 'none';
 				document.getElementById('owner-controls-panel').style.display = 'flex';
-				showOwnerFeedback('✅ تم فتح لوحة المالك الأساسي بنجاح.', true);
+				showOwnerFeedback('✅ تم التحقق من البوابة السرية الثانية وفتح خزنة الإدارة.', true);
 			} else {
-				showOwnerFeedback('❌ الرمز السري الأساسي غير صحيح!', false);
+				showOwnerFeedback('❌ الرمز السري الثاني غير صحيح!', false);
 			}
 		}
 
@@ -2231,22 +2299,54 @@
 			showOwnerFeedback(`✅ تم حذف مدرسة (${target.name}) نهائياً!`, true);
 		}
 
-		function saveOwnerSettings() {
+		async function saveOwnerSettings() {
 			if (!isOwnerSessionUnlocked) return;
+			const newGate1User = (document.getElementById('admin-gate1-user')?.value || '').trim();
+			const newGate1Pass = (document.getElementById('admin-gate1-pass')?.value || '').trim();
 			const newPass = document.getElementById('admin-new-pass').value.trim();
 			const confirmPass = document.getElementById('admin-confirm-pass').value.trim();
 			const ownerRec = document.getElementById('admin-owner-recovery').value.trim();
 			const jwt = document.getElementById('admin-pinata-jwt').value.trim();
 
+			if (newPass && (newPass.length < 3 || newPass !== confirmPass)) {
+				showOwnerFeedback('⚠️ الرمز السري الثاني وتأكيده غير متطابقين.', false);
+				return;
+			}
+			if (newGate1Pass && newGate1Pass.length < 3) {
+				showOwnerFeedback('⚠️ كلمة المرور الأولى يجب ألا تقل عن 3 خانات.', false);
+				return;
+			}
+
 			if (jwt) localStorage.setItem('platform_pinata_jwt', jwt);
 			if (ownerRec) localStorage.setItem('owner_recovery_hash', computeSecureHash(ownerRec, 'owner_rec'));
+			if (newGate1User) localStorage.setItem('owner_gate1_username', newGate1User.toLowerCase());
+			if (newGate1Pass) localStorage.setItem('owner_gate1_pass_hash', computeSecureHash(newGate1Pass, 'owner_gate1'));
+
+			const syncApi = localStorage.getItem('al3lm_sync_api_url') || localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+			if (navigator.onLine) {
+				try {
+					await fetch(syncApi, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: 'owner_update_credentials',
+							masterPin: window._ownerMasterPinSession,
+							masterPinHash: localStorage.getItem('school_admin_pin_hash') || computeSecureHash('1234', 'owner_master'),
+							newGate1User,
+							newGate1Pass,
+							newGate2Pin: newPass,
+							newRecoveryPhrase: ownerRec
+						})
+					});
+				} catch (_) {}
+			}
+
+			if (newGate1User) document.getElementById('admin-gate1-user').value = '';
+			if (newGate1Pass) document.getElementById('admin-gate1-pass').value = '';
 
 			if (newPass) {
-				if (newPass.length < 3 || newPass !== confirmPass) {
-					showOwnerFeedback('⚠️ الرمز الجديد وتأكيده غير متطابقين.', false);
-					return;
-				}
 				localStorage.setItem('school_admin_pin_hash', computeSecureHash(newPass, 'owner_master'));
+				window._ownerMasterPinSession = newPass;
 				document.getElementById('admin-new-pass').value = '';
 				document.getElementById('admin-confirm-pass').value = '';
 
@@ -2258,12 +2358,12 @@
 				document.getElementById('change-pin-section').style.display = 'none';
 				document.getElementById('owner-controls-panel').style.display = 'none';
 				document.getElementById('owner-auth-step').style.display = 'flex';
-				showOwnerFeedback('✅ تم تشفير وحفظ الرمز السري الجديد وقفل اللوحة!', true);
+				showOwnerFeedback('✅ تم تشفير وحفظ بيانات البوابتين على السحابة وقفل الخزنة!', true);
 				return;
 			}
 
 			document.getElementById('change-pin-section').style.display = 'none';
-			showOwnerFeedback('✅ تم حفظ إعدادات المالك بنجاح!', true);
+			showOwnerFeedback('✅ تم حفظ بيانات البوابتين السريتين في السحابة بنجاح!', true);
 		}
 
 		function exportSchoolCustomizations() {
@@ -2385,7 +2485,30 @@
 		<div class="admin-modal-card" style="max-width:600px;text-align:right;" onclick="event.stopPropagation()">
 			<button class="admin-close-x" onclick="document.getElementById('platform-users-modal').style.display='none'">×</button>
 			<h3 class="admin-modal-title" style="text-align:center;">👥 سِجِلُّ مُسْتَخْدِمِي المِنَصَّةِ وَبَوَّابَةُ المُعَلِّمِ</h3>
-			<div id="active-teacher-profile-box" style="background:rgba(22,101,52,0.35);border:1.5px solid #4ade80;border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:0.84rem;font-weight:800;color:#f8fafc;"></div>
+			<div id="active-teacher-profile-box" style="background:rgba(22,101,52,0.35);border:1.5px solid #4ade80;border-radius:14px;padding:10px 14px;margin-bottom:10px;font-size:0.84rem;font-weight:800;color:#f8fafc;"></div>
+			<div id="teacher-simple-analytics-box" style="background:rgba(15,23,42,0.9);border:1.5px solid #38bdf8;border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:0.8rem;font-weight:800;color:#e2e8f0;line-height:1.7;"></div>
+
+			<!-- صندوق إرسال واستقبال ملفات الـ JSON مباشرةً بين المستخدمين عبر المنصة دون واتساب أو نقل يدوي -->
+			<div style="background:rgba(6,78,59,0.28);border:1.5px solid #eab308;border-radius:16px;padding:10px 12px;margin-bottom:12px;">
+				<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+					<span style="color:#fde047;font-weight:900;font-size:0.86rem;">📨 إرسال واستقبال حزم (JSON) مباشرةً عبر المنصة</span>
+					<button type="button" class="reset-pin-btn" onclick="window.refreshTeacherDirectInbox()">🔄 فحص الوارد (<span id="tch-inbox-cnt">0</span>)</button>
+				</div>
+				<div id="tch-direct-inbox-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
+				<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+					<input type="text" id="direct-pkg-target-user" class="admin-pass-field" style="flex:1.2;min-width:140px;padding:6px 10px;font-size:0.8rem;text-align:right;" placeholder="اكتب اسم المستلم (username) أو الإدارة...">
+					<input type="text" id="direct-pkg-title" class="admin-pass-field" style="flex:1;min-width:120px;padding:6px 10px;font-size:0.8rem;text-align:right;" placeholder="عنوان الحزمة (اختياري)...">
+				</div>
+				<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">
+					<button type="button" class="admin-action-btn" style="flex:1;background:#059669;font-size:0.76rem;padding:7px;" onclick="window.sendActiveSchoolPkgDirect(false)">📤 إرسال حزمة مدرستي لهذا المستخدم</button>
+					<button type="button" class="admin-action-btn" style="flex:1;background:#d97706;font-size:0.76rem;padding:7px;" onclick="window.sendActiveSchoolPkgDirect(true)">📢 إرسال حزمة مدرستي لكل طلابي</button>
+					<label class="admin-action-btn" style="flex:1;background:#0284c7;font-size:0.76rem;padding:7px;text-align:center;cursor:pointer;">
+						📎 إرسال ملف JSON من جهازي
+						<input type="file" accept=".json" style="display:none;" onchange="window.sendLocalJsonFileDirectToUser(event)">
+					</label>
+				</div>
+				<div id="direct-pkg-status-msg" style="font-size:0.78rem;font-weight:800;color:#86efac;margin-top:5px;"></div>
+			</div>
 
 			<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
 				<button type="button" class="admin-action-btn" style="flex:1;background:#0284c7;font-size:0.8rem;padding:8px;" onclick="exportTeacherOwnCard()">💾 تنزيل بطاقة حسابي كمعلم</button>
@@ -2517,10 +2640,310 @@
 				}
 			} catch (_) {}
 		}
+
+		// ١. إظهار زر خزنة الإدارة السرية فقط إذا دخلت الإدارة عبر البوابة الأولى في index.html!
+		const hasGate1 = (localStorage.getItem('al3lm_owner_gate1_passed') === '1') || (sessionStorage.getItem('al3lm_owner_gate1_passed') === '1');
+		if (hasGate1) {
+			document.body.classList.add('owner-gate1-verified');
+		} else {
+			document.body.classList.remove('owner-gate1-verified');
+		}
+
+		// ٢. بناء حزمة المدرسة النشطة للمعلم (جاهزة للنشر السحابي أو الإرسال المباشر لأي مستخدم)
+		function buildActiveSchoolStudentPkgObject() {
+			const editOwner = localStorage.getItem('edit_mode_owner') || currentSelectedSchoolId || 'main';
+			if (!editOwner || editOwner === 'main') return null;
+			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+			const schoolMeta = allSchools.find(s => s.id === editOwner);
+			if (!schoolMeta) return null;
+			const lessonsByYear = {};
+			for (let y = 1; y <= 21; y++) {
+				const val = localStorage.getItem(`custom_curriculum_edits_${schoolMeta.id}_y${y}`);
+				if (val) lessonsByYear[y] = val;
+			}
+			return {
+				packageType: 'single_private_school',
+				exportedAt: new Date().toISOString(),
+				schoolMeta: {
+					id: schoolMeta.id,
+					code: schoolMeta.code,
+					name: schoolMeta.name,
+					owner: schoolMeta.owner,
+					targetYears: schoolMeta.targetYears || [],
+					yearHashes: schoolMeta.yearHashes || {}
+				},
+				lessonsByYear
+			};
+		}
+
+		window.publishActiveSchoolToCloud = async function() {
+			const pkg = buildActiveSchoolStudentPkgObject();
+			if (!pkg) { showAdminFeedback('⚠️ افتح تعديل مدرستك الخاصة أولاً قبل النشر السحابي.', false); return; }
+			showAdminFeedback('⏳ جاري نشر حزمة دروس مدرستك على السحابة لجميع طلابك...', true);
+			try {
+				const r = await fetch(CLOUD_SYNC_API, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'publish_school_package', packageData: pkg })
+				});
+				const d = await r.json();
+				if (d && d.ok) {
+					showAdminFeedback(`✅ تم نشر دروس مدرسة (${pkg.schoolMeta.name}) سحابياً! ستظهر لطلابك تلقائياً فور فتح حساباتهم دون إرسال ملفات.`, true);
+				} else {
+					showAdminFeedback('❌ تعذر النشر السحابي حالياً.', false);
+				}
+			} catch (_) {
+				showAdminFeedback('❌ تأكد من الاتصال بالإنترنت.', false);
+			}
+		};
+
+		window.sendActiveSchoolPkgDirect = async function(sendToAllMyStudents) {
+			const statusEl = document.getElementById('direct-pkg-status-msg');
+			const pkg = buildActiveSchoolStudentPkgObject();
+			if (!pkg) {
+				if (statusEl) { statusEl.style.color = '#fca5a5'; statusEl.textContent = '⚠️ اختر مدرسة خاصة مفعّلة أولاً أو استخدم زر «إرسال ملف JSON من جهازي».'; }
+				return;
+			}
+			const targetInput = (document.getElementById('direct-pkg-target-user')?.value || '').trim();
+			const toUsername = sendToAllMyStudents ? `school:${pkg.schoolMeta.id}` : targetInput;
+			if (!toUsername) {
+				if (statusEl) { statusEl.style.color = '#fca5a5'; statusEl.textContent = '⚠️ اكتب اسم المستخدم المستلم أولاً.'; }
+				return;
+			}
+			const customTitle = (document.getElementById('direct-pkg-title')?.value || '').trim() || `حزمة مدرسة ${pkg.schoolMeta.name}`;
+			await dispatchDirectPackageToCloud(toUsername, customTitle, pkg);
+		};
+
+		window.sendLocalJsonFileDirectToUser = function(ev) {
+			const file = ev.target.files?.[0];
+			if (!file) return;
+			const statusEl = document.getElementById('direct-pkg-status-msg');
+			const toUsername = (document.getElementById('direct-pkg-target-user')?.value || '').trim();
+			if (!toUsername) {
+				if (statusEl) { statusEl.style.color = '#fca5a5'; statusEl.textContent = '⚠️ اكتب اسم المستخدم المستلم في الخانة أولاً ثم اختر ملف JSON.'; }
+				ev.target.value = '';
+				return;
+			}
+			const reader = new FileReader();
+			reader.onload = async (e) => {
+				try {
+					const parsed = JSON.parse(e.target.result);
+					const customTitle = (document.getElementById('direct-pkg-title')?.value || '').trim() || file.name;
+					await dispatchDirectPackageToCloud(toUsername, customTitle, parsed);
+				} catch (_) {
+					if (statusEl) { statusEl.style.color = '#fca5a5'; statusEl.textContent = '❌ الملف المختار ليس بصيغة JSON صالحة.'; }
+				} finally {
+					ev.target.value = '';
+				}
+			};
+			reader.readAsText(file);
+		};
+
+		async function dispatchDirectPackageToCloud(toUsername, title, packagePayload) {
+			const statusEl = document.getElementById('direct-pkg-status-msg');
+			const fromUser = localStorage.getItem('al3lm_active_teacher_user') || 'معلم';
+			if (statusEl) { statusEl.style.color = '#fde047'; statusEl.textContent = '⏳ جاري إرسال الحزمة عبر المنصة...'; }
+			try {
+				const r = await fetch(CLOUD_SYNC_API, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						action: 'send_package',
+						fromUser,
+						fromRole: hasGate1 ? 'admin' : 'teacher',
+						toUsername,
+						title,
+						packagePayload
+					})
+				});
+				const d = await r.json();
+				if (d && d.ok) {
+					if (statusEl) { statusEl.style.color = '#4ade80'; statusEl.textContent = `✅ تم إرسال الحزمة بنجاح (${d.deliveredCount} مستلم)! ستظهر في بوابة المستلم فوراً.`; }
+					const tIn = document.getElementById('direct-pkg-target-user');
+					if (tIn && !toUsername.startsWith('school:')) tIn.value = '';
+				} else if (d && d.error === 'RECIPIENT_NOT_FOUND') {
+					if (statusEl) { statusEl.style.color = '#fca5a5'; statusEl.textContent = '❌ اسم المستخدم المستلم غير مسجّل على المنصة.'; }
+				} else {
+					if (statusEl) { statusEl.style.color = '#fca5a5'; statusEl.textContent = '❌ تعذّر إرسال الحزمة حالياً.'; }
+				}
+			} catch (_) {
+				if (statusEl) { statusEl.style.color = '#fca5a5'; statusEl.textContent = '❌ تعذّر الاتصال بالخادم.'; }
+			}
+		}
+
+		let _teacherInboxItems = [];
+		window.refreshTeacherDirectInbox = async function() {
+			const activeTch = String(localStorage.getItem('al3lm_active_teacher_user') || '').trim().toLowerCase();
+			const listEl = document.getElementById('tch-direct-inbox-list');
+			const cntEl = document.getElementById('tch-inbox-cnt');
+			if (!navigator.onLine || !listEl) return;
+			try {
+				const r = await fetch(CLOUD_SYNC_API, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'check_inbox', username: activeTch, includeAdminBox: hasGate1 })
+				});
+				const d = await r.json();
+				_teacherInboxItems = (d && d.ok && Array.isArray(d.items)) ? d.items : [];
+				if (cntEl) cntEl.textContent = _teacherInboxItems.length;
+				if (_teacherInboxItems.length === 0) {
+					listEl.innerHTML = '<div style="font-size:0.75rem;color:#94a3b8;">صندوق الوارد فارغ حالياً.</div>';
+					return;
+				}
+				listEl.innerHTML = _teacherInboxItems.map((it, idx) => `
+					<div class="school-manage-item" style="background:rgba(15,23,42,0.95);border-color:#fde047;">
+						<div class="school-manage-info">
+							📦 <span>${it.title}</span> — مرسلة من: <strong>${it.fromUser}</strong> (${(it.sentAt || '').slice(0, 10)})
+						</div>
+						<div style="display:flex;gap:4px;flex-wrap:wrap;">
+							<button type="button" class="clear-warn-btn" onclick="window.acceptTeacherInboxItem(${idx})">📥 قبول وتطبيق</button>
+							<button type="button" class="reset-pin-btn" onclick="window.downloadTeacherInboxItem(${idx})">💾 تنزيل JSON</button>
+							<button type="button" class="delete-school-btn" onclick="window.removeTeacherInboxItem(${idx})">🗑️</button>
+						</div>
+					</div>
+				`).join('');
+			} catch (_) {}
+		};
+
+		window.acceptTeacherInboxItem = async function(idx) {
+			const item = _teacherInboxItems[idx];
+			if (!item || !item.packagePayload) return;
+			const data = item.packagePayload;
+			try {
+				if (data.schoolMeta && data.schoolMeta.id) {
+					const inc = data.schoolMeta;
+					const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+					const exIdx = allSchools.findIndex(s => s.id === inc.id);
+					if (exIdx >= 0) allSchools[exIdx] = { ...allSchools[exIdx], ...inc };
+					else allSchools.push(inc);
+					localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
+					if (data.lessonsByYear) {
+						Object.keys(data.lessonsByYear).forEach(y => {
+							localStorage.setItem(`custom_curriculum_edits_${inc.id}_y${y}`, data.lessonsByYear[y]);
+						});
+					}
+					populatePrivateSchoolsDropdown();
+					alert(`✅ تم قبول وتطبيق حزمة مدرسة (${inc.name}) بنجاح!`);
+				} else if (data.accountType === 'student' && data.username) {
+					const curS = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+					curS[data.username] = data;
+					localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(curS));
+					renderPlatformUsersModal();
+					alert(`✅ تم استلام وحفظ سجل التلميذ (${data.username}) بنجاح!`);
+				} else {
+					window.downloadTeacherInboxItem(idx);
+				}
+			} catch (_) {}
+		};
+
+		window.downloadTeacherInboxItem = function(idx) {
+			const item = _teacherInboxItems[idx];
+			if (!item) return;
+			const blob = new Blob([JSON.stringify(item.packagePayload, null, 2)], { type: 'application/json' });
+			const a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = `${(item.title || 'package').replace(/\s+/g, '_')}.json`;
+			a.click();
+		};
+
+		window.removeTeacherInboxItem = async function(idx) {
+			const item = _teacherInboxItems[idx];
+			if (!item) return;
+			const activeTch = String(localStorage.getItem('al3lm_active_teacher_user') || '').trim().toLowerCase();
+			try {
+				await fetch(CLOUD_SYNC_API, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'delete_inbox_item', username: activeTch, itemId: item.id, isAdminBox: Boolean(item._adminBox) })
+				});
+			} catch (_) {}
+			window.refreshTeacherDirectInbox();
+		};
+
 		pullCloudUsersDirectory();
+		setTimeout(() => window.refreshTeacherDirectInbox && window.refreshTeacherDirectInbox(), 900);
+
+		const ABJAD_LETTERS_28 = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي','ك','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
+		const SEAL_LABELS_7 = {
+			1: 'المنطق والبيان', 2: 'البصيرة والفن', 3: 'الرنين والصوت',
+			4: 'الرياضيات والمقدار', 5: 'الحركة والاتزان', 6: 'العلوم والحياة', 7: 'الآداب والسلوك'
+		};
+
+		function getDaysSince(isoStr) {
+			if (!isoStr) return null;
+			const ms = Date.now() - new Date(isoStr).getTime();
+			if (isNaN(ms)) return null;
+			return Math.max(0, Math.floor(ms / 86400000));
+		}
+
+		function formatLastSeenBadge(isoStr, pctVal) {
+			const days = getDaysSince(isoStr);
+			if (days === null) {
+				return (pctVal > 0)
+					? `<span style="color:#86efac;">🟢 متفاعل</span>`
+					: `<span style="color:#94a3b8;">⚪ لم يبدأ بعد (0%)</span>`;
+			}
+			if (days === 0) return `<span style="color:#4ade80;">🟢 نشط اليوم</span>`;
+			if (days <= 7) return `<span style="color:#86efac;">🟢 منذ ${days} يوم</span>`;
+			if (days <= 30) return `<span style="color:#fde047;">🟡 منذ ${days} يوماً</span>`;
+			return `<span style="color:#fca5a5;">⚪ خامل منذ ${days} يوماً</span>`;
+		}
+
+		function isUserConsideredInactive(item, isStudent) {
+			const days = getDaysSince(item.lastActiveAt || item.createdAt);
+			const pct = item.pct ?? item.stats?.pct ?? 0;
+			if (days !== null && days >= 30) return true;
+			if (isStudent && pct === 0 && (days === null || days >= 7)) return true;
+			return false;
+		}
+
+		function analyzeCohortSummary(stuArr) {
+			if (!stuArr || stuArr.length === 0) {
+				return { avgPct: 0, stgCounts: { 1: 0, 2: 0, 3: 0 }, topStuckText: 'لا توجد بيانات توقف بعد', weakSealText: 'لا توجد بيانات تعثر بعد' };
+			}
+			const stgCounts = { 1: 0, 2: 0, 3: 0 };
+			let sumPct = 0;
+			const stuckMap = {};
+			const weakSealMap = {};
+
+			stuArr.forEach(s => {
+				const yr = parseInt(s.assignedYear, 10) || 1;
+				const stg = Math.min(3, Math.max(1, Math.ceil(yr / 7)));
+				stgCounts[stg]++;
+				const pct = Number(s.pct ?? s.stats?.pct ?? 0);
+				sumPct += pct;
+
+				const curW = parseInt(s.curWeek ?? s.stats?.curWeek ?? 1, 10) || 1;
+				if (pct < 100) {
+					const ltr = ABJAD_LETTERS_28[(curW - 1) % 28] || 'أ';
+					const key = `سنة ${yr} • وحدة ${curW} (${ltr})`;
+					stuckMap[key] = (stuckMap[key] || 0) + 1;
+				}
+				const ws = s.weakestSeal ?? s.stats?.weakestSeal;
+				if (ws && SEAL_LABELS_7[ws]) {
+					weakSealMap[ws] = (weakSealMap[ws] || 0) + 1;
+				}
+			});
+
+			const topStuck = Object.entries(stuckMap).sort((a, b) => b[1] - a[1]).slice(0, 2)
+				.map(([k, cnt]) => `${k} (${cnt} طلاب)`).join(' ، ') || 'التقدم متوازن دون تكدس';
+
+			const topWeakEntry = Object.entries(weakSealMap).sort((a, b) => b[1] - a[1])[0];
+			const weakSealText = topWeakEntry
+				? `${SEAL_LABELS_7[topWeakEntry[0]]} (${topWeakEntry[1]} طلاب يحتاجون دعماً فيها)`
+				: 'لا يوجد تعثر ملحوظ في مادة بعينها';
+
+			return {
+				avgPct: Math.round(sumPct / stuArr.length),
+				stgCounts,
+				topStuckText: topStuck,
+				weakSealText
+			};
+		}
 
 		window.renderPlatformUsersModal = async function() {
 			await pullCloudUsersDirectory();
+			if (window.refreshTeacherDirectInbox) window.refreshTeacherDirectInbox();
 			const activeTch = localStorage.getItem('al3lm_active_teacher_user') || 'معلم / إدارة';
 			const teachers = JSON.parse(localStorage.getItem('al3lm_teacher_accounts_v1') || '{}');
 			const students = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
@@ -2531,7 +2954,25 @@
 			if (curTchObj) {
 				profBox.innerHTML = `👨‍🏫 حساب المعلم النشط: <strong style="color:#fde047;">${curTchObj.username}</strong> — المدرسة: <strong>${curTchObj.schoolName || 'مدرسة العلم'}</strong> ${curTchObj.schoolCode ? `[${curTchObj.schoolCode}]` : ''}`;
 			} else {
-				profBox.innerHTML = `👨‍🏫 الوضع الحالي: <strong style="color:#fde047;">${activeTch}</strong> — عدد المدارس الخاصة المسجلة: (${schools.length})`;
+				profBox.innerHTML = `👨‍🏫 الوضع الحالي: <strong style="color:#fde047;">${activeTch}</strong> — إجمالي المدارس الخاصة: (${schools.length})`;
+			}
+
+			// إذا كان المعلم صاحب مدرسة خاصة، نعرض له طلاب مدرسته وتحليلاتهم؛ وإذا كان الإدارة يرى الجميع
+			const allStuArr = Object.values(students);
+			const scopedStudents = (curTchObj && curTchObj.schoolId && curTchObj.schoolId !== 'main')
+				? allStuArr.filter(s => s.schoolBranch === curTchObj.schoolId)
+				: allStuArr;
+
+			const summary = analyzeCohortSummary(scopedStudents);
+			const anBox = document.getElementById('teacher-simple-analytics-box');
+			if (anBox) {
+				anBox.innerHTML = `
+					📊 <strong>ملخص التحليل السريع (${scopedStudents.length} تلميذ):</strong>
+					متوسط الإنجاز العام: <strong style="color:#4ade80;">${summary.avgPct}%</strong>
+					| التوزيع: سيد (${summary.stgCounts[1]}) • عبد (${summary.stgCounts[2]}) • صاحب (${summary.stgCounts[3]})<br>
+					📍 <strong>أكثر المحطات توقفاً حالياً:</strong> <span style="color:#fde047;">${summary.topStuckText}</span><br>
+					🛠️ <strong>أكثر مادة تحتاج تعزيزاً في الشرح:</strong> <span style="color:#fda4af;">${summary.weakSealText}</span>
+				`;
 			}
 
 			const tKeys = Object.keys(teachers);
@@ -2541,20 +2982,319 @@
 				? '<div style="color:#94a3b8;font-size:0.8rem;padding:6px;">لا توجد حسابات معلمين مسجلة باسم مستخدم بعد.</div>'
 				: tKeys.map(k => {
 					const t = teachers[k];
-					return `<div class="school-manage-item"><div class="school-manage-info">👨‍🏫 <span>${t.username}</span> — المدرسة: ${t.schoolName || 'العامة'} ${t.schoolCode ? `[${t.schoolCode}]` : ''}</div></div>`;
+					const stuCnt = allStuArr.filter(s => t.schoolId && t.schoolId !== 'main' && s.schoolBranch === t.schoolId).length;
+					return `<div class="school-manage-item"><div class="school-manage-info">👨‍🏫 <span>${t.username}</span> — المدرسة: ${t.schoolName || 'العامة'} ${t.schoolCode ? `[${t.schoolCode}]` : ''} | طلابها: (${stuCnt}) | ${formatLastSeenBadge(t.lastActiveAt || t.createdAt, 1)}</div></div>`;
 				}).join('');
 
-			const sKeys = Object.keys(students);
-			document.getElementById('stu-count-lbl').textContent = sKeys.length;
+			document.getElementById('stu-count-lbl').textContent = scopedStudents.length;
 			const sList = document.getElementById('platform-students-list');
-			sList.innerHTML = sKeys.length === 0
-				? '<div style="color:#94a3b8;font-size:0.8rem;padding:6px;">لا يوجد تلاميذ مسجلون على هذا الجهاز بعد.</div>'
-				: sKeys.map(k => {
-					const s = students[k];
-					const pct = s.stats?.pct ?? 0;
-					const scLbl = s.stats?.scoreLabel || s.lastScore || '0%';
-					return `<div class="school-manage-item"><div class="school-manage-info">🎓 <span>${s.username}</span> — السنة: <span>${s.assignedYear || 1}</span> | الإنجاز: <span>${pct}%</span> (${scLbl})</div></div>`;
+			sList.innerHTML = scopedStudents.length === 0
+				? '<div style="color:#94a3b8;font-size:0.8rem;padding:6px;">لا يوجد تلاميذ مسجلون ضمن هذا النطاق بعد.</div>'
+				: scopedStudents.map(s => {
+					const pct = s.pct ?? s.stats?.pct ?? 0;
+					const scLbl = s.scoreLabel || s.stats?.scoreLabel || s.lastScore || `${pct}%`;
+					const curW = s.curWeek ?? s.stats?.curWeek ?? 1;
+					const ltr = ABJAD_LETTERS_28[(curW - 1) % 28] || 'أ';
+					return `<div class="school-manage-item"><div class="school-manage-info">🎓 <span>${s.username}</span> — السنة: <span>${s.assignedYear || 1}</span> | واصل لوحدة: <span>${curW} (${ltr})</span> | الإنجاز: <span>${pct}%</span> (${scLbl}) | ${formatLastSeenBadge(s.lastActiveAt || s.createdAt, pct)}</div></div>`;
 				}).join('');
+		};
+
+		// ====================================================================
+		// لوحة التحليلات التربوية وإدارة الحسابات الخاملة (خاصة بالمالك الأساسي ◼)
+		// ====================================================================
+		let _ownerAnalyticsFilter = 'all';
+		let _cachedOwnerData = { students: [], teachers: [], schools: [] };
+
+		function getOwnerAuthPayload() {
+			const savedHash = localStorage.getItem('school_admin_pin_hash') || computeSecureHash('1234', 'owner_master');
+			return {
+				masterPin: window._ownerMasterPinSession || '',
+				masterPinHash: savedHash,
+				customOwnerVerified: Boolean(isOwnerSessionUnlocked)
+			};
+		}
+
+		window.setOwnerAnalyticsFilter = function(flt) {
+			_ownerAnalyticsFilter = flt;
+			document.querySelectorAll('.owner-flt-btn').forEach(b => {
+				const active = b.getAttribute('data-flt') === flt;
+				b.style.background = active ? '#eab308' : '#334155';
+				b.style.color = active ? '#0f172a' : '#ffffff';
+			});
+			renderOwnerAnalyticsLists();
+		};
+
+		window.loadAndRenderOwnerAnalytics = async function() {
+			if (!isOwnerSessionUnlocked) return;
+			showOwnerFeedback('⏳ جاري سحب أحدث بيانات المستخدمين والتحليلات من السحابة...', true);
+			try {
+				if (navigator.onLine) {
+					const r = await fetch(CLOUD_SYNC_API, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ action: 'owner_analytics_directory', ...getOwnerAuthPayload() })
+					});
+					if (r.ok) {
+						const d = await r.json();
+						if (d && d.ok) {
+							const mapS = {};
+							(d.students || []).forEach(s => { if (s && s.username) mapS[s.username] = s; });
+							localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(mapS));
+
+							const mapT = {};
+							(d.teachers || []).forEach(t => { if (t && t.username) mapT[t.username] = t; });
+							localStorage.setItem('al3lm_teacher_accounts_v1', JSON.stringify(mapT));
+						}
+					} else {
+						await pullCloudUsersDirectory();
+					}
+				}
+			} catch (_) {
+				await pullCloudUsersDirectory();
+			}
+
+			const studentsObj = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+			const teachersObj = JSON.parse(localStorage.getItem('al3lm_teacher_accounts_v1') || '{}');
+			const schoolsArr  = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+
+			_cachedOwnerData = {
+				students: Object.values(studentsObj),
+				teachers: Object.values(teachersObj),
+				schools: schoolsArr
+			};
+
+			renderOwnerAnalyticsKPIs();
+			renderOwnerAnalyticsLists();
+			showOwnerFeedback('✅ تم تحديث لوحة التحليلات وسجل الحسابات بنجاح.', true);
+		};
+
+		function renderOwnerAnalyticsKPIs() {
+			const kpiWrap = document.getElementById('owner-kpi-cards');
+			if (!kpiWrap) return;
+			const stus = _cachedOwnerData.students;
+			const tchs = _cachedOwnerData.teachers;
+			const summary = analyzeCohortSummary(stus);
+			const inactiveStus = stus.filter(s => isUserConsideredInactive(s, true)).length;
+			const inactiveTchs = tchs.filter(t => isUserConsideredInactive(t, false)).length;
+
+			// حساب أفضل مدرسة/معلم تفاعلاً من حيث متوسط إنجاز الطلاب وعددهم
+			const schoolStats = {};
+			stus.forEach(s => {
+				const b = s.schoolBranch || 'main';
+				if (!schoolStats[b]) schoolStats[b] = { count: 0, sumPct: 0 };
+				schoolStats[b].count++;
+				schoolStats[b].sumPct += Number(s.pct ?? s.stats?.pct ?? 0);
+			});
+			let bestSchoolTxt = 'مدرسة العلم (المنهج الأساسي)';
+			let bestAvg = -1;
+			tchs.forEach(t => {
+				if (t.schoolId && t.schoolId !== 'main' && schoolStats[t.schoolId]) {
+					const avg = Math.round(schoolStats[t.schoolId].sumPct / schoolStats[t.schoolId].count);
+					if (avg > bestAvg) {
+						bestAvg = avg;
+						bestSchoolTxt = `${t.schoolName} (${t.username}) — متوسط ${avg}%`;
+					}
+				}
+			});
+
+			kpiWrap.innerHTML = `
+				<div style="background:rgba(15,23,42,0.92);border:1px solid #4ade80;border-radius:12px;padding:9px 11px;font-size:0.76rem;line-height:1.65;">
+					<div style="color:#4ade80;font-weight:900;">📊 المستويات والإقبال العام</div>
+					<div>التلاميذ: <strong>${stus.length}</strong> | متوسط الإنجاز: <strong>${summary.avgPct}%</strong></div>
+					<div>سيد: <strong>${summary.stgCounts[1]}</strong> • عبد: <strong>${summary.stgCounts[2]}</strong> • صاحب: <strong>${summary.stgCounts[3]}</strong></div>
+					<div style="color:#cbd5e1;">خاملون مرشحون للإلغاء: <strong>${inactiveStus} طلاب / ${inactiveTchs} معلمين</strong></div>
+				</div>
+				<div style="background:rgba(15,23,42,0.92);border:1px solid #f59e0b;border-radius:12px;padding:9px 11px;font-size:0.76rem;line-height:1.65;">
+					<div style="color:#fde047;font-weight:900;">🔍 تشخيص المناهج (نقاط التوقف)</div>
+					<div><strong>أكثر محطة يتوقف عندها الطلاب:</strong><br><span style="color:#fef08a;">${summary.topStuckText}</span></div>
+					<div><strong>مادة تحتاج تبسيطاً/تحسيناً:</strong><br><span style="color:#fda4af;">${summary.weakSealText}</span></div>
+				</div>
+				<div style="background:rgba(15,23,42,0.92);border:1px solid #38bdf8;border-radius:12px;padding:9px 11px;font-size:0.76rem;line-height:1.65;">
+					<div style="color:#7dd3fc;font-weight:900;">🏫 تقييم المعلمين والمدارس</div>
+					<div>إجمالي المعلمين المسجلين: <strong>${tchs.length}</strong></div>
+					<div><strong>الأعلى تفاعلاً وإنجازاً:</strong><br><span style="color:#86efac;">${bestSchoolTxt}</span></div>
+				</div>
+			`;
+		}
+
+		function renderOwnerAnalyticsLists() {
+			const stus = _cachedOwnerData.students.filter(s => {
+				const inact = isUserConsideredInactive(s, true);
+				if (_ownerAnalyticsFilter === 'active') return !inact;
+				if (_ownerAnalyticsFilter === 'inactive') return inact;
+				return true;
+			});
+			const tchs = _cachedOwnerData.teachers.filter(t => {
+				const inact = isUserConsideredInactive(t, false);
+				if (_ownerAnalyticsFilter === 'active') return !inact;
+				if (_ownerAnalyticsFilter === 'inactive') return inact;
+				return true;
+			});
+
+			document.getElementById('oa-tch-cnt').textContent = tchs.length;
+			const tEl = document.getElementById('oa-teachers-list');
+			tEl.innerHTML = tchs.length === 0
+				? '<div style="color:#94a3b8;font-size:0.78rem;padding:6px;">لا توجد حسابات معلمين مطابقة لهذا الفرز.</div>'
+				: tchs.map(t => {
+					const myStus = _cachedOwnerData.students.filter(s => t.schoolId && t.schoolId !== 'main' && s.schoolBranch === t.schoolId);
+					const avg = myStus.length ? Math.round(myStus.reduce((a, b) => a + Number(b.pct ?? b.stats?.pct ?? 0), 0) / myStus.length) : 0;
+					const safeU = String(t.username).replace(/'/g, '');
+					return `
+						<div class="school-manage-item">
+							<div class="school-manage-info">
+								👨‍🏫 <span>${t.username}</span> — المدرسة: <strong>${t.schoolName || 'العامة'}</strong> ${t.schoolCode ? `[${t.schoolCode}]` : ''}<br>
+								طلاب مدرسته: <span>${myStus.length}</span> (متوسطهم ${avg}%) | الحالة: ${formatLastSeenBadge(t.lastActiveAt || t.createdAt, myStus.length + 1)}
+							</div>
+							<div class="school-manage-actions">
+								<button type="button" class="reset-pin-btn" onclick="window.ownerResetAccountPassword('teacher','${safeU}')">🔑 كلمة مرور جديدة</button>
+								<button type="button" class="delete-school-btn" onclick="window.ownerDeleteUserAccount('teacher','${safeU}')">🗑️ إلغاء الحساب</button>
+							</div>
+						</div>`;
+				}).join('');
+
+			document.getElementById('oa-stu-cnt').textContent = stus.length;
+			const sEl = document.getElementById('oa-students-list');
+			sEl.innerHTML = stus.length === 0
+				? '<div style="color:#94a3b8;font-size:0.78rem;padding:6px;">لا توجد حسابات تلاميذ مطابقة لهذا الفرز.</div>'
+				: stus.map(s => {
+					const pct = Number(s.pct ?? s.stats?.pct ?? 0);
+					const yr = s.assignedYear || 1;
+					const curW = s.curWeek ?? s.stats?.curWeek ?? 1;
+					const ltr = ABJAD_LETTERS_28[(curW - 1) % 28] || 'أ';
+					const ws = s.weakestSeal ?? s.stats?.weakestSeal;
+					const wsTxt = ws && SEAL_LABELS_7[ws] ? ` | تعثر: ${SEAL_LABELS_7[ws]}` : '';
+					const safeU = String(s.username).replace(/'/g, '');
+					return `
+						<div class="school-manage-item">
+							<div class="school-manage-info">
+								🎓 <span>${s.username}</span> — السنة: <span>${yr}</span> | الوحدة الحالية: <span>${curW} (${ltr})</span><br>
+								الإنجاز: <span>${pct}%</span> (${s.scoreLabel || s.stats?.scoreLabel || (pct + '%')})${wsTxt} | ${formatLastSeenBadge(s.lastActiveAt || s.createdAt, pct)}
+							</div>
+							<div class="school-manage-actions">
+								<button type="button" class="reset-pin-btn" onclick="window.ownerResetAccountPassword('student','${safeU}')">🔑 كلمة مرور جديدة</button>
+								<button type="button" class="delete-school-btn" onclick="window.ownerDeleteUserAccount('student','${safeU}')">🗑️ إلغاء الحساب</button>
+							</div>
+						</div>`;
+				}).join('');
+		}
+
+		window.ownerDeleteUserAccount = async function(role, username) {
+			if (!isOwnerSessionUnlocked) return;
+			const label = role === 'teacher' ? `المعلم (${username})` : `التلميذ (${username})`;
+			if (!confirm(`⚠️ هل أنتِ متأكدة من إلغاء وحذف حساب ${label} نهائياً من المنصة والسحابة؟`)) return;
+
+			let deleteSchoolToo = false;
+			if (role === 'teacher') {
+				deleteSchoolToo = confirm('هل ترغبين أيضاً في حذف المدرسة الخاصة المرتبطة بهذا المعلم (إن وُجدت)؟ اضغطي «موافق» لحذفهما معاً أو «إلغاء» لحذف حساب المعلم فقط.');
+			}
+
+			try {
+				if (navigator.onLine) {
+					await fetch(CLOUD_SYNC_API, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: 'owner_delete_user',
+							accountType: role,
+							username,
+							deleteSchoolToo,
+							...getOwnerAuthPayload()
+						})
+					});
+				}
+			} catch (_) {}
+
+			if (role === 'teacher') {
+				const curT = JSON.parse(localStorage.getItem('al3lm_teacher_accounts_v1') || '{}');
+				delete curT[username];
+				localStorage.setItem('al3lm_teacher_accounts_v1', JSON.stringify(curT));
+			} else {
+				const curS = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+				delete curS[username];
+				localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(curS));
+			}
+
+			await window.loadAndRenderOwnerAnalytics();
+			showOwnerFeedback(`✅ تم إلغاء وحذف حساب ${label} نهائياً.`, true);
+		};
+
+		window.ownerResetAccountPassword = async function(role, username) {
+			if (!isOwnerSessionUnlocked) return;
+			const label = role === 'teacher' ? `المعلم (${username})` : `التلميذ (${username})`;
+			const newPass = prompt(`🔑 اكتبي كلمة المرور الجديدة لحساب ${label} (٣ خانات على الأقل):`);
+			if (!newPass || newPass.trim().length < 3) return;
+
+			const cleanPass = newPass.trim();
+			const saltPrefix = role === 'teacher' ? 'tch_' : 'stu_';
+			const newHash = computeSecureHash(cleanPass, saltPrefix + username.toLowerCase());
+
+			let cloudOk = false;
+			try {
+				if (navigator.onLine) {
+					const r = await fetch(CLOUD_SYNC_API, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							action: 'owner_reset_user_password',
+							accountType: role,
+							username,
+							newPassword: cleanPass,
+							...getOwnerAuthPayload()
+						})
+					});
+					const d = await r.json().catch(() => ({}));
+					cloudOk = Boolean(d && d.ok);
+				}
+			} catch (_) {}
+
+			const storeKey = role === 'teacher' ? 'al3lm_teacher_accounts_v1' : 'al3lm_student_accounts_v1';
+			const map = JSON.parse(localStorage.getItem(storeKey) || '{}');
+			if (map[username]) {
+				map[username].pwHash = newHash;
+				localStorage.setItem(storeKey, JSON.stringify(map));
+			}
+
+			showOwnerFeedback(
+				cloudOk
+					? `✅ تم تحديث كلمة المرور في السحابة لحساب ${label} بنجاح!`
+					: `✅ تم تحديث كلمة المرور محلياً لحساب ${label} (تأكدي من تحديث كود الـ Worker لتفعيل التحديث السحابي).`,
+				true
+			);
+		};
+
+		window.exportAnalyticsCSVReport = function() {
+			if (!isOwnerSessionUnlocked) return;
+			const rows = [
+				['النوع', 'اسم المستخدم', 'المدرسة / الفرع', 'السنة الدراسية', 'الوحدة الحالية', 'نسبة الإنجاز %', 'العلامة', 'مادة تحتاج تركيزاً', 'آخر نشاط', 'الحالة']
+			];
+			_cachedOwnerData.teachers.forEach(t => {
+				const inact = isUserConsideredInactive(t, false) ? 'خامل' : 'نشط';
+				rows.push(['معلم', t.username, t.schoolName || 'مدرسة العلم', '-', '-', '-', '-', '-', (t.lastActiveAt || t.createdAt || '').slice(0, 10), inact]);
+			});
+			_cachedOwnerData.students.forEach(s => {
+				const pct = Number(s.pct ?? s.stats?.pct ?? 0);
+				const curW = s.curWeek ?? s.stats?.curWeek ?? 1;
+				const ws = s.weakestSeal ?? s.stats?.weakestSeal;
+				const inact = isUserConsideredInactive(s, true) ? 'خامل' : 'نشط';
+				rows.push([
+					'تلميذ',
+					s.username,
+					s.schoolBranch || 'main',
+					String(s.assignedYear || 1),
+					`وحدة ${curW} (${ABJAD_LETTERS_28[(curW - 1) % 28] || 'أ'})`,
+					String(pct),
+					s.scoreLabel || s.stats?.scoreLabel || `${pct}%`,
+					(ws && SEAL_LABELS_7[ws]) ? SEAL_LABELS_7[ws] : '-',
+					(s.lastActiveAt || s.createdAt || '').slice(0, 10),
+					inact
+				]);
+			});
+			const csvContent = '\uFEFF' + rows.map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
+			const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+			const a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = `al3lm-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+			a.click();
 		};
 
 		window.exportTeacherOwnCard = function() {
