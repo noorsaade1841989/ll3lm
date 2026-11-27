@@ -1,2055 +1,905 @@
-<!-- ==================== [ بداية الجزء 1 من 2 : الرأس والتنسيقات وهيكل المراحل الثلاث لـ index.html ] ==================== -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>اطلب العلم | المدرسة اللامركزية</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>مدرسة العلم | بوابة الدخول والاشتراك</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="cc.ico" type="image/x-icon">
+    <meta name="theme-color" content="#064e3b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مدرسة العلم">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
+    <script>
+    (function ensureSafeStorage(){
+        try {
+            var t = '__al3lm_test__';
+            window.localStorage.setItem(t, '1');
+            window.localStorage.removeItem(t);
+        } catch (e) {
+            var mem = {};
+            var safeStore = {
+                getItem: function(k){ return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+                setItem: function(k, v){ mem[k] = String(v); },
+                removeItem: function(k){ delete mem[k]; },
+                clear: function(){ mem = {}; },
+                key: function(i){ return Object.keys(mem)[i] || null; },
+                get length(){ return Object.keys(mem).length; }
+            };
+            try { Object.defineProperty(window, 'localStorage', { value: safeStore, configurable: true }); } catch (_) {}
+        }
+    })();
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            min-height: 100dvh;
+            width: 100%;
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at 50% 12%, #065f46 0%, #06281e 52%, #09111e 100%);
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .auth-shell {
+            width: 100%;
+            max-width: 520px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(236,253,245,0.95));
+            color: #0f172a;
+            border: 3.5px solid #eab308;
+            border-radius: 32px;
+            padding: clamp(18px, 3.8vmin, 28px);
+            box-shadow: 0 26px 65px rgba(0,0,0,0.68);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            text-align: center;
+        }
+        .active-session-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: #fef9c3;
+            border: 1.5px solid #eab308;
+            color: #713f12;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 0.82rem;
+            font-weight: 900;
+            flex-wrap: wrap;
+        }
+        .active-session-bar a, .active-session-bar button {
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: none;
+            background: #065f46;
+            color: #fef08a;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 900;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .brand-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .brand-hero-img {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eab308;
+            background: #064e3b;
+            box-shadow: 0 8px 22px rgba(6,78,59,0.35);
+        }
+        .brand-title {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(1.85rem, 5vmin, 2.3rem);
+            color: #064e3b;
+            line-height: 1.15;
+        }
+        .brand-sub {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #475569;
+        }
+        .install-app-btn {
+            align-self: center;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 18px;
+            border-radius: 999px;
+            border: 2px solid #059669;
+            background: #ecfdf5;
+            color: #064e3b;
+            font-family: inherit;
+            font-size: 0.84rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 0.16s ease, background 0.16s ease;
+        }
+        .install-app-btn:hover { transform: scale(1.03); background: #d1fae5; }
 
-	<!-- إعدادات تحويل المنصة إلى تطبيق مستقل (PWA) بملء الشاشة على جميع الأجهزة -->
-	<link rel="manifest" href="manifest.json">
-	<link rel="icon" href="cc.ico" type="image/x-icon">
-	<meta name="theme-color" content="#1a1a1a">
-	<meta name="mobile-web-app-capable" content="yes">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-	<meta name="apple-mobile-web-app-title" content="اطلب العلم">
-	<link rel="apple-touch-icon" href="icon-512.png">
+        .role-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: #ecfdf5;
+            padding: 5px;
+            border-radius: 999px;
+            border: 2px solid #6ee7b7;
+        }
+        .role-tab-btn {
+            padding: 9px 12px;
+            border-radius: 999px;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.92rem;
+            color: #065f46;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .role-tab-btn.active {
+            background: linear-gradient(135deg, #059669, #064e3b);
+            color: #fef08a;
+            box-shadow: 0 4px 12px rgba(6,78,59,0.3);
+        }
 
-	<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
-	<style>
-		*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .mode-switch-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .mode-pill-btn {
+            padding: 6px 18px;
+            border-radius: 999px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            font-family: inherit;
+            font-size: 0.84rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.18s;
+        }
+        .mode-pill-btn.active {
+            border-color: #eab308;
+            background: #fef9c3;
+            color: #713f12;
+        }
 
-		html, body {
-			width: 100%; height: 100%; height: 100dvh; overflow: hidden;
-			font-family: 'Cairo', sans-serif; background-color: #1a1a1a;
-			display: flex; flex-direction: column;
-			-webkit-tap-highlight-color: transparent; user-select: none;
-		}
+        .field-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: right;
+        }
+        .auth-input, .auth-select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 15px;
+            border: 2px solid #cbd5e1;
+            background: #ffffff;
+            color: #0f172a;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 800;
+            outline: none;
+            transition: border-color 0.18s;
+        }
+        .auth-input:focus, .auth-select:focus { border-color: #059669; }
 
-		@keyframes wavyGradient {
-			0% { background-position: 0% 50%; }
-			50% { background-position: 100% 50%; }
-			100% { background-position: 0% 50%; }
-		}
+        .fun-class-picker {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            background: #f8fafc;
+            border: 2px solid #a7f3d0;
+            border-radius: 20px;
+            padding: 12px;
+            text-align: center;
+        }
+        .fun-picker-label {
+            font-size: 0.86rem;
+            font-weight: 900;
+            color: #065f46;
+        }
+        .stage-mini-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .stg-mini-card {
+            padding: 10px 6px;
+            border-radius: 16px;
+            border: 2.5px solid #cbd5e1;
+            background: #ffffff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .stg-mini-card .stg-ar { font-family: 'Aref Ruqaa', serif; font-size: 1.25rem; line-height: 1.1; }
+        .stg-mini-card .stg-rng { font-size: 0.74rem; font-weight: 900; direction: ltr; color: #475569; }
+        .stg-mini-card.s1.selected { border-color: #0284c7; background: #e0f2fe; color: #0369a1; transform: translateY(-2px); }
+        .stg-mini-card.s2.selected { border-color: #059669; background: #d1fae5; color: #065f46; transform: translateY(-2px); }
+        .stg-mini-card.s3.selected { border-color: #be123c; background: #ffe4e6; color: #9f1239; transform: translateY(-2px); }
 
-		/* ================= ١. تنسيق الترويسة وشريط المدارس العلوي ================= */
-		header {
-			position: relative; flex: 0 0 auto;
-			background: linear-gradient(45deg, #e6eff5, #a3c1ad, #dbeafe, #8fbc8f);
-			background-size: 300% 300%; animation: wavyGradient 10s ease infinite;
-			text-align: center; padding: clamp(8px, 1.4dvh, 14px) 10px;
-			border-bottom: 2px solid #8fbc8f; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-			z-index: 10; display: flex; flex-direction: column;
-			align-items: center; justify-content: center; gap: 4px;
-		}
+        .fun-years-bubbles {
+            display: flex;
+            justify-content: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            padding-top: 4px;
+        }
+        .yr-bubble-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid #94a3b8;
+            background: #ffffff;
+            color: #0f172a;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.18s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .yr-bubble-btn.picked {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #0f172a;
+            border-color: #713f12;
+            transform: scale(1.12);
+            box-shadow: 0 4px 12px rgba(234,179,8,0.45);
+        }
 
-		header h1 {
-			font-family: 'Aref Ruqaa', serif;
-			font-size: clamp(1.3rem, 3.6vmin, 2.2rem); color: #1b5e20;
-			line-height: 1.1; text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-		}
+        .teacher-reg-years-box {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 18px;
+            padding: 12px;
+            border: 2px solid #eab308;
+            text-align: center;
+        }
+        .t-years-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            justify-items: center;
+        }
+        .t-yr-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px dashed #64748b;
+            background: rgba(255,255,255,0.08);
+            color: #94a3b8;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .t-yr-dot.lit {
+            background: #16a34a;
+            color: #ffffff;
+            border: 2px solid #86efac;
+        }
 
-		.school-selector-bar {
-			position: fixed; top: 10px; right: 12px; z-index: 9000;
-			display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap;
-		}
-		.private-school-menu-wrap {
-			position: relative; display: inline-flex; flex-direction: column; align-items: flex-start;
-		}
-		.school-mode-btn {
-			background: rgba(15, 23, 42, 0.88); color: #f8fafc;
-			border: 2px solid #64748b; border-radius: 25px;
-			padding: 5px 14px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.82rem; cursor: pointer;
-			transition: 0.25s; backdrop-filter: blur(6px);
-			box-shadow: 0 4px 15px rgba(0,0,0,0.3); white-space: nowrap;
-		}
-		.school-mode-btn:hover { transform: scale(1.04); }
-		.school-mode-btn.active {
-			background: #166534; color: #ffffff; border-color: #4ade80;
-			box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
-		}
-		.student-import-pill {
-			background: rgba(15, 23, 42, 0.88); color: #7dd3fc;
-			border: 1.5px solid #38bdf8; border-radius: 25px;
-			padding: 5px 12px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.78rem; cursor: pointer;
-			display: none; align-items: center; gap: 4px;
-			box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.25s;
-			backdrop-filter: blur(6px); white-space: nowrap;
-		}
-		.student-import-pill:hover { background: #0284c7; color: #ffffff; transform: scale(1.04); }
+        .submit-auth-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 999px;
+            border: 2.5px solid #fde047;
+            background: linear-gradient(135deg, #059669, #064e3b);
+            color: #fef08a;
+            font-family: inherit;
+            font-size: 1.02rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(5,150,105,0.35);
+            transition: transform 0.16s ease, opacity 0.16s ease;
+        }
+        .submit-auth-btn:disabled { opacity: 0.6; cursor: wait; }
+        .submit-auth-btn:hover:not(:disabled) { transform: translateY(-1px); }
 
-		#private-school-dropdown {
-			display: none; position: absolute; top: calc(100% + 6px); right: 0;
-			min-width: 250px; background: rgba(15, 23, 42, 0.98); color: #fde047;
-			border: 2px solid #f59e0b; border-radius: 16px;
-			padding: 6px 12px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.82rem; cursor: pointer;
-			outline: none; box-shadow: 0 10px 25px rgba(0,0,0,0.6); z-index: 9500;
-		}
-		.active-school-hint {
-			font-size: clamp(0.68rem, 1.55vmin, 0.84rem); font-weight: 800;
-			color: #1e293b; background: rgba(254, 240, 138, 0.95);
-			padding: 3px 14px; border-radius: 12px; border: 1.5px solid #eab308;
-			display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-		}
-		.school-warning-banner {
-			font-size: clamp(0.68rem, 1.5vmin, 0.82rem); font-weight: 900;
-			color: #ffffff; background: #dc2626;
-			padding: 4px 14px; border-radius: 12px; border: 2px solid #fca5a5;
-			display: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
-		}
-
-		/* ================= ٢. تنسيق بطاقات المراحل الثلاث (سيد • عبد • صاحب) ================= */
-		.container {
-			flex: 1 1 0%; min-height: 0; min-width: 0;
-			display: flex; flex-direction: row; width: 100%; overflow: hidden;
-		}
-
-		.stage-btn {
-			flex: 1 1 0%; min-width: 0; min-height: 0; container-type: size;
-			position: relative; display: flex; flex-direction: column;
-			justify-content: center; align-items: center; text-align: center;
-			color: #ffffff; cursor: pointer; background-size: cover; background-position: center;
-			border-left: 2px solid rgba(255, 255, 255, 0.12);
-			transition: flex 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
-			overflow: hidden; padding: 2cqmin;
-		}
-		.stage-btn.stage-dimmed { opacity: 0.55; filter: grayscale(65%); }
-
-		.bg-stage-1 { background-image: url('assets/stage1-bg.jpg'), url('assets/34273.jpg'), url('stage1-bg.jpg'), url('34273.jpg'); }
-		.bg-stage-2 { background-image: url('assets/stage2-bg.jpg'), url('assets/34275.jpg'), url('stage2-bg.jpg'), url('34275.jpg'); }
-		.bg-stage-3 { background-image: url('assets/stage3-bg.jpg'), url('assets/34276.jpg'), url('stage3-bg.jpg'), url('34276.jpg'); }
-
-		.stage-btn:first-child { border-left: none; }
-		.stage-btn::before {
-			content: ""; position: absolute; inset: 0;
-			background: rgba(0, 0, 0, 0.62); transition: background 0.5s ease; z-index: 1;
-		}
-
-		.content {
-			z-index: 2; width: 92%; max-width: 460px; max-height: 96%;
-			display: flex; flex-direction: column; align-items: center; justify-content: center;
-		}
-
-		.hero-title {
-			font-family: 'Aref Ruqaa', serif; font-size: clamp(1.6rem, 19cqmin, 5rem);
-			width: 100%; line-height: 1.05; display: block; transition: transform 0.4s ease;
-		}
-
-		.hero-range {
-			font-family: 'Cairo', sans-serif; font-size: clamp(1rem, 10cqmin, 2.5rem);
-			font-weight: 900; width: 85%; margin: 1cqmin 0 2cqmin 0;
-			padding-bottom: 1cqmin; letter-spacing: 2px; direction: ltr; display: block; line-height: 1;
-		}
-
-		.neon-silver-blue { color: #f0f8ff; text-shadow: 0 0 7px #e0f2fe, 0 0 15px #7dd3fc, 0 0 30px #0ea5e9, 0 0 50px #0284c7; }
-		.neon-silver-blue.hero-range { border-bottom: 2px solid rgba(125, 211, 252, 0.45); }
-
-		.neon-gold-green { color: #fefce8; text-shadow: 0 0 7px #fef08a, 0 0 15px #bef264, 0 0 30px #84cc16, 0 0 50px #eab308; }
-		.neon-gold-green.hero-range { border-bottom: 2px solid rgba(190, 242, 100, 0.45); }
-
-		.neon-bronze-red { color: #fff1f2; text-shadow: 0 0 7px #fecdd3, 0 0 15px #fda4af, 0 0 30px #ea580c, 0 0 50px #e11d48; }
-		.neon-bronze-red.hero-range { border-bottom: 2px solid rgba(253, 164, 175, 0.45); }
-
-		.content h2 {
-			font-family: 'Aref Ruqaa', serif; font-size: clamp(0.95rem, 7.5cqmin, 1.8rem);
-			margin-bottom: 0.5cqmin; color: #f4f4f4; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); line-height: 1.2;
-		}
-
-		.content h3 { font-size: clamp(0.75rem, 5cqmin, 1.15rem); font-weight: 600; color: #d1d1d1; line-height: 1.2; }
-
-		.details {
-			max-height: 0; opacity: 0; overflow: hidden;
-			transition: max-height 0.5s ease, opacity 0.4s ease, margin-top 0.4s ease;
-			text-align: right; font-size: clamp(0.7rem, 4.2cqmin, 1rem); line-height: 1.45; width: 100%;
-		}
-
-		ul { list-style: none; }
-		li { position: relative; padding-right: 14px; margin-bottom: 4px; color: #e0e0e0; }
-		li::before { content: "•"; position: absolute; right: 0; color: #ffffff; font-weight: bold; }
-
-		@media (hover: hover) and (min-height: 480px) {
-			.stage-btn:hover { flex: 1.45 1 0%; }
-			.stage-btn:hover::before { background: rgba(0, 0, 0, 0.80); }
-			.stage-btn:hover .hero-title { transform: scale(1.04); }
-			.stage-btn:hover .details { max-height: 40cqh; opacity: 1; margin-top: 2cqmin; }
-		}
-
-		footer {
-			flex: 0 0 auto;
-			background: linear-gradient(45deg, #8fbc8f, #dbeafe, #a3c1ad, #e6eff5);
-			background-size: 300% 300%; animation: wavyGradient 10s ease infinite;
-			text-align: center; padding: clamp(5px, 1.2dvh, 11px) 10px;
-			border-top: 2px solid #8fbc8f; z-index: 10;
-		}
-
-		footer h4 {
-			font-family: 'Aref Ruqaa', serif; font-size: clamp(0.9rem, 2.5vmin, 1.3rem);
-			color: #1b5e20; line-height: 1.1; text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-		}
-
-		/* ================= ٣. تنسيق نوافذ اختيار السنوات (1 - 21) ================= */
-		.modal-toggle { display: none; }
-		.modal {
-			position: fixed; inset: 0; z-index: 100;
-			display: flex; align-items: center; justify-content: center;
-			opacity: 0; pointer-events: none; transition: opacity 0.35s ease; padding: 3vmin;
-		}
-		.modal-toggle:checked + .modal { opacity: 1; pointer-events: auto; }
-		.modal-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); cursor: pointer; }
-		.modal-box {
-			position: relative; width: 100%; max-width: 600px; max-height: 90dvh;
-			background-size: cover; background-position: center; border-radius: 20px;
-			overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-			transform: scale(0.92); transition: transform 0.35s ease;
-			border: 2px solid rgba(255, 255, 255, 0.15); display: flex; flex-direction: column;
-		}
-		.modal-toggle:checked + .modal .modal-box { transform: scale(1); }
-		.modal-overlay {
-			background: rgba(0, 0, 0, 0.76); padding: clamp(20px, 5vmin, 45px) clamp(15px, 4vmin, 30px);
-			text-align: center; overflow-y: auto; width: 100%; height: 100%;
-		}
-		.close-btn {
-			position: absolute; top: 10px; left: 16px; color: #ffffff;
-			font-size: clamp(1.8rem, 5vmin, 2.3rem); cursor: pointer; z-index: 10; transition: color 0.3s; line-height: 1;
-		}
-		.close-btn:hover { color: #ff5252; }
-		.modal-overlay h2 { font-family: 'Aref Ruqaa', serif; color: #ffffff; font-size: clamp(1.4rem, 4.5vmin, 2.3rem); margin-bottom: 6px; }
-		.modal-overlay p { color: #d1d1d1; font-size: clamp(0.95rem, 2.8vmin, 1.2rem); margin-bottom: clamp(15px, 4vmin, 28px); }
-
-		.years-row { display: flex; justify-content: center; gap: clamp(8px, 2.2vmin, 15px); flex-wrap: wrap; }
-		.year-btn {
-			width: clamp(42px, 10vmin, 55px); height: clamp(42px, 10vmin, 55px);
-			display: flex; align-items: center; justify-content: center;
-			background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px);
-			border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%;
-			color: #ffffff; font-size: clamp(1.1rem, 3.2vmin, 1.5rem); font-weight: 700;
-			text-decoration: none; transition: all 0.25s ease; cursor: pointer; position: relative;
-		}
-		.year-btn.built-year {
-			border: 2.5px solid #4ade80; background: rgba(22, 101, 52, 0.65);
-			box-shadow: 0 0 14px rgba(74, 222, 128, 0.7);
-		}
-		.year-btn.year-disabled {
-			opacity: 0.22 !important; filter: grayscale(100%) !important;
-			background: rgba(15, 23, 42, 0.4) !important; border: 1px dashed rgba(255, 255, 255, 0.25) !important;
-			color: #64748b !important; box-shadow: none !important; transform: none !important; cursor: not-allowed !important;
-		}
-		.year-btn:not(.year-disabled):hover, .year-btn:not(.year-disabled):active {
-			background: #ffffff; color: #1b5e20; transform: translateY(-4px);
-			box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #ffffff;
-		}
-
-		/* ================= ٤. تنسيق بوابات المعلمين والمالك الأساسي والمدارس الخاصة ================= */
-		.top-left-controls {
-			position: fixed; top: 10px; left: 12px; z-index: 9000;
-			display: flex; align-items: center; gap: 6px;
-		}
-		#admin-lock-trigger {
-			background: rgba(15, 23, 42, 0.88); color: #fcd34d;
-			border: 2px solid #f59e0b; border-radius: 25px;
-			padding: 5px 14px; font-family: 'Cairo', sans-serif;
-			font-weight: 800; font-size: 0.82rem; cursor: pointer;
-			display: none; align-items: center; gap: 6px;
-			box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s;
-			backdrop-filter: blur(6px);
-		}
-		#admin-lock-trigger:hover { transform: scale(1.05); background: #1e293b; }
-		#admin-lock-trigger.edit-on {
-			background: #166534; color: #ffffff; border-color: #4ade80;
-			box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-		}
-
-		#owner-square-trigger {
-			width: 30px; height: 30px;
-			background: rgba(15, 23, 42, 0.75); color: #94a3b8;
-			border: 1.5px solid rgba(148, 163, 184, 0.4); border-radius: 8px;
-			font-size: 0.85rem; cursor: pointer;
-			display: flex; align-items: center; justify-content: center;
-			box-shadow: 0 4px 10px rgba(0,0,0,0.25); transition: 0.25s;
-			backdrop-filter: blur(6px);
-		}
-		#owner-square-trigger:hover { color: #f8fafc; border-color: #cbd5e1; transform: scale(1.06); }
-		#owner-square-trigger.owner-active { background: #166534; color: #4ade80; border-color: #4ade80; }
-
-		#admin-pass-modal, #owner-secret-modal {
-			position: fixed; inset: 0; z-index: 10000;
-			background: rgba(0, 0, 0, 0.82); backdrop-filter: blur(6px);
-			display: none; justify-content: center; align-items: center;
-			font-family: 'Cairo', sans-serif; direction: rtl;
-		}
-		.admin-modal-card {
-			background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-			width: 94%; max-width: 500px; border-radius: 24px;
-			border: 2px solid rgba(255, 255, 255, 0.2);
-			padding: 20px 22px; color: #f8fafc;
-			box-shadow: 0 20px 50px rgba(0,0,0,0.85);
-			position: relative; text-align: center;
-			max-height: 92dvh; overflow-y: auto;
-		}
-		.admin-close-x {
-			position: absolute; top: 10px; left: 14px;
-			background: none; border: none; color: #cbd5e1;
-			font-size: 1.6rem; cursor: pointer; font-weight: bold;
-		}
-		.admin-close-x:hover { color: #f87171; }
-		.admin-modal-title { font-size: 1.22rem; font-weight: 900; color: #4ade80; margin: 0 0 10px 0; }
-		.admin-status-pill {
-			display: inline-block; padding: 4px 14px; border-radius: 20px;
-			font-size: 0.82rem; font-weight: 800; margin-bottom: 10px;
-			background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444;
-		}
-		.admin-status-pill.active { background: rgba(34, 197, 94, 0.2); color: #86efac; border-color: #22c55e; }
-		.school-code-badge {
-			display: inline-block; padding: 4px 14px; border-radius: 12px;
-			background: rgba(234, 179, 8, 0.18); border: 1.5px solid #fde047;
-			color: #fde047; font-size: 0.86rem; font-weight: 900; margin-bottom: 10px;
-			direction: ltr; user-select: text; -webkit-user-select: text;
-		}
-		.admin-input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-		.admin-pass-field {
-			width: 100%; padding: 8px 12px; border-radius: 12px;
-			border: 2px solid #475569; background: #0f172a; color: #ffffff;
-			font-family: 'Cairo', sans-serif; font-size: 0.9rem; font-weight: 700;
-			text-align: center; outline: none; transition: 0.2s;
-		}
-		.admin-pass-field:focus { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
-		.admin-action-btn {
-			width: 100%; padding: 9px; border-radius: 14px; border: none;
-			font-family: 'Cairo', sans-serif; font-size: 0.9rem; font-weight: 900;
-			cursor: pointer; transition: 0.25s; background: #22c55e; color: #ffffff;
-		}
-		.admin-action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-		.admin-action-btn.stop-btn { background: #ef4444; }
-		.admin-action-btn.secondary-btn {
-			background: rgba(255, 255, 255, 0.08); color: #fcd34d;
-			border: 1px solid rgba(252, 211, 77, 0.4); font-size: 0.82rem; padding: 7px; margin-top: 6px;
-		}
-		.sub-section-box {
-			display: none; margin-top: 10px; padding-top: 10px;
-			border-top: 1px dashed rgba(255, 255, 255, 0.2);
-			flex-direction: column; gap: 8px;
-		}
-		.admin-msg-feedback { font-size: 0.85rem; font-weight: 800; min-height: 22px; margin-top: 8px; line-height: 1.4; }
-
-		.teacher-years-panel {
-			background: rgba(15, 23, 42, 0.85); border: 1.5px solid #334155;
-			border-radius: 16px; padding: 10px; margin: 6px 0 10px 0;
-			display: flex; flex-direction: column; gap: 8px;
-		}
-		.teacher-years-label { font-size: 0.82rem; font-weight: 800; color: #fde047; line-height: 1.35; }
-		.teacher-years-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; justify-items: center; }
-		.teacher-year-toggle {
-			width: 36px; height: 36px; border-radius: 50%;
-			border: 1.5px dashed #475569; background: rgba(30, 41, 59, 0.6); color: #64748b;
-			font-family: 'Cairo', sans-serif; font-weight: 900; font-size: 0.9rem;
-			cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
-		}
-		.teacher-year-toggle.lit {
-			background: #16a34a; color: #ffffff; border: 2px solid #86efac;
-			box-shadow: 0 0 12px rgba(74, 222, 128, 0.75); transform: scale(1.06);
-		}
-
-		.schools-manage-list { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; padding: 4px; }
-		.school-manage-item {
-			background: rgba(15, 23, 42, 0.9); border: 1px solid #475569; border-radius: 12px;
-			padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: right;
-		}
-		.school-manage-info { font-size: 0.78rem; font-weight: 700; color: #e2e8f0; line-height: 1.35; }
-		.school-manage-info span { color: #fde047; font-weight: 900; }
-		.school-manage-actions { display: flex; flex-direction: column; gap: 4px; }
-		.warn-school-btn {
-			background: #f59e0b; color: #0f172a; border: none; border-radius: 10px; padding: 5px 10px;
-			font-family: 'Cairo', sans-serif; font-size: 0.72rem; font-weight: 900; cursor: pointer; white-space: nowrap;
-		}
-		.clear-warn-btn {
-			background: #16a34a; color: #ffffff; border: none; border-radius: 10px; padding: 5px 10px;
-			font-family: 'Cairo', sans-serif; font-size: 0.72rem; font-weight: 900; cursor: pointer; white-space: nowrap;
-		}
-		.reset-pin-btn {
-			background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; padding: 5px 10px;
-			font-family: 'Cairo', sans-serif; font-size: 0.72rem; font-weight: 900; cursor: pointer; white-space: nowrap;
-		}
-		.delete-school-btn {
-			background: #ef4444; color: #ffffff; border: none; border-radius: 10px; padding: 5px 10px;
-			font-family: 'Cairo', sans-serif; font-size: 0.72rem; font-weight: 900; cursor: pointer; white-space: nowrap;
-		}
-
-		/* ================= ٥. التجاوب مع الهواتف والشاشات العمودية ================= */
-		@media (orientation: portrait), (max-width: 700px) {
-			header { padding-top: 48px; }
-			.school-selector-bar { top: 8px; right: 8px; gap: 4px; }
-			.school-mode-btn, .student-import-pill { padding: 4px 10px; font-size: 0.72rem; }
-			.top-left-controls { top: 8px; left: 8px; gap: 4px; }
-			#admin-lock-trigger { padding: 4px 10px; font-size: 0.74rem; }
-			#owner-square-trigger { width: 26px; height: 26px; font-size: 0.75rem; }
-			.container { flex-direction: column; }
-			.stage-btn { border-left: none; border-bottom: 2px solid rgba(255, 255, 255, 0.15); }
-			.stage-btn:last-child { border-bottom: none; }
-			.stage-btn:hover .details { max-height: 0; opacity: 0; margin-top: 0; }
-		}
-	</style>
+        .feedback-box {
+            min-height: 22px;
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #be123c;
+            line-height: 1.5;
+        }
+        .feedback-box.ok { color: #15803d; }
+    </style>
 </head>
 <body>
-
-	<!-- شريط اختيار المدرسة في اليمين + زر الطالب لإدراج ملف مدرسة معلمه بضغطة واحدة -->
-	<div class="school-selector-bar">
-		<button id="btn-public-school" class="school-mode-btn active" onclick="switchSchoolMode('main', true)">🏫 مدرسة العلم</button>
-		<div class="private-school-menu-wrap">
-			<button id="btn-private-school" class="school-mode-btn" onclick="switchSchoolMode('private', true)">🌟 مدرسة خاصة</button>
-			<select id="private-school-dropdown" onchange="selectPrivateSchool(this.value, true)"></select>
-		</div>
-		<label id="student-import-school-btn" class="student-import-pill" title="إضافة حزمة مدرسة خاصة من ملف JSON أرسله المعلم">
-			<span>📥 إضافة ملف مدرسة</span>
-			<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
-		</label>
-	</div>
-
-	<header>
-		<h1>اطلب العلم</h1>
-		<span id="active-school-hint" class="active-school-hint"></span>
-		<div id="school-warning-banner" class="school-warning-banner"></div>
-	</header>
-
-	<div class="container">
-		<!-- المرحلة الأولى: سيد (1-7) -->
-		<label id="stage-card-1" for="modal-stage1" class="stage-btn bg-stage-1">
-			<div class="content">
-				<div class="hero-title neon-silver-blue">سيد</div>
-				<div class="hero-range neon-silver-blue">1 - 7</div>
-				<h2>مرحلة التعلم الأولى</h2>
-				<h3>بناء البدن والنفس</h3>
-				<div class="details">
-					<ul>
-						<li>مرحلة السيادة: الطفولة المستكشفة من الصفر المعرفي.</li>
-						<li>تطوير الحواس عبر التطبيق المادي بعيداً عن الشاشات.</li>
-						<li>إرساء دعائم النطق والقراءة والعمليات الحسابية.</li>
-					</ul>
-				</div>
-			</div>
-		</label>
-
-		<!-- المرحلة الثانية: عبد (8-14) -->
-		<label id="stage-card-2" for="modal-stage2" class="stage-btn bg-stage-2">
-			<div class="content">
-				<div class="hero-title neon-gold-green">عبد</div>
-				<div class="hero-range neon-gold-green">8 - 14</div>
-				<h2>مرحلة التعلم الثانية</h2>
-				<h3>بناء العقل والأفعال</h3>
-				<div class="details">
-					<ul>
-						<li>مرحلة التلقي والعبودية للانضباط وترويض العقل.</li>
-						<li>تحويل المعارف إلى ملكات عملية وأفعال حية متقنة.</li>
-						<li>التدريب العقلاني الصارم على أدوات العصر.</li>
-					</ul>
-				</div>
-			</div>
-		</label>
-
-		<!-- المرحلة الثالثة: صاحب (15-21) -->
-		<label id="stage-card-3" for="modal-stage3" class="stage-btn bg-stage-3">
-			<div class="content">
-				<div class="hero-title neon-bronze-red">صاحب</div>
-				<div class="hero-range neon-bronze-red">15 - 21</div>
-				<h2>مرحلة التعلم الثالثة</h2>
-				<h3>بناء الروح والمجتمع</h3>
-				<div class="details">
-					<ul>
-						<li>مرحلة الحرية والانفتاح والاختيار الواعي.</li>
-						<li>استكشاف بانورامي شامل لتاريخ وعلوم الإنسان.</li>
-						<li>التفرع نحو الإنتاج الفعلي وبناء الروح المجتمعية.</li>
-					</ul>
-				</div>
-			</div>
-		</label>
-	</div>
-
-	<footer>
-		<h4>اطلبوا العلم من المهد إلى اللحد</h4>
-	</footer>
-
-	<!-- النافذة الأولى (سيد 1-7 -> stage1.html) -->
-	<input type="checkbox" id="modal-stage1" class="modal-toggle">
-	<div class="modal">
-		<label for="modal-stage1" class="modal-backdrop"></label>
-		<div class="modal-box bg-stage-1">
-			<label for="modal-stage1" class="close-btn">&times;</label>
-			<div class="modal-overlay">
-				<h2>مرحلة التعلم الأولى (سيد)</h2>
-				<p>اختر السنة للبدء:</p>
-				<div class="years-row">
-					<a href="stage1.html?stage=1&year=1" data-year="1" onclick="return selectStageYear(event, 1, 1)" class="year-btn">1</a>
-					<a href="stage1.html?stage=1&year=2" data-year="2" onclick="return selectStageYear(event, 1, 2)" class="year-btn">2</a>
-					<a href="stage1.html?stage=1&year=3" data-year="3" onclick="return selectStageYear(event, 1, 3)" class="year-btn">3</a>
-					<a href="stage1.html?stage=1&year=4" data-year="4" onclick="return selectStageYear(event, 1, 4)" class="year-btn">4</a>
-					<a href="stage1.html?stage=1&year=5" data-year="5" onclick="return selectStageYear(event, 1, 5)" class="year-btn">5</a>
-					<a href="stage1.html?stage=1&year=6" data-year="6" onclick="return selectStageYear(event, 1, 6)" class="year-btn">6</a>
-					<a href="stage1.html?stage=1&year=7" data-year="7" onclick="return selectStageYear(event, 1, 7)" class="year-btn">7</a>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- النافذة الثانية (عبد 8-14 -> stage2.html مباشرةً) -->
-	<input type="checkbox" id="modal-stage2" class="modal-toggle">
-	<div class="modal">
-		<label for="modal-stage2" class="modal-backdrop"></label>
-		<div class="modal-box bg-stage-2">
-			<label for="modal-stage2" class="close-btn">&times;</label>
-			<div class="modal-overlay">
-				<h2>مرحلة التعلم الثانية (عبد)</h2>
-				<p>اختر السنة للبدء:</p>
-				<div class="years-row">
-					<a href="stage2.html?stage=2&year=8" data-year="8" onclick="return selectStageYear(event, 2, 8)" class="year-btn">8</a>
-					<a href="stage2.html?stage=2&year=9" data-year="9" onclick="return selectStageYear(event, 2, 9)" class="year-btn">9</a>
-					<a href="stage2.html?stage=2&year=10" data-year="10" onclick="return selectStageYear(event, 2, 10)" class="year-btn">10</a>
-					<a href="stage2.html?stage=2&year=11" data-year="11" onclick="return selectStageYear(event, 2, 11)" class="year-btn">11</a>
-					<a href="stage2.html?stage=2&year=12" data-year="12" onclick="return selectStageYear(event, 2, 12)" class="year-btn">12</a>
-					<a href="stage2.html?stage=2&year=13" data-year="13" onclick="return selectStageYear(event, 2, 13)" class="year-btn">13</a>
-					<a href="stage2.html?stage=2&year=14" data-year="14" onclick="return selectStageYear(event, 2, 14)" class="year-btn">14</a>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- النافذة الثالثة (صاحب 15-21 -> stage3.html مباشرةً) -->
-	<input type="checkbox" id="modal-stage3" class="modal-toggle">
-	<div class="modal">
-		<label for="modal-stage3" class="modal-backdrop"></label>
-		<div class="modal-box bg-stage-3">
-			<label for="modal-stage3" class="close-btn">&times;</label>
-			<div class="modal-overlay">
-				<h2>مرحلة التعلم الثالثة (صاحب)</h2>
-				<p>اختر السنة للبدء:</p>
-				<div class="years-row">
-					<a href="stage3.html?stage=3&year=15" data-year="15" onclick="return selectStageYear(event, 3, 15)" class="year-btn">15</a>
-					<a href="stage3.html?stage=3&year=16" data-year="16" onclick="return selectStageYear(event, 3, 16)" class="year-btn">16</a>
-					<a href="stage3.html?stage=3&year=17" data-year="17" onclick="return selectStageYear(event, 3, 17)" class="year-btn">17</a>
-					<a href="stage3.html?stage=3&year=18" data-year="18" onclick="return selectStageYear(event, 3, 18)" class="year-btn">18</a>
-					<a href="stage3.html?stage=3&year=19" data-year="19" onclick="return selectStageYear(event, 3, 19)" class="year-btn">19</a>
-					<a href="stage3.html?stage=3&year=20" data-year="20" onclick="return selectStageYear(event, 3, 20)" class="year-btn">20</a>
-					<a href="stage3.html?stage=3&year=21" data-year="21" onclick="return selectStageYear(event, 3, 21)" class="year-btn">21</a>
-				</div>
-			</div>
-		</div>
-	</div>
-<!-- ==================== [ نهاية الجزء 1 من 2 — يتبع الجزء الثاني الخاص بالمدارس الخاصة والمستخدمين والتعديل ] ==================== -->
-
-<!-- ==================== [ بداية الجزء 2 من 2 : بوابات المستخدمين والمدارس الخاصة والتشفير والتعديل لـ index.html ] ==================== -->
-
-	<!-- أزرار الزاوية اليسرى العلوية: زر المعلمين (يظهر في وضع المدارس الخاصة) + زر المربع الخاص بالمالك الأساسي -->
-	<div class="top-left-controls">
-		<button id="admin-lock-trigger" onclick="openAdminPassModal()">
-			<span id="admin-lock-icon">🔒</span>
-			<span id="admin-lock-text">وضع التعديل</span>
-		</button>
-		<button id="owner-square-trigger" onclick="openOwnerSecretModal()">◼</button>
-	</div>
-
-	<!-- ١. بوابة المدارس الخاصة للمعلمين (المعرّف الفريد ELM-XXXX + التشفير + حزمتا الطلاب والمعلم + النقل بين الأجهزة) -->
-	<div id="admin-pass-modal" onclick="closeAdminPassModal(event)">
-		<div class="admin-modal-card" onclick="event.stopPropagation()">
-			<button class="admin-close-x" onclick="closeAdminPassModal(event)">×</button>
-			<h3 class="admin-modal-title">🏫 بَوَّابَةُ المَدَارِسِ الخَاصَّةِ (لِلْمُعَلِّم)</h3>
-			<div id="admin-status-badge" class="admin-status-pill">وضع التعديل: مغلق 🔒</div>
-			<div id="active-school-code-display" class="school-code-badge" style="display:none;"></div>
-
-			<div id="modal-teacher-warning-box" class="school-warning-banner" style="margin-bottom:10px;"></div>
-
-			<!-- (أ) قسم دخول المعلم وإدارة مدرسته النشطة -->
-			<div id="teacher-login-section">
-				<div id="teacher-login-inputs" class="admin-input-group">
-					<select id="teacher-login-school-select" class="admin-pass-field" style="cursor:pointer;"></select>
-					<input type="text" id="teacher-login-code-or-name" class="admin-pass-field" placeholder="أو اكتب معرّف المدرسة (مثال: ELM-4821) أو اسمها...">
-					<input type="password" id="admin-login-pass" class="admin-pass-field" placeholder="الرقم السري الخاص بمدرستك..." onkeydown="if(event.key==='Enter') verifyAndToggleEditMode()">
-				</div>
-
-				<!-- لوحة الـ 21 زراً لإضاءة الصفوف العمرية للمدرسة -->
-				<div id="active-school-years-manager" class="teacher-years-panel" style="display:none;">
-					<div class="teacher-years-label">💡 أضئ الأعمار / الصفوف (1 - 21) المفعّلة في مدرستك (الصف المطفأ لن يفتح لأحد):</div>
-					<div id="active-school-years-grid" class="teacher-years-grid"></div>
-				</div>
-
-				<!-- أدوات المعلم النشط بعد فتح القفل بالرمز السري -->
-				<div id="teacher-active-tools" style="display:none; flex-direction:column; gap:6px; margin-bottom:10px;">
-					<div style="display:flex; gap:6px; flex-wrap:wrap;">
-						<button type="button" class="admin-action-btn" style="background:#059669; font-size:0.78rem; flex:1; padding:8px;" onclick="exportSinglePrivateSchoolPackage(false)">🎓 تصدير حزمة للطلاب (للقراءة)</button>
-						<button type="button" class="admin-action-btn" style="background:#0284c7; font-size:0.78rem; flex:1; padding:8px;" onclick="exportSinglePrivateSchoolPackage(true)">🔐 تصدير حزمة المعلم (للنقل)</button>
-					</div>
-					<label class="admin-action-btn" style="background:#7c3aed; font-size:0.8rem; padding:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-						📤 تحديث دروس مدرستي من ملف (JSON)
-						<input type="file" accept=".json" style="display:none;" onchange="importSchoolCustomizations(event, false)">
-					</label>
-
-					<button class="admin-action-btn secondary-btn" onclick="toggleSubSection('teacher-change-pin-box')">🔑 تغيير الرقم السري أو كلمة الأمان لمدرستي</button>
-					<div id="teacher-change-pin-box" class="sub-section-box">
-						<input type="password" id="teacher-new-pin" class="admin-pass-field" placeholder="الرقم السري الجديد لمدرستك">
-						<input type="text" id="teacher-new-recovery" class="admin-pass-field" placeholder="كلمة أمان للاسترداد عند النسيان (اختياري)">
-						<button class="admin-action-btn" style="background:#0284c7;" onclick="saveTeacherNewPin()">💾 حفظ التشفير الجديد</button>
-					</div>
-				</div>
-
-				<button id="admin-toggle-submit" class="admin-action-btn" onclick="verifyAndToggleEditMode()">🔓 تفعيل تعديل مدرستي</button>
-
-				<!-- روابط ما قبل الدخول: إنشاء مدرسة جديدة + نقل مدرسة لجهاز جديد + استرداد الرمز -->
-				<div id="teacher-prelogin-links" style="display:flex; flex-direction:column; gap:4px; margin-top:6px;">
-					<button id="btn-open-register-school" class="admin-action-btn secondary-btn" onclick="switchToCreateSchoolView()">➕ إنشاء مدرسة خاصة جديدة (للمعلم)</button>
-					<button class="admin-action-btn secondary-btn" style="color:#86efac; border-color:rgba(134,239,172,0.4);" onclick="switchToRestoreTeacherDeviceView()">💻 استعادة مدرستي على هذا الجهاز (من ملف المعلم)</button>
-					<button class="admin-action-btn secondary-btn" style="color:#7dd3fc; border-color:rgba(125,211,252,0.35);" onclick="switchToRecoverTeacherPinView()">❓ نسيت الرقم السري لمدرستي؟</button>
-				</div>
-			</div>
-
-			<!-- (ب) قسم إنشاء مدرسة خاصة جديدة (يولّد كود ELM-XXXX فريد تلقائياً حتى لو تشابهت أسماء المدارس) -->
-			<div id="register-school-section" class="sub-section-box" style="border-top:none; margin-top:0; padding-top:0;">
-				<input type="text" id="reg-school-name" class="admin-pass-field" placeholder="اسم المدرسة الجديدة (مسموح بتكرار الأسماء)">
-				<input type="text" id="reg-teacher-name" class="admin-pass-field" placeholder="اسم المعلم أو المعلمة">
-				<input type="password" id="reg-school-pin" class="admin-pass-field" placeholder="اختر رقماً سرياً خاصاً بك (يُحفظ مشفّراً)">
-				<input type="text" id="reg-school-recovery" class="admin-pass-field" placeholder="كلمة أمان لاسترداد الرمز عند النسيان">
-				<div class="teacher-years-panel">
-					<div class="teacher-years-label">💡 أضئ الصفوف العمرية (1 - 21) التي ستبني محتواها في مدرستك:</div>
-					<div id="reg-school-years-grid" class="teacher-years-grid"></div>
-				</div>
-				<button class="admin-action-btn" style="background:#0284c7;" onclick="registerNewPrivateSchool()">🏫 إنشاء المدرسة والحصول على المعرّف الفريد</button>
-				<button class="admin-action-btn secondary-btn" onclick="switchToLoginSchoolView()">🔙 رجوع لتسجيل الدخول</button>
-			</div>
-
-			<!-- (ج) قسم استعادة المعلم لمدرسته على حاسوب أو هاتف جديد -->
-			<div id="restore-teacher-device-section" class="sub-section-box" style="border-top:none; margin-top:0; padding-top:0;">
-				<div style="font-size:0.82rem; color:#86efac; font-weight:800;">💻 نقل واستعادة مدرسة المعلم إلى جهاز جديد بكامل صلاحيات التعديل:</div>
-				<input type="password" id="restore-verify-pin" class="admin-pass-field" placeholder="أدخل الرقم السري الأصلي لمدرستك أولاً...">
-				<label class="admin-action-btn" style="background:#059669; cursor:pointer; display:block;">
-					📂 اختر حزمة المعلم المشفرة (.json) للاستعادة والفتح
-					<input type="file" accept=".json" style="display:none;" onchange="restoreTeacherPackageOnNewDevice(event)">
-				</label>
-				<button class="admin-action-btn secondary-btn" onclick="switchToLoginSchoolView()">🔙 رجوع لتسجيل الدخول</button>
-			</div>
-
-			<!-- (د) قسم استرداد الرقم السري للمعلم عند النسيان -->
-			<div id="recover-teacher-pin-section" class="sub-section-box" style="border-top:none; margin-top:0; padding-top:0;">
-				<div style="font-size:0.82rem; color:#bae6fd; font-weight:800;">🔑 استعادة الرقم السري للمدرسة الخاصة:</div>
-				<input type="text" id="rec-school-code-or-name" class="admin-pass-field" placeholder="معرّف المدرسة (ELM-XXXX) أو اسم المدرسة...">
-				<input type="text" id="rec-teacher-name" class="admin-pass-field" placeholder="اسم المعلم المسجل...">
-				<input type="text" id="rec-recovery-word" class="admin-pass-field" placeholder="كلمة الأمان التي وضعتها عند الإنشاء...">
-				<input type="password" id="rec-new-pin" class="admin-pass-field" placeholder="الرقم السري الجديد الذي تريده...">
-				<button class="admin-action-btn" style="background:#0284c7;" onclick="recoverTeacherPin()">🔓 استعادة وتعيين الرقم الجديد</button>
-				<button class="admin-action-btn secondary-btn" onclick="switchToLoginSchoolView()">🔙 رجوع لتسجيل الدخول</button>
-			</div>
-
-			<div id="admin-feedback-msg" class="admin-msg-feedback"></div>
-		</div>
-	</div>
-
-	<!-- ٢. بوابة المالك الأساسي السرية (زر المربع ◼) -->
-	<div id="owner-secret-modal" onclick="closeOwnerSecretModal(event)">
-		<div class="admin-modal-card" onclick="event.stopPropagation()">
-			<button class="admin-close-x" onclick="closeOwnerSecretModal(event)">×</button>
-			<h3 class="admin-modal-title">◼ بَوَّابَةُ المَالِكِ الأَسَاسِيّ</h3>
-
-			<!-- التحقق الأول بالرمز الأساسي المشفر -->
-			<div id="owner-auth-step" class="admin-input-group">
-				<input type="password" id="owner-master-pin-input" class="admin-pass-field" placeholder="أدخل الرمز السري الأساسي للمنصة..." onkeydown="if(event.key==='Enter') unlockOwnerPanel()">
-				<button class="admin-action-btn" onclick="unlockOwnerPanel()">🔓 فتح لوحة المالك</button>
-				<button class="admin-action-btn secondary-btn" style="color:#7dd3fc;" onclick="toggleSubSection('owner-recover-box')">❓ نسيت الرمز الأساسي؟ (استرداد بكلمة الأمان)</button>
-				<div id="owner-recover-box" class="sub-section-box">
-					<input type="text" id="owner-rec-phrase-input" class="admin-pass-field" placeholder="أدخل كلمة الأمان السرية للمالك...">
-					<input type="password" id="owner-rec-new-pin" class="admin-pass-field" placeholder="الرمز السري الأساسي الجديد...">
-					<button class="admin-action-btn" style="background:#0284c7;" onclick="recoverOwnerMasterPin()">🔑 تعيين الرمز الأساسي الجديد</button>
-				</div>
-			</div>
-
-			<!-- لوحة التحكم الكاملة للمالك -->
-			<div id="owner-controls-panel" style="display:none; flex-direction:column; gap:8px;">
-				<div id="owner-edit-status-badge" class="admin-status-pill">تعديل مدرسة العلم: مغلق 🔒</div>
-				<button id="owner-main-edit-btn" class="admin-action-btn" onclick="toggleMainSchoolEditMode()">✏️ تفعيل التعديل لمدرسة العلم الأساسية</button>
-
-				<button class="admin-action-btn secondary-btn" style="color:#fca5a5; border-color:rgba(248,113,113,0.4);" onclick="toggleSubSection('manage-schools-section'); renderManageSchoolsList();">🛡️ رقابة وتحذير وإنقاذ رموز المدارس الخاصة</button>
-				<div id="manage-schools-section" class="sub-section-box">
-					<div id="schools-manage-list" class="schools-manage-list"></div>
-				</div>
-
-				<button class="admin-action-btn secondary-btn" onclick="toggleSubSection('change-pin-section')">🔑 الإعدادات وتغيير الرمز السري وكلمة الأمان</button>
-				<div id="change-pin-section" class="sub-section-box">
-					<input type="password" id="admin-new-pass" class="admin-pass-field" placeholder="الرمز السري الأساسي الجديد (اتركه فارغاً إن لم ترد تغييره)">
-					<input type="password" id="admin-confirm-pass" class="admin-pass-field" placeholder="تأكيد الرمز السري الأساسي الجديد">
-					<input type="text" id="admin-owner-recovery" class="admin-pass-field" placeholder="كلمة أمان المالك لاسترداد الرمز عند النسيان">
-					<input type="password" id="admin-pinata-jwt" class="admin-pass-field" placeholder="مفتاح Pinata JWT للرفع اللامركزي التلقائي (اختياري)">
-					<button class="admin-action-btn" style="background:#0284c7;" onclick="saveOwnerSettings()">💾 حفظ الإعدادات المشفرة</button>
-				</div>
-
-				<button class="admin-action-btn secondary-btn" onclick="toggleSubSection('backup-tools-section')">📦 النسخ الاحتياطي الشامل للمنصة</button>
-				<div id="backup-tools-section" class="sub-section-box">
-					<button class="admin-action-btn" style="background:#0284c7; font-size:0.85rem;" onclick="exportSchoolCustomizations()">📥 تنزيل حزمة المنصة الشاملة (JSON)</button>
-					<label class="admin-action-btn" style="background:#7c3aed; font-size:0.85rem; display:block; cursor:pointer;">
-						📤 استيراد حزمة تعديلات شاملة (JSON)
-						<input type="file" accept=".json" style="display:none;" onchange="importSchoolCustomizations(event, true)">
-					</label>
-				</div>
-			</div>
-
-			<div id="owner-feedback-msg" class="admin-msg-feedback"></div>
-		</div>
-	</div>
-
-	<script>
-		// ====================================================================
-		// ١. محرك التشفير المحلي وتوليد المعرّفات الفريدة للمدارس (ELM-XXXX)
-		// ====================================================================
-		const DEFAULT_PINATA_JWT = "";
-		const DEFAULT_ADMIN_PIN = "1234";
-		const STANDARD_WARNING_TEXT = "⚠️ رسالة تحذير من إدارة المنصة: إن لم تلتزم بمبادئ الآداب العامة فسيقوم الموقع بحذف المدرسة نهائياً.";
-
-		function computeSecureHash(rawStr, salt = "3lm_sacred_salt_v2") {
-			const str = `${salt}::${String(rawStr || '').trim()}`;
-			let h1 = 0xdeadbeef ^ str.length;
-			let h2 = 0x41c6ce57 ^ str.length;
-			for (let i = 0, ch; i < str.length; i++) {
-				ch = str.charCodeAt(i);
-				h1 = Math.imul(h1 ^ ch, 2654435761);
-				h2 = Math.imul(h2 ^ ch, 1597334677);
-			}
-			h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-			h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-			return "h2_" + (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
-		}
-
-		function generateUniqueSchoolCode(existingSchools) {
-			const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-			let code = "";
-			do {
-				let part = "";
-				for (let i = 0; i < 4; i++) {
-					part += chars[Math.floor(Math.random() * chars.length)];
-				}
-				code = `ELM-${part}`;
-			} while (existingSchools.some(s => s.code === code));
-			return code;
-		}
-
-		// ترقية تلقائية لأي بيانات مدارس سابقة لتشفير رموزها ومنحها معرّفاً فريداً
-		function migrateLegacySecurityData() {
-			const rawOwnerPin = localStorage.getItem('school_admin_pin');
-			if (rawOwnerPin && !rawOwnerPin.startsWith('h2_')) {
-				localStorage.setItem('school_admin_pin_hash', computeSecureHash(rawOwnerPin, 'owner_master'));
-				localStorage.removeItem('school_admin_pin');
-			}
-			const rawOwnerRec = localStorage.getItem('owner_recovery_phrase');
-			if (rawOwnerRec && !rawOwnerRec.startsWith('h2_')) {
-				localStorage.setItem('owner_recovery_hash', computeSecureHash(rawOwnerRec, 'owner_rec'));
-				localStorage.removeItem('owner_recovery_phrase');
-			}
-
-			const all = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			let changed = false;
-			all.forEach(sc => {
-				if (!sc.code) {
-					sc.code = generateUniqueSchoolCode(all);
-					changed = true;
-				}
-				if (sc.pin && !sc.pinHash) {
-					sc.pinHash = computeSecureHash(sc.pin, sc.id);
-					delete sc.pin;
-					changed = true;
-				}
-				if (sc.recoveryWord && !sc.recHash) {
-					sc.recHash = computeSecureHash(sc.recoveryWord, sc.id + "_rec");
-					delete sc.recoveryWord;
-					changed = true;
-				}
-			});
-			if (changed) {
-				localStorage.setItem('private_schools_directory', JSON.stringify(all));
-			}
-		}
-		migrateLegacySecurityData();
-
-		function verifyOwnerMasterPin(enteredPin) {
-			const savedHash = localStorage.getItem('school_admin_pin_hash');
-			if (!savedHash) return enteredPin === DEFAULT_ADMIN_PIN;
-			return computeSecureHash(enteredPin, 'owner_master') === savedHash;
-		}
-
-		function verifySchoolPin(schoolObj, enteredPin) {
-			if (!schoolObj || !enteredPin) return false;
-			if (schoolObj.pinHash) {
-				return computeSecureHash(enteredPin, schoolObj.id) === schoolObj.pinHash;
-			}
-			return schoolObj.pin === enteredPin;
-		}
-
-		function verifySchoolRecovery(schoolObj, enteredWord) {
-			if (!schoolObj || !enteredWord) return false;
-			if (schoolObj.recHash) {
-				return computeSecureHash(enteredWord, schoolObj.id + "_rec") === schoolObj.recHash;
-			}
-			return (schoolObj.recoveryWord || '').trim() === enteredWord.trim();
-		}
-
-		let isOwnerSessionUnlocked = false;
-		let registrationSelectedYears = [];
-		let isPrivateModeActive = (localStorage.getItem('selected_school_branch') || 'main') !== 'main';
-		let currentSelectedSchoolId = localStorage.getItem('selected_school_branch') || 'main';
-
-		function getPinataJWT() {
-			return localStorage.getItem('platform_pinata_jwt') || DEFAULT_PINATA_JWT;
-		}
-
-		function getBlockedSchoolsList() {
-			return JSON.parse(localStorage.getItem('blocked_schools_list') || '[]');
-		}
-
-		function getWarningsMap() {
-			return JSON.parse(localStorage.getItem('warned_schools_map') || '{}');
-		}
-
-		function getAllPrivateSchools() {
-			const blocked = getBlockedSchoolsList();
-			const warningsMap = getWarningsMap();
-			const all = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			return all
-				.filter(s => !blocked.includes(s.id) && (!s.ipfsHash || !blocked.includes(s.ipfsHash)))
-				.map(s => {
-					if (warningsMap[s.id]) {
-						s.warnings = warningsMap[s.id].count;
-						s.warningMessage = warningsMap[s.id].message;
-					}
-					return s;
-				});
-		}
-
-		// مزامنة لا مركزية آمنة مع IPFS (دون كشف أي رقم سري صريح)
-		async function syncSchoolsFromDecentralizedNetwork() {
-			const jwt = getPinataJWT();
-			if (!jwt || !navigator.onLine) return;
-			try {
-				const url = 'https://api.pinata.cloud/data/pinList?status=pinned&pageLimit=100&metadata[keyvalues][app]={"value":"3lm_platform_school","op":"eq"}';
-				const res = await fetch(url, { headers: { 'Authorization': `Bearer ${jwt}` } });
-				if (!res.ok) return;
-				const data = await res.json();
-				if (!data || !Array.isArray(data.rows)) return;
-
-				const blocked = getBlockedSchoolsList();
-				const localSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-				const map = {};
-				localSchools.forEach(s => {
-					s.yearHashes = s.yearHashes || {};
-					map[s.id] = s;
-				});
-
-				data.rows.forEach(row => {
-					const kv = row.metadata?.keyvalues || {};
-					const sId = kv.schoolId;
-					if (!sId || sId === 'main') return;
-					if (blocked.includes(sId) || blocked.includes(row.ipfs_pin_hash)) return;
-
-					const targetY = parseInt(kv.targetYear, 10) || 1;
-					if (!map[sId]) {
-						map[sId] = {
-							id: sId,
-							code: kv.schoolCode || generateUniqueSchoolCode(Object.values(map)),
-							name: kv.schoolName || sId,
-							owner: kv.ownerName || 'معلم',
-							targetYears: [targetY],
-							pinHash: kv.pinHash || '',
-							ipfsHash: row.ipfs_pin_hash,
-							ipfsUrl: `https://gateway.pinata.cloud/ipfs/${row.ipfs_pin_hash}`,
-							yearHashes: { [targetY]: row.ipfs_pin_hash }
-						};
-					} else {
-						if (!Array.isArray(map[sId].targetYears)) map[sId].targetYears = [];
-						if (!map[sId].targetYears.includes(targetY)) {
-							map[sId].targetYears.push(targetY);
-							map[sId].targetYears.sort((a, b) => a - b);
-						}
-						map[sId].yearHashes = map[sId].yearHashes || {};
-						if (!map[sId].yearHashes[targetY]) {
-							map[sId].yearHashes[targetY] = row.ipfs_pin_hash;
-						}
-					}
-				});
-
-				localStorage.setItem('private_schools_directory', JSON.stringify(Object.values(map)));
-			} catch (e) {}
-		}
-
-		function isSchoolEditModeActive() {
-			return localStorage.getItem('school_edit_mode') === 'true';
-		}
-
-		// ====================================================================
-		// ٢. التبديل بين المدارس والتوجيه الفوري السليم إلى stage1 / stage2 / stage3
-		// ====================================================================
-		function switchSchoolMode(mode, userClicked = false) {
-			const pubBtn = document.getElementById('btn-public-school');
-			const privBtn = document.getElementById('btn-private-school');
-			const stuImportBtn = document.getElementById('student-import-school-btn');
-			const dropdown = document.getElementById('private-school-dropdown');
-			const hint = document.getElementById('active-school-hint');
-			const warnBanner = document.getElementById('school-warning-banner');
-			const editOwner = localStorage.getItem('edit_mode_owner') || 'main';
-
-			if (mode === 'main') {
-				isPrivateModeActive = false;
-				if (isSchoolEditModeActive() && editOwner !== 'main') {
-					localStorage.setItem('school_edit_mode', 'false');
-					localStorage.removeItem('edit_mode_owner');
-				}
-				currentSelectedSchoolId = 'main';
-				localStorage.setItem('selected_school_branch', 'main');
-				pubBtn.classList.add('active');
-				privBtn.classList.remove('active');
-				if (stuImportBtn) stuImportBtn.style.display = 'none';
-				dropdown.style.display = 'none';
-				hint.style.display = 'none';
-				if (warnBanner) warnBanner.style.display = 'none';
-				filterVisibleYears(null);
-				refreshAdminUI();
-			} else {
-				isPrivateModeActive = true;
-				if (isSchoolEditModeActive() && editOwner === 'main') {
-					isOwnerSessionUnlocked = false;
-					localStorage.setItem('school_edit_mode', 'false');
-					localStorage.removeItem('edit_mode_owner');
-				}
-				pubBtn.classList.remove('active');
-				privBtn.classList.add('active');
-				if (stuImportBtn) stuImportBtn.style.display = 'inline-flex';
-				populatePrivateSchoolsDropdown();
-
-				if (userClicked) {
-					dropdown.value = '';
-					dropdown.style.display = 'block';
-				} else {
-					dropdown.style.display = 'none';
-					const schools = getAllPrivateSchools();
-					if (schools.length > 0) {
-						const targetId = (currentSelectedSchoolId !== 'main' && schools.some(s => s.id === currentSelectedSchoolId))
-							? currentSelectedSchoolId
-							: schools[0].id;
-						selectPrivateSchool(targetId, false);
-					} else {
-						filterVisibleYears([]);
-					}
-				}
-				refreshAdminUI();
-			}
-		}
-
-		document.addEventListener('click', (e) => {
-			const wrap = document.querySelector('.private-school-menu-wrap');
-			const dropdown = document.getElementById('private-school-dropdown');
-			if (wrap && dropdown && !wrap.contains(e.target)) {
-				dropdown.style.display = 'none';
-			}
-		});
-
-		function populatePrivateSchoolsDropdown() {
-			const dropdown = document.getElementById('private-school-dropdown');
-			const loginSelect = document.getElementById('teacher-login-school-select');
-			const schools = getAllPrivateSchools();
-
-			dropdown.innerHTML = '';
-			const placeholderOpt = document.createElement('option');
-			placeholderOpt.value = '';
-			placeholderOpt.disabled = true;
-			placeholderOpt.selected = true;
-			placeholderOpt.innerText = schools.length > 0
-				? '🔻 اختر المدرسة الخاصة من القائمة...'
-				: 'لا توجد مدرسة مضافة (أنشئ مدرسة أو أضف ملف مدرسة)';
-			dropdown.appendChild(placeholderOpt);
-
-			schools.forEach(sc => {
-				const opt = document.createElement('option');
-				opt.value = sc.id;
-				opt.innerText = `${sc.name} — ${sc.owner} [${sc.code || sc.id}]`;
-				dropdown.appendChild(opt);
-			});
-
-			if (loginSelect) {
-				loginSelect.innerHTML = '';
-				const defOpt = document.createElement('option');
-				defOpt.value = '';
-				defOpt.innerText = schools.length > 0 ? '🏫 اختر مدرستك المسجلة على هذا الجهاز...' : 'لا توجد مدارس مسجلة بعد';
-				loginSelect.appendChild(defOpt);
-				schools.forEach(sc => {
-					const opt = document.createElement('option');
-					opt.value = sc.id;
-					opt.innerText = `${sc.name} — المعلم: ${sc.owner} [${sc.code || ''}]`;
-					if (sc.id === currentSelectedSchoolId) opt.selected = true;
-					loginSelect.appendChild(opt);
-				});
-			}
-		}
-
-		function selectPrivateSchool(schoolId, hideDropdownImmediately = true) {
-			if (!schoolId) return;
-			const schools = getAllPrivateSchools();
-			const found = schools.find(s => s.id === schoolId);
-			const hint = document.getElementById('active-school-hint');
-			const warnBanner = document.getElementById('school-warning-banner');
-			const dropdown = document.getElementById('private-school-dropdown');
-
-			if (hideDropdownImmediately && dropdown) dropdown.style.display = 'none';
-			if (!found) { filterVisibleYears([]); return; }
-
-			const currentEditOwner = localStorage.getItem('edit_mode_owner') || 'main';
-			if (isSchoolEditModeActive() && currentEditOwner !== found.id) {
-				localStorage.setItem('school_edit_mode', 'false');
-				localStorage.removeItem('edit_mode_owner');
-			}
-
-			currentSelectedSchoolId = found.id;
-			localStorage.setItem('selected_school_branch', found.id);
-			localStorage.setItem('active_private_school_meta', JSON.stringify(found));
-
-			const builtYears = (found.targetYears || []).slice().sort((a, b) => a - b);
-			const editOwner = localStorage.getItem('edit_mode_owner') || 'main';
-			const isOwnerEditingThisSchool = isSchoolEditModeActive() && editOwner === found.id;
-			const codeLabel = found.code ? ` [${found.code}]` : '';
-
-			hint.style.display = 'inline-block';
-			if (isOwnerEditingThisSchool) {
-				hint.innerText = `✏️ تعديل (${found.name}${codeLabel} — المعلم: ${found.owner}): الصفوف المضاءة (${builtYears.join('، ') || 'أضئ صفوفك من زر التعديل'})`;
-			} else {
-				hint.innerText = `✨ ${found.name}${codeLabel} — المعلم: ${found.owner} | الصفوف المفعّلة: (${builtYears.join('، ') || 'لا يوجد'})`;
-			}
-
-			if (warnBanner) {
-				if (found.warnings && found.warnings > 0) {
-					warnBanner.innerText = found.warningMessage || STANDARD_WARNING_TEXT;
-					warnBanner.style.display = 'inline-block';
-				} else {
-					warnBanner.style.display = 'none';
-				}
-			}
-
-			filterVisibleYears(builtYears);
-			refreshAdminUI();
-		}
-
-		function filterVisibleYears(allowedYearsArray) {
-			const allYearBtns = document.querySelectorAll('.year-btn');
-			const stageHasActiveYear = { 1: false, 2: false, 3: false };
-
-			allYearBtns.forEach(btn => {
-				const y = parseInt(btn.getAttribute('data-year'), 10);
-				const stg = Math.ceil(y / 7);
-				btn.style.display = 'flex';
-
-				if (!Array.isArray(allowedYearsArray)) {
-					btn.classList.remove('year-disabled', 'built-year');
-					stageHasActiveYear[stg] = true;
-					return;
-				}
-
-				if (allowedYearsArray.includes(y)) {
-					btn.classList.remove('year-disabled');
-					btn.classList.add('built-year');
-					stageHasActiveYear[stg] = true;
-				} else {
-					btn.classList.remove('built-year');
-					btn.classList.add('year-disabled');
-				}
-			});
-
-			for (let s = 1; s <= 3; s++) {
-				const stgCard = document.getElementById(`stage-card-${s}`);
-				if (!stgCard) continue;
-				if (!Array.isArray(allowedYearsArray) || stageHasActiveYear[s]) {
-					stgCard.classList.remove('stage-dimmed');
-				} else {
-					stgCard.classList.add('stage-dimmed');
-				}
-			}
-		}
-
-		// التوجيه المباشر الفوري إلى stage1.html و stage2.html و stage3.html دون أي عائق
-		function resolveAndNavigateStage(stageNum, yearNum, schoolId) {
-			const query = `?stage=${stageNum}&year=${yearNum}&school=${encodeURIComponent(schoolId || 'main')}`;
-			let targetFile = 'stage1.html';
-
-			if (stageNum === 2 || (yearNum >= 8 && yearNum <= 14)) {
-				targetFile = 'stage2.html';
-			} else if (stageNum === 3 || yearNum >= 15) {
-				targetFile = 'stage3.html';
-			}
-
-			window.location.href = targetFile + query;
-		}
-
-		function selectStageYear(event, stageNum, yearNum) {
-			if (event) event.preventDefault();
-			if (event && event.currentTarget && event.currentTarget.classList.contains('year-disabled')) {
-				event.stopPropagation();
-				return false;
-			}
-			const editOwner = localStorage.getItem('edit_mode_owner') || 'main';
-			if (isSchoolEditModeActive() && editOwner !== currentSelectedSchoolId) {
-				localStorage.setItem('school_edit_mode', 'false');
-				localStorage.removeItem('edit_mode_owner');
-			}
-			localStorage.setItem('selected_stage_group', stageNum);
-			localStorage.setItem('selected_school_year', yearNum);
-
-			resolveAndNavigateStage(stageNum, yearNum, currentSelectedSchoolId);
-			return false;
-		}
-
-		// ====================================================================
-		// ٣. استيراد حزمة مدرسة للطالب بضغطة زر (للتعلم فقط بدون كشف أي رمز سري)
-		// ====================================================================
-		function importStudentSchoolPackage(event) {
-			const file = event.target.files?.[0];
-			if (!file) return;
-
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				try {
-					const data = JSON.parse(e.target.result);
-					if (!data || !data.schoolMeta || !data.schoolMeta.id) {
-						alert('❌ هذا الملف ليس حزمة مدرسة خاصة صالحة!');
-						return;
-					}
-
-					const blocked = getBlockedSchoolsList();
-					if (blocked.includes(data.schoolMeta.id)) {
-						alert('🚫 هذه المدرسة محظورة من إدارة المنصة.');
-						return;
-					}
-
-					const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-					const incoming = data.schoolMeta;
-					const existingIdx = allSchools.findIndex(s => s.id === incoming.id || (incoming.code && s.code === incoming.code));
-
-					if (existingIdx >= 0) {
-						allSchools[existingIdx].name = incoming.name || allSchools[existingIdx].name;
-						allSchools[existingIdx].owner = incoming.owner || allSchools[existingIdx].owner;
-						allSchools[existingIdx].targetYears = incoming.targetYears || allSchools[existingIdx].targetYears;
-						allSchools[existingIdx].code = allSchools[existingIdx].code || incoming.code || generateUniqueSchoolCode(allSchools);
-					} else {
-						allSchools.push({
-							id: incoming.id,
-							code: incoming.code || generateUniqueSchoolCode(allSchools),
-							name: incoming.name || 'مدرسة خاصة',
-							owner: incoming.owner || 'معلم',
-							targetYears: incoming.targetYears || [],
-							pinHash: incoming.pinHash || '',
-							recHash: incoming.recHash || '',
-							warnings: 0,
-							warningMessage: '',
-							yearHashes: incoming.yearHashes || {}
-						});
-					}
-
-					localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-
-					if (data.lessonsByYear) {
-						Object.keys(data.lessonsByYear).forEach(y => {
-							localStorage.setItem(`custom_curriculum_edits_${incoming.id}_y${y}`, data.lessonsByYear[y]);
-						});
-					}
-
-					localStorage.setItem('school_edit_mode', 'false');
-					localStorage.removeItem('edit_mode_owner');
-
-					switchSchoolMode('private', false);
-					selectPrivateSchool(incoming.id, true);
-					alert(`✅ تمت إضافة مدرسة (${incoming.name}) بنجاح! اختر الآن السنة الدراسية للبدء.`);
-				} catch (err) {
-					alert('❌ تعذرت قراءة الملف، يرجى التأكد من سلامة ملف JSON.');
-				} finally {
-					event.target.value = '';
-				}
-			};
-			reader.readAsText(file);
-		}
-
-		// ====================================================================
-		// ٤. إدارة شبكة الصفوف (1 - 21) وبوابة المعلمين بالمعرّف الفريد ELM-XXXX
-		// ====================================================================
-		function renderRegistrationYearsGrid() {
-			const grid = document.getElementById('reg-school-years-grid');
-			if (!grid) return;
-			grid.innerHTML = '';
-			for (let y = 1; y <= 21; y++) {
-				const btn = document.createElement('button');
-				btn.type = 'button';
-				btn.className = 'teacher-year-toggle' + (registrationSelectedYears.includes(y) ? ' lit' : '');
-				btn.innerText = y;
-				btn.onclick = () => {
-					if (registrationSelectedYears.includes(y)) {
-						registrationSelectedYears = registrationSelectedYears.filter(item => item !== y);
-					} else {
-						registrationSelectedYears.push(y);
-						registrationSelectedYears.sort((a, b) => a - b);
-					}
-					renderRegistrationYearsGrid();
-				};
-				grid.appendChild(btn);
-			}
-		}
-
-		function renderActiveSchoolYearsGrid() {
-			const managerBox = document.getElementById('active-school-years-manager');
-			const grid = document.getElementById('active-school-years-grid');
-			if (!managerBox || !grid) return;
-
-			const editOwner = localStorage.getItem('edit_mode_owner') || 'main';
-			if (!isSchoolEditModeActive() || editOwner === 'main') {
-				managerBox.style.display = 'none';
-				return;
-			}
-
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const schoolIdx = allSchools.findIndex(s => s.id === editOwner);
-			if (schoolIdx < 0) {
-				managerBox.style.display = 'none';
-				return;
-			}
-
-			managerBox.style.display = 'flex';
-			const activeYears = Array.isArray(allSchools[schoolIdx].targetYears) ? allSchools[schoolIdx].targetYears : [];
-			grid.innerHTML = '';
-
-			for (let y = 1; y <= 21; y++) {
-				const btn = document.createElement('button');
-				btn.type = 'button';
-				btn.className = 'teacher-year-toggle' + (activeYears.includes(y) ? ' lit' : '');
-				btn.innerText = y;
-				btn.onclick = () => toggleYearForActivePrivateSchool(editOwner, y);
-				grid.appendChild(btn);
-			}
-		}
-
-		function toggleYearForActivePrivateSchool(schoolId, yearNum) {
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const idx = allSchools.findIndex(s => s.id === schoolId);
-			if (idx < 0) return;
-
-			let yrs = Array.isArray(allSchools[idx].targetYears) ? allSchools[idx].targetYears : [];
-			if (yrs.includes(yearNum)) yrs = yrs.filter(item => item !== yearNum);
-			else { yrs.push(yearNum); yrs.sort((a, b) => a - b); }
-
-			allSchools[idx].targetYears = yrs;
-			localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-			localStorage.setItem('active_private_school_meta', JSON.stringify(allSchools[idx]));
-
-			renderActiveSchoolYearsGrid();
-			populatePrivateSchoolsDropdown();
-			if (currentSelectedSchoolId === schoolId) selectPrivateSchool(schoolId, true);
-			showAdminFeedback(`✅ تم تحديث الصفوف المضاءة لمدرستك: (${yrs.join('، ') || 'لا يوجد صف مفعل'})`, true);
-		}
-
-		function hideAllTeacherSubViews() {
-			document.getElementById('teacher-login-section').style.display = 'none';
-			document.getElementById('register-school-section').style.display = 'none';
-			document.getElementById('restore-teacher-device-section').style.display = 'none';
-			document.getElementById('recover-teacher-pin-section').style.display = 'none';
-			document.getElementById('admin-feedback-msg').innerText = '';
-		}
-
-		function switchToCreateSchoolView() {
-			hideAllTeacherSubViews();
-			document.getElementById('register-school-section').style.display = 'flex';
-		}
-
-		function switchToRestoreTeacherDeviceView() {
-			hideAllTeacherSubViews();
-			document.getElementById('restore-teacher-device-section').style.display = 'flex';
-		}
-
-		function switchToRecoverTeacherPinView() {
-			hideAllTeacherSubViews();
-			document.getElementById('recover-teacher-pin-section').style.display = 'flex';
-		}
-
-		function switchToLoginSchoolView() {
-			hideAllTeacherSubViews();
-			document.getElementById('teacher-login-section').style.display = 'block';
-		}
-
-		function refreshAdminUI() {
-			const active = isSchoolEditModeActive();
-			const owner = localStorage.getItem('edit_mode_owner') || 'main';
-			const triggerBtn = document.getElementById('admin-lock-trigger');
-			const squareBtn = document.getElementById('owner-square-trigger');
-			const iconEl = document.getElementById('admin-lock-icon');
-			const textEl = document.getElementById('admin-lock-text');
-			const badgeEl = document.getElementById('admin-status-badge');
-			const codeBadgeEl = document.getElementById('active-school-code-display');
-			const submitBtn = document.getElementById('admin-toggle-submit');
-			const loginInputs = document.getElementById('teacher-login-inputs');
-			const preloginLinks = document.getElementById('teacher-prelogin-links');
-			const activeTools = document.getElementById('teacher-active-tools');
-
-			if (!isPrivateModeActive && !(active && owner !== 'main')) {
-				triggerBtn.style.display = 'none';
-			} else {
-				triggerBtn.style.display = 'flex';
-			}
-
-			const ownerBadge = document.getElementById('owner-edit-status-badge');
-			const ownerMainBtn = document.getElementById('owner-main-edit-btn');
-			if (active && owner === 'main') {
-				squareBtn.classList.add('owner-active');
-				if (ownerBadge) { ownerBadge.className = 'admin-status-pill active'; ownerBadge.innerText = 'تعديل مدرسة العلم الأساسية: مفعل 🔓'; }
-				if (ownerMainBtn) { ownerMainBtn.className = 'admin-action-btn stop-btn'; ownerMainBtn.innerText = '🔒 إيقاف تعديل مدرسة العلم الأساسية'; }
-			} else {
-				squareBtn.classList.remove('owner-active');
-				if (ownerBadge) { ownerBadge.className = 'admin-status-pill'; ownerBadge.innerText = 'تعديل مدرسة العلم: مغلق 🔒'; }
-				if (ownerMainBtn) { ownerMainBtn.className = 'admin-action-btn'; ownerMainBtn.innerText = '✏️ تفعيل التعديل لمدرسة العلم الأساسية'; }
-			}
-
-			if (active && owner !== 'main') {
-				const schools = getAllPrivateSchools();
-				const found = schools.find(s => s.id === owner);
-				const ownerLabel = found ? found.name : owner;
-
-				triggerBtn.classList.add('edit-on');
-				iconEl.innerText = '✏️';
-				textEl.innerText = `تعديل (${ownerLabel})`;
-				badgeEl.className = 'admin-status-pill active';
-				badgeEl.innerText = `وضع التعديل مفعل لـ: (${ownerLabel}) 🔓`;
-				if (codeBadgeEl && found?.code) {
-					codeBadgeEl.style.display = 'inline-block';
-					codeBadgeEl.innerText = `معرّف مدرستك الفريد: ${found.code}`;
-				}
-				submitBtn.className = 'admin-action-btn stop-btn';
-				submitBtn.innerText = '🔒 إيقاف وضع التعديل';
-				if (loginInputs) loginInputs.style.display = 'none';
-				if (preloginLinks) preloginLinks.style.display = 'none';
-				if (activeTools) activeTools.style.display = 'flex';
-			} else {
-				triggerBtn.classList.remove('edit-on');
-				iconEl.innerText = '🔒';
-				textEl.innerText = 'وضع التعديل';
-				badgeEl.className = 'admin-status-pill';
-				badgeEl.innerText = 'وضع التعديل: مغلق 🔒';
-				if (codeBadgeEl) codeBadgeEl.style.display = 'none';
-				submitBtn.className = 'admin-action-btn';
-				submitBtn.innerText = '🔓 تفعيل تعديل مدرستي';
-				if (loginInputs) loginInputs.style.display = 'flex';
-				if (preloginLinks) preloginLinks.style.display = 'flex';
-				if (activeTools) activeTools.style.display = 'none';
-			}
-
-			renderActiveSchoolYearsGrid();
-		}
-
-		function openAdminPassModal() {
-			populatePrivateSchoolsDropdown();
-			refreshAdminUI();
-			switchToLoginSchoolView();
-			const schools = getAllPrivateSchools();
-			const currentFound = schools.find(s => s.id === currentSelectedSchoolId);
-
-			document.getElementById('teacher-login-code-or-name').value = currentFound?.code || '';
-			document.getElementById('admin-login-pass').value = '';
-			document.getElementById('admin-feedback-msg').innerText = '';
-			document.getElementById('teacher-change-pin-box').style.display = 'none';
-
-			const modalWarn = document.getElementById('modal-teacher-warning-box');
-			if (modalWarn) {
-				if (currentFound && currentFound.warnings > 0) {
-					modalWarn.innerText = currentFound.warningMessage || STANDARD_WARNING_TEXT;
-					modalWarn.style.display = 'block';
-				} else {
-					modalWarn.style.display = 'none';
-				}
-			}
-
-			registrationSelectedYears = [];
-			renderRegistrationYearsGrid();
-			document.getElementById('admin-pass-modal').style.display = 'flex';
-		}
-
-		function closeAdminPassModal(e) {
-			if (e) e.stopPropagation();
-			document.getElementById('admin-pass-modal').style.display = 'none';
-		}
-
-		function toggleSubSection(secId) {
-			const sec = document.getElementById(secId);
-			sec.style.display = (sec.style.display === 'flex') ? 'none' : 'flex';
-		}
-
-		function showAdminFeedback(msg, isSuccess) {
-			const el = document.getElementById('admin-feedback-msg');
-			el.style.color = isSuccess ? '#4ade80' : '#f87171';
-			el.innerText = msg;
-		}
-
-		function showOwnerFeedback(msg, isSuccess) {
-			const el = document.getElementById('owner-feedback-msg');
-			el.style.color = isSuccess ? '#4ade80' : '#f87171';
-			el.innerText = msg;
-		}
-
-		function verifyAndToggleEditMode() {
-			if (isSchoolEditModeActive()) {
-				localStorage.setItem('school_edit_mode', 'false');
-				localStorage.removeItem('edit_mode_owner');
-				refreshAdminUI();
-				if (currentSelectedSchoolId !== 'main') selectPrivateSchool(currentSelectedSchoolId, true);
-				showAdminFeedback('تم إيقاف وضع التعديل بنجاح.', true);
-				return;
-			}
-
-			const selectedId = document.getElementById('teacher-login-school-select').value;
-			const typedQuery = document.getElementById('teacher-login-code-or-name').value.trim();
-			const enteredPin = document.getElementById('admin-login-pass').value.trim();
-
-			if (!enteredPin) {
-				showAdminFeedback('⚠️ يرجى إدخال الرقم السري الخاص بمدرستك.', false);
-				return;
-			}
-
-			const schools = getAllPrivateSchools();
-			let candidates = [];
-
-			if (typedQuery) {
-				const upperQ = typedQuery.toUpperCase();
-				candidates = schools.filter(s => (s.code && s.code.toUpperCase() === upperQ) || s.name.trim() === typedQuery || s.id === typedQuery);
-			}
-			if (candidates.length === 0 && selectedId) {
-				candidates = schools.filter(s => s.id === selectedId);
-			}
-
-			const matchedSchool = candidates.find(s => verifySchoolPin(s, enteredPin));
-
-			if (matchedSchool) {
-				localStorage.setItem('school_edit_mode', 'true');
-				localStorage.setItem('edit_mode_owner', matchedSchool.id);
-				currentSelectedSchoolId = matchedSchool.id;
-				isPrivateModeActive = true;
-				selectPrivateSchool(matchedSchool.id, true);
-				refreshAdminUI();
-
-				if (matchedSchool.warnings && matchedSchool.warnings > 0) {
-					alert(matchedSchool.warningMessage || STANDARD_WARNING_TEXT);
-				}
-				showAdminFeedback(`✅ مرحباً (${matchedSchool.owner})! تم فتح تعديل مدرسة (${matchedSchool.name} [${matchedSchool.code}]).`, true);
-				return;
-			}
-
-			showAdminFeedback('❌ معرّف المدرسة أو الرقم السري غير مطابق!', false);
-		}
-
-		function saveTeacherNewPin() {
-			const editOwner = localStorage.getItem('edit_mode_owner') || 'main';
-			if (!isSchoolEditModeActive() || editOwner === 'main') return;
-
-			const newPin = document.getElementById('teacher-new-pin').value.trim();
-			const newRec = document.getElementById('teacher-new-recovery').value.trim();
-
-			if (newPin.length < 3) {
-				showAdminFeedback('⚠️ يرجى إدخال رقم سري جديد لا يقل عن 3 خانات.', false);
-				return;
-			}
-
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const idx = allSchools.findIndex(s => s.id === editOwner);
-			if (idx < 0) return;
-
-			allSchools[idx].pinHash = computeSecureHash(newPin, allSchools[idx].id);
-			delete allSchools[idx].pin;
-			if (newRec) {
-				allSchools[idx].recHash = computeSecureHash(newRec, allSchools[idx].id + "_rec");
-				delete allSchools[idx].recoveryWord;
-			}
-			localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-			localStorage.setItem('active_private_school_meta', JSON.stringify(allSchools[idx]));
-
-			document.getElementById('teacher-new-pin').value = '';
-			document.getElementById('teacher-new-recovery').value = '';
-			document.getElementById('teacher-change-pin-box').style.display = 'none';
-			showAdminFeedback('✅ تم تشفير وحفظ الرقم السري الجديد لمدرستك بنجاح!', true);
-		}
-
-		function recoverTeacherPin() {
-			const codeOrName = document.getElementById('rec-school-code-or-name').value.trim();
-			const tName = document.getElementById('rec-teacher-name').value.trim();
-			const recWord = document.getElementById('rec-recovery-word').value.trim();
-			const newPin = document.getElementById('rec-new-pin').value.trim();
-
-			if (!codeOrName || !tName || !recWord || newPin.length < 3) {
-				showAdminFeedback('⚠️ يرجى ملء معرّف/اسم المدرسة، واسم المعلم، وكلمة الأمان، والرقم الجديد.', false);
-				return;
-			}
-
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const upperQ = codeOrName.toUpperCase();
-			const idx = allSchools.findIndex(s =>
-				((s.code && s.code.toUpperCase() === upperQ) || s.name.trim() === codeOrName) &&
-				s.owner.trim() === tName &&
-				verifySchoolRecovery(s, recWord)
-			);
-
-			if (idx < 0) {
-				showAdminFeedback('❌ البيانات أو كلمة الأمان غير مطابقة! (يمكن لمالك المنصة إعادة تعيين الرمز لك).', false);
-				return;
-			}
-
-			allSchools[idx].pinHash = computeSecureHash(newPin, allSchools[idx].id);
-			delete allSchools[idx].pin;
-			localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-
-			switchToLoginSchoolView();
-			populatePrivateSchoolsDropdown();
-			document.getElementById('teacher-login-code-or-name').value = allSchools[idx].code || allSchools[idx].name;
-			document.getElementById('admin-login-pass').value = newPin;
-			showAdminFeedback(`✅ تم تعيين الرقم الجديد لمدرسة [${allSchools[idx].code}]! اضغط الآن على تفعيل التعديل.`, true);
-		}
-
-		function registerNewPrivateSchool() {
-			const name = document.getElementById('reg-school-name').value.trim();
-			const teacher = document.getElementById('reg-teacher-name').value.trim();
-			const pin = document.getElementById('reg-school-pin').value.trim();
-			const recoveryWord = document.getElementById('reg-school-recovery').value.trim();
-
-			if (!name || !teacher || pin.length < 3) {
-				showAdminFeedback('⚠️ يرجى ملء اسم المدرسة، واسم المعلم، ورقم سري لا يقل عن 3 خانات.', false);
-				return;
-			}
-
-			if (name === 'مدرسة العلم') {
-				showAdminFeedback('⚠️ اسم (مدرسة العلم) محجوز للمنهج الأصلي، يرجى اختيار اسم آخر.', false);
-				return;
-			}
-
-			if (registrationSelectedYears.length === 0) {
-				showAdminFeedback('⚠️ يرجى إضاءة صف عمري واحد على الأقل من الأزرار (1 - 21).', false);
-				return;
-			}
-
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const firstYear = registrationSelectedYears[0];
-			const schoolId = 'school_' + Date.now() + '_' + Math.floor(Math.random() * 900 + 100);
-			const schoolCode = generateUniqueSchoolCode(allSchools);
-
-			const newSchool = {
-				id: schoolId,
-				code: schoolCode,
-				name: name,
-				owner: teacher,
-				targetYears: [...registrationSelectedYears],
-				pinHash: computeSecureHash(pin, schoolId),
-				recHash: recoveryWord ? computeSecureHash(recoveryWord, schoolId + "_rec") : '',
-				warnings: 0,
-				warningMessage: '',
-				ipfsHash: '',
-				ipfsUrl: '',
-				yearHashes: {}
-			};
-
-			allSchools.push(newSchool);
-			localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-
-			localStorage.setItem('school_edit_mode', 'true');
-			localStorage.setItem('edit_mode_owner', schoolId);
-			localStorage.setItem('selected_school_branch', schoolId);
-			localStorage.setItem('active_private_school_meta', JSON.stringify(newSchool));
-
-			const stageNum = Math.ceil(firstYear / 7);
-			localStorage.setItem('selected_stage_group', stageNum);
-			localStorage.setItem('selected_school_year', firstYear);
-
-			alert(`🎉 تم إنشاء مدرستك بنجاح!\n\n🏫 الاسم: ${name}\n🆔 المعرّف الفريد لمدرستك: ${schoolCode}\n\nاحتفظ بهذا المعرّف لتسجيل الدخول بسهولة في أي وقت.`);
-			resolveAndNavigateStage(stageNum, firstYear, schoolId);
-		}
-
-		// ====================================================================
-		// ٥. تصدير واستعادة الحزمتين: (حزمة الطلاب للقراءة | حزمة المعلم المشفرة للنقل)
-		// ====================================================================
-		function exportSinglePrivateSchoolPackage(includeEncryptedTeacherAuth = false) {
-			const editOwner = localStorage.getItem('edit_mode_owner') || 'main';
-			if (!isSchoolEditModeActive() || editOwner === 'main') {
-				showAdminFeedback('🔒 لا يمكن التصدير إلا بعد فتح تعديل مدرستك بالرقم السري!', false);
-				return;
-			}
-
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const schoolMeta = allSchools.find(s => s.id === editOwner);
-			if (!schoolMeta) {
-				showAdminFeedback('❌ لم يتم العثور على المدرسة النشطة!', false);
-				return;
-			}
-
-			const safeMeta = {
-				id: schoolMeta.id,
-				code: schoolMeta.code,
-				name: schoolMeta.name,
-				owner: schoolMeta.owner,
-				targetYears: schoolMeta.targetYears || [],
-				yearHashes: schoolMeta.yearHashes || {}
-			};
-
-			if (includeEncryptedTeacherAuth) {
-				safeMeta.pinHash = schoolMeta.pinHash || '';
-				safeMeta.recHash = schoolMeta.recHash || '';
-			}
-
-			const lessonsByYear = {};
-			for (let y = 1; y <= 21; y++) {
-				const val = localStorage.getItem(`custom_curriculum_edits_${schoolMeta.id}_y${y}`);
-				if (val) lessonsByYear[y] = val;
-			}
-
-			const pkg = {
-				packageType: includeEncryptedTeacherAuth ? 'teacher_transfer_package' : 'single_private_school',
-				exportedAt: new Date().toISOString(),
-				schoolMeta: safeMeta,
-				lessonsByYear: lessonsByYear
-			};
-
-			const suffix = includeEncryptedTeacherAuth ? 'TEACHER_ADMIN' : 'STUDENT';
-			const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' });
-			const a = document.createElement('a');
-			a.href = URL.createObjectURL(blob);
-			a.download = `${schoolMeta.code || 'school'}-${suffix}.json`;
-			a.click();
-
-			showAdminFeedback(
-				includeEncryptedTeacherAuth
-					? `✅ تم تصدير (حزمة المعلم المشفرة [${schoolMeta.code}]) لنقل مدرستك إلى أي جهاز آخر بأمان!`
-					: `✅ تم تصدير (حزمة الطلاب [${schoolMeta.code}]) الخالية من أي بيانات سرية لمشاركتها مع طلابك!`,
-				true
-			);
-		}
-
-		function restoreTeacherPackageOnNewDevice(event) {
-			const file = event.target.files?.[0];
-			if (!file) return;
-
-			const enteredPin = document.getElementById('restore-verify-pin').value.trim();
-			if (!enteredPin) {
-				showAdminFeedback('⚠️ أدخل الرقم السري الأصلي لمدرستك في المربع أولاً قبل اختيار الملف!', false);
-				event.target.value = '';
-				return;
-			}
-
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				try {
-					const data = JSON.parse(e.target.result);
-					const meta = data?.schoolMeta;
-					if (!meta || !meta.id) {
-						showAdminFeedback('❌ هذا الملف ليس حزمة معلم صالحة!', false);
-						return;
-					}
-					if (!meta.pinHash) {
-						showAdminFeedback('⚠️ هذا الملف حزمة طلاب للقراءة فقط وليس حزمة المعلم الإدارية!', false);
-						return;
-					}
-					if (computeSecureHash(enteredPin, meta.id) !== meta.pinHash) {
-						showAdminFeedback('❌ الرقم السري المدخل لا يطابق بصمة هذه المدرسة!', false);
-						return;
-					}
-
-					const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-					const idx = allSchools.findIndex(s => s.id === meta.id);
-					if (idx >= 0) allSchools[idx] = { ...allSchools[idx], ...meta };
-					else allSchools.push(meta);
-
-					localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-					if (data.lessonsByYear) {
-						Object.keys(data.lessonsByYear).forEach(y => {
-							localStorage.setItem(`custom_curriculum_edits_${meta.id}_y${y}`, data.lessonsByYear[y]);
-						});
-					}
-
-					localStorage.setItem('school_edit_mode', 'true');
-					localStorage.setItem('edit_mode_owner', meta.id);
-					currentSelectedSchoolId = meta.id;
-					switchSchoolMode('private', false);
-					selectPrivateSchool(meta.id, true);
-					switchToLoginSchoolView();
-					refreshAdminUI();
-					showAdminFeedback(`✅ تمت استعادة مدرستك (${meta.name} [${meta.code}]) وتفعيل التعديل بنجاح!`, true);
-				} catch (err) {
-					showAdminFeedback('❌ الملف غير صالح!', false);
-				} finally {
-					event.target.value = '';
-				}
-			};
-			reader.readAsText(file);
-		}
-
-		// ====================================================================
-		// ٦. إدارة بوابة المالك الأساسي المشفرة (زر المربع ◼)
-		// ====================================================================
-		function openOwnerSecretModal() {
-			refreshAdminUI();
-			document.getElementById('owner-feedback-msg').innerText = '';
-			document.getElementById('owner-master-pin-input').value = '';
-			document.getElementById('owner-recover-box').style.display = 'none';
-			document.getElementById('manage-schools-section').style.display = 'none';
-			document.getElementById('change-pin-section').style.display = 'none';
-			document.getElementById('backup-tools-section').style.display = 'none';
-
-			const isMainOwnerActive = isSchoolEditModeActive() && localStorage.getItem('edit_mode_owner') === 'main';
-			if (isMainOwnerActive) {
-				isOwnerSessionUnlocked = true;
-				document.getElementById('owner-auth-step').style.display = 'none';
-				document.getElementById('owner-controls-panel').style.display = 'flex';
-			} else {
-				isOwnerSessionUnlocked = false;
-				document.getElementById('owner-auth-step').style.display = 'flex';
-				document.getElementById('owner-controls-panel').style.display = 'none';
-				setTimeout(() => document.getElementById('owner-master-pin-input').focus(), 100);
-			}
-			document.getElementById('owner-secret-modal').style.display = 'flex';
-		}
-
-		function closeOwnerSecretModal(e) {
-			if (e) e.stopPropagation();
-			if (!(isSchoolEditModeActive() && localStorage.getItem('edit_mode_owner') === 'main')) {
-				isOwnerSessionUnlocked = false;
-			}
-			document.getElementById('owner-secret-modal').style.display = 'none';
-		}
-
-		function unlockOwnerPanel() {
-			const entered = document.getElementById('owner-master-pin-input').value.trim();
-			if (verifyOwnerMasterPin(entered)) {
-				isOwnerSessionUnlocked = true;
-				document.getElementById('owner-master-pin-input').value = '';
-				document.getElementById('owner-auth-step').style.display = 'none';
-				document.getElementById('owner-controls-panel').style.display = 'flex';
-				showOwnerFeedback('✅ تم فتح لوحة المالك الأساسي بنجاح.', true);
-			} else {
-				showOwnerFeedback('❌ الرمز السري الأساسي غير صحيح!', false);
-			}
-		}
-
-		function recoverOwnerMasterPin() {
-			const savedOwnerRecHash = localStorage.getItem('owner_recovery_hash') || '';
-			const enteredRec = document.getElementById('owner-rec-phrase-input').value.trim();
-			const newPin = document.getElementById('owner-rec-new-pin').value.trim();
-
-			if (!savedOwnerRecHash) {
-				showOwnerFeedback('⚠️ لم يتم ضبط كلمة أمان للمالك مسبقاً في الإعدادات.', false);
-				return;
-			}
-			if (computeSecureHash(enteredRec, 'owner_rec') !== savedOwnerRecHash) {
-				showOwnerFeedback('❌ كلمة أمان المالك غير صحيحة!', false);
-				return;
-			}
-			if (newPin.length < 3) {
-				showOwnerFeedback('⚠️ يرجى إدخال رمز جديد لا يقل عن 3 خانات.', false);
-				return;
-			}
-
-			localStorage.setItem('school_admin_pin_hash', computeSecureHash(newPin, 'owner_master'));
-			document.getElementById('owner-rec-phrase-input').value = '';
-			document.getElementById('owner-rec-new-pin').value = '';
-			document.getElementById('owner-recover-box').style.display = 'none';
-			showOwnerFeedback('✅ تم تعيين وتشفير الرمز الأساسي الجديد! أدخله الآن للفتح.', true);
-		}
-
-		function toggleMainSchoolEditMode() {
-			if (!isOwnerSessionUnlocked) return;
-			const isMainActive = isSchoolEditModeActive() && localStorage.getItem('edit_mode_owner') === 'main';
-			if (isMainActive) {
-				isOwnerSessionUnlocked = false;
-				localStorage.setItem('school_edit_mode', 'false');
-				localStorage.removeItem('edit_mode_owner');
-				refreshAdminUI();
-				document.getElementById('owner-controls-panel').style.display = 'none';
-				document.getElementById('owner-auth-step').style.display = 'flex';
-				showOwnerFeedback('🔒 تم إيقاف وضع التعديل وقفل اللوحة.', true);
-			} else {
-				localStorage.setItem('school_edit_mode', 'true');
-				localStorage.setItem('edit_mode_owner', 'main');
-				switchSchoolMode('main', false);
-				refreshAdminUI();
-				showOwnerFeedback('✅ تم تفعيل التعديل على (مدرسة العلم الأساسية) لجميع المراحل.', true);
-			}
-		}
-
-		function renderManageSchoolsList() {
-			const listEl = document.getElementById('schools-manage-list');
-			const schools = getAllPrivateSchools();
-			listEl.innerHTML = '';
-
-			if (schools.length === 0) {
-				listEl.innerHTML = '<div style="color:#94a3b8; font-size:0.82rem; padding:8px;">لا توجد مدارس خاصة مضافة حالياً.</div>';
-				return;
-			}
-
-			schools.forEach(sc => {
-				const warnCount = sc.warnings || 0;
-				const row = document.createElement('div');
-				row.className = 'school-manage-item';
-
-				const actionsHtml = (warnCount === 0)
-					? `<button class="warn-school-btn" onclick="sendWarningToSchool('${sc.id}')">⚠️ إرسال تحذير</button>
-					   <button class="reset-pin-btn" onclick="ownerResetTeacherPin('${sc.id}')">🔑 تعيين رمز جديد</button>`
-					: `<button class="warn-school-btn" onclick="sendWarningToSchool('${sc.id}')">⚠️ تحذير إضافي (${warnCount})</button>
-					   <button class="clear-warn-btn" onclick="clearWarningFromSchool('${sc.id}')">✅ إزالة التحذير</button>
-					   <button class="reset-pin-btn" onclick="ownerResetTeacherPin('${sc.id}')">🔑 تعيين رمز جديد</button>
-					   <button class="delete-school-btn" onclick="deletePrivateSchoolLink('${sc.id}')">🗑️ حذف نهائي</button>`;
-
-				row.innerHTML = `
-					<div class="school-manage-info">
-						🏫 <span>${sc.name}</span> — <span>[${sc.code || sc.id}]</span><br>
-						المعلم: ${sc.owner} | الحماية: <span>مشفّر 🔒</span><br>
-						الصفوف: (${(sc.targetYears || []).join('، ')})
-						${warnCount > 0 ? `<br><span style="color:#f87171;">⚠️ تحذيرات مرسلة: (${warnCount})</span>` : ''}
-					</div>
-					<div class="school-manage-actions">${actionsHtml}</div>
-				`;
-				listEl.appendChild(row);
-			});
-		}
-
-		function ownerResetTeacherPin(schoolId) {
-			if (!isOwnerSessionUnlocked) return;
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const idx = allSchools.findIndex(s => s.id === schoolId);
-			if (idx < 0) return;
-
-			const newPin = prompt(`🔑 أدخل الرقم السري الجديد لمدرسة (${allSchools[idx].name} [${allSchools[idx].code}]):`);
-			if (!newPin || newPin.trim().length < 3) return;
-
-			allSchools[idx].pinHash = computeSecureHash(newPin.trim(), allSchools[idx].id);
-			delete allSchools[idx].pin;
-			localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-			renderManageSchoolsList();
-			showOwnerFeedback(`✅ تم تعيين وتشفير الرقم السري الجديد لمدرسة [${allSchools[idx].code}]!`, true);
-		}
-
-		function sendWarningToSchool(schoolId) {
-			if (!isOwnerSessionUnlocked) return;
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const idx = allSchools.findIndex(s => s.id === schoolId);
-			const warningsMap = getWarningsMap();
-
-			const currentCount = (warningsMap[schoolId]?.count || (idx >= 0 ? allSchools[idx].warnings : 0) || 0) + 1;
-			warningsMap[schoolId] = { count: currentCount, message: STANDARD_WARNING_TEXT };
-			localStorage.setItem('warned_schools_map', JSON.stringify(warningsMap));
-
-			if (idx >= 0) {
-				allSchools[idx].warnings = currentCount;
-				allSchools[idx].warningMessage = STANDARD_WARNING_TEXT;
-				localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-			}
-
-			renderManageSchoolsList();
-			if (currentSelectedSchoolId === schoolId) selectPrivateSchool(schoolId, true);
-			showOwnerFeedback('⚠️ تم إرسال رسالة التحذير إلى المدرسة بنجاح.', true);
-		}
-
-		function clearWarningFromSchool(schoolId) {
-			if (!isOwnerSessionUnlocked) return;
-			const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-			const idx = allSchools.findIndex(s => s.id === schoolId);
-			const warningsMap = getWarningsMap();
-
-			delete warningsMap[schoolId];
-			localStorage.setItem('warned_schools_map', JSON.stringify(warningsMap));
-
-			if (idx >= 0) {
-				allSchools[idx].warnings = 0;
-				allSchools[idx].warningMessage = '';
-				localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-			}
-
-			renderManageSchoolsList();
-			if (currentSelectedSchoolId === schoolId) selectPrivateSchool(schoolId, true);
-			showOwnerFeedback('✅ تمت إزالة التحذير عن المدرسة بنجاح.', true);
-		}
-
-		async function deletePrivateSchoolLink(schoolId) {
-			if (!isOwnerSessionUnlocked) return;
-			const schools = getAllPrivateSchools();
-			const target = schools.find(s => s.id === schoolId);
-			if (!target) return;
-
-			if (!target.warnings || target.warnings < 1) {
-				showOwnerFeedback('⚠️ يرجى إرسال رسالة تحذير للمشترك أولاً قبل الحذف النهائي!', false);
-				return;
-			}
-			if (!confirm(`⚠️ هل أنت متأكد من حذف مدرسة (${target.name} [${target.code}]) نهائياً؟`)) return;
-
-			const blocked = getBlockedSchoolsList();
-			if (!blocked.includes(target.id)) blocked.push(target.id);
-			if (target.ipfsHash && !blocked.includes(target.ipfsHash)) blocked.push(target.ipfsHash);
-			localStorage.setItem('blocked_schools_list', JSON.stringify(blocked));
-
-			const updatedSchools = schools.filter(s => s.id !== schoolId);
-			localStorage.setItem('private_schools_directory', JSON.stringify(updatedSchools));
-			for (let y = 1; y <= 21; y++) localStorage.removeItem(`custom_curriculum_edits_${target.id}_y${y}`);
-
-			const jwt = getPinataJWT();
-			if (jwt && target.ipfsHash && navigator.onLine) {
-				fetch(`https://api.pinata.cloud/pinning/unpin/${target.ipfsHash}`, {
-					method: 'DELETE',
-					headers: { 'Authorization': `Bearer ${jwt}` }
-				}).catch(() => {});
-			}
-
-			if (currentSelectedSchoolId === schoolId) switchSchoolMode('main', false);
-			else populatePrivateSchoolsDropdown();
-
-			if (localStorage.getItem('edit_mode_owner') === schoolId) {
-				localStorage.setItem('school_edit_mode', 'false');
-				localStorage.removeItem('edit_mode_owner');
-				refreshAdminUI();
-			}
-
-			renderManageSchoolsList();
-			showOwnerFeedback(`✅ تم حذف مدرسة (${target.name}) نهائياً!`, true);
-		}
-
-		function saveOwnerSettings() {
-			if (!isOwnerSessionUnlocked) return;
-			const newPass = document.getElementById('admin-new-pass').value.trim();
-			const confirmPass = document.getElementById('admin-confirm-pass').value.trim();
-			const ownerRec = document.getElementById('admin-owner-recovery').value.trim();
-			const jwt = document.getElementById('admin-pinata-jwt').value.trim();
-
-			if (jwt) localStorage.setItem('platform_pinata_jwt', jwt);
-			if (ownerRec) localStorage.setItem('owner_recovery_hash', computeSecureHash(ownerRec, 'owner_rec'));
-
-			if (newPass) {
-				if (newPass.length < 3 || newPass !== confirmPass) {
-					showOwnerFeedback('⚠️ الرمز الجديد وتأكيده غير متطابقين.', false);
-					return;
-				}
-				localStorage.setItem('school_admin_pin_hash', computeSecureHash(newPass, 'owner_master'));
-				document.getElementById('admin-new-pass').value = '';
-				document.getElementById('admin-confirm-pass').value = '';
-
-				isOwnerSessionUnlocked = false;
-				localStorage.setItem('school_edit_mode', 'false');
-				localStorage.removeItem('edit_mode_owner');
-				refreshAdminUI();
-
-				document.getElementById('change-pin-section').style.display = 'none';
-				document.getElementById('owner-controls-panel').style.display = 'none';
-				document.getElementById('owner-auth-step').style.display = 'flex';
-				showOwnerFeedback('✅ تم تشفير وحفظ الرمز السري الجديد وقفل اللوحة!', true);
-				return;
-			}
-
-			document.getElementById('change-pin-section').style.display = 'none';
-			showOwnerFeedback('✅ تم حفظ إعدادات المالك بنجاح!', true);
-		}
-
-		function exportSchoolCustomizations() {
-			if (!isOwnerSessionUnlocked) return;
-			const backupData = {};
-			for (let i = 0; i < localStorage.length; i++) {
-				const k = localStorage.key(i);
-				if (k && !k.includes('admin_pin') && !k.includes('recovery') && k !== 'school_edit_mode' && k !== 'platform_pinata_jwt') {
-					backupData[k] = localStorage.getItem(k);
-				}
-			}
-			const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-			const a = document.createElement('a');
-			a.href = URL.createObjectURL(blob);
-			a.download = '3lm-platform-backup.json';
-			a.click();
-			showOwnerFeedback('✅ تم تنزيل النسخة الاحتياطية الشاملة بنجاح!', true);
-		}
-
-		function importSchoolCustomizations(event, isFromOwnerModal = false) {
-			const file = event.target.files?.[0];
-			if (!file) return;
-
-			const editOwner = localStorage.getItem('edit_mode_owner') || 'main';
-			if (isFromOwnerModal && !isOwnerSessionUnlocked) {
-				showOwnerFeedback('🔒 يجب فتح لوحة المالك أولاً!', false);
-				event.target.value = '';
-				return;
-			}
-			if (!isFromOwnerModal && (!isSchoolEditModeActive() || editOwner === 'main')) {
-				showAdminFeedback('🔒 يجب فتح تعديل مدرستك بالرقم السري أولاً!', false);
-				event.target.value = '';
-				return;
-			}
-
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				try {
-					const data = JSON.parse(e.target.result);
-
-					if (!isFromOwnerModal) {
-						if (!data || !data.schoolMeta || !data.lessonsByYear) {
-							showAdminFeedback('❌ هذا الملف ليس حزمة دروس مدرسة صالحة!', false);
-							return;
-						}
-						const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-						const activeIdx = allSchools.findIndex(s => s.id === editOwner);
-						if (activeIdx < 0) return;
-
-						if (Array.isArray(data.schoolMeta.targetYears) && data.schoolMeta.targetYears.length > 0) {
-							allSchools[activeIdx].targetYears = data.schoolMeta.targetYears;
-						}
-						localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-
-						Object.keys(data.lessonsByYear).forEach(y => {
-							localStorage.setItem(`custom_curriculum_edits_${allSchools[activeIdx].id}_y${y}`, data.lessonsByYear[y]);
-						});
-
-						populatePrivateSchoolsDropdown();
-						selectPrivateSchool(allSchools[activeIdx].id, true);
-						renderActiveSchoolYearsGrid();
-						showAdminFeedback(`✅ تم تحديث دروس مدرستك (${allSchools[activeIdx].name}) بنجاح!`, true);
-						return;
-					}
-
-					if (data && data.schoolMeta && data.lessonsByYear) {
-						const inc = data.schoolMeta;
-						const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
-						const exIdx = allSchools.findIndex(s => s.id === inc.id);
-						inc.code = inc.code || generateUniqueSchoolCode(allSchools);
-						if (exIdx >= 0) allSchools[exIdx] = { ...allSchools[exIdx], ...inc };
-						else allSchools.push(inc);
-						localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
-						Object.keys(data.lessonsByYear).forEach(y => {
-							localStorage.setItem(`custom_curriculum_edits_${inc.id}_y${y}`, data.lessonsByYear[y]);
-						});
-					} else {
-						Object.keys(data).forEach(k => {
-							if (!k.includes('admin_pin') && !k.includes('recovery')) {
-								localStorage.setItem(k, data[k]);
-							}
-						});
-					}
-					migrateLegacySecurityData();
-					populatePrivateSchoolsDropdown();
-					renderManageSchoolsList();
-					showOwnerFeedback('✅ تم استيراد الحزمة بنجاح!', true);
-				} catch (err) {
-					if (isFromOwnerModal) showOwnerFeedback('❌ الملف غير صالح!', false);
-					else showAdminFeedback('❌ الملف غير صالح!', false);
-				} finally {
-					event.target.value = '';
-				}
-			};
-			reader.readAsText(file);
-		}
-
-		// ====================================================================
-		// ٧. التهيئة الأولية وتسجيل تطبيق الويب التقدمي (PWA)
-		// ====================================================================
-		localStorage.setItem('has_stage3_installed', 'true');
-		refreshAdminUI();
-		if (currentSelectedSchoolId !== 'main') {
-			switchSchoolMode('private', false);
-		} else {
-			switchSchoolMode('main', false);
-		}
-		syncSchoolsFromDecentralizedNetwork();
-
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('./sw.js').catch(() => {});
-		}
-	</script>
+    <div class="auth-shell">
+        <div class="active-session-bar" id="active-session-bar">
+            <span id="active-session-label">جلسة نشطة</span>
+            <div style="display:flex; gap:6px;">
+                <a href="student.html" id="return-portal-link">العودة لبوابتي</a>
+                <button type="button" style="background:#dc2626;color:#fff;" onclick="logoutCurrentSession()">تسجيل الخروج</button>
+            </div>
+        </div>
+
+        <div class="brand-row">
+            <img src="icon-512.png" onerror="this.src='cc.ico'" alt="مدرسة العلم" class="brand-hero-img">
+            <h1 class="brand-title">مدرسة العلم</h1>
+            <p class="brand-sub">اطلبوا العلم من المهد إلى اللحد — بوابة التلميذ والمعلم</p>
+        </div>
+
+        <button type="button" class="install-app-btn" id="install-pwa-btn" onclick="triggerInstallApp()">
+            <span>📲</span>
+            <span>تنزيل المنصة كتطبيق على الهاتف</span>
+        </button>
+
+        <!-- ١. اختيار الصفة أولاً: تلميذ أو معلم -->
+        <div class="role-tabs" role="tablist" aria-label="اختر نوع الحساب">
+            <button type="button" class="role-tab-btn active" id="tab-student" onclick="setRole('student')">🎓 أنا تلميذ</button>
+            <button type="button" class="role-tab-btn" id="tab-teacher" onclick="setRole('teacher')">🏫 أنا معلم / إدارة</button>
+        </div>
+
+        <!-- ٢. وضع العملية: تسجيل الدخول أو إنشاء حساب جديد فقط (مزامنة سحابية تلقائية عبر الإنترنت) -->
+        <div class="mode-switch-row">
+            <button type="button" class="mode-pill-btn active" id="mode-login-btn" onclick="setAuthMode('login')">🔑 تسجيل الدخول</button>
+            <button type="button" class="mode-pill-btn" id="mode-register-btn" onclick="setAuthMode('register')">✨ إنشاء حساب جديد</button>
+        </div>
+
+        <!-- ٣. الحقول الأساسية -->
+        <div class="field-col" id="auth-form-fields">
+            <input type="text" id="auth-display-name" class="auth-input" placeholder="الاسم المحبّب (مثال: نور / الأستاذ علي)" style="display:none;">
+            <input type="text" id="auth-username" class="auth-input" placeholder="اسم المستخدم (Username)" autocomplete="username">
+            <input type="password" id="auth-password" class="auth-input" placeholder="كلمة المرور (Password)" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleAuthSubmit()">
+
+            <!-- واجهة اختيار الصف الممتعة للتلميذ عند الاشتراك -->
+            <div class="fun-class-picker" id="student-class-picker">
+                <div class="fun-picker-label">🌟 اختر مرحلتك وعمرك الدراسي لرحلتك العلمية:</div>
+                <div class="stage-mini-cards">
+                    <button type="button" class="stg-mini-card s1 selected" id="stg-card-1" onclick="selectFunStage(1)">
+                        <span class="stg-ar">سيد</span>
+                        <span class="stg-rng">1 - 7</span>
+                    </button>
+                    <button type="button" class="stg-mini-card s2" id="stg-card-2" onclick="selectFunStage(2)">
+                        <span class="stg-ar">عبد</span>
+                        <span class="stg-rng">8 - 14</span>
+                    </button>
+                    <button type="button" class="stg-mini-card s3" id="stg-card-3" onclick="selectFunStage(3)">
+                        <span class="stg-ar">صاحب</span>
+                        <span class="stg-rng">15 - 21</span>
+                    </button>
+                </div>
+                <div class="fun-years-bubbles" id="fun-years-bubbles"></div>
+                <select id="student-school-branch" class="auth-select" title="اختر المدرسة">
+                    <option value="main">🏫 مدرسة العلم (المنهج الأساسي)</option>
+                </select>
+            </div>
+
+            <!-- إعدادات مدرسة المعلم عند إنشاء حساب معلم جديد -->
+            <input type="text" id="auth-school-name" class="auth-input" placeholder="اسم مدرستك الخاصة (اتركه فارغاً للتصفح العام)" style="display:none;">
+            <div class="teacher-reg-years-box" id="teacher-reg-years-box">
+                <div style="font-size:0.8rem; font-weight:800; color:#fde047;">💡 حدّد الصفوف العمرية (1 - 21) المفعّلة في مدرستك الخاصة:</div>
+                <div class="t-years-grid" id="teacher-reg-years-grid"></div>
+            </div>
+        </div>
+
+        <button type="button" class="submit-auth-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">دخول</button>
+        <div class="feedback-box" id="auth-feedback"></div>
+    </div>
+
+    <script>
+    (function initAl3lmGateway() {
+        const CLOUD_SYNC_API = localStorage.getItem('al3lm_sync_api_url')
+                            || localStorage.getItem('al3lm_tutor_worker_url')
+                            || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+
+        async function callCloudApi(payload, timeoutMs = 9000) {
+            if (!navigator.onLine) return { ok: false, offline: true };
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), timeoutMs);
+            try {
+                const res = await fetch(CLOUD_SYNC_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: ctrl.signal
+                });
+                const data = await res.json().catch(() => ({}));
+                return { status: res.status, ...data };
+            } catch (e) {
+                return { ok: false, networkError: true };
+            } finally {
+                clearTimeout(t);
+            }
+        }
+
+        function computeHash(rawStr, salt) {
+            const str = `${salt}::${String(rawStr || '').trim()}`;
+            let h1 = 0xdeadbeef ^ str.length, h2 = 0x41c6ce57 ^ str.length;
+            for (let i = 0; i < str.length; i++) {
+                const ch = str.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 1597334677);
+            }
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+            return "h2_" + (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
+        }
+
+        function restoreStudentSnapshotToLocal(stu) {
+            if (!stu) return;
+            if (stu.progress && typeof stu.progress === 'object') {
+                Object.keys(stu.progress).forEach(k => {
+                    if (typeof stu.progress[k] === 'string') {
+                        localStorage.setItem(k, stu.progress[k]);
+                    }
+                });
+            }
+            const yr = parseInt(stu.assignedYear, 10) || 1;
+            localStorage.setItem('selected_school_year', String(yr));
+            localStorage.setItem('selected_stage_group', String(Math.ceil(yr / 7)));
+            localStorage.setItem('selected_school_branch', stu.schoolBranch || 'main');
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('logout') === '1') {
+            localStorage.removeItem('al3lm_active_role');
+            localStorage.removeItem('al3lm_active_student_user');
+            localStorage.removeItem('al3lm_active_teacher_user');
+        }
+
+        const activeRole = localStorage.getItem('al3lm_active_role');
+        const activeStuUser = localStorage.getItem('al3lm_active_student_user');
+        const activeTchUser = localStorage.getItem('al3lm_active_teacher_user');
+        const isSwitching = (params.get('switchAccount') === '1');
+
+        if (!isSwitching) {
+            if (activeRole === 'student' && activeStuUser) {
+                const stuMap = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+                if (stuMap[activeStuUser]) {
+                    restoreStudentSnapshotToLocal(stuMap[activeStuUser]);
+                    window.location.replace('student.html');
+                    return;
+                }
+            } else if (activeRole === 'teacher' && activeTchUser) {
+                window.location.replace('teachers.html');
+                return;
+            }
+        } else {
+            const bar = document.getElementById('active-session-bar');
+            const lbl = document.getElementById('active-session-label');
+            const lnk = document.getElementById('return-portal-link');
+            if (activeRole === 'student' && activeStuUser) {
+                bar.style.display = 'flex';
+                lbl.textContent = `🎓 متصل كطالب: ${activeStuUser}`;
+                lnk.href = 'student.html';
+                lnk.textContent = 'بوابة التلميذ ⬅';
+            } else if (activeRole === 'teacher' && activeTchUser) {
+                bar.style.display = 'flex';
+                lbl.textContent = `🏫 متصل كمعلم: ${activeTchUser}`;
+                lnk.href = 'teachers.html';
+                lnk.textContent = 'بوابة المعلمين ⬅';
+            }
+        }
+
+        window.logoutCurrentSession = function() {
+            localStorage.removeItem('al3lm_active_role');
+            localStorage.removeItem('al3lm_active_student_user');
+            localStorage.removeItem('al3lm_active_teacher_user');
+            localStorage.setItem('school_edit_mode', 'false');
+            document.getElementById('active-session-bar').style.display = 'none';
+            showMsg('تم تسجيل الخروج بنجاح.', true);
+        };
+
+        let deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+        });
+        window.triggerInstallApp = async () => {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice.catch(() => {});
+                deferredInstallPrompt = null;
+                return;
+            }
+            showMsg('لتثبيت المنصة كتطبيق على هاتفك: افتح قائمة المتصفح (⋮ أو زر المشاركة ⬆️) واختر «إضافة إلى الشاشة الرئيسية / تثبيت التطبيق».', true);
+        };
+
+        async function populateStudentSchools() {
+            const sel = document.getElementById('student-school-branch');
+            if (!sel) return;
+            // مزامنة قائمة المدارس الخاصة من السحابة تلقائياً
+            const dirRes = await callCloudApi({ action: 'list_directory' }, 5000);
+            if (dirRes && dirRes.ok && Array.isArray(dirRes.schools)) {
+                const localSc = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                dirRes.schools.forEach(inc => {
+                    if (!inc || !inc.id) return;
+                    const idx = localSc.findIndex(s => s.id === inc.id);
+                    if (idx >= 0) localSc[idx] = { ...localSc[idx], ...inc };
+                    else localSc.push(inc);
+                });
+                localStorage.setItem('private_schools_directory', JSON.stringify(localSc));
+            }
+            const blocked = JSON.parse(localStorage.getItem('blocked_schools_list') || '[]');
+            const schools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]')
+                .filter(s => !blocked.includes(s.id));
+            schools.forEach(sc => {
+                if (!sel.querySelector(`option[value="${sc.id}"]`)) {
+                    const o = document.createElement('option');
+                    o.value = sc.id;
+                    o.textContent = `🌟 ${sc.name} — المعلم: ${sc.owner}`;
+                    sel.appendChild(o);
+                }
+            });
+        }
+        populateStudentSchools();
+
+        let currentRole = params.get('role') === 'teacher' ? 'teacher' : 'student';
+        let currentMode = 'login';
+        let pickedStage = 1;
+        let pickedStudentYear = 1;
+        let teacherRegYears = [1, 8, 15];
+
+        function renderStudentYearBubbles() {
+            const wrap = document.getElementById('fun-years-bubbles');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            const startY = (pickedStage - 1) * 7 + 1;
+            const endY = pickedStage * 7;
+            if (pickedStudentYear < startY || pickedStudentYear > endY) pickedStudentYear = startY;
+
+            for (let y = startY; y <= endY; y++) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'yr-bubble-btn' + (y === pickedStudentYear ? ' picked' : '');
+                b.textContent = y;
+                b.onclick = () => {
+                    pickedStudentYear = y;
+                    renderStudentYearBubbles();
+                };
+                wrap.appendChild(b);
+            }
+        }
+
+        window.selectFunStage = function(stg) {
+            pickedStage = stg;
+            for (let s = 1; s <= 3; s++) {
+                document.getElementById('stg-card-' + s).classList.toggle('selected', s === stg);
+            }
+            pickedStudentYear = (stg - 1) * 7 + 1;
+            renderStudentYearBubbles();
+        };
+
+        function renderTeacherRegYears() {
+            const g = document.getElementById('teacher-reg-years-grid');
+            if (!g) return;
+            g.innerHTML = '';
+            for (let y = 1; y <= 21; y++) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 't-yr-dot' + (teacherRegYears.includes(y) ? ' lit' : '');
+                b.textContent = y;
+                b.onclick = () => {
+                    if (teacherRegYears.includes(y)) teacherRegYears = teacherRegYears.filter(x => x !== y);
+                    else { teacherRegYears.push(y); teacherRegYears.sort((a, b) => a - b); }
+                    renderTeacherRegYears();
+                };
+                g.appendChild(b);
+            }
+        }
+
+        function showMsg(txt, ok = false) {
+            const fb = document.getElementById('auth-feedback');
+            fb.className = 'feedback-box' + (ok ? ' ok' : '');
+            fb.textContent = txt;
+        }
+
+        function updateFormUI() {
+            document.getElementById('tab-student').classList.toggle('active', currentRole === 'student');
+            document.getElementById('tab-teacher').classList.toggle('active', currentRole === 'teacher');
+
+            document.getElementById('mode-login-btn').classList.toggle('active', currentMode === 'login');
+            document.getElementById('mode-register-btn').classList.toggle('active', currentMode === 'register');
+
+            const isReg = (currentMode === 'register');
+
+            document.getElementById('auth-display-name').style.display = isReg ? 'block' : 'none';
+            document.getElementById('auth-username').placeholder = currentRole === 'teacher'
+                ? 'اسم مستخدم المعلم أو معرّف المدرسة (ELM-XXXX)'
+                : 'اسم المستخدم الخاص بك (Username)';
+
+            document.getElementById('student-class-picker').style.display = (isReg && currentRole === 'student') ? 'flex' : 'none';
+            document.getElementById('auth-school-name').style.display = (isReg && currentRole === 'teacher') ? 'block' : 'none';
+            document.getElementById('teacher-reg-years-box').style.display = (isReg && currentRole === 'teacher') ? 'flex' : 'none';
+
+            const subBtn = document.getElementById('auth-submit-btn');
+            if (isReg) subBtn.textContent = currentRole === 'student' ? '🚀 إنشاء حسابي والانتقال لبوابة التلميذ' : '🏫 إنشاء حساب المعلم والانتقال لبوابة المعلمين';
+            else subBtn.textContent = currentRole === 'student' ? '🎓 دخول إلى بوابة التلميذ' : '🏫 دخول إلى بوابة المعلمين';
+
+            showMsg('');
+        }
+
+        window.setRole = (r) => { currentRole = r; updateFormUI(); };
+        window.setAuthMode = (m) => { currentMode = m; updateFormUI(); };
+
+        function generateSchoolCode(existing) {
+            const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+            let code = "";
+            do {
+                let p = "";
+                for (let i = 0; i < 4; i++) p += chars[Math.floor(Math.random() * chars.length)];
+                code = "ELM-" + p;
+            } while (existing.some(s => s.code === code));
+            return code;
+        }
+
+        window.handleAuthSubmit = async () => {
+            const rawUser = (document.getElementById('auth-username').value || '').trim();
+            const username = rawUser.toLowerCase();
+            const password = (document.getElementById('auth-password').value || '').trim();
+            const displayName = (document.getElementById('auth-display-name').value || '').trim();
+            const schoolName = (document.getElementById('auth-school-name').value || '').trim();
+            const stuSchoolBranch = document.getElementById('student-school-branch')?.value || 'main';
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if (!username || !password) {
+                showMsg('⚠️ يرجى إدخال اسم المستخدم وكلمة المرور.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+
+            try {
+                // ١. مسار التلميذ (Student) — مزامنة سحابية تلقائية عبر الإنترنت
+                if (currentRole === 'student') {
+                    const accounts = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+                    const pwHash = computeHash(password, 'stu_' + username);
+
+                    if (currentMode === 'register') {
+                        if (password.length < 3) {
+                            showMsg('⚠️ يرجى اختيار كلمة مرور لا تقل عن 3 خانات.');
+                            return;
+                        }
+                        const newStu = {
+                            accountType: 'student',
+                            username,
+                            name: displayName || rawUser,
+                            pwHash,
+                            assignedYear: pickedStudentYear,
+                            schoolBranch: stuSchoolBranch,
+                            createdAt: new Date().toISOString(),
+                            completed: false,
+                            completedYears: [],
+                            reminderTime: '08:30',
+                            reminderEnabled: false,
+                            lastVisitStatus: 'ready',
+                            lastScore: '',
+                            lessonHistory: [],
+                            progress: {}
+                        };
+
+                        showMsg('⏳ جاري تسجيل حسابك على السحابة...', true);
+                        const cloudReg = await callCloudApi({ action: 'register_student', profile: newStu });
+                        if (cloudReg && cloudReg.error === 'USERNAME_EXISTS') {
+                            showMsg('⚠️ اسم المستخدم هذا محجوز مسبقاً، اختر اسماً آخر أو سجّل الدخول.');
+                            return;
+                        }
+                        if (!cloudReg.ok && accounts[username]) {
+                            showMsg('⚠️ اسم المستخدم مسجّل مسبقاً، اختر اسماً آخر أو سجّل الدخول.');
+                            return;
+                        }
+
+                        accounts[username] = cloudReg.profile || newStu;
+                        localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+                        localStorage.setItem('al3lm_active_student_user', username);
+                        localStorage.setItem('al3lm_active_role', 'student');
+                        restoreStudentSnapshotToLocal(accounts[username]);
+                        window.location.href = 'student.html';
+                        return;
+                    } else {
+                        showMsg('⏳ جاري فتح حسابك واسترجاع تقدمك...', true);
+                        const cloudLogin = await callCloudApi({ action: 'login_student', username, pwHash });
+
+                        if (cloudLogin && cloudLogin.ok && cloudLogin.profile) {
+                            // دمج أي تقدم محلي إن وجد مع النسخة السحابية
+                            const localCopy = accounts[username];
+                            const merged = cloudLogin.profile;
+                            if (localCopy && localCopy.pwHash === pwHash && localCopy.progress) {
+                                merged.progress = { ...localCopy.progress, ...(merged.progress || {}) };
+                            }
+                            accounts[username] = merged;
+                            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+                            localStorage.setItem('al3lm_active_student_user', username);
+                            localStorage.setItem('al3lm_active_role', 'student');
+                            restoreStudentSnapshotToLocal(merged);
+                            window.location.href = 'student.html';
+                            return;
+                        }
+
+                        if (cloudLogin && cloudLogin.error === 'WRONG_PASSWORD') {
+                            showMsg('❌ كلمة المرور غير صحيحة.');
+                            return;
+                        }
+
+                        // احتياطي العمل دون اتصال (Offline Fallback) إن كان الحساب محفوظاً على نفس الجهاز
+                        const localAcc = accounts[username];
+                        if (localAcc && localAcc.pwHash === pwHash) {
+                            // إذا كان السيرفر يعمل ولكن الحساب لم يُرفع له بعد، نرفعه تلقائياً الآن!
+                            callCloudApi({ action: 'sync_student', username, pwHash, profile: localAcc });
+                            localStorage.setItem('al3lm_active_student_user', username);
+                            localStorage.setItem('al3lm_active_role', 'student');
+                            restoreStudentSnapshotToLocal(localAcc);
+                            window.location.href = 'student.html';
+                            return;
+                        }
+
+                        showMsg('❌ اسم المستخدم أو كلمة المرور غير صحيحة.');
+                        return;
+                    }
+                }
+
+                // ٢. مسار المعلم والإدارة (Teacher) — مزامنة سحابية تلقائية
+                const teachers = JSON.parse(localStorage.getItem('al3lm_teacher_accounts_v1') || '{}');
+                const pwHash = computeHash(password, 'tch_' + username);
+
+                if (currentMode === 'register') {
+                    if (password.length < 3) {
+                        showMsg('⚠️ يرجى اختيار كلمة مرور لا تقل عن 3 خانات.');
+                        return;
+                    }
+                    let linkedSchoolId = 'main';
+                    let linkedSchoolCode = '';
+                    let newSchoolObj = null;
+
+                    if (schoolName && schoolName !== 'مدرسة العلم') {
+                        const schools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                        linkedSchoolId = 'school_' + Date.now() + '_' + Math.floor(Math.random() * 900 + 100);
+                        linkedSchoolCode = generateSchoolCode(schools);
+                        const yrs = teacherRegYears.length > 0 ? [...teacherRegYears] : [1];
+                        newSchoolObj = {
+                            id: linkedSchoolId,
+                            code: linkedSchoolCode,
+                            name: schoolName,
+                            owner: displayName || rawUser,
+                            targetYears: yrs,
+                            pinHash: computeHash(password, linkedSchoolId),
+                            warnings: 0,
+                            warningMessage: '',
+                            yearHashes: {}
+                        };
+                        schools.push(newSchoolObj);
+                        localStorage.setItem('private_schools_directory', JSON.stringify(schools));
+                        localStorage.setItem('selected_school_branch', linkedSchoolId);
+                        localStorage.setItem('active_private_school_meta', JSON.stringify(newSchoolObj));
+                        localStorage.setItem('school_edit_mode', 'true');
+                        localStorage.setItem('edit_mode_owner', linkedSchoolId);
+                    }
+
+                    const newTch = {
+                        accountType: 'teacher',
+                        username,
+                        name: displayName || rawUser,
+                        pwHash,
+                        schoolId: linkedSchoolId,
+                        schoolCode: linkedSchoolCode,
+                        schoolName: schoolName || 'مدرسة العلم',
+                        schoolMeta: newSchoolObj,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    showMsg('⏳ جاري إنشاء حساب المعلم على السحابة...', true);
+                    const cloudTchReg = await callCloudApi({ action: 'register_teacher', profile: newTch });
+                    if (cloudTchReg && cloudTchReg.error === 'USERNAME_EXISTS') {
+                        showMsg('⚠️ اسم مستخدم المعلم مسجّل مسبقاً، يرجى تسجيل الدخول.');
+                        return;
+                    }
+
+                    teachers[username] = cloudTchReg.profile || newTch;
+                    localStorage.setItem('al3lm_teacher_accounts_v1', JSON.stringify(teachers));
+                    localStorage.setItem('al3lm_active_role', 'teacher');
+                    localStorage.setItem('al3lm_active_teacher_user', username);
+                    window.location.href = 'teachers.html';
+                    return;
+                } else {
+                    showMsg('⏳ جاري التحقق من حساب المعلم...', true);
+                    const cloudTchLogin = await callCloudApi({ action: 'login_teacher', username, pwHash });
+                    if (cloudTchLogin && cloudTchLogin.ok && cloudTchLogin.profile) {
+                        const tProf = cloudTchLogin.profile;
+                        teachers[username] = tProf;
+                        localStorage.setItem('al3lm_teacher_accounts_v1', JSON.stringify(teachers));
+                        if (cloudTchLogin.schoolMeta) {
+                            const schools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                            const idx = schools.findIndex(s => s.id === cloudTchLogin.schoolMeta.id);
+                            if (idx >= 0) schools[idx] = cloudTchLogin.schoolMeta; else schools.push(cloudTchLogin.schoolMeta);
+                            localStorage.setItem('private_schools_directory', JSON.stringify(schools));
+                        }
+                        localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_teacher_user', username);
+                        if (tProf.schoolId && tProf.schoolId !== 'main') {
+                            localStorage.setItem('selected_school_branch', tProf.schoolId);
+                            localStorage.setItem('school_edit_mode', 'true');
+                            localStorage.setItem('edit_mode_owner', tProf.schoolId);
+                        }
+                        window.location.href = 'teachers.html';
+                        return;
+                    }
+
+                    const tAcc = teachers[username];
+                    if (tAcc && tAcc.pwHash === pwHash) {
+                        callCloudApi({ action: 'sync_teacher', username, pwHash, profile: tAcc, schoolMeta: tAcc.schoolMeta || null });
+                        localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_teacher_user', username);
+                        if (tAcc.schoolId && tAcc.schoolId !== 'main') {
+                            localStorage.setItem('selected_school_branch', tAcc.schoolId);
+                            localStorage.setItem('school_edit_mode', 'true');
+                            localStorage.setItem('edit_mode_owner', tAcc.schoolId);
+                        }
+                        window.location.href = 'teachers.html';
+                        return;
+                    }
+
+                    const schools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                    const matchedSchool = schools.find(s =>
+                        ((s.code && s.code.toLowerCase() === username) || (s.name && s.name.trim().toLowerCase() === username)) &&
+                        s.pinHash === computeHash(password, s.id)
+                    );
+                    if (matchedSchool) {
+                        localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_teacher_user', matchedSchool.owner || matchedSchool.code);
+                        localStorage.setItem('selected_school_branch', matchedSchool.id);
+                        localStorage.setItem('active_private_school_meta', JSON.stringify(matchedSchool));
+                        localStorage.setItem('school_edit_mode', 'true');
+                        localStorage.setItem('edit_mode_owner', matchedSchool.id);
+                        window.location.href = 'teachers.html';
+                        return;
+                    }
+
+                    const savedOwnerHash = localStorage.getItem('school_admin_pin_hash');
+                    const isMaster = savedOwnerHash ? (computeHash(password, 'owner_master') === savedOwnerHash) : (password === '1234');
+                    if (isMaster) {
+                        localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_teacher_user', rawUser || 'الإدارة');
+                        window.location.href = 'teachers.html';
+                        return;
+                    }
+
+                    showMsg('❌ بيانات دخول المعلم غير صحيحة.');
+                }
+            } finally {
+                submitBtn.disabled = false;
+            }
+        };
+
+        renderStudentYearBubbles();
+        renderTeacherRegYears();
+        updateFormUI();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+    })();
+    </script>
 </body>
 </html>
-<!-- ==================== [ نهاية الجزء 2 من 2 : اكتمال ملف index.html بالكامل ] ==================== -->

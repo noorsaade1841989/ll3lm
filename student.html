@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>مدرسة العلم | بوابة التلميذ وسجل العلامات</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="cc.ico" type="image/x-icon">
+    <meta name="theme-color" content="#064e3b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
+    <script>
+    (function ensureSafeStorage(){
+        try {
+            var t = '__al3lm_test__';
+            window.localStorage.setItem(t, '1');
+            window.localStorage.removeItem(t);
+        } catch (e) {
+            var mem = {};
+            var safeStore = {
+                getItem: function(k){ return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+                setItem: function(k, v){ mem[k] = String(v); },
+                removeItem: function(k){ delete mem[k]; },
+                clear: function(){ mem = {}; },
+                key: function(i){ return Object.keys(mem)[i] || null; },
+                get length(){ return Object.keys(mem).length; }
+            };
+            try { Object.defineProperty(window, 'localStorage', { value: safeStore, configurable: true }); } catch (_) {}
+        }
+    })();
+    </script>
+    <style>
+        :root {
+            --portal-primary: #059669;
+            --portal-dark: #064e3b;
+            --portal-accent: #eab308;
+            --portal-bg: radial-gradient(circle at 50% 10%, #065f46 0%, #06281e 55%, #09111e 100%);
+        }
+        body.theme-stage-1 {
+            --portal-primary: #0284c7;
+            --portal-dark: #0c4a6e;
+            --portal-accent: #22c55e;
+            --portal-bg: radial-gradient(circle at 50% 10%, #0369a1 0%, #0f172a 75%);
+        }
+        body.theme-stage-3 {
+            --portal-primary: #b45309;
+            --portal-dark: #451a03;
+            --portal-accent: #eab308;
+            --portal-bg: radial-gradient(circle at 50% 10%, #78350f 0%, #06281e 60%, #09111e 100%);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            min-height: 100dvh;
+            width: 100%;
+            font-family: 'Cairo', sans-serif;
+            background: var(--portal-bg);
+            color: #0f172a;
+        }
+
+        .top-nav {
+            width: 100%;
+            padding: 10px 16px;
+            background: rgba(6, 24, 19, 0.88);
+            backdrop-filter: blur(14px);
+            border-bottom: 2px solid rgba(250, 204, 21, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 500;
+        }
+        .nav-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            color: #fef08a;
+            font-weight: 900;
+            font-size: 1rem;
+        }
+        .nav-brand img {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid #fde047;
+        }
+        .nav-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .nav-pill-btn {
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(253, 224, 71, 0.6);
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.18s;
+        }
+        .nav-pill-btn:hover { background: rgba(255, 255, 255, 0.24); }
+
+        .page-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 18px 14px 48px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* ١. بطاقة زر البدء والترحيب / ختام الدرس */
+        .hero-start-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.97), rgba(240,253,244,0.95));
+            border: 3.5px solid #eab308;
+            border-radius: 32px;
+            padding: clamp(20px, 4vmin, 32px);
+            box-shadow: 0 22px 55px rgba(0,0,0,0.45);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .wrapup-celebration-banner {
+            display: none;
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #fef9c3, #fde047);
+            border: 2.5px solid #ca8a04;
+            color: #713f12;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .wrapup-celebration-banner.show { display: flex; }
+        .wrapup-score-pill {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 999px;
+            background: #064e3b;
+            color: #fef08a;
+            font-weight: 900;
+            font-size: 1.05rem;
+        }
+
+        .student-stage-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 16px;
+            border-radius: 999px;
+            background: var(--portal-dark);
+            color: #fef08a;
+            border: 2px solid #fde047;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+        .hero-greeting {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(1.7rem, 4.8vmin, 2.5rem);
+            color: var(--portal-dark);
+            line-height: 1.25;
+        }
+        .hero-next-lesson-desc {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #334155;
+            line-height: 1.65;
+        }
+
+        .giant-start-btn {
+            width: 112px;
+            height: 112px;
+            border-radius: 50%;
+            border: 4.5px solid #fde047;
+            background: linear-gradient(135deg, var(--portal-primary), var(--portal-dark));
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            box-shadow: 0 14px 34px rgba(5, 150, 105, 0.5);
+            transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: pulsePortalStart 2.2s infinite;
+        }
+        .giant-start-btn:hover { transform: scale(1.09); }
+        .giant-start-btn svg { width: 42px; height: 42px; fill: currentColor; margin-left: 4px; }
+        .giant-start-lbl { font-size: 0.84rem; font-weight: 900; color: #fef08a; }
+        @keyframes pulsePortalStart {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.65); }
+            50% { box-shadow: 0 0 0 18px rgba(234, 179, 8, 0); }
+        }
+
+        /* ٢. بطاقة منبّه الدراسة والإشعارات */
+        .section-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 2.5px solid rgba(250, 204, 21, 0.65);
+            border-radius: 26px;
+            padding: 20px;
+            box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .sec-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 2px dashed #d1fae5;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .sec-title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #064e3b;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alarm-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .alarm-time-input {
+            padding: 9px 16px;
+            border-radius: 16px;
+            border: 2.5px solid #10b981;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #064e3b;
+            background: #f0fdf4;
+        }
+        .action-pill-btn {
+            padding: 9px 18px;
+            border-radius: 999px;
+            border: 2px solid #eab308;
+            background: linear-gradient(135deg, #059669, #064e3b);
+            color: #fef08a;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 0.16s ease;
+        }
+        .action-pill-btn:hover { transform: translateY(-1px); }
+        .action-pill-btn.secondary {
+            background: #f1f5f9;
+            color: #334155;
+            border-color: #cbd5e1;
+        }
+        .alarm-status-banner {
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: #064e3b;
+            color: #fef08a;
+            font-size: 0.92rem;
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.65;
+        }
+
+        /* ٣. بطاقات سجل التلميذ والعلامات */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+            gap: 12px;
+        }
+        .stat-tile {
+            background: linear-gradient(145deg, #f8fafc, #ecfdf5);
+            border: 2px solid #a7f3d0;
+            border-radius: 20px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: center;
+        }
+        .stat-lbl { font-size: 0.8rem; font-weight: 800; color: #475569; }
+        .stat-val { font-size: 1.25rem; font-weight: 900; color: #064e3b; }
+
+        .overall-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .overall-bar-track {
+            width: 100%;
+            height: 14px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+            border: 1.5px solid #cbd5e1;
+        }
+        .overall-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #eab308);
+            transition: width 0.5s ease;
+        }
+
+        .abjad-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .abjad-mini-cell {
+            padding: 7px 4px;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            background: #ffffff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .abjad-mini-cell .ltr { font-weight: 900; font-size: 1rem; color: #0f172a; }
+        .abjad-mini-cell .st { font-size: 0.68rem; font-weight: 800; color: #64748b; }
+        .abjad-mini-cell.done { border-color: #10b981; background: #dcfce7; }
+        .abjad-mini-cell.current { border-color: #eab308; background: #fef9c3; transform: scale(1.05); }
+        .abjad-mini-cell.locked { opacity: 0.42; background: #f1f5f9; }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .history-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        .sync-actions-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #064e3b;
+            color: #fef08a;
+            border: 2px solid #fde047;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 0.86rem;
+            font-weight: 900;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.45);
+        }
+        @media (max-width: 600px) {
+            .abjad-mini-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <img src="icon-512.png" onerror="this.src='cc.ico'" alt="العلم">
+            <span id="nav-student-title">بوابة التلميذ</span>
+        </div>
+        <div class="nav-actions">
+            <button type="button" class="nav-pill-btn" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
+            <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب</a>
+            <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 خروج</a>
+        </div>
+    </nav>
+
+    <main class="page-container">
+        <!-- ١. بوابة البدء والترحيب واستقبال ختام الدرس -->
+        <section class="hero-start-card">
+            <div class="wrapup-celebration-banner" id="wrapup-banner">
+                <div style="font-size:2rem; line-height:1;">🌟🏆</div>
+                <div style="font-size:1.18rem; font-weight:900;">انْتَهَى دَرْسُ اليَوْمِ بِنَجَاحٍ!</div>
+                <div class="wrapup-score-pill" id="wrapup-score-pill">العلامة: مكتمل</div>
+                <div style="font-size:0.9rem; font-weight:800;">نَحْنُ بِانْتِظَارِكَ غَداً صَبَاحاً أَوْ فِي مَوْعِدِكَ القَادِمِ — اضْبِطْ جَرَسَ التَّنْبِيهِ بِالأَسْفَلِ!</div>
+            </div>
+
+            <div class="student-stage-chip" id="hero-stage-chip">مرحلة سيد • السنة 1</div>
+            <h1 class="hero-greeting" id="hero-greeting">أهلاً بك في مدرسة العلم</h1>
+            <p class="hero-next-lesson-desc" id="hero-lesson-desc">اضغط زر البدء للانطلاق مباشرة إلى درسك الحالي</p>
+
+            <button type="button" class="giant-start-btn" id="start-now-btn" onclick="launchStudentLesson()">
+                <svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>
+                <span class="giant-start-lbl">ابدأ الدرس</span>
+            </button>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:4px;">
+                <select id="stu-school-selector" class="alarm-time-input" style="font-size:0.84rem; padding:6px 12px;" onchange="changeStudentSchool(this.value)">
+                    <option value="main">🏫 مدرسة العلم (المنهج الأساسي)</option>
+                </select>
+                <label class="action-pill-btn secondary" style="cursor:pointer; font-size:0.8rem; padding:6px 12px;">
+                    <span>📥 إضافة ملف مدرسة معلمي</span>
+                    <input type="file" accept=".json" style="display:none;" onchange="importTeacherSchoolForStudent(event)">
+                </label>
+            </div>
+        </section>
+
+        <!-- ٢. مركز الإشعارات ومنبّه موعد الدراسة -->
+        <section class="section-card">
+            <div class="sec-hdr">
+                <h2 class="sec-title"><span>🔔</span><span>مُنَبِّهُ مَوْعِدِ الدِّرَاسَةِ وَالإِشْعَارَاتُ</span></h2>
+                <span style="font-size:0.8rem; font-weight:800; color:#059669;" id="notif-perm-badge">الجرس التذكيري</span>
+            </div>
+            <p style="font-size:0.9rem; font-weight:800; color:#475569; text-align:center;">
+                اختر الساعة التي تحب أن يذكّرك فيها معلمك بموعد درسك القادم، وعند الضغط على الإشعار ستفتح لك هذه الصفحة مباشرة:
+            </p>
+            <div class="alarm-controls-row">
+                <input type="time" id="stu-alarm-time" class="alarm-time-input" value="08:30">
+                <button type="button" class="action-pill-btn" onclick="saveAndArmStudentAlarm()">🔔 تفعيل الجرس وموافق</button>
+                <button type="button" class="action-pill-btn secondary" onclick="testNotificationNow()">📨 تجربة الإشعار الآن</button>
+                <button type="button" class="action-pill-btn secondary" onclick="disableStudentAlarm()">🔕 إيقاف الجرس</button>
+            </div>
+            <div class="alarm-status-banner" id="alarm-status-banner">
+                لم يتم تفعيل جرس التذكير بعد — اختر وقتك المفضل واضغط «تفعيل الجرس وموافق».
+            </div>
+        </section>
+
+        <!-- ٣. سجل التلميذ الشخصي والعلامات وتقدم الحروف الـ 28 -->
+        <section class="section-card">
+            <div class="sec-hdr">
+                <h2 class="sec-title"><span>📜</span><span>سِجِلِّي الشَّخْصِيُّ وَعَلَامَاتِي</span></h2>
+                <button type="button" class="action-pill-btn" id="promote-next-year-btn" style="display:none; background:#b45309;" onclick="promoteToNextClass()">
+                    🎓 مبارك إتمام الصف! انتقل للصف التالي
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-tile">
+                    <span class="stat-lbl">اسم التلميذ والمستخدم</span>
+                    <span class="stat-val" id="st-name-val">—</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-lbl">المرحلة والصف المثبّت</span>
+                    <span class="stat-val" id="st-class-val">—</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-lbl">الوحدة والحرف الحالي</span>
+                    <span class="stat-val" id="st-unit-val">—</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-lbl">رصيد العلامات والنجوم</span>
+                    <span class="stat-val" id="st-score-val">—</span>
+                </div>
+            </div>
+
+            <div class="overall-bar-wrap">
+                <div style="display:flex; justify-content:space-between; font-size:0.86rem; font-weight:900; color:#064e3b;">
+                    <span>نسبة إنجاز الصف الدراسي الحالي</span>
+                    <span id="st-pct-label" style="direction:ltr;">0%</span>
+                </div>
+                <div class="overall-bar-track">
+                    <div class="overall-bar-fill" id="st-pct-fill"></div>
+                </div>
+                <div style="font-size:0.78rem; font-weight:800; color:#64748b;" id="st-class-lock-note">
+                    🔒 صفك الدراسي مثبّت لضمان التسلسل، ويُفتح لك الانتقال للصف التالي تلقائياً عند إتمام هذا الصف.
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size:0.95rem; font-weight:900; color:#065f46; margin-bottom:8px;" id="abjad-cycle-heading">
+                    🧭 خريطة إنجاز حروف دورتك الحالية (٢٨ حرفاً):
+                </h3>
+                <div class="abjad-mini-grid" id="stu-abjad-grid"></div>
+            </div>
+
+            <div>
+                <h3 style="font-size:0.95rem; font-weight:900; color:#065f46; margin-bottom:8px;">
+                    🗓️ آخر الدروس والعلامات المحفوظة في سجلّك:
+                </h3>
+                <div class="history-list" id="stu-history-list"></div>
+            </div>
+        </section>
+
+        <!-- حالة المزامنة السحابية التلقائية عبر الإنترنت -->
+        <div style="text-align:center; padding:6px 12px; font-size:0.82rem; font-weight:800; color:#a7f3d0;" id="cloud-sync-status-line">
+            ☁️ تقدمك وعلاماتك محفوظة تلقائياً في حسابك؛ يمكنك فتح حسابك من أي جهاز باسم المستخدم وكلمة المرور.
+        </div>
+    </main>
+
+    <div class="toast-msg" id="portal-toast"></div>
+
+    <script>
+    (function initStudentPortal() {
+        const ABJAD = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي','ك','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
+        const STAGE_NAMES = { 1: 'مرحلة سيد', 2: 'مرحلة عبد', 3: 'مرحلة صاحب' };
+        const S2_CYCLES = { 8: 1, 9: 1, 10: 1, 11: 1, 12: 2, 13: 2, 14: 2 };
+        const S3_CYCLES = { 15: 5, 16: 6, 17: 7, 18: 1, 19: 1, 20: 1, 21: 1 };
+
+        const activeUser = localStorage.getItem('al3lm_active_student_user');
+        const accounts = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+        if (!activeUser || !accounts[activeUser]) {
+            window.location.replace('index.html');
+            return;
+        }
+        localStorage.setItem('al3lm_active_role', 'student');
+
+        let stu = accounts[activeUser];
+
+        const CLOUD_SYNC_API = localStorage.getItem('al3lm_sync_api_url')
+                            || localStorage.getItem('al3lm_tutor_worker_url')
+                            || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+
+        let _cloudPushTimer = null;
+        function pushStudentProfileToCloud() {
+            clearTimeout(_cloudPushTimer);
+            _cloudPushTimer = setTimeout(async () => {
+                if (!navigator.onLine || !stu || !stu.username || !stu.pwHash) return;
+                try {
+                    const res = await fetch(CLOUD_SYNC_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'sync_student', username: stu.username, pwHash: stu.pwHash, profile: stu })
+                    });
+                    const stLine = document.getElementById('cloud-sync-status-line');
+                    if (res.ok && stLine) {
+                        stLine.textContent = '☁️ تمت مزامنة علاماتك وتقدمك سحابياً — يمكنك المتابعة من أي جهاز آخر باسم المستخدم وكلمة المرور.';
+                    }
+                } catch (_) {}
+            }, 400);
+        }
+
+        async function pullLatestStudentFromCloudOnOpen() {
+            if (!navigator.onLine || !stu || !stu.username || !stu.pwHash) return;
+            try {
+                const res = await fetch(CLOUD_SYNC_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'pull_student', username: stu.username, pwHash: stu.pwHash })
+                });
+                if (!res.ok) {
+                    pushStudentProfileToCloud();
+                    return;
+                }
+                const data = await res.json();
+                if (data && data.ok && data.profile) {
+                    const remote = data.profile;
+                    // Merge remote progress keys into localStorage & local profile
+                    stu.progress = { ...(remote.progress || {}), ...(stu.progress || {}) };
+                    Object.keys(stu.progress).forEach(k => {
+                        if (typeof stu.progress[k] === 'string') localStorage.setItem(k, stu.progress[k]);
+                    });
+                    if (Array.isArray(remote.lessonHistory) && remote.lessonHistory.length > (stu.lessonHistory || []).length) {
+                        stu.lessonHistory = remote.lessonHistory;
+                    }
+                    if (remote.assignedYear && remote.assignedYear > (stu.assignedYear || 1)) {
+                        stu.assignedYear = remote.assignedYear;
+                    }
+                    accounts[activeUser] = stu;
+                    localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+                    renderDashboard();
+                    pushStudentProfileToCloud();
+                }
+            } catch (_) {}
+        }
+
+        let toastTmr = null;
+        function showToast(msg) {
+            const el = document.getElementById('portal-toast');
+            el.textContent = msg;
+            el.style.display = 'block';
+            clearTimeout(toastTmr);
+            toastTmr = setTimeout(() => { el.style.display = 'none'; }, 3200);
+        }
+
+        // تثبيت التطبيق PWA
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
+        window.triggerInstallPWA = async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice.catch(() => {});
+                deferredPrompt = null;
+                return;
+            }
+            showToast('من قائمة المتصفح اختر «إضافة إلى الشاشة الرئيسية / تثبيت التطبيق».');
+        };
+
+        // استعادة تقدم التلميذ في localStorage ثم قراءة أحدث الإحصائيات
+        function syncSnapshotBothWays() {
+            accounts[activeUser] = stu;
+            if (stu.progress) {
+                Object.keys(stu.progress).forEach(k => {
+                    if (localStorage.getItem(k) === null && typeof stu.progress[k] === 'string') {
+                        localStorage.setItem(k, stu.progress[k]);
+                    }
+                });
+            }
+            const snap = stu.progress || {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (!k) continue;
+                if (k.startsWith('student_week_') || k.startsWith('student_subj_') || k.startsWith('subj_star_') || k.startsWith('subj_score_') || k.startsWith('subj_coins_') || k.startsWith('seal_done_') || k.startsWith('gift_diamond_') || k.startsWith('s3_')) {
+                    snap[k] = localStorage.getItem(k);
+                }
+            }
+            stu.progress = snap;
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+        }
+
+        function computeStudentLiveMetrics() {
+            syncSnapshotBothWays();
+            const yr = parseInt(stu.assignedYear, 10) || 1;
+            const stg = Math.ceil(yr / 7);
+            const branch = stu.schoolBranch || 'main';
+            const saveKey = (branch === 'main') ? `y${yr}` : `${branch}_y${yr}`;
+
+            let curWeek = 1, curSubj = 1, earned = 0, maxTotal = 28, pct = 0, scoreLabel = '';
+            const cycleUnitStates = []; // 28 items: 'done' | 'current' | 'locked', plus label
+
+            if (stg === 1) {
+                const schoolYr = ((yr - 1) % 7) + 1;
+                const maxCoins = (schoolYr <= 2) ? 1 : (schoolYr <= 5 ? 1 : (schoolYr === 6 ? 2 : 3));
+                curWeek = Math.min(28, parseInt(localStorage.getItem(`student_week_${saveKey}`), 10) || 1);
+                curSubj = parseInt(localStorage.getItem(`student_subj_${saveKey}`), 10) || 1;
+                maxTotal = 28 * 7 * maxCoins;
+                for (let w = 1; w <= 28; w++) {
+                    let wDoneSeals = 0;
+                    for (let s = 1; s <= 7; s++) {
+                        const sc = parseInt(localStorage.getItem(`subj_score_${saveKey}_w${w}_s${s}`), 10);
+                        if (!isNaN(sc)) earned += Math.min(maxCoins, sc);
+                        else if (w < curWeek || (w === curWeek && s < curSubj)) earned += maxCoins;
+                        if (w < curWeek || (w === curWeek && s < curSubj) || localStorage.getItem(`seal_done_${saveKey}_w${w}_s${s}`) === 'true') {
+                            wDoneSeals++;
+                        }
+                    }
+                    cycleUnitStates.push({
+                        letter: ABJAD[w - 1],
+                        state: w < curWeek || wDoneSeals === 7 ? 'done' : (w === curWeek ? 'current' : 'locked'),
+                        sub: `${wDoneSeals}/7`
+                    });
+                }
+                pct = Math.min(100, Math.round((earned / maxTotal) * 100));
+                scoreLabel = `🪙 ${earned} / ${maxTotal} (${pct}%)`;
+            } else if (stg === 2) {
+                const totCyc = S2_CYCLES[yr] || 1;
+                const totWeeks = totCyc * 28;
+                curWeek = Math.min(totWeeks, parseInt(localStorage.getItem(`student_week_${saveKey}`), 10) || 1);
+                curSubj = parseInt(localStorage.getItem(`student_subj_${saveKey}`), 10) || 1;
+                maxTotal = totWeeks * 7;
+                for (let w = 1; w <= totWeeks; w++) {
+                    for (let s = 1; s <= 7; s++) {
+                        if (localStorage.getItem(`subj_star_${saveKey}_w${w}_s${s}`) === '1' || w < curWeek || (w === curWeek && s < curSubj)) {
+                            earned++;
+                        }
+                    }
+                }
+                const curCyc = Math.ceil(curWeek / 28);
+                const offset = (curCyc - 1) * 28;
+                for (let i = 1; i <= 28; i++) {
+                    const gw = offset + i;
+                    let stCnt = 0;
+                    for (let s = 1; s <= 7; s++) {
+                        if (localStorage.getItem(`subj_star_${saveKey}_w${gw}_s${s}`) === '1' || gw < curWeek || (gw === curWeek && s < curSubj)) stCnt++;
+                    }
+                    cycleUnitStates.push({
+                        letter: ABJAD[i - 1],
+                        state: gw < curWeek || stCnt === 7 ? 'done' : (gw === curWeek ? 'current' : 'locked'),
+                        sub: `⭐${stCnt}/7`
+                    });
+                }
+                pct = Math.min(100, Math.round((earned / maxTotal) * 100));
+                scoreLabel = `⭐ ${earned} / ${maxTotal} (${pct}%)`;
+            } else {
+                const totCyc = S3_CYCLES[yr] || 5;
+                const totWeeks = totCyc * 28;
+                const major = parseInt(localStorage.getItem('s3_committed_major_seal') || '2', 10) || 2;
+                let majDone = 0, minDone = 0;
+                curWeek = totWeeks;
+                let foundFirstUnfinished = false;
+                for (let w = 1; w <= totWeeks; w++) {
+                    const mStar = localStorage.getItem(`s3_star_y${yr}_w${w}_s${major}`) === '1';
+                    if (!mStar && !foundFirstUnfinished) { curWeek = w; foundFirstUnfinished = true; }
+                    if (mStar) majDone++;
+                    for (let s = 1; s <= 7; s++) {
+                        if (s !== major && localStorage.getItem(`s3_star_y${yr}_w${w}_s${s}`) === '1') minDone++;
+                    }
+                }
+                const majPts = +((majDone / totWeeks) * 70).toFixed(1);
+                const minPts = +((minDone / (totWeeks * 6)) * 30).toFixed(1);
+                const totPts = +(majPts + minPts).toFixed(1);
+                pct = Math.min(100, Math.round(totPts));
+                scoreLabel = `⚖️ ${totPts} / 100 (تخصص ${majPts}/70)`;
+                const curCyc = Math.ceil(curWeek / 28);
+                const offset = (curCyc - 1) * 28;
+                for (let i = 1; i <= 28; i++) {
+                    const gw = offset + i;
+                    const mDone = localStorage.getItem(`s3_star_y${yr}_w${gw}_s${major}`) === '1';
+                    cycleUnitStates.push({
+                        letter: ABJAD[i - 1],
+                        state: mDone ? 'done' : (gw === curWeek ? 'current' : 'locked'),
+                        sub: mDone ? '👑⭐' : (gw === curWeek ? '📍' : '🔒')
+                    });
+                }
+            }
+
+            if (pct >= 100) stu.completed = true;
+            stu.stats = { curWeek, curSubj, pct, scoreLabel };
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            return { yr, stg, curWeek, curSubj, pct, scoreLabel, cycleUnitStates };
+        }
+
+        function populateSchoolDropdown() {
+            const sel = document.getElementById('stu-school-selector');
+            if (!sel) return;
+            const blocked = JSON.parse(localStorage.getItem('blocked_schools_list') || '[]');
+            const schools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]')
+                .filter(s => !blocked.includes(s.id));
+            schools.forEach(sc => {
+                if (!sel.querySelector(`option[value="${sc.id}"]`)) {
+                    const o = document.createElement('option');
+                    o.value = sc.id;
+                    o.textContent = `🌟 ${sc.name} (المعلم: ${sc.owner})`;
+                    sel.appendChild(o);
+                }
+            });
+            sel.value = stu.schoolBranch || 'main';
+        }
+
+        window.changeStudentSchool = function(branchId) {
+            stu.schoolBranch = branchId || 'main';
+            localStorage.setItem('selected_school_branch', stu.schoolBranch);
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            renderDashboard();
+            showToast('✅ تم تحديث المدرسة المرتبطة بحسابك.');
+        };
+
+        window.importTeacherSchoolForStudent = function(ev) {
+            const file = ev.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data?.schoolMeta?.id) { showToast('❌ ملف المدرسة غير صالح.'); return; }
+                    const inc = data.schoolMeta;
+                    const allSchools = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                    const idx = allSchools.findIndex(s => s.id === inc.id);
+                    if (idx >= 0) allSchools[idx] = { ...allSchools[idx], ...inc }; else allSchools.push(inc);
+                    localStorage.setItem('private_schools_directory', JSON.stringify(allSchools));
+                    if (data.lessonsByYear) {
+                        Object.keys(data.lessonsByYear).forEach(y => {
+                            localStorage.setItem(`custom_curriculum_edits_${inc.id}_y${y}`, data.lessonsByYear[y]);
+                        });
+                    }
+                    stu.schoolBranch = inc.id;
+                    localStorage.setItem('selected_school_branch', inc.id);
+                    accounts[activeUser] = stu;
+                    localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+                    populateSchoolDropdown();
+                    renderDashboard();
+                    showToast(`✅ تمت إضافة وربط مدرسة (${inc.name}) بحسابك!`);
+                } catch (_) {
+                    showToast('❌ تعذر قراءة ملف JSON.');
+                } finally {
+                    ev.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // إطلاق الدرس مباشرة بدون شاشة بدء مكررة
+        window.launchStudentLesson = function() {
+            const yr = parseInt(stu.assignedYear, 10) || 1;
+            const stg = Math.ceil(yr / 7);
+            const branch = stu.schoolBranch || 'main';
+            stu.lastVisitStatus = 'studying';
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            localStorage.setItem('selected_school_year', String(yr));
+            localStorage.setItem('selected_stage_group', String(stg));
+            localStorage.setItem('selected_school_branch', branch);
+            localStorage.setItem('school_edit_mode', 'false');
+
+            const targetFile = stg === 1 ? 'stage1.html' : (stg === 2 ? 'stage2.html' : 'stage3.html');
+            window.location.href = `${targetFile}?stage=${stg}&year=${yr}&school=${encodeURIComponent(branch)}&autostart=1`;
+        };
+
+        window.promoteToNextClass = function() {
+            const curY = parseInt(stu.assignedYear, 10) || 1;
+            if (curY >= 21) {
+                showToast('🌟 مبارك! لقد أتممت السنوات الـ 21 كاملة في مدرسة العلم!');
+                return;
+            }
+            if (!Array.isArray(stu.completedYears)) stu.completedYears = [];
+            if (!stu.completedYears.includes(curY)) stu.completedYears.push(curY);
+            stu.assignedYear = curY + 1;
+            stu.completed = false;
+            localStorage.setItem('selected_school_year', String(stu.assignedYear));
+            localStorage.setItem('selected_stage_group', String(Math.ceil(stu.assignedYear / 7)));
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            renderDashboard();
+            pushStudentProfileToCloud();
+            showToast(`🎉 مبارك الترقية! أنت الآن في السنة (${stu.assignedYear}).`);
+        };
+
+        // نظام الجرس والإشعارات
+        let alarmTimeoutId = null;
+        function scheduleAlarmTimer(timeStr) {
+            clearTimeout(alarmTimeoutId);
+            if (!stu.reminderEnabled || !timeStr || !timeStr.includes(':')) return;
+            const [hh, mm] = timeStr.split(':').map(n => parseInt(n, 10));
+            if (isNaN(hh) || isNaN(mm)) return;
+            const now = new Date();
+            const target = new Date();
+            target.setHours(hh, mm, 0, 0);
+            if (target <= now) target.setDate(target.getDate() + 1);
+            const ms = target.getTime() - now.getTime();
+            alarmTimeoutId = setTimeout(() => {
+                triggerBrowserNotification(
+                    `مدرسة العلم — حان موعد درسك يا ${stu.name}! 🌟`,
+                    `اضغط هنا لفتح بوابتك والضغط على زر البدء لدرسك الجديد.`
+                );
+                scheduleAlarmTimer(timeStr);
+            }, ms);
+        }
+
+        function triggerBrowserNotification(title, body) {
+            try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistration().then(reg => {
+                            if (reg && reg.showNotification) {
+                                reg.showNotification(title, { body, icon: 'icon-512.png', data: { url: 'student.html' } });
+                            } else {
+                                const n = new Notification(title, { body, icon: 'icon-512.png' });
+                                n.onclick = () => { window.focus(); window.location.href = 'student.html'; };
+                            }
+                        }).catch(() => {
+                            const n = new Notification(title, { body });
+                            n.onclick = () => { window.focus(); window.location.href = 'student.html'; };
+                        });
+                    } else {
+                        const n = new Notification(title, { body });
+                        n.onclick = () => { window.focus(); window.location.href = 'student.html'; };
+                    }
+                }
+            } catch (_) {}
+        }
+
+        function updateAlarmBannerUI() {
+            const banner = document.getElementById('alarm-status-banner');
+            const inp = document.getElementById('stu-alarm-time');
+            if (stu.reminderTime && inp) inp.value = stu.reminderTime;
+            if (stu.reminderEnabled && stu.reminderTime) {
+                banner.innerHTML = `✅ الجرس مفعّل يومياً على الساعة (<strong>${stu.reminderTime}</strong>) — معلمك يقول لك: إلى اللقاء، نحن بالانتظار في الموعد! 🌟`;
+                banner.style.background = '#064e3b';
+            } else {
+                banner.innerHTML = `🔕 الجرس غير مفعّل حالياً — اختر الساعة المناسبة لك واضغط «تفعيل الجرس وموافق».`;
+                banner.style.background = '#334155';
+            }
+        }
+
+        window.saveAndArmStudentAlarm = function() {
+            const tVal = document.getElementById('stu-alarm-time').value || '08:30';
+            stu.reminderTime = tVal;
+            stu.reminderEnabled = true;
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            updateAlarmBannerUI();
+
+            const finalize = () => {
+                scheduleAlarmTimer(tVal);
+                triggerBrowserNotification(
+                    `تم ضبط منبّه الدرس (${tVal}) 🔔`,
+                    `أحسنت يا ${stu.name}! سنكون بانتظارك الساعة ${tVal} لبدء درسك القادم.`
+                );
+                pushStudentProfileToCloud();
+                showToast(`🔔 تم ضبط جرس الدراسة على الساعة (${tVal}) بنجاح!`);
+            };
+
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(finalize).catch(finalize);
+            } else {
+                finalize();
+            }
+        };
+
+        window.testNotificationNow = function() {
+            const fire = () => {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    triggerBrowserNotification(
+                        `رسالة من معلمك في مدرسة العلم 🌟`,
+                        `أهلاً بك يا ${stu.name}! اضغط زر البدء عندما تكون مستعداً.`
+                    );
+                    showToast('📨 تم إرسال إشعار تجريبي لجهازك!');
+                } else {
+                    showToast('⚠️ يرجى السماح بالإشعارات في متصفحك لتصلك التنبيهات.');
+                }
+            };
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(fire).catch(fire);
+            } else {
+                fire();
+            }
+        };
+
+        window.disableStudentAlarm = function() {
+            stu.reminderEnabled = false;
+            clearTimeout(alarmTimeoutId);
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            updateAlarmBannerUI();
+            showToast('🔕 تم إيقاف جرس التذكير.');
+        };
+
+        // حفظ وتنزيل بطاقة التلميذ وكود المزامنة
+        window.downloadStudentRecordCard = function() {
+            computeStudentLiveMetrics();
+            const blob = new Blob([JSON.stringify(stu, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${stu.username}-student-record.json`;
+            a.click();
+            showToast('💾 تم تنزيل بطاقة سجلّك وتقدمك بنجاح!');
+        };
+
+        window.copyQuickSyncCode = async function() {
+            computeStudentLiveMetrics();
+            try {
+                const code = 'AL3LM:' + btoa(unescape(encodeURIComponent(JSON.stringify(stu))));
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(code);
+                    showToast('📋 تم نسخ كود المزامنة السريع! الصقه في أي جهاز آخر لفتح تقدمك فوراً.');
+                } else {
+                    prompt('انسخ كود المزامنة السريع التالي:', code);
+                }
+            } catch (_) {
+                showToast('استخدم زر تنزيل بطاقة السجل (.json) لنقل بياناتك.');
+            }
+        };
+
+        window.syncRecordToCloudNow = async function() {
+            computeStudentLiveMetrics();
+            const jwt = localStorage.getItem('platform_pinata_jwt') || '';
+            if (!jwt || !navigator.onLine) {
+                showToast('💾 تم الحفظ محلياً! للفتح على جهاز آخر استخدم «تنزيل بطاقة سجلّي» أو «نسخ كود المزامنة».');
+                return;
+            }
+            try {
+                const res = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
+                    body: JSON.stringify({
+                        pinataMetadata: {
+                            name: `3lm_stu_${stu.username}`,
+                            keyvalues: { app: '3lm_student_profile', username: stu.username }
+                        },
+                        pinataContent: stu
+                    })
+                });
+                if (res.ok) showToast('☁️ تمت المزامنة السحابية لحسابك وعلاماتك بنجاح!');
+                else showToast('⚠️ تعذر الاتصال السحابي، استخدم بطاقة السجل أو كود المزامنة.');
+            } catch (_) {
+                showToast('⚠️ تعذر الاتصال السحابي، استخدم بطاقة السجل أو كود المزامنة.');
+            }
+        };
+
+        function renderDashboard() {
+            const m = computeStudentLiveMetrics();
+            document.body.className = `theme-stage-${m.stg}`;
+
+            document.getElementById('nav-student-title').textContent = `بوابة التلميذ — ${stu.name}`;
+            document.getElementById('hero-stage-chip').textContent = `${STAGE_NAMES[m.stg]} • السنة ${m.yr}`;
+
+            const params = new URLSearchParams(window.location.search);
+            const isWrapUp = params.get('wrapup') === '1' || stu.lastVisitStatus === 'wrapup';
+            const wrapBanner = document.getElementById('wrapup-banner');
+            if (isWrapUp) {
+                wrapBanner.classList.add('show');
+                document.getElementById('wrapup-score-pill').textContent = `علامتك: ${stu.lastScore || m.scoreLabel}`;
+                document.getElementById('hero-greeting').textContent = `أحسنت يا ${stu.name}! بارك الله في همّتك`;
+                document.getElementById('hero-lesson-desc').textContent = `المحطة القادمة جاهزة لك: حرف (${ABJAD[(m.curWeek - 1) % 28]}) — الوحدة (${m.curWeek})`;
+                stu.lastVisitStatus = 'ready_return';
+                accounts[activeUser] = stu;
+                localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            } else {
+                wrapBanner.classList.remove('show');
+                document.getElementById('hero-greeting').textContent =
+                    stu.lastVisitStatus === 'ready_return'
+                        ? `أهلاً بعودتك يا ${stu.name}! نحن بانتظارك 🌟`
+                        : `مرحباً بك يا ${stu.name} في رحلة العلم 🌟`;
+                document.getElementById('hero-lesson-desc').textContent =
+                    `درسك الحالي: حرف (${ABJAD[(m.curWeek - 1) % 28]}) — الوحدة (${m.curWeek}) • الختم (${m.curSubj} من 7)`;
+            }
+
+            document.getElementById('st-name-val').textContent = `${stu.name} (@${stu.username})`;
+            document.getElementById('st-class-val').textContent = `${STAGE_NAMES[m.stg]} — السنة ${m.yr}`;
+            document.getElementById('st-unit-val').textContent = `حرف (${ABJAD[(m.curWeek - 1) % 28]}) • وحدة ${m.curWeek}`;
+            document.getElementById('st-score-val').textContent = m.scoreLabel;
+
+            document.getElementById('st-pct-label').textContent = `${m.pct}%`;
+            document.getElementById('st-pct-fill').style.width = `${m.pct}%`;
+
+            const promBtn = document.getElementById('promote-next-year-btn');
+            const lockNote = document.getElementById('st-class-lock-note');
+            if (stu.completed || m.pct >= 100) {
+                promBtn.style.display = 'inline-block';
+                lockNote.textContent = '🎉 لقد أتممت متطلبات هذا الصف بالكامل! يمكنك الآن الترقية إلى الصف التالي.';
+            } else {
+                promBtn.style.display = 'none';
+            }
+
+            // شبكة الـ 28 حرفاً
+            const grid = document.getElementById('stu-abjad-grid');
+            grid.innerHTML = '';
+            m.cycleUnitStates.forEach(item => {
+                const d = document.createElement('div');
+                d.className = `abjad-mini-cell ${item.state}`;
+                d.innerHTML = `<span class="ltr">${item.letter}</span><span class="st">${item.sub}</span>`;
+                grid.appendChild(d);
+            });
+
+            // سجل الدروس المنجزة
+            const histEl = document.getElementById('stu-history-list');
+            const hist = Array.isArray(stu.lessonHistory) ? stu.lessonHistory : [];
+            if (hist.length === 0) {
+                histEl.innerHTML = `<div class="history-row" style="justify-content:center; color:#64748b;">ابدأ درسك الأول لتُحفظ إنجازاتك وعلاماتك اليومية هنا 🌟</div>`;
+            } else {
+                histEl.innerHTML = hist.slice().reverse().slice(0, 20).map(h => `
+                    <div class="history-row">
+                        <span>📘 ${h.title || ('وحدة حرف ' + (h.letter || ''))} (السنة ${h.year || m.yr})</span>
+                        <span style="color:#b45309;">${h.score || 'مكتمل ⭐'}</span>
+                        <span style="color:#64748b; font-size:0.76rem; direction:ltr;">${h.date || ''}</span>
+                    </div>
+                `).join('');
+            }
+
+            updateAlarmBannerUI();
+            if (stu.reminderEnabled && stu.reminderTime) {
+                scheduleAlarmTimer(stu.reminderTime);
+            }
+        }
+
+        populateSchoolDropdown();
+        renderDashboard();
+        pullLatestStudentFromCloudOnOpen();
+        pushStudentProfileToCloud();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+    })();
+    </script>
+</body>
+</html>

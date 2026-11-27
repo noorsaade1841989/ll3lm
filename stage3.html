@@ -1152,7 +1152,7 @@
 
     <!-- ١. الشريط العلوي الموحد (العودة المباشرة الفورية إلى index.html) -->
     <header class="top-bar">
-        <a href="index.html" class="hdr-capsule" id="home-identity-capsule" title="العودة المباشرة إلى الصفحة الرئيسية">
+        <a href="student.html" class="hdr-capsule" id="home-identity-capsule" title="العودة المباشرة إلى البوابة">
             <span class="school-emblem" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 3L2 8l10 5 10-5-10-5zm-7 7.5v5.2c0 1.8 3.1 3.3 7 3.3s7-1.5 7-3.3v-5.2l-7 3.5-7-3.5z"/></svg>
             </span>
@@ -1237,6 +1237,7 @@
                 </div>
 
                 <div class="media-controls-cluster" id="station-media-bar">
+                    <button type="button" class="icon-ctrl-btn glass-audio-btn" id="s3-read-aloud-btn" title="قراءة النص صوتياً">🔊</button>
                     <button type="button" class="icon-ctrl-btn" id="slide-prev-btn" title="الشريحة السابقة">▶</button>
                     <span class="slide-counter-badge" id="slide-counter-badge">١ / ١</span>
                     <button type="button" class="icon-ctrl-btn" id="slide-next-btn" title="الشريحة التالية">◀</button>
@@ -2706,11 +2707,18 @@ window.Stage3LabEngine = (function() {
 
         if (activeSeal === major || hasSealStar(activeYear, playWeek, major)) {
             const meta = getLessonMeta(activeYear, playWeek);
-            document.getElementById('complete-modal-title').textContent = `أَتْمَمْتَ خَتْمَ مَادَّتِكَ الأَسَاسِيَّةِ فِي وَحْدَةِ (${meta.rawLtr})!`;
-            document.getElementById('complete-stars-row').textContent = '👑⭐';
-            document.getElementById('complete-modal-summary').textContent =
-                `رَصِيدُ التَّخَصُّصِ: ${toAr(sc.majorPoints)} / ٧٠ — المُعَدَّلُ الكُلِّيُّ: ${toAr(sc.totalPoints)} / ١٠٠`;
-            document.getElementById('lesson-complete-modal').classList.add('open');
+            const scoreStr = `التخصص ${toAr(sc.majorPoints)}/٧٠ — المعدل ${toAr(sc.totalPoints)}/١٠٠`;
+            const host = document.getElementById('station-body-host');
+            if (typeof window.recordUnitCompletionAndExitToStudentPortal === 'function' && host) {
+                window.recordUnitCompletionAndExitToStudentPortal(host, {
+                    year: activeYear,
+                    week: playWeek,
+                    letter: meta.rawLtr,
+                    title: `وحدة حرف (${meta.rawLtr}) — التخصص`,
+                    score: scoreStr
+                });
+                return;
+            }
         } else {
             showToast(`تَمَّتْ إِضَافَةُ دَرَجَةِ الثَّقَافَةِ العَامَّةِ! المُعَدَّلُ: ${toAr(sc.totalPoints)}٪`);
             activeSeal = major;
@@ -2943,6 +2951,21 @@ window.Stage3LabEngine = (function() {
 
     document.getElementById('corner-next-btn').onclick = handleCornerButtonAction;
 
+    const s3ReadBtn = document.getElementById('s3-read-aloud-btn');
+    if (s3ReadBtn) {
+        s3ReadBtn.onclick = () => {
+            const host = document.getElementById('station-body-host');
+            const rawTxt = host ? host.innerText.trim() : '';
+            if (!rawTxt || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(rawTxt);
+            u.lang = 'ar-SA';
+            u.rate = 0.9;
+            window.speechSynthesis.speak(u);
+        };
+    }
+
+
     if (!checkAndRenderOnboardingGate()) {
         activeSeal = getMajorSeal();
         playWeek = getMaxUnlockedWeek(activeYear);
@@ -2951,5 +2974,247 @@ window.Stage3LabEngine = (function() {
     }
 })();
     </script>
+
+<style>
+.al3lm-tts-stop-btn {
+    background: #fff1f2 !important;
+    border: 2px solid #fb7185 !important;
+    color: #be123c !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    font-size: 0.95rem !important;
+    font-weight: 900 !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.16s ease, background 0.16s ease;
+}
+.al3lm-tts-stop-btn:hover { transform: scale(1.08); background: #ffe4e6 !important; }
+.al3lm-exit-portal-card {
+    width: min(94%, 580px);
+    margin: 24px auto;
+    padding: 26px 22px;
+    border-radius: 28px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(236,253,245,0.96));
+    border: 3.5px solid #eab308;
+    box-shadow: 0 22px 55px rgba(0,0,0,0.38);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    color: #0f172a;
+}
+.al3lm-exit-btn {
+    padding: 11px 24px;
+    border-radius: 999px;
+    border: 2.5px solid #fde047;
+    background: linear-gradient(135deg, #059669, #064e3b);
+    color: #fef08a;
+    font-family: inherit;
+    font-size: 0.98rem;
+    font-weight: 900;
+    cursor: pointer;
+    text-decoration: none;
+}
+</style>
+<script>
+(function initAl3lmStagePortalBridge() {
+    const params = new URLSearchParams(window.location.search);
+    const isTeacher = (params.get('from') === 'teachers') || (localStorage.getItem('al3lm_active_role') === 'teacher');
+    const stageKey = document.title.includes('صَاحِب') || window.location.pathname.includes('stage3') ? 'stage3'
+                   : (document.title.includes('عبد') || window.location.pathname.includes('stage2') ? 'stage2' : 'stage1');
+
+    // 1. Default TTS OFF in stage2 and stage3 unless explicitly turned on ('true')
+    if (stageKey === 'stage2' || stageKey === 'stage3') {
+        if (localStorage.getItem('tts_enabled_state') === null) {
+            localStorage.setItem('tts_enabled_state', 'false');
+        }
+        if (localStorage.getItem('tts_enabled_state') !== 'true') {
+            window.isTTSActive = false;
+            if (typeof updateTTSButtonUI === 'function') {
+                try { updateTTSButtonUI(); } catch (_) {}
+            }
+        }
+    }
+
+    // 2. Stop All Audio helper + dedicated Stop button (⏹)
+    window.stopAllAl3lmAudio = function() {
+        try { if (typeof window._stopActiveSlideAutoAndLine === 'function') window._stopActiveSlideAutoAndLine(); } catch (_) {}
+        try { if (typeof stopAllSpeech === 'function') stopAllSpeech(); } catch (_) {}
+        try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (_) {}
+        try {
+            const ca = document.getElementById('custom-audio');
+            if (ca) { ca.pause(); ca.currentTime = 0; }
+        } catch (_) {}
+        window._isSpeakingMainQuestion = false;
+        window._questionReadCompleted = true;
+    };
+
+    function ensureStopButtonBeside(replayEl) {
+        if (!replayEl || !replayEl.parentElement) return;
+        const next = replayEl.nextElementSibling;
+        if (next && next.classList && next.classList.contains('al3lm-tts-stop-btn')) return;
+        const stopBtn = document.createElement('button');
+        stopBtn.type = 'button';
+        stopBtn.className = 'al3lm-tts-stop-btn';
+        stopBtn.title = 'إيقاف القارئ الآلي';
+        stopBtn.setAttribute('aria-label', 'إيقاف القارئ الآلي');
+        stopBtn.innerHTML = '⏹';
+        stopBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.stopAllAl3lmAudio();
+        };
+        replayEl.insertAdjacentElement('afterend', stopBtn);
+    }
+
+    function scanAndInjectStopButtons() {
+        document.querySelectorAll('.glass-audio-btn, .tutor-speak-mini').forEach(ensureStopButtonBeside);
+        const tutorBox = document.getElementById('embedded-tutor-box');
+        if (tutorBox && !tutorBox.querySelector('.al3lm-tutor-top-stop')) {
+            const hdr = tutorBox.querySelector('.embedded-tutor-hdr');
+            if (hdr) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'al3lm-tts-stop-btn al3lm-tutor-top-stop';
+                b.title = 'إيقاف القارئ الآلي';
+                b.innerHTML = '⏹';
+                b.onclick = function(e) { e.preventDefault(); e.stopPropagation(); window.stopAllAl3lmAudio(); };
+                hdr.appendChild(b);
+            }
+        }
+    }
+
+    // 3. Sync active student's progress snapshot into al3lm_student_accounts_v1
+    window.syncAl3lmStudentProgressSnapshot = function(unitDoneMeta) {
+        if (isTeacher) return;
+        try {
+            const activeUser = localStorage.getItem('al3lm_active_student_user');
+            if (!activeUser) return;
+            const accounts = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+            if (!accounts[activeUser]) return;
+            const stu = accounts[activeUser];
+            const snap = stu.progress || {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (!k) continue;
+                if (k.startsWith('student_week_') || k.startsWith('student_subj_') || k.startsWith('subj_star_') || k.startsWith('subj_score_') || k.startsWith('subj_coins_') || k.startsWith('seal_done_') || k.startsWith('gift_diamond_') || k.startsWith('s3_')) {
+                    snap[k] = localStorage.getItem(k);
+                }
+            }
+            stu.progress = snap;
+            if (unitDoneMeta) {
+                stu.lastScore = unitDoneMeta.score || stu.lastScore || '';
+                stu.lastVisitStatus = 'wrapup';
+                if (!Array.isArray(stu.lessonHistory)) stu.lessonHistory = [];
+                const nowStr = new Date().toLocaleDateString('ar-EG') + ' ' + new Date().toTimeString().slice(0, 5);
+                stu.lessonHistory.push({
+                    date: nowStr,
+                    year: unitDoneMeta.year || stu.assignedYear || 1,
+                    week: unitDoneMeta.week || 1,
+                    letter: unitDoneMeta.letter || '',
+                    title: unitDoneMeta.title || '',
+                    score: unitDoneMeta.score || ''
+                });
+            }
+            accounts[activeUser] = stu;
+            localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+            if (navigator.onLine && stu.username && stu.pwHash) {
+                const syncUrl = localStorage.getItem('al3lm_sync_api_url') || localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+                fetch(syncUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'sync_student', username: stu.username, pwHash: stu.pwHash, profile: stu }),
+                    keepalive: true
+                }).catch(() => {});
+            }
+        } catch (_) {}
+    };
+
+    window.addEventListener('beforeunload', () => {
+        window.syncAl3lmStudentProgressSnapshot();
+    });
+
+    // 4. End-of-lesson transition back to student.html?wrapup=1 (or teacher continuation)
+    window.recordUnitCompletionAndExitToStudentPortal = function(hostEl, meta) {
+        window.stopAllAl3lmAudio();
+        window.syncAl3lmStudentProgressSnapshot(meta);
+
+        if (isTeacher) {
+            if (!hostEl) return;
+            hostEl.innerHTML = `
+                <div class="al3lm-exit-portal-card">
+                    <div style="font-size:2.6rem;">🏆🌟</div>
+                    <h2 style="color:#064e3b;font-weight:900;">اكتملت معاينة هذه الوحدة (${meta.score || ''})</h2>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                        <a href="teachers.html" class="al3lm-exit-btn">🏫 العودة إلى بوابة المعلمين</a>
+                        <button type="button" class="al3lm-exit-btn" style="background:#0f172a;" onclick="location.reload()">⬅ متابعة المعاينة</button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        if (hostEl) {
+            hostEl.innerHTML = `
+                <div class="al3lm-exit-portal-card">
+                    <div style="font-size:3rem;line-height:1;">🌟🏆</div>
+                    <h2 style="color:#064e3b;font-size:1.45rem;font-weight:900;">مُبَارَكٌ! أَتْمَمْتَ دَرْسَ اليَوْمِ بِنَجَاحٍ!</h2>
+                    <div style="background:#fef9c3;border:2px solid #eab308;color:#713f12;padding:6px 18px;border-radius:999px;font-weight:900;font-size:1.1rem;">
+                        عَلَامَتُكَ: ${meta.score || 'مكتمل ⭐'}
+                    </div>
+                    <p style="font-weight:800;color:#334155;font-size:0.95rem;">جاري تسجيل علامتك والانتقال إلى بوابتك الشخصية لضبط منبّه الدرس القادم...</p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                        ${meta.extraExamBtn ? `<button type="button" class="al3lm-exit-btn" id="al3lm-cyc-exam-trigger" style="background:#b45309;">${meta.extraExamBtn.label}</button>` : ''}
+                        <a href="student.html?wrapup=1" class="al3lm-exit-btn">🏠 الانتقال إلى بوابتي وسجل علاماتي ⬅</a>
+                    </div>
+                </div>
+            `;
+            if (meta.extraExamBtn) {
+                const exB = hostEl.querySelector('#al3lm-cyc-exam-trigger');
+                if (exB) exB.onclick = () => { clearTimeout(window._al3lmAutoRedirectTmr); meta.extraExamBtn.onClick(); };
+            }
+        }
+
+        if (!meta.extraExamBtn) {
+            window._al3lmAutoRedirectTmr = setTimeout(() => {
+                window.location.href = 'student.html?wrapup=1';
+            }, 2200);
+        }
+    };
+
+    // 5. Wire top identity capsule link & auto-start when arriving from student.html or teachers.html
+    document.addEventListener('DOMContentLoaded', () => {
+        const mo = new MutationObserver(scanAndInjectStopButtons);
+        mo.observe(document.body, { childList: true, subtree: true });
+        scanAndInjectStopButtons();
+
+        const homeLink = document.getElementById('header-year-badge') || document.getElementById('home-identity-capsule');
+        if (homeLink) {
+            homeLink.href = isTeacher ? 'teachers.html' : 'student.html';
+            homeLink.title = isTeacher ? 'العودة إلى بوابة المعلمين' : 'العودة إلى بوابة التلميذ وسجل العلامات';
+            homeLink.addEventListener('click', () => {
+                window.stopAllAl3lmAudio();
+                window.syncAl3lmStudentProgressSnapshot();
+            });
+        }
+
+        // Auto-bypass internal #welcome-screen when launched from student.html (?autostart=1) or teachers.html
+        const shouldAutoStart = (params.get('autostart') === '1') || isTeacher || Boolean(localStorage.getItem('al3lm_active_student_user'));
+        const ws = document.getElementById('welcome-screen');
+        if (ws && shouldAutoStart) {
+            ws.style.display = 'none';
+            if (typeof startLesson === 'function') {
+                try { startLesson(); } catch (_) {}
+            }
+        }
+    });
+})();
+</script>
+
 </body>
 </html>
