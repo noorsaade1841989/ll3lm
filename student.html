@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v10';
+            var VER = 'al3lm_layout_v11';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -78,53 +78,124 @@
 
         .top-nav {
             width: 100%;
-            padding: 10px 16px;
-            background: rgba(6, 24, 19, 0.88);
+            padding: 9px 16px;
+            background: rgba(6, 24, 19, 0.92);
             backdrop-filter: blur(14px);
             border-bottom: 2px solid rgba(250, 204, 21, 0.45);
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             gap: 10px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             position: sticky;
             top: 0;
-            z-index: 500;
+            z-index: 900;
         }
-        .nav-brand {
+        .brand-menu-anchor {
+            position: relative;
             display: inline-flex;
             align-items: center;
-            gap: 9px;
+            gap: 10px;
+            max-width: 100%;
+            min-width: 0;
+        }
+        .logo-circle-trigger {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2.2px solid #fde047;
+            background: #064e3b;
+            padding: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.38);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+        .logo-circle-trigger:hover,
+        .logo-circle-trigger.menu-open {
+            transform: scale(1.07);
+            box-shadow: 0 0 0 3px rgba(253, 224, 71, 0.35), 0 6px 16px rgba(0,0,0,0.45);
+        }
+        .logo-circle-trigger img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .nav-student-title-txt {
             color: #fef08a;
             font-weight: 900;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 2.4vmin, 1.05rem);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
         }
-        .nav-brand img {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: 2px solid #fde047;
-        }
+        /* كبسولات القائمة المخفية: تظهر بجانب دائرة الأيقونة في صف واحد متجاور دون أي تراكب، وتنزل كقائمة عمودية في الشاشات الصغيرة جداً */
         .nav-actions {
-            display: inline-flex;
+            display: none;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 7px;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+        .nav-actions.open {
+            display: inline-flex;
+            animation: trayFadeIn 0.2s ease forwards;
+        }
+        @keyframes trayFadeIn {
+            from { opacity: 0; transform: translateX(8px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         .nav-pill-btn {
-            padding: 6px 14px;
+            padding: 6px 13px;
             border-radius: 999px;
-            border: 1.5px solid rgba(253, 224, 71, 0.6);
-            background: rgba(255, 255, 255, 0.12);
+            border: 1.5px solid rgba(253, 224, 71, 0.65);
+            background: rgba(15, 23, 42, 0.92);
             color: #ffffff;
             font-family: inherit;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 800;
             cursor: pointer;
             text-decoration: none;
             transition: 0.18s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
-        .nav-pill-btn:hover { background: rgba(255, 255, 255, 0.24); }
+        .nav-pill-btn:hover { background: #065f46; border-color: #fde047; }
+
+        /* عندما تكون الشاشة صغيرة جداً: تنزل الكبسولات بشكل قائمة عمودية مرتبة أسفل دائرة الشعار دون تداخل إطلاقاً */
+        @media (max-width: 640px) {
+            .nav-actions.open {
+                position: absolute;
+                top: calc(100% + 10px);
+                right: 0;
+                flex-direction: column;
+                align-items: stretch;
+                background: rgba(6, 28, 22, 0.98);
+                border: 2px solid #eab308;
+                border-radius: 20px;
+                padding: 10px;
+                gap: 7px;
+                min-width: 195px;
+                box-shadow: 0 16px 38px rgba(0,0,0,0.65);
+                z-index: 1500;
+            }
+            .nav-actions.open .nav-pill-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 8px 14px;
+                font-size: 0.82rem;
+            }
+        }
 
         .page-container {
             max-width: 960px;
@@ -408,15 +479,18 @@
 </head>
 <body>
     <nav class="top-nav">
-        <div class="nav-brand">
-            <img src="icon-512.png" onerror="this.src='cc.ico'" alt="العلم">
-            <span id="nav-student-title">بوابة التلميذ</span>
-        </div>
-        <div class="nav-actions">
-            <button type="button" class="nav-pill-btn al3lm-orient-cycle-btn compact-orient" onclick="cycleAl3lmOrientation()">🔄 حر</button>
-            <button type="button" class="nav-pill-btn hide-in-pwa" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
-            <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب</a>
-            <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 خروج</a>
+        <div class="brand-menu-anchor" id="stu-brand-menu-anchor">
+            <button type="button" class="logo-circle-trigger" id="stu-logo-menu-btn" onclick="toggleStudentLogoMenu(event)" title="اضغط لإظهار أو إخفاء خيارات الحساب والتطبيق" aria-expanded="false">
+                <img src="icon-512.png" onerror="this.src='icon-192.png'" alt="شعار مدرسة العلم">
+            </button>
+            <span class="nav-student-title-txt" id="nav-student-title" onclick="toggleStudentLogoMenu(event)" title="اضغط لفتح قائمة الحساب">بوابة التلميذ</span>
+
+            <div class="nav-actions" id="stu-logo-capsules-menu">
+                <button type="button" class="nav-pill-btn al3lm-orient-cycle-btn compact-orient" onclick="cycleAl3lmOrientation()">🔄 حر</button>
+                <button type="button" class="nav-pill-btn hide-in-pwa" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
+                <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب</a>
+                <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 خروج</a>
+            </div>
         </div>
     </nav>
 
@@ -462,7 +536,8 @@
             <div class="alarm-controls-row">
                 <input type="time" id="stu-alarm-time" class="alarm-time-input" value="08:30">
                 <button type="button" class="action-pill-btn" onclick="saveAndArmStudentAlarm()">🔔 تفعيل الجرس وموافق</button>
-                <button type="button" class="action-pill-btn secondary" onclick="testNotificationNow()">📨 تجربة الإشعار الآن</button>
+                <button type="button" class="action-pill-btn secondary" onclick="testNotificationNow()">🔔 تجربة رنين الجرس والإشعار</button>
+                <button type="button" class="action-pill-btn secondary" onclick="addPhoneSystemAlarmICS()" title="لتنبيهك حتى لو أغلقت المتصفح بالكامل على الهاتف">📱 تثبيت في منبّه تقويم الهاتف</button>
                 <button type="button" class="action-pill-btn secondary" onclick="disableStudentAlarm()">🔕 إيقاف الجرس</button>
             </div>
             <div class="alarm-status-banner" id="alarm-status-banner">
@@ -854,54 +929,174 @@
             showToast(`🎉 مبارك الترقية! أنت الآن في السنة (${stu.assignedYear}).`);
         };
 
-        // نظام الجرس والإشعارات
-        let alarmTimeoutId = null;
-        function scheduleAlarmTimer(timeStr) {
-            clearTimeout(alarmTimeoutId);
-            if (!stu.reminderEnabled || !timeStr || !timeStr.includes(':')) return;
-            const [hh, mm] = timeStr.split(':').map(n => parseInt(n, 10));
-            if (isNaN(hh) || isNaN(mm)) return;
-            const now = new Date();
-            const target = new Date();
-            target.setHours(hh, mm, 0, 0);
-            if (target <= now) target.setDate(target.getDate() + 1);
-            const ms = target.getTime() - now.getTime();
-            alarmTimeoutId = setTimeout(() => {
-                triggerBrowserNotification(
-                    `مدرسة العلم — حان موعد درسك يا ${stu.name}! 🌟`,
-                    `اضغط هنا لفتح بوابتك والضغط على زر البدء لدرسك الجديد.`
-                );
-                scheduleAlarmTimer(timeStr);
-            }, ms);
+        // قائمة الشعار الجانبي القابلة للطي في بوابة التلميذ
+        window.toggleStudentLogoMenu = function(ev) {
+            if (ev) ev.stopPropagation();
+            const menu = document.getElementById('stu-logo-capsules-menu');
+            const btn = document.getElementById('stu-logo-menu-btn');
+            if (!menu) return;
+            const isOpen = menu.classList.toggle('open');
+            if (btn) {
+                btn.classList.toggle('menu-open', isOpen);
+                btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            }
+        };
+        document.addEventListener('click', (e) => {
+            const anchor = document.getElementById('stu-brand-menu-anchor');
+            const menu = document.getElementById('stu-logo-capsules-menu');
+            const btn = document.getElementById('stu-logo-menu-btn');
+            if (anchor && menu && !anchor.contains(e.target)) {
+                menu.classList.remove('open');
+                if (btn) { btn.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); }
+            }
+        });
+
+        // ================= محرك الجرس الصوتي والإشعارات الأصلي للهاتف والحاسوب =================
+        let alarmIntervalId = null;
+
+        // ١. نغمة جرس مدرسي حقيقية عبر Web Audio API + اهتزاز الهاتف (تعمل على جميع الهواتف ١٠٠٪ حتى لو قيّد المتصفح الإشعارات)
+        function playSchoolBellChime() {
+            try {
+                if (navigator.vibrate) navigator.vibrate([220, 100, 220, 100, 320]);
+            } catch (_) {}
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!window._stuBellCtx) window._stuBellCtx = new AudioCtx();
+                const ctx = window._stuBellCtx;
+                if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+                const now = ctx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    const t0 = now + i * 0.14;
+                    osc.frequency.setValueAtTime(freq, t0);
+                    gain.gain.setValueAtTime(0.001, t0);
+                    gain.gain.exponentialRampToValueAtTime(0.28, t0 + 0.025);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.42);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t0);
+                    osc.stop(t0 + 0.45);
+                });
+            } catch (_) {}
         }
 
-        function triggerBrowserNotification(title, body) {
+        // ٢. التأكد من تسجيل وتجهيز الـ Service Worker لإشعارات شريط الهاتف على أندرويد و iOS
+        async function getReadyServiceWorkerReg() {
+            if (!('serviceWorker' in navigator)) return null;
+            try {
+                let reg = await navigator.serviceWorker.getRegistration('./');
+                if (!reg) reg = await navigator.serviceWorker.register('./sw.js');
+                await navigator.serviceWorker.ready;
+                return (await navigator.serviceWorker.getRegistration('./')) || reg;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        // ٣. طلب إذن الإشعارات بالصيغتين الحديثة والقديمة لدعم كافة متصفحات الهواتف
+        async function requestMobileNotificationPermission() {
+            if (!('Notification' in window)) return 'unsupported';
+            if (Notification.permission === 'granted') return 'granted';
+            try {
+                const res = Notification.requestPermission();
+                if (res && typeof res.then === 'function') {
+                    return await res;
+                }
+                return await new Promise(resolve => Notification.requestPermission(p => resolve(p)));
+            } catch (_) {
+                return Notification.permission;
+            }
+        }
+
+        // ٤. إطلاق الجرس المزدوج: (رنين مسموع + اهتزاز + إشعار شريط الهاتف عبر Service Worker)
+        async function triggerBrowserNotification(title, body, playBell = true) {
+            if (playBell) playSchoolBellChime();
+
+            let dispatchedSystemNotif = false;
             try {
                 if ('Notification' in window && Notification.permission === 'granted') {
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.getRegistration().then(reg => {
-                            if (reg && reg.showNotification) {
-                                reg.showNotification(title, { body, icon: 'icon-512.png', data: { url: 'student.html' } });
-                            } else {
-                                const n = new Notification(title, { body, icon: 'icon-512.png' });
-                                n.onclick = () => { window.focus(); window.location.href = 'student.html'; };
-                            }
-                        }).catch(() => {
-                            const n = new Notification(title, { body });
-                            n.onclick = () => { window.focus(); window.location.href = 'student.html'; };
+                    const reg = await getReadyServiceWorkerReg();
+                    if (reg && typeof reg.showNotification === 'function') {
+                        await reg.showNotification(title, {
+                            body,
+                            icon: './icon-192.png',
+                            badge: './icon-192.png',
+                            dir: 'rtl',
+                            lang: 'ar',
+                            tag: 'al3lm-alarm-' + Date.now(),
+                            renotify: true,
+                            vibrate: [220, 100, 220, 100, 320],
+                            data: { url: './student.html' }
                         });
+                        dispatchedSystemNotif = true;
+                    } else if (reg && reg.active) {
+                        reg.active.postMessage({
+                            type: 'SHOW_ALARM_NOTIFICATION',
+                            title,
+                            body,
+                            url: './student.html'
+                        });
+                        dispatchedSystemNotif = true;
                     } else {
-                        const n = new Notification(title, { body });
-                        n.onclick = () => { window.focus(); window.location.href = 'student.html'; };
+                        // احتياطي لمتصفحات سطح المكتب فقط (حيث يمنع أندرويد new Notification مباشرة)
+                        try {
+                            const n = new Notification(title, { body, icon: './icon-192.png', dir: 'rtl', lang: 'ar' });
+                            n.onclick = () => { window.focus(); window.location.href = 'student.html'; };
+                            dispatchedSystemNotif = true;
+                        } catch (_) {}
                     }
                 }
             } catch (_) {}
+            return dispatchedSystemNotif;
+        }
+
+        // ٥. مراقب وقت دقيق لا يتأثر بسكون شاشة الهاتف (يفحص كل ١٥ ثانية وعند إضاءة الشاشة)
+        function scheduleAlarmTimer(timeStr) {
+            clearInterval(alarmIntervalId);
+            if (!stu.reminderEnabled || !timeStr || !timeStr.includes(':')) return;
+
+            const checkClockNow = () => {
+                if (!stu.reminderEnabled || !stu.reminderTime) return;
+                const [hh, mm] = stu.reminderTime.split(':').map(n => parseInt(n, 10));
+                if (isNaN(hh) || isNaN(mm)) return;
+                const now = new Date();
+                const todayKey = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}_${hh}:${mm}`;
+                const lastFired = localStorage.getItem(`al3lm_alarm_fired_${stu.username}`);
+                // يقرع الجرس إذا طابقت الساعة والدقيقة (أو خلال أول دقيقتين عند فتح الهاتف) ولم يقرع اليوم بعد
+                const nowMins = now.getHours() * 60 + now.getMinutes();
+                const targetMins = hh * 60 + mm;
+                if (nowMins >= targetMins && nowMins <= targetMins + 2 && lastFired !== todayKey) {
+                    localStorage.setItem(`al3lm_alarm_fired_${stu.username}`, todayKey);
+                    triggerBrowserNotification(
+                        `مدرسة العلم — حان موعد درسك يا ${stu.name}! 🌟`,
+                        `اضغط هنا لفتح بوابتك والبدء بدرسك الجديد.`,
+                        true
+                    );
+                    showToast(`🔔 حان موعد درسك اليومي يا ${stu.name}! اضغط زر «ابدأ الدرس» 🌟`);
+                }
+            };
+
+            alarmIntervalId = setInterval(checkClockNow, 15000);
+            document.removeEventListener('visibilitychange', checkClockNow);
+            document.addEventListener('visibilitychange', checkClockNow);
         }
 
         function updateAlarmBannerUI() {
             const banner = document.getElementById('alarm-status-banner');
+            const badge = document.getElementById('notif-perm-badge');
             const inp = document.getElementById('stu-alarm-time');
             if (stu.reminderTime && inp) inp.value = stu.reminderTime;
+
+            if (badge && 'Notification' in window) {
+                badge.textContent = Notification.permission === 'granted'
+                    ? '✅ إشعارات الجهاز مفعّلة'
+                    : (Notification.permission === 'denied' ? '🔕 إشعارات المتصفح محجوبة (الرنين الصوتي يعمل)' : '🔔 الجرس التذكيري');
+            }
+
             if (stu.reminderEnabled && stu.reminderTime) {
                 banner.innerHTML = `✅ الجرس مفعّل يومياً على الساعة (<strong>${stu.reminderTime}</strong>) — معلمك يقول لك: إلى اللقاء، نحن بالانتظار في الموعد! 🌟`;
                 banner.style.background = '#064e3b';
@@ -911,53 +1106,98 @@
             }
         }
 
-        window.saveAndArmStudentAlarm = function() {
+        window.saveAndArmStudentAlarm = async function() {
             const tVal = document.getElementById('stu-alarm-time').value || '08:30';
+            // تهيئة الصوت باللمسة المباشرة للمستخدم ليسمح الهاتف بالرنين
+            playSchoolBellChime();
+
             stu.reminderTime = tVal;
             stu.reminderEnabled = true;
+            localStorage.removeItem(`al3lm_alarm_fired_${stu.username}`);
             accounts[activeUser] = stu;
             localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+
+            const perm = await requestMobileNotificationPermission();
             updateAlarmBannerUI();
+            scheduleAlarmTimer(tVal);
+            await triggerBrowserNotification(
+                `تم ضبط منبّه الدرس (${tVal}) 🔔`,
+                `أحسنت يا ${stu.name}! سنكون بانتظارك الساعة ${tVal} لبدء درسك القادم.`,
+                false
+            );
+            pushStudentProfileToCloud();
 
-            const finalize = () => {
-                scheduleAlarmTimer(tVal);
-                triggerBrowserNotification(
-                    `تم ضبط منبّه الدرس (${tVal}) 🔔`,
-                    `أحسنت يا ${stu.name}! سنكون بانتظارك الساعة ${tVal} لبدء درسك القادم.`
-                );
-                pushStudentProfileToCloud();
-                showToast(`🔔 تم ضبط جرس الدراسة على الساعة (${tVal}) بنجاح!`);
-            };
-
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission().then(finalize).catch(finalize);
+            if (perm === 'granted') {
+                showToast(`🔔 تم تفعيل الجرس والإشعار على الساعة (${tVal}) بنجاح!`);
             } else {
-                finalize();
+                showToast(`🔔 تم ضبط رنين الجرس (${tVal})! وللتنبيه والهاتف مغلق اضغط «📱 تثبيت في منبّه تقويم الهاتف».`);
             }
         };
 
-        window.testNotificationNow = function() {
-            const fire = () => {
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    triggerBrowserNotification(
-                        `رسالة من معلمك في مدرسة العلم 🌟`,
-                        `أهلاً بك يا ${stu.name}! اضغط زر البدء عندما تكون مستعداً.`
-                    );
-                    showToast('📨 تم إرسال إشعار تجريبي لجهازك!');
-                } else {
-                    showToast('⚠️ يرجى السماح بالإشعارات في متصفحك لتصلك التنبيهات.');
-                }
-            };
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission().then(fire).catch(fire);
+        window.testNotificationNow = async function() {
+            playSchoolBellChime();
+            const perm = await requestMobileNotificationPermission();
+            updateAlarmBannerUI();
+
+            const sent = await triggerBrowserNotification(
+                `رسالة من معلمك في مدرسة العلم 🌟`,
+                `أهلاً بك يا ${stu.name}! اضغط زر البدء عندما تكون مستعداً.`,
+                false
+            );
+
+            if (sent) {
+                showToast('🔔 رنّ الجرس وأُرسل الإشعار إلى شريط هاتفك العلوي بنجاح!');
+            } else if (perm === 'denied') {
+                showToast('🔔 رنّ الجرس الصوتي! (لتفعيل إشعار الشريط العلوي افتح قفل الرابط 🔒 واختر السماح للإشعارات).');
             } else {
-                fire();
+                showToast('🔔 رنّ الجرس التجريبي بنجاح! (على iPhone ثبّت التطبيق على الشاشة الرئيسية ليظهر الإشعار العلوي).');
             }
+        };
+
+        // ٦. تنبيه أصلي ١٠٠٪ في تقويم/منبّه الهاتف يعمل يومياً حتى لو أُغلق المتصفح بالكامل!
+        window.addPhoneSystemAlarmICS = function() {
+            const tVal = document.getElementById('stu-alarm-time').value || stu.reminderTime || '08:30';
+            const [hh, mm] = tVal.split(':').map(n => parseInt(n, 10));
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh || 8, mm || 30, 0);
+            if (start <= now) start.setDate(start.getDate() + 1);
+            const end = new Date(start.getTime() + 25 * 60000);
+            const pad = (n) => String(n).padStart(2, '0');
+            const fmtLocal = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+
+            const icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Al3lm School//Student Alarm//AR',
+                'BEGIN:VEVENT',
+                `UID:al3lm-study-${stu.username}@al-3lm.org`,
+                `DTSTAMP:${fmtLocal(now)}`,
+                `DTSTART:${fmtLocal(start)}`,
+                `DTEND:${fmtLocal(end)}`,
+                'RRULE:FREQ=DAILY',
+                `SUMMARY:🌟 موعد درسك في مدرسة العلم (${stu.name})`,
+                'DESCRIPTION:افتح مدرسة العلم لبدء درسك اليومي: https://al-3lm.org/student.html',
+                'URL:https://al-3lm.org/student.html',
+                'BEGIN:VALARM',
+                'TRIGGER:-PT0M',
+                'ACTION:DISPLAY',
+                'DESCRIPTION:حان موعد درسك في مدرسة العلم!',
+                'END:VALARM',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `al3lm-alarm-${stu.username}.ics`;
+            a.click();
+            showToast('📱 افتح الملف الذي نزل الآن واضغط «حفظ / إضافة» ليرنّ هاتفك يومياً في الموعد حتى لو كان المتصفح مغلقاً!');
         };
 
         window.disableStudentAlarm = function() {
             stu.reminderEnabled = false;
-            clearTimeout(alarmTimeoutId);
+            clearInterval(alarmIntervalId);
             accounts[activeUser] = stu;
             localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
             updateAlarmBannerUI();
@@ -1097,9 +1337,7 @@
         pullLatestStudentFromCloudOnOpen();
         pushStudentProfileToCloud();
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
-        }
+        getReadyServiceWorkerReg();
     })();
     </script>
 

@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v10';
+            var VER = 'al3lm_layout_v12';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -1023,48 +1023,90 @@
             box-shadow: 0 6px 18px rgba(234, 179, 8, 0.35);
         }
 
-        /* نافذة العرض التعريفي الخفيفة (تُفتح عند الطلب فقط وتُفرغ الذاكرة فور الإغلاق) */
+        /* نافذة العرض التعريفي ذات التمرير الواحد الكامل من الأعلى للأسفل + إمكانية إخفاء النص والتحكم */
         #promo-lightbox-modal {
             position: fixed;
             inset: 0;
             z-index: 12000;
-            background: rgba(2, 12, 9, 0.92);
+            background: rgba(2, 12, 9, 0.94);
             backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 12px;
+            padding: 10px;
         }
         #promo-lightbox-modal.open { display: flex; }
+
         .promo-modal-frame-wrap {
             position: relative;
             width: min(1060px, 98vw);
-            height: min(680px, 90dvh);
+            height: min(720px, 94dvh);
             background: #04130f;
             border: 3px solid #eab308;
             border-radius: 26px;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
             box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85);
+            scrollbar-width: thin;
+            scrollbar-color: #fde047 #06281e;
         }
-        .promo-modal-close-btn {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            z-index: 50;
-            padding: 6px 14px;
+        .promo-modal-frame-wrap::-webkit-scrollbar { width: 10px; }
+        .promo-modal-frame-wrap::-webkit-scrollbar-track { background: #06281e; border-radius: 999px; }
+        .promo-modal-frame-wrap::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #fde047, #10b981); border-radius: 999px; }
+
+        /* شريط الأزرار العلوي اللصيق أعلى نافذة العرض */
+        .promo-sticky-topbar {
+            position: sticky;
+            top: 8px;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 0 12px;
+            pointer-events: none;
+            height: 0;
+            overflow: visible;
+        }
+        .promo-top-action-btn {
+            pointer-events: auto;
+            margin-top: 28px;
+            padding: 6px 13px;
             border-radius: 999px;
-            border: 2px solid #fda4af;
-            background: rgba(190, 18, 60, 0.92);
-            color: #ffffff;
             font-family: 'Cairo', sans-serif;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.55);
+            white-space: nowrap;
+            transition: transform 0.16s ease, background 0.16s ease;
+        }
+        .promo-top-action-btn:hover { transform: scale(1.04); }
+        .promo-toggle-text-btn {
+            border: 2px solid #fde047;
+            background: rgba(6, 78, 59, 0.95);
+            color: #fef08a;
+        }
+        .promo-modal-close-btn {
+            border: 2px solid #fda4af;
+            background: rgba(190, 18, 60, 0.94);
+            color: #ffffff;
         }
         .promo-modal-close-btn:hover { background: #e11d48; }
-        #promo-iframe-container { width: 100%; height: 100%; }
-        #promo-iframe-container iframe { width: 100%; height: 100%; border: none; display: block; }
+
+        #promo-iframe-container {
+            width: 100%;
+            min-height: 100%;
+        }
+        #promo-iframe-container iframe {
+            width: 100%;
+            min-height: 760px;
+            height: auto;
+            border: none;
+            display: block;
+            overflow: hidden;
+        }
 
         /* نافذة إرشاد تثبيت التطبيق خطوة بخطوة إذا لم يظهر مربع التثبيت التلقائي */
         #pwa-help-modal {
@@ -1095,10 +1137,13 @@
         }
     </style>
 
-    <!-- نافذة العرض الإعلاني التفاعلي -->
+    <!-- نافذة العرض الإعلاني التفاعلي بتمرير موحّد من الأول إلى الأخير + زر إظهار/إخفاء النص والتحكم -->
     <div id="promo-lightbox-modal" onclick="if(event.target===this) closePromoLightbox()">
-        <div class="promo-modal-frame-wrap">
-            <button type="button" class="promo-modal-close-btn" onclick="closePromoLightbox()">✖ إغلاق العرض</button>
+        <div class="promo-modal-frame-wrap" id="promo-scroll-host">
+            <div class="promo-sticky-topbar">
+                <button type="button" class="promo-top-action-btn promo-toggle-text-btn" id="promo-toggle-caption-btn" onclick="togglePromoFooterFromIndex()">👁️ إخفاء النص والتحكم</button>
+                <button type="button" class="promo-top-action-btn promo-modal-close-btn" onclick="closePromoLightbox()">✖ إغلاق العرض</button>
+            </div>
             <div id="promo-iframe-container"></div>
         </div>
     </div>
@@ -1114,26 +1159,144 @@
 
     <script>
     (function setupLazyPromoAndInstall() {
-        // إخفاء زر التنزيل تلقائياً إذا كان المستخدم قد فتح المنصة من داخل التطبيق المثبّت فعلاً!
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
         const installBtn = document.getElementById('install-pwa-btn');
         if (isStandalone && installBtn) {
             installBtn.style.display = 'none';
         }
 
-        // فتح العرض التعريفي عند الطلب فقط (صفر تحميل مسبق) وإطفاؤه كلياً فور الإغلاق
+        let _promoResizeTimer = null;
+        let _promoFooterHidden = false;
+
+        // دالة تجعل صفحة promo.html تتمدد كقطعة واحدة طبيعية بلا أي تثبيت عائم، ليتولى شريط التمرير الخارجي الصعود والهبوط من الأول إلى الأخير!
+        function unifyPromoIframeScroll(ifr) {
+            try {
+                const doc = ifr && (ifr.contentDocument || ifr.contentWindow?.document);
+                if (!doc || !doc.head || !doc.body) return;
+
+                if (!doc.getElementById('index-unified-scroll-override')) {
+                    const st = doc.createElement('style');
+                    st.id = 'index-unified-scroll-override';
+                    st.textContent = `
+                        html, body {
+                            height: auto !important;
+                            min-height: 100% !important;
+                            overflow: visible !important;
+                            display: block !important;
+                        }
+                        #launch-overlay {
+                            min-height: 540px !important;
+                            position: relative !important;
+                            inset: auto !important;
+                        }
+                        #stage-viewport {
+                            position: relative !important;
+                            height: auto !important;
+                            min-height: 520px !important;
+                            overflow: visible !important;
+                            padding: 52px 20px 24px 20px !important;
+                            display: flex !important;
+                            flex-direction: column !important;
+                            gap: 18px !important;
+                        }
+                        .top-cinema-bar {
+                            padding-left: 0 !important;
+                        }
+                        .scenes-stack {
+                            position: relative !important;
+                            height: auto !important;
+                            min-height: 400px !important;
+                            overflow: visible !important;
+                            display: block !important;
+                        }
+                        /* فكّ التموضع المطلق للمشاهد حتى تأخذ ارتفاعها الحقيقي الكامل ولا يركب النص فوقها أبداً */
+                        .promo-scene {
+                            position: relative !important;
+                            inset: auto !important;
+                            display: none !important;
+                            opacity: 1 !important;
+                            transform: none !important;
+                            height: auto !important;
+                            padding: 10px 0 18px 0 !important;
+                        }
+                        .promo-scene.active {
+                            display: flex !important;
+                        }
+                        /* وضع النص وأزرار التحكم في نهاية الصفحة بشكل طبيعي أسفل المشهد تماماً بدون position: fixed */
+                        .cinematic-footer {
+                            position: relative !important;
+                            bottom: auto !important;
+                            left: auto !important;
+                            right: auto !important;
+                            width: 100% !important;
+                            margin-top: 8px !important;
+                            padding: 14px 16px 22px 16px !important;
+                            background: rgba(3, 20, 15, 0.98) !important;
+                            border-top: 2px solid #eab308 !important;
+                        }
+                        .subtitle-box {
+                            max-height: none !important;
+                            overflow: visible !important;
+                        }
+                        body.hide-promo-footer-all .cinematic-footer {
+                            display: none !important;
+                        }
+                    `;
+                    doc.head.appendChild(st);
+                }
+
+                doc.body.classList.toggle('hide-promo-footer-all', _promoFooterHidden);
+
+                const contentH = Math.max(
+                    doc.body.scrollHeight || 0,
+                    doc.documentElement.scrollHeight || 0,
+                    620
+                );
+                ifr.style.height = contentH + 'px';
+            } catch (_) {}
+        }
+
+        window.togglePromoFooterFromIndex = function() {
+            _promoFooterHidden = !_promoFooterHidden;
+            const btn = document.getElementById('promo-toggle-caption-btn');
+            if (btn) {
+                btn.textContent = _promoFooterHidden ? '👁️ إظهار النص والتحكم' : '👁️ إخفاء النص والتحكم';
+            }
+            const ifr = document.querySelector('#promo-iframe-container iframe');
+            if (ifr) unifyPromoIframeScroll(ifr);
+        };
+
         window.openPromoLightbox = function() {
             const modal = document.getElementById('promo-lightbox-modal');
             const box = document.getElementById('promo-iframe-container');
+            const scrollHost = document.getElementById('promo-scroll-host');
+            const toggleBtn = document.getElementById('promo-toggle-caption-btn');
             if (!modal || !box) return;
-            box.innerHTML = '<iframe src="promo.html?autostart=1" allow="autoplay; fullscreen"></iframe>';
+
+            _promoFooterHidden = false;
+            if (toggleBtn) toggleBtn.textContent = '👁️ إخفاء النص والتحكم';
+            if (scrollHost) scrollHost.scrollTop = 0;
+
+            box.innerHTML = '';
+            const ifr = document.createElement('iframe');
+            ifr.src = 'promo.html?autostart=1&v=' + Date.now();
+            ifr.setAttribute('allow', 'autoplay; fullscreen');
+            ifr.setAttribute('scrolling', 'no');
+            ifr.onload = function() {
+                unifyPromoIframeScroll(ifr);
+                clearInterval(_promoResizeTimer);
+                // متابعة تغيّر ارتفاع كل مشهد عند تبدّل المشاهد الثمانية ليبقى شريط التمرير الواحد مضبوطاً من الأعلى للأسفل
+                _promoResizeTimer = setInterval(() => unifyPromoIframeScroll(ifr), 350);
+            };
+            box.appendChild(ifr);
             modal.classList.add('open');
         };
 
         window.closePromoLightbox = function() {
+            clearInterval(_promoResizeTimer);
             const modal = document.getElementById('promo-lightbox-modal');
             const box = document.getElementById('promo-iframe-container');
-            if (box) box.innerHTML = ''; // يمسح الـ iframe فيتوقف الصوت والأنيميشن ١٠٠٪ فوراً
+            if (box) box.innerHTML = '';
             if (modal) modal.classList.remove('open');
         };
     })();

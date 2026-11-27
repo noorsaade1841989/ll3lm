@@ -5,7 +5,7 @@
 	<script>
 	(function autoRefreshStaleCacheV6() {
 		try {
-			var VER = 'al3lm_layout_v10';
+			var VER = 'al3lm_layout_v11';
 			if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
 				localStorage.setItem('al3lm_ui_cache_ver', VER);
 				if ('caches' in window) {
@@ -582,24 +582,135 @@
 			.stage-btn:last-child { border-bottom: none; }
 			.stage-btn:hover .details { max-height: 0; opacity: 0; margin-top: 0; }
 		}
+
+		/* ================= ٦. قائمة دائرة الشعار الجانبية في بوابة المعلمين (كبسولات متجاورة أفقياً، وقائمة عمودية في الشاشات الضيقة) ================= */
+		.hdr-top-row {
+			justify-content: flex-start !important;
+			position: relative;
+			z-index: 9200;
+		}
+		.tch-brand-menu-anchor {
+			position: relative;
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			max-width: 100%;
+			min-width: 0;
+		}
+		.tch-logo-circle-btn {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			border: 2.2px solid #166534;
+			background: #064e3b;
+			padding: 0;
+			cursor: pointer;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			box-shadow: 0 4px 12px rgba(0,0,0,0.28);
+			transition: transform 0.2s ease, box-shadow 0.2s ease;
+		}
+		.tch-logo-circle-btn:hover,
+		.tch-logo-circle-btn.menu-open {
+			transform: scale(1.07);
+			border-color: #eab308;
+			box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.38), 0 6px 16px rgba(0,0,0,0.35);
+		}
+		.tch-logo-circle-btn img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+		.top-left-controls {
+			display: none !important;
+			align-items: center;
+			gap: 7px;
+			flex-wrap: nowrap !important;
+			white-space: nowrap;
+		}
+		.top-left-controls.open {
+			display: inline-flex !important;
+			animation: tchTrayIn 0.2s ease forwards;
+		}
+		@keyframes tchTrayIn {
+			from { opacity: 0; transform: translateX(8px); }
+			to { opacity: 1; transform: translateX(0); }
+		}
+		/* إبقاء نصوص الكبسولات كاملة وواضحة دائماً دون إخفائها أو ضغطها فوق بعضها */
+		.top-left-controls .portal-top-btn {
+			width: auto !important;
+			height: 32px !important;
+			padding: 0 13px !important;
+			border-radius: 999px !important;
+			font-size: 0.78rem !important;
+			flex-shrink: 0 !important;
+		}
+		.top-left-controls .portal-top-btn .btn-lbl {
+			display: inline !important;
+		}
+		body.is-installed-pwa .hide-in-pwa {
+			display: none !important;
+		}
+
+		/* في الشاشات الصغيرة والهواتف: تنزل الكبسولات بشكل قائمة عمودية مرتبة أسفل دائرة الشعار */
+		@media (max-width: 780px) {
+			.top-left-controls.open {
+				position: absolute !important;
+				top: calc(100% + 8px) !important;
+				right: 0 !important;
+				flex-direction: column !important;
+				align-items: stretch !important;
+				background: rgba(15, 23, 42, 0.98) !important;
+				border: 2px solid #eab308 !important;
+				border-radius: 20px !important;
+				padding: 10px !important;
+				gap: 7px !important;
+				min-width: 205px !important;
+				box-shadow: 0 18px 42px rgba(0,0,0,0.68) !important;
+				z-index: 9800 !important;
+			}
+			.top-left-controls.open .portal-top-btn,
+			.top-left-controls.open #admin-lock-trigger {
+				width: 100% !important;
+				justify-content: flex-start !important;
+				height: 35px !important;
+				padding: 0 14px !important;
+				border-radius: 999px !important;
+				font-size: 0.8rem !important;
+			}
+			.top-left-controls.open #owner-square-trigger {
+				width: 100% !important;
+				height: 33px !important;
+				border-radius: 999px !important;
+			}
+		}
+
 	</style>
 </head>
 <body>
 
 	<header>
-		<!-- الصف العلوي الأول: عنوان المنصة يميناً وأدوات الإدارة والحساب يساراً -->
+		<!-- الصف العلوي الأول: دائرة الشعار القابلة للضغط وبجانبها كبسولات الحساب والإدارة المخفية -->
 		<div class="hdr-top-row">
-			<h1>اطلب العلم</h1>
+			<div class="tch-brand-menu-anchor" id="tch-brand-menu-anchor">
+				<button type="button" class="tch-logo-circle-btn" id="tch-logo-menu-btn" onclick="toggleTeacherLogoMenu(event)" title="اضغط لإظهار أو إخفاء كبسولات الحساب والإدارة" aria-expanded="false">
+					<img src="icon-512.png" onerror="this.src='icon-192.png'" alt="شعار مدرسة العلم">
+				</button>
+				<h1 onclick="toggleTeacherLogoMenu(event)" style="cursor:pointer;" title="اضغط لفتح قائمة البوابة">اطلب العلم</h1>
 
-			<div class="top-left-controls" id="top-left-controls-bar">
-				<button type="button" class="portal-top-btn al3lm-orient-cycle-btn" style="background:rgba(15,23,42,0.9);color:#7dd3fc;border:1.5px solid #38bdf8;" onclick="cycleAl3lmOrientation()">
-					<span class="btn-ico">🔄</span><span class="btn-lbl">تلقائي</span>
-				</button>
-				<button id="admin-lock-trigger" onclick="openAdminPassModal()" title="وضع التعديل">
-					<span id="admin-lock-icon">🔒</span>
-					<span id="admin-lock-text" class="btn-lbl">وضع التعديل</span>
-				</button>
-				<button id="owner-square-trigger" onclick="openOwnerSecretModal()" title="بوابة المالك الأساسي">◼</button>
+				<div class="top-left-controls" id="top-left-controls-bar">
+					<button type="button" class="portal-top-btn al3lm-orient-cycle-btn" style="background:rgba(15,23,42,0.92);color:#7dd3fc;border:1.5px solid #38bdf8;" onclick="cycleAl3lmOrientation()">
+						<span class="btn-ico">🔄</span><span class="btn-lbl">تلقائي</span>
+					</button>
+					<button id="admin-lock-trigger" onclick="openAdminPassModal()" title="وضع التعديل">
+						<span id="admin-lock-icon">🔒</span>
+						<span id="admin-lock-text" class="btn-lbl">وضع التعديل</span>
+					</button>
+					<button id="owner-square-trigger" onclick="openOwnerSecretModal()" title="بوابة المالك الأساسي">◼</button>
+				</div>
 			</div>
 		</div>
 
@@ -2296,23 +2407,77 @@
 	<script>
 	(function initTeachersPortalUsersHub() {
 		localStorage.setItem('al3lm_active_role', 'teacher');
+		let tchDeferredPrompt = null;
+		window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); tchDeferredPrompt = e; });
+
+		window.toggleTeacherLogoMenu = function(ev) {
+			if (ev) ev.stopPropagation();
+			const bar = document.getElementById('top-left-controls-bar');
+			const btn = document.getElementById('tch-logo-menu-btn');
+			if (!bar) return;
+			const isOpen = bar.classList.toggle('open');
+			if (btn) {
+				btn.classList.toggle('menu-open', isOpen);
+				btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+			}
+		};
+
+		document.addEventListener('click', (e) => {
+			const anchor = document.getElementById('tch-brand-menu-anchor');
+			const bar = document.getElementById('top-left-controls-bar');
+			const btn = document.getElementById('tch-logo-menu-btn');
+			if (anchor && bar && !anchor.contains(e.target)) {
+				bar.classList.remove('open');
+				if (btn) { btn.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); }
+			}
+		});
+
 		const leftCtrl = document.querySelector('.top-left-controls');
 		if (leftCtrl) {
+			const installBtn = document.createElement('button');
+			installBtn.type = 'button';
+			installBtn.className = 'portal-top-btn hide-in-pwa';
+			installBtn.style.cssText = 'background:rgba(15,23,42,0.92);color:#a7f3d0;border:1.5px solid #10b981;';
+			installBtn.innerHTML = '<span class="btn-ico">📲</span><span class="btn-lbl">تثبيت التطبيق</span>';
+			installBtn.onclick = async () => {
+				if (tchDeferredPrompt) {
+					tchDeferredPrompt.prompt();
+					await tchDeferredPrompt.userChoice.catch(() => {});
+					tchDeferredPrompt = null;
+				} else {
+					alert('لتثبيت المنصة كتطبيق: افتح قائمة المتصفح (⋮ أو ⬆️) واختر «تثبيت التطبيق / إضافة إلى الشاشة الرئيسية».');
+				}
+			};
+
 			const usersBtn = document.createElement('button');
 			usersBtn.type = 'button';
 			usersBtn.className = 'portal-top-btn portal-users-btn';
 			usersBtn.title = 'سجل المستخدمين والمدارس';
 			usersBtn.innerHTML = '<span class="btn-ico">👥</span><span class="btn-lbl">المستخدمون</span>';
-			usersBtn.onclick = () => { renderPlatformUsersModal(); document.getElementById('platform-users-modal').style.display = 'flex'; };
+			usersBtn.onclick = () => {
+				document.getElementById('top-left-controls-bar')?.classList.remove('open');
+				renderPlatformUsersModal();
+				document.getElementById('platform-users-modal').style.display = 'flex';
+			};
 
-			const loginBtn = document.createElement('a');
-			loginBtn.href = 'index.html?switchAccount=1';
-			loginBtn.className = 'portal-top-btn portal-login-btn';
-			loginBtn.title = 'بوابة الدخول وتبديل الحساب';
-			loginBtn.innerHTML = '<span class="btn-ico">🔑</span><span class="btn-lbl">بوابة الدخول</span>';
+			const switchBtn = document.createElement('a');
+			switchBtn.href = 'index.html?switchAccount=1';
+			switchBtn.className = 'portal-top-btn portal-login-btn';
+			switchBtn.title = 'تبديل الحساب';
+			switchBtn.innerHTML = '<span class="btn-ico">🔄</span><span class="btn-lbl">تبديل الحساب</span>';
 
-			leftCtrl.appendChild(usersBtn);
-			leftCtrl.appendChild(loginBtn);
+			const logoutBtn = document.createElement('a');
+			logoutBtn.href = 'index.html?logout=1';
+			logoutBtn.className = 'portal-top-btn';
+			logoutBtn.style.cssText = 'background:rgba(15,23,42,0.92);color:#fecdd3;border:1.5px solid #fda4af;';
+			logoutBtn.title = 'تسجيل الخروج';
+			logoutBtn.innerHTML = '<span class="btn-ico">🚪</span><span class="btn-lbl">خروج</span>';
+
+			const ownerSq = document.getElementById('owner-square-trigger');
+			leftCtrl.insertBefore(installBtn, ownerSq);
+			leftCtrl.insertBefore(usersBtn, ownerSq);
+			leftCtrl.insertBefore(switchBtn, ownerSq);
+			leftCtrl.insertBefore(logoutBtn, ownerSq);
 		}
 
 		const CLOUD_SYNC_API = localStorage.getItem('al3lm_sync_api_url') || localStorage.getItem('al3lm_tutor_worker_url') || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';

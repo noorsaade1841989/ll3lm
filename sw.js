@@ -1,5 +1,5 @@
-// Service Worker المحدّث لمنصة مدرسة العلم (Network-First للصفحات لضمان ظهور أي تعديل على GitHub فوراً)
-const CACHE_NAME = 'al3lm-pwa-v10';
+// Service Worker المحدّث لمنصة مدرسة العلم (v11 — إشعارات الجرس على الهاتف + Network-First للصفحات)
+const CACHE_NAME = 'al3lm-pwa-v11';
 const CORE_ASSETS = [
   './manifest.json',
   './icon-192.png',
@@ -21,6 +21,26 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// استقبال أوامر الجرس من student.html لإطلاق إشعار نظام أصلي على هواتف أندرويد و iOS والحاسوب
+self.addEventListener('message', (event) => {
+  const d = event.data;
+  if (d && d.type === 'SHOW_ALARM_NOTIFICATION') {
+    const title = d.title || 'مدرسة العلم 🌟';
+    const options = {
+      body: d.body || 'حان موعد درسك الجديد في مدرسة العلم!',
+      icon: './icon-192.png',
+      badge: './icon-192.png',
+      dir: 'rtl',
+      lang: 'ar',
+      tag: d.tag || ('al3lm-alarm-' + Date.now()),
+      renotify: true,
+      vibrate: [220, 100, 220, 100, 320],
+      data: { url: d.url || './student.html' }
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -33,7 +53,6 @@ self.addEventListener('fetch', (event) => {
                      url.pathname.endsWith('.js') ||
                      url.pathname === '/';
 
-  // الشبكة أولاً لملفات HTML و JS لكي يرى الهاتف أي تحديث يرفع على GitHub فوراً، مع الاحتفاظ بنسخة للعمل دون إنترنت
   if (isHTMLOrJS) {
     event.respondWith(
       fetch(req, { cache: 'no-cache' })
@@ -49,13 +68,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // الكاش أولاً للصور والأيقونات لسرعة الفتح
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
       return fetch(req).then((netRes) => {
-        const copy = netRes.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+        if (netRes && netRes.ok) {
+          const copy = netRes.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+        }
         return netRes;
       });
     })
@@ -64,11 +84,11 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || 'student.html';
+  const targetUrl = (event.notification.data && event.notification.data.url) || './student.html';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {
-        if (client.url.includes(targetUrl) && 'focus' in client) return client.focus();
+        if (client.url.includes('student.html') && 'focus' in client) return client.focus();
       }
       if (clients.openWindow) return clients.openWindow(targetUrl);
     })
