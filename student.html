@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v8';
+            var VER = 'al3lm_layout_v9';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -414,7 +414,7 @@
         </div>
         <div class="nav-actions">
             <button type="button" class="nav-pill-btn al3lm-orient-cycle-btn compact-orient" onclick="cycleAl3lmOrientation()">🔄 حر</button>
-            <button type="button" class="nav-pill-btn" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
+            <button type="button" class="nav-pill-btn hide-in-pwa" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
             <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب</a>
             <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 خروج</a>
         </div>
@@ -1102,6 +1102,20 @@
     </script>
 
 <style id="al3lm-orientation-styles">
+/* إظهار زر قلب الشاشة (أفقي / عمودي) داخل التطبيق المثبّت حصراً دون المتصفح العادي */
+.al3lm-orient-cycle-btn {
+    display: none !important;
+}
+body.is-installed-pwa .hide-in-pwa { display: none !important; }
+body.is-installed-pwa .al3lm-orient-cycle-btn {
+    display: inline-flex !important;
+}
+@media all and (display-mode: standalone), all and (display-mode: fullscreen) {
+    .al3lm-orient-cycle-btn {
+        display: inline-flex !important;
+    }
+}
+
 .orient-picker-bar {
     display: inline-flex;
     align-items: center;
@@ -1175,6 +1189,13 @@
 </style>
 <script>
 (function initAl3lmOrientationManager() {
+    const isInstalledApp = window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || window.navigator.standalone === true;
+    if (isInstalledApp) {
+        document.documentElement.classList.add('is-installed-pwa');
+        if (document.body) document.body.classList.add('is-installed-pwa');
+        else document.addEventListener('DOMContentLoaded', () => document.body.classList.add('is-installed-pwa'));
+    }
+    if (!isInstalledApp) return;
     const KEY = 'al3lm_screen_orientation'; // 'any' | 'landscape' | 'portrait'
     const LABELS = {
         any: '🔄 تلقائي (حر)',

@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v8';
+            var VER = 'al3lm_layout_v9';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -16,6 +16,18 @@
             }
         } catch (e) {}
     })();
+    </script>
+        <script>
+    window.__al3lmDeferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        window.__al3lmDeferredPrompt = e;
+        var btn = document.getElementById('install-pwa-btn');
+        if (btn) btn.classList.add('ready-to-install');
+    });
+    window.addEventListener('appinstalled', function() {
+        window.__al3lmDeferredPrompt = null;
+    });
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -366,18 +378,22 @@
             <p class="brand-sub">اطلبوا العلم من المهد إلى اللحد — بوابة التلميذ والمعلم</p>
         </div>
 
-        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
-            <button type="button" class="install-app-btn" id="install-pwa-btn" onclick="triggerInstallApp()">
-                <span>📲</span>
-                <span>تنزيل المنصة كتطبيق على الهاتف</span>
-            </button>
-            <div class="orient-picker-bar" role="group" aria-label="اختيار اتجاه شاشة الهاتف">
-                <span class="orient-picker-lbl">📱 اتجاه الشاشة:</span>
-                <button type="button" class="orient-chip-btn active" data-orient-choice="any" onclick="setAl3lmOrientation('any')">🔄 تلقائي</button>
-                <button type="button" class="orient-chip-btn" data-orient-choice="landscape" onclick="setAl3lmOrientation('landscape')">↔️ أفقي</button>
-                <button type="button" class="orient-chip-btn" data-orient-choice="portrait" onclick="setAl3lmOrientation('portrait')">↕️ عمودي</button>
+        <!-- صندوق العرض التعريفي التفاعلي (خفيف ١٠٠٪: لا يحمّل المشاهد إلا عند الضغط، ويتوقف تماماً عند الإغلاق) -->
+        <div class="promo-spotlight-card" onclick="openPromoLightbox()">
+            <div class="promo-spotlight-right">
+                <span class="promo-play-orb">▶</span>
+                <div class="promo-spotlight-texts">
+                    <div class="promo-spotlight-title">تعرّف على «مدرسة العلم» في دقيقتين</div>
+                    <div class="promo-spotlight-sub">عرض مرئي تفاعلي يشرح المراحل الثلاث (١ – ٢١ سنة)</div>
+                </div>
             </div>
+            <span class="promo-open-pill">مشاهدة ✨</span>
         </div>
+
+        <button type="button" class="install-app-btn" id="install-pwa-btn" onclick="triggerInstallApp()">
+            <span>📲</span>
+            <span id="install-pwa-btn-txt">تنزيل المنصة كتطبيق على الهاتف</span>
+        </button>
 
         <!-- ١. اختيار الصفة أولاً: تلميذ أو معلم -->
         <div class="role-tabs" role="tablist" aria-label="اختر نوع الحساب">
@@ -535,19 +551,27 @@
             showMsg('تم تسجيل الخروج بنجاح.', true);
         };
 
-        let deferredInstallPrompt = null;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredInstallPrompt = e;
-        });
         window.triggerInstallApp = async () => {
-            if (deferredInstallPrompt) {
-                deferredInstallPrompt.prompt();
-                await deferredInstallPrompt.userChoice.catch(() => {});
-                deferredInstallPrompt = null;
+            const promptEvent = window.__al3lmDeferredPrompt;
+            if (promptEvent) {
+                promptEvent.prompt();
+                const choice = await promptEvent.userChoice.catch(() => ({}));
+                if (choice && choice.outcome === 'accepted') {
+                    window.__al3lmDeferredPrompt = null;
+                }
                 return;
             }
-            showMsg('لتثبيت المنصة كتطبيق على هاتفك: افتح قائمة المتصفح (⋮ أو زر المشاركة ⬆️) واختر «إضافة إلى الشاشة الرئيسية / تثبيت التطبيق».', true);
+            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const stepsBox = document.getElementById('pwa-help-steps');
+            const modal = document.getElementById('pwa-help-modal');
+            if (stepsBox && modal) {
+                if (isIOS) {
+                    stepsBox.innerHTML = '١. اضغط على زر <strong>المشاركة (⬆️)</strong> في شريط متصفح Safari.<br>٢. اختر <strong>«إضافة إلى الشاشة الرئيسية» (Add to Home Screen)</strong>.<br>٣. اضغط <strong>إضافة (Add)</strong> لتظهر أيقونة التطبيق على شاشة هاتفك.';
+                } else {
+                    stepsBox.innerHTML = '• إذا كان التطبيق مثبّتاً مسبقاً على هاتفك، فستجد أيقونة <strong>«مدرسة العلم»</strong> على شاشتك الرئيسية (أو ستجد في قائمة المتصفح <strong>⋮</strong> خيار <strong>«فتح في التطبيق»</strong>).<br>• لتثبيته الآن يدوياً: اضغط النقاط الثلاث <strong>(⋮)</strong> أعلى المتصفح واختر <strong>«تثبيت التطبيق» (Install app)</strong> أو <strong>«الإضافة إلى الشاشة الرئيسية»</strong>.';
+                }
+                modal.classList.add('open');
+            }
         };
 
         async function populateStudentSchools() {
@@ -923,213 +947,197 @@
     })();
     </script>
 
-<style id="al3lm-orientation-styles">
-.orient-picker-bar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    background: #ecfdf5;
-    border: 1.5px solid #6ee7b7;
-    border-radius: 999px;
-    padding: 4px 8px;
-    flex-wrap: wrap;
-}
-.orient-picker-lbl {
-    font-size: 0.76rem;
-    font-weight: 900;
-    color: #065f46;
-    margin-left: 3px;
-}
-.orient-chip-btn {
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1.5px solid transparent;
-    background: #ffffff;
-    color: #334155;
-    font-family: 'Cairo', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 900;
-    cursor: pointer;
-    transition: all 0.18s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-.orient-chip-btn.active {
-    background: linear-gradient(135deg, #059669, #064e3b);
-    color: #fef08a;
-    border-color: #eab308;
-    box-shadow: 0 3px 8px rgba(6,78,59,0.28);
-}
-/* تنبيه لطيف قابل للإغلاق عندما يختار المستخدم وضعاً محدداً (أفقي أو عمودي) على متصفح يمنع التدوير البرمجي التلقائي (مثل iOS) */
-#al3lm-rotate-hint-banner {
-    position: fixed;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 12000;
-    background: rgba(6, 40, 30, 0.96);
-    color: #fef08a;
-    border: 2px solid #eab308;
-    border-radius: 999px;
-    padding: 7px 16px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 900;
-    display: none;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.5);
-    white-space: nowrap;
-    max-width: 94vw;
-}
-#al3lm-rotate-hint-banner button {
-    background: rgba(255,255,255,0.16);
-    color: #ffffff;
-    border: none;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    font-weight: 900;
-    cursor: pointer;
-}
-</style>
-<script>
-(function initAl3lmOrientationManager() {
-    const KEY = 'al3lm_screen_orientation'; // 'any' | 'landscape' | 'portrait'
-    const LABELS = {
-        any: '🔄 تلقائي (حر)',
-        landscape: '↔️ أفقي',
-        portrait: '↕️ عمودي'
-    };
-    const SHORT_LABELS = {
-        any: '🔄 حر',
-        landscape: '↔️ أفقي',
-        portrait: '↕️ عمودي'
-    };
 
-    function getPref() {
-        const v = localStorage.getItem(KEY);
-        return (v === 'landscape' || v === 'portrait') ? v : 'any';
-    }
-
-    let hintDismissedForMode = '';
-
-    function checkPhysicalMismatchHint(mode) {
-        let banner = document.getElementById('al3lm-rotate-hint-banner');
-        if (!banner) {
-            banner = document.createElement('div');
-            banner.id = 'al3lm-rotate-hint-banner';
-            banner.innerHTML = '<span id="al3lm-rotate-hint-txt"></span><button type="button" title="إخفاء">×</button>';
-            banner.querySelector('button').onclick = function() {
-                hintDismissedForMode = getPref();
-                banner.style.display = 'none';
-            };
-            document.body.appendChild(banner);
+    <style>
+        .promo-spotlight-card {
+            width: 100%;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 65%, #047857 100%);
+            border: 2.5px solid #eab308;
+            border-radius: 20px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(6, 78, 59, 0.28);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            text-align: right;
         }
-        if (mode === 'any' || hintDismissedForMode === mode) {
-            banner.style.display = 'none';
-            return;
+        .promo-spotlight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(6, 78, 59, 0.4);
         }
-        const isCurrentlyLandscape = window.innerWidth > window.innerHeight;
-        if (mode === 'landscape' && !isCurrentlyLandscape) {
-            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↔️ أدر الهاتف أفقياً للعرض بالوضع الأفقي الذي اخترته';
-            banner.style.display = 'inline-flex';
-        } else if (mode === 'portrait' && isCurrentlyLandscape) {
-            banner.querySelector('#al3lm-rotate-hint-txt').textContent = '↕️ أدر الهاتف عمودياً للعرض بالوضع العمودي الذي اخترته';
-            banner.style.display = 'inline-flex';
-        } else {
-            banner.style.display = 'none';
+        .promo-spotlight-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
         }
-    }
-
-    async function applyOrientationLock(mode, fromUserGesture = false) {
-        try {
-            if (mode === 'any') {
-                if (screen.orientation && typeof screen.orientation.unlock === 'function') {
-                    screen.orientation.unlock();
-                }
-                if (fromUserGesture && document.fullscreenElement && document.exitFullscreen) {
-                    await document.exitFullscreen().catch(() => {});
-                }
-            } else {
-                const lockTarget = mode === 'landscape' ? 'landscape' : 'portrait';
-                let lockedOk = false;
-                if (screen.orientation && typeof screen.orientation.lock === 'function') {
-                    try {
-                        await screen.orientation.lock(lockTarget);
-                        lockedOk = true;
-                    } catch (err) {
-                        // في المتصفح العادي على أندرويد (خارج التطبيق المثبّت)، قد يتطلب قفل الشاشة تفعيل ملء الشاشة أولاً عند نقر المستخدم
-                        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-                        if (fromUserGesture && !isStandalone && document.documentElement.requestFullscreen && !document.fullscreenElement) {
-                            try {
-                                await document.documentElement.requestFullscreen();
-                                await screen.orientation.lock(lockTarget);
-                                lockedOk = true;
-                            } catch (_) {}
-                        }
-                    }
-                }
-            }
-        } catch (_) {}
-        updateAllOrientationButtonsUI(mode);
-        setTimeout(() => checkPhysicalMismatchHint(mode), 220);
-    }
-
-    function updateAllOrientationButtonsUI(mode) {
-        document.querySelectorAll('[data-orient-choice]').forEach(btn => {
-            btn.classList.toggle('active', btn.getAttribute('data-orient-choice') === mode);
-        });
-        document.querySelectorAll('.al3lm-orient-cycle-btn').forEach(btn => {
-            const isCompact = btn.classList.contains('compact-orient');
-            const lblEl = btn.querySelector('.btn-lbl');
-            const icoEl = btn.querySelector('.btn-ico');
-            if (lblEl && icoEl) {
-                icoEl.textContent = mode === 'landscape' ? '↔️' : (mode === 'portrait' ? '↕️' : '🔄');
-                lblEl.textContent = mode === 'landscape' ? 'أفقي' : (mode === 'portrait' ? 'عمودي' : 'تلقائي');
-            } else {
-                btn.innerHTML = isCompact ? SHORT_LABELS[mode] : `📱 الاتجاه: ${LABELS[mode]}`;
-            }
-            btn.title = `اتجاه شاشة الهاتف الحالي: ${LABELS[mode]} (اضغط للتبديل بين حر / أفقي / عمودي)`;
-        });
-    }
-
-    window.setAl3lmOrientation = function(mode) {
-        const clean = (mode === 'landscape' || mode === 'portrait') ? mode : 'any';
-        hintDismissedForMode = '';
-        localStorage.setItem(KEY, clean);
-        applyOrientationLock(clean, true);
-    };
-
-    window.cycleAl3lmOrientation = function() {
-        const cur = getPref();
-        const next = cur === 'any' ? 'landscape' : (cur === 'landscape' ? 'portrait' : 'any');
-        window.setAl3lmOrientation(next);
-    };
-
-    window.addEventListener('resize', () => checkPhysicalMismatchHint(getPref()));
-    window.addEventListener('orientationchange', () => setTimeout(() => checkPhysicalMismatchHint(getPref()), 200));
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const saved = getPref();
-        updateAllOrientationButtonsUI(saved);
-        if (saved !== 'any') {
-            applyOrientationLock(saved, false);
-            // إعادة تطبيق القفل عند أول لمسة للمستخدم إذا كان التطبيق المثبّت يحتاج تفاعلاً أولياً
-            const onceLock = () => {
-                const cur = getPref();
-                if (cur !== 'any' && screen.orientation && typeof screen.orientation.lock === 'function') {
-                    screen.orientation.lock(cur).catch(() => {});
-                }
-                document.removeEventListener('click', onceLock);
-            };
-            document.addEventListener('click', onceLock, { once: true });
+        .promo-play-orb {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fef08a, #eab308);
+            color: #064e3b;
+            font-size: 1rem;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 14px rgba(250, 204, 21, 0.65);
         }
-    });
-})();
-</script>
+        .promo-spotlight-texts {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .promo-spotlight-title {
+            color: #fef08a;
+            font-size: 0.88rem;
+            font-weight: 900;
+            line-height: 1.3;
+        }
+        .promo-spotlight-sub {
+            color: #d1fae5;
+            font-size: 0.74rem;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+        .promo-open-pill {
+            background: rgba(254, 240, 138, 0.18);
+            border: 1.5px solid #fde047;
+            color: #fef08a;
+            padding: 4px 11px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 900;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .install-app-btn.ready-to-install {
+            background: linear-gradient(135deg, #fef9c3, #fde047);
+            border-color: #ca8a04;
+            color: #064e3b;
+            box-shadow: 0 6px 18px rgba(234, 179, 8, 0.35);
+        }
+
+        /* نافذة العرض التعريفي الخفيفة (تُفتح عند الطلب فقط وتُفرغ الذاكرة فور الإغلاق) */
+        #promo-lightbox-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 12000;
+            background: rgba(2, 12, 9, 0.92);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+        #promo-lightbox-modal.open { display: flex; }
+        .promo-modal-frame-wrap {
+            position: relative;
+            width: min(1060px, 98vw);
+            height: min(680px, 90dvh);
+            background: #04130f;
+            border: 3px solid #eab308;
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85);
+        }
+        .promo-modal-close-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 50;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 2px solid #fda4af;
+            background: rgba(190, 18, 60, 0.92);
+            color: #ffffff;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+        }
+        .promo-modal-close-btn:hover { background: #e11d48; }
+        #promo-iframe-container { width: 100%; height: 100%; }
+        #promo-iframe-container iframe { width: 100%; height: 100%; border: none; display: block; }
+
+        /* نافذة إرشاد تثبيت التطبيق خطوة بخطوة إذا لم يظهر مربع التثبيت التلقائي */
+        #pwa-help-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 12500;
+            background: rgba(2, 12, 9, 0.86);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        #pwa-help-modal.open { display: flex; }
+        .pwa-help-card {
+            width: 100%;
+            max-width: 440px;
+            background: #ffffff;
+            color: #0f172a;
+            border: 3px solid #eab308;
+            border-radius: 26px;
+            padding: 22px 20px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+        }
+    </style>
+
+    <!-- نافذة العرض الإعلاني التفاعلي -->
+    <div id="promo-lightbox-modal" onclick="if(event.target===this) closePromoLightbox()">
+        <div class="promo-modal-frame-wrap">
+            <button type="button" class="promo-modal-close-btn" onclick="closePromoLightbox()">✖ إغلاق العرض</button>
+            <div id="promo-iframe-container"></div>
+        </div>
+    </div>
+
+    <!-- نافذة مساعدة التثبيت المباشر على الهاتف -->
+    <div id="pwa-help-modal" onclick="if(event.target===this) this.classList.remove('open')">
+        <div class="pwa-help-card">
+            <h3 style="color:#064e3b; font-size:1.12rem; font-weight:900; text-align:center;" id="pwa-help-title">📲 تثبيت تطبيق «مدرسة العلم»</h3>
+            <div id="pwa-help-steps" style="font-size:0.9rem; font-weight:800; color:#334155; line-height:1.8;"></div>
+            <button type="button" class="submit-auth-btn" style="padding:9px;" onclick="document.getElementById('pwa-help-modal').classList.remove('open')">حسناً، فهمت</button>
+        </div>
+    </div>
+
+    <script>
+    (function setupLazyPromoAndInstall() {
+        // إخفاء زر التنزيل تلقائياً إذا كان المستخدم قد فتح المنصة من داخل التطبيق المثبّت فعلاً!
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        const installBtn = document.getElementById('install-pwa-btn');
+        if (isStandalone && installBtn) {
+            installBtn.style.display = 'none';
+        }
+
+        // فتح العرض التعريفي عند الطلب فقط (صفر تحميل مسبق) وإطفاؤه كلياً فور الإغلاق
+        window.openPromoLightbox = function() {
+            const modal = document.getElementById('promo-lightbox-modal');
+            const box = document.getElementById('promo-iframe-container');
+            if (!modal || !box) return;
+            box.innerHTML = '<iframe src="promo.html?autostart=1" allow="autoplay; fullscreen"></iframe>';
+            modal.classList.add('open');
+        };
+
+        window.closePromoLightbox = function() {
+            const modal = document.getElementById('promo-lightbox-modal');
+            const box = document.getElementById('promo-iframe-container');
+            if (box) box.innerHTML = ''; // يمسح الـ iframe فيتوقف الصوت والأنيميشن ١٠٠٪ فوراً
+            if (modal) modal.classList.remove('open');
+        };
+    })();
+    </script>
 
 </body>
 </html>

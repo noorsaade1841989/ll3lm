@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مدرسة العلم | العرض التعريفي السينمائي التفاعلي (al-3lm.org)</title>
+    <link rel="icon" href="cc.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Aref+Ruqaa:wght@700&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        html, body {
+            width: 100%; height: 100dvh; overflow: hidden;
+            font-family: 'Cairo', sans-serif;
+            background: #04130f; color: #f8fafc;
+        }
+
+        /* خلفية النجوم والمدارات الحية */
+        #cosmos-canvas {
+            position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+        }
+
+        /* شاشة البدء قبل الانطلاق السينمائي */
+        #launch-overlay {
+            position: fixed; inset: 0; z-index: 5000;
+            background: radial-gradient(circle at 50% 35%, rgba(6, 95, 70, 0.96) 0%, rgba(4, 19, 15, 0.99) 75%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 18px; text-align: center; padding: 24px; transition: opacity 0.6s ease;
+        }
+        .launch-emblem {
+            width: 110px; height: 110px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fef08a, #ca8a04);
+            border: 4px solid #ffffff;
+            box-shadow: 0 0 45px rgba(234, 179, 8, 0.65);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Aref Ruqaa', serif; font-size: 3.4rem; color: #064e3b;
+            animation: pulseGlow 2.4s infinite ease-in-out;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(234, 179, 8, 0.55); }
+            50% { transform: scale(1.07); box-shadow: 0 0 60px rgba(250, 204, 21, 0.9); }
+        }
+        .launch-title { font-family: 'Aref Ruqaa', serif; font-size: clamp(2.2rem, 6vmin, 3.8rem); color: #fef08a; }
+        .launch-sub { font-size: clamp(0.95rem, 2.2vmin, 1.2rem); color: #a7f3d0; font-weight: 700; max-width: 620px; line-height: 1.7; }
+        .launch-opts { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+        .launch-btn {
+            padding: 13px 30px; border-radius: 999px; border: 2.5px solid #fde047;
+            background: linear-gradient(135deg, #10b981, #064e3b);
+            color: #fef08a; font-family: inherit; font-size: 1.05rem; font-weight: 900;
+            cursor: pointer; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.45);
+            transition: transform 0.2s ease; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .launch-btn:hover { transform: scale(1.05); }
+        .launch-btn.clean-rec { background: linear-gradient(135deg, #ca8a04, #78350f); color: #ffffff; }
+
+        /* حاوية المشاهد السينمائية الثمانية */
+        #stage-viewport {
+            position: relative; z-index: 10; width: 100%; height: 100dvh;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: clamp(14px, 2.5vmin, 28px) clamp(16px, 4vw, 48px) clamp(135px, 21dvh, 180px);
+            overflow: hidden;
+        }
+
+        /* الشريط العلوي للهوية ورقم المشهد */
+        .top-cinema-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 30; transition: opacity 0.4s ease;
+        }
+        body.clean-record-mode .bottom-controls-bar { opacity: 0; pointer-events: none; }
+        body.clean-record-mode:hover .bottom-controls-bar { opacity: 0.92; pointer-events: auto; }
+
+        .brand-pill {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 6px 18px; border-radius: 999px;
+            background: rgba(6, 40, 30, 0.82); border: 1.8px solid rgba(250, 204, 21, 0.65);
+            backdrop-filter: blur(10px);
+        }
+        .brand-pill-dot {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #fde047, #ca8a04);
+            color: #064e3b; font-family: 'Aref Ruqaa', serif; font-weight: 700;
+            display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;
+        }
+        .scene-badge {
+            padding: 5px 16px; border-radius: 999px;
+            background: rgba(15, 23, 42, 0.78); border: 1.5px solid rgba(110, 231, 183, 0.45);
+            color: #a7f3d0; font-size: 0.85rem; font-weight: 800;
+        }
+
+        /* منطقة المشهد المتغيرة في المنتصف */
+        .scenes-stack {
+            position: relative; flex: 1 1 auto; width: 100%; max-width: 1220px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: center; min-height: 0;
+        }
+        .promo-scene {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: clamp(12px, 2.2vmin, 22px);
+            opacity: 0; transform: scale(0.94) translateY(18px); pointer-events: none;
+            transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .promo-scene.active {
+            opacity: 1; transform: scale(1) translateY(0); pointer-events: auto;
+        }
+
+        .scene-headline {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(1.65rem, 4.3vmin, 2.9rem);
+            color: #fef08a; text-align: center;
+            text-shadow: 0 4px 22px rgba(234, 179, 8, 0.45);
+            line-height: 1.25;
+        }
+        .scene-tagline {
+            padding: 5px 20px; border-radius: 999px;
+            background: rgba(6, 78, 59, 0.75); border: 1.5px solid #fde047;
+            color: #ecfdf5; font-size: clamp(0.82rem, 1.85vmin, 1.05rem); font-weight: 800;
+            text-align: center;
+        }
+
+        /* ================= تصميم المشهد 1: شجرة العلم ومدار أبجد هوز ================= */
+        .s1-orbit-box {
+            position: relative; width: min(76vmin, 410px); height: min(76vmin, 410px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .abjad-ring {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 1.5px dashed rgba(253, 224, 71, 0.38);
+            animation: spinSlow 36s linear infinite;
+        }
+        @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .abjad-node {
+            position: absolute; width: 30px; height: 30px; margin: -15px;
+            border-radius: 50%; background: rgba(6, 78, 59, 0.92);
+            border: 1.5px solid #fde047; color: #fef08a;
+            font-size: 0.82rem; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.35);
+        }
+        .s1-center-tree {
+            width: 58%; height: 58%; border-radius: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(4, 24, 18, 0.92) 75%);
+            border: 3px solid #eab308;
+            box-shadow: 0 0 50px rgba(16, 185, 129, 0.45), inset 0 0 28px rgba(250, 204, 21, 0.3);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .s1-alif {
+            font-family: 'Aref Ruqaa', serif; font-size: clamp(3.4rem, 9vmin, 5.2rem);
+            color: #fef08a; text-shadow: 0 0 24px #eab308; line-height: 1;
+        }
+
+        /* ================= تصميم المشهد 2: المراحل الثلاث ================= */
+        .s2-pillars-grid {
+            width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 2vw, 22px);
+        }
+        .stage-pillar {
+            border-radius: 26px; padding: clamp(14px, 2.5vmin, 26px);
+            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+            backdrop-filter: blur(14px); border: 2.5px solid rgba(255,255,255,0.25);
+            transform: translateY(20px); opacity: 0; transition: all 0.6s ease;
+        }
+        .promo-scene.active .stage-pillar:nth-child(1) { transform: translateY(0); opacity: 1; transition-delay: 0.15s; }
+        .promo-scene.active .stage-pillar:nth-child(2) { transform: translateY(0); opacity: 1; transition-delay: 0.45s; }
+        .promo-scene.active .stage-pillar:nth-child(3) { transform: translateY(0); opacity: 1; transition-delay: 0.75s; }
+
+        .stage-pillar.p1 { background: linear-gradient(160deg, rgba(2, 132, 199, 0.35), rgba(15, 23, 42, 0.88)); border-color: #38bdf8; box-shadow: 0 12px 32px rgba(56, 189, 248, 0.25); }
+        .stage-pillar.p2 { background: linear-gradient(160deg, rgba(5, 150, 105, 0.4), rgba(6, 40, 30, 0.92)); border-color: #eab308; box-shadow: 0 12px 32px rgba(234, 179, 8, 0.28); }
+        .stage-pillar.p3 { background: linear-gradient(160deg, rgba(190, 18, 60, 0.38), rgba(28, 12, 20, 0.92)); border-color: #fb7185; box-shadow: 0 12px 32px rgba(244, 63, 94, 0.25); }
+
+        .pillar-name { font-family: 'Aref Ruqaa', serif; font-size: clamp(2rem, 5vmin, 3.2rem); line-height: 1.1; }
+        .pillar-years { font-size: 1.15rem; font-weight: 900; padding: 2px 16px; border-radius: 999px; background: rgba(0,0,0,0.35); direction: ltr; }
+        .pillar-desc { font-size: clamp(0.78rem, 1.7vmin, 0.96rem); color: #e2e8f0; font-weight: 700; line-height: 1.6; }
+
+        /* ================= تصميم المشهد 3: خريطة الـ 28 حرفاً والأختام الـ 7 ================= */
+        .s3-map-seals-wrap {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;
+        }
+        .s3-mini-map {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+            background: rgba(15, 23, 42, 0.85); padding: 14px; border-radius: 22px; border: 2px solid #eab308;
+        }
+        .s3-cell {
+            width: clamp(30px, 4.6vmin, 42px); height: clamp(30px, 4.6vmin, 42px);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.95rem; color: #fff; border: 2px solid rgba(255,255,255,0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .s3-cell.lit-pulse { transform: scale(1.18); box-shadow: 0 0 16px #fde047; border-color: #fff; z-index: 3; }
+        .s3-seals-col {
+            display: flex; flex-direction: column; gap: 7px;
+            background: rgba(6, 40, 30, 0.88); padding: 12px 16px; border-radius: 22px; border: 2px solid #34d399;
+        }
+        .s3-seal-row {
+            display: flex; align-items: center; gap: 10px; font-size: 0.86rem; font-weight: 800; color: #ecfdf5;
+        }
+        .s3-bat { display: inline-flex; gap: 3px; background: rgba(0,0,0,0.45); padding: 3px 6px; border-radius: 999px; }
+        .s3-bat i { width: 8px; height: 5px; border-radius: 2px; background: #34d399; display: block; }
+
+        /* ================= تصميم المشهد 4: مرحلة سيد الطفولية ================= */
+        .s4-kid-showcase {
+            width: 100%; max-width: 920px; background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(224,242,254,0.92));
+            color: #0f172a; border: 4px solid #38bdf8; border-radius: 30px; padding: clamp(14px, 2.5vmin, 24px);
+            display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: center;
+            box-shadow: 0 20px 50px rgba(14, 165, 233, 0.32);
+        }
+        .s4-flashcard {
+            background: #ffffff; border: 3px solid #7dd3fc; border-radius: 22px; padding: 16px;
+            text-align: center; display: flex; flex-direction: column; gap: 8px;
+        }
+        .s4-word { font-size: clamp(2rem, 5vmin, 3.2rem); font-weight: 900; }
+        .s4-red { color: #e11d48; }
+        .s4-balloons-zone { display: flex; justify-content: center; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .s4-balloon {
+            width: 78px; height: 94px; border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 900; color: #0f172a; border: 3px solid #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            animation: floatB 2.4s infinite ease-in-out alternate;
+        }
+        @keyframes floatB { from { transform: translateY(5px); } to { transform: translateY(-9px); } }
+        .s4-balloon.win { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; transform: scale(1.1); box-shadow: 0 0 22px rgba(34,197,94,0.75); }
+
+        /* ================= تصميم المشهد 5: مختبر فيثاغورس والمعلم الذكي ================= */
+        .s5-split {
+            width: 100%; max-width: 980px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+        }
+        .s5-lab-card, .s5-tutor-card {
+            background: rgba(9, 25, 20, 0.92); border: 2.5px solid #eab308; border-radius: 24px;
+            padding: 16px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .s5-tutor-bubble {
+            background: #f0fdf4; color: #0f172a; border: 2px solid #10b981;
+            padding: 10px 14px; border-radius: 16px; font-size: 0.86rem; font-weight: 800; line-height: 1.7;
+        }
+        .s5-stu-bubble {
+            align-self: flex-end; background: #059669; color: #fff; border: 1.5px solid #fde047;
+            padding: 7px 14px; border-radius: 16px; font-size: 0.84rem; font-weight: 800;
+        }
+
+        /* ================= تصميم المشهد 6: مرحلة صاحب وميثاق التخصص 70% ================= */
+        .s6-major-showcase {
+            width: 100%; max-width: 940px; background: linear-gradient(145deg, rgba(30, 15, 8, 0.92), rgba(6, 48, 36, 0.94));
+            border: 3px solid #fde047; border-radius: 28px; padding: 20px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .s6-tracks-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .s6-track-pill {
+            padding: 12px 10px; border-radius: 18px; background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(253,224,71,0.35); text-align: center; font-weight: 800; font-size: 0.88rem;
+        }
+        .s6-track-pill.crowned {
+            background: linear-gradient(135deg, #fef08a, #eab308); color: #0f172a; border-color: #ffffff;
+            transform: scale(1.05); box-shadow: 0 8px 24px rgba(234, 179, 8, 0.45); font-weight: 900;
+        }
+        .s6-meter-bar {
+            width: 100%; height: 28px; border-radius: 999px; overflow: hidden; display: flex;
+            border: 2px solid #fde047; font-size: 0.8rem; font-weight: 900;
+        }
+
+        /* ================= تصميم المشهد 7: المزامنة السحابية والمدارس الخاصة ================= */
+        .s7-portals-grid {
+            width: 100%; max-width: 960px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+        }
+        .s7-portal-card {
+            background: rgba(15, 23, 42, 0.9); border: 2.5px solid #34d399; border-radius: 24px;
+            padding: 18px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .s7-portal-card.teacher-card { border-color: #fde047; }
+
+        /* ================= تصميم المشهد 8: التطبيق المتكامل والخاتمة ================= */
+        .s8-finale-wrap {
+            display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; width: 100%;
+        }
+        .s8-devices-row {
+            display: flex; align-items: center; justify-content: center;
+            gap: clamp(36px, 6vw, 72px); flex-wrap: wrap; width: 100%;
+        }
+        /* مساحة حجز مربعة آمنة (220×220) تحيط بالهاتف حتى لا يلمس النص أبداً عند دورانه أفقياً */
+        .s8-phone-safe-zone {
+            width: 224px; height: 224px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; position: relative;
+        }
+        .s8-phone-mockup {
+            width: 112px; height: 196px; border-radius: 22px; border: 4px solid #fde047;
+            background: linear-gradient(145deg, #065f46, #022c22);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 6px; box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+            transform-origin: center center;
+            animation: rotatePhoneDemo 5s ease-in-out infinite;
+        }
+        @keyframes rotatePhoneDemo {
+            0%, 32% { transform: rotate(0deg); }
+            50%, 82% { transform: rotate(-90deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .s8-domain-cta {
+            padding: 12px 34px; border-radius: 999px;
+            background: linear-gradient(135deg, #fde047, #eab308);
+            color: #064e3b; font-size: clamp(1.2rem, 3vmin, 1.75rem); font-weight: 900;
+            letter-spacing: 1px; direction: ltr; text-decoration: none;
+            box-shadow: 0 0 35px rgba(250, 204, 21, 0.65);
+        }
+
+        /* ================= شريط الترجمة السينمائية والتحكم السفلي ================= */
+        .cinematic-footer {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            padding: 8px 16px 12px;
+            background: linear-gradient(to top, rgba(2, 12, 9, 0.96) 0%, rgba(2, 12, 9, 0.72) 70%, transparent 100%);
+        }
+        .subtitle-box {
+            max-width: 1020px; width: 96%; text-align: center;
+            padding: 14px 26px; border-radius: 20px;
+            background: rgba(4, 31, 23, 0.96); border: 2.5px solid #fde047;
+            font-family: 'Cairo', Tahoma, sans-serif;
+            font-weight: 800;
+            font-size: clamp(1.18rem, 2.85vmin, 1.68rem);
+            color: #ffffff;
+            line-height: 1.8;
+            letter-spacing: 0.2px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.65);
+        }
+        .bottom-controls-bar {
+            display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+            transition: opacity 0.3s ease;
+        }
+        .ctrl-btn {
+            padding: 5px 14px; border-radius: 999px; border: 1.5px solid rgba(253, 224, 71, 0.55);
+            background: rgba(15, 23, 42, 0.9); color: #fef08a;
+            font-family: inherit; font-size: 0.78rem; font-weight: 800; cursor: pointer;
+        }
+        .ctrl-btn:hover { background: #065f46; }
+        .scene-dots { display: inline-flex; gap: 6px; align-items: center; }
+        .s-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.28);
+            cursor: pointer; border: none; transition: all 0.25s ease;
+        }
+        .s-dot.active { width: 26px; border-radius: 999px; background: #fde047; }
+
+        @media (max-width: 760px) {
+            .s2-pillars-grid, .s4-kid-showcase, .s5-split, .s7-portals-grid { grid-template-columns: 1fr; }
+            .s6-tracks-row { grid-template-columns: repeat(2, 1fr); }
+            .s3-seals-col { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="cosmos-canvas"></canvas>
+
+    <!-- شاشة الانطلاق -->
+    <div id="launch-overlay">
+        <div class="launch-emblem">أ</div>
+        <h1 class="launch-title">مَدْرَسَةُ العِلْم</h1>
+        <p class="launch-sub">
+            العرض الإعلاني السينمائي المبرمج بالمشاهد الثمانية الكاملة لمنصة «مدرسة العلم» (٢١ عاماً من البناء المعرفي والتربوي).
+        </p>
+        <div class="launch-opts">
+            <button type="button" class="launch-btn" onclick="startPromoShow(false)">
+                <span>▶</span><span>تشغيل العرض السينمائي الكامل</span>
+            </button>
+            <button type="button" class="launch-btn clean-rec" onclick="startPromoShow(true)">
+                <span>🎥</span><span>وضع التصوير النظيف بملء الشاشة (بدون أزرار)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- المسرح الرئيسي للمشاهد الثمانية -->
+    <div id="stage-viewport">
+        <div class="top-cinema-bar">
+            <div class="brand-pill">
+                <span class="brand-pill-dot">ع</span>
+                <span style="font-weight:900; color:#fef08a; font-size:0.92rem;">مدرسة العلم • al-3lm.org</span>
+            </div>
+            <div class="scene-badge" id="scene-counter-badge">المشهد ١ من ٨</div>
+        </div>
+
+        <div class="scenes-stack">
+            <!-- المشهد 1: الافتتاحية وشجرة العلم ومدار الأبجدية -->
+            <section class="promo-scene active" data-scene="0">
+                <h2 class="scene-headline">اطلبوا العلم من المهد إلى اللحد</h2>
+                <div class="s1-orbit-box">
+                    <div class="abjad-ring" id="s1-abjad-ring"></div>
+                    <div class="s1-center-tree">
+                        <span class="s1-alif">أ — غ</span>
+                        <span style="font-size:0.86rem; font-weight:900; color:#a7f3d0; margin-top:6px;">٢١ عاماً من البناء المتصل</span>
+                    </div>
+                </div>
+                <div class="scene-tagline">صرحٌ تربوي يجمع العلوم واللغة والأخلاق في ميزانٍ واحد</div>
+            </section>
+
+            <!-- المشهد 2: المراحل العمرية الثلاث -->
+            <section class="promo-scene" data-scene="1">
+                <h2 class="scene-headline">سباعيات العمر الثلاث (٢١ عاماً)</h2>
+                <div class="s2-pillars-grid">
+                    <div class="stage-pillar p1">
+                        <span class="pillar-name" style="color:#7dd3fc;">سَيِّد</span>
+                        <span class="pillar-years" style="color:#bae6fd;">1 – 7</span>
+                        <div style="font-weight:900; color:#fff;">بناء البدن والنفس</div>
+                        <p class="pillar-desc">إيقاظ الحواس من الصفر المعرفي بالقصص والبطاقات الملونة والتطبيق المادي والورقي.</p>
+                    </div>
+                    <div class="stage-pillar p2">
+                        <span class="pillar-name" style="color:#fde047;">عَبْد</span>
+                        <span class="pillar-years" style="color:#fef08a;">8 – 14</span>
+                        <div style="font-weight:900; color:#fff;">بناء العقل والأفعال</div>
+                        <p class="pillar-desc">ترويض العقل عبر دورات الأبجدية والمختبرات التفاعلية الحية والمعلم المحاور الذكي.</p>
+                    </div>
+                    <div class="stage-pillar p3">
+                        <span class="pillar-name" style="color:#fda4af;">صَاحِب</span>
+                        <span class="pillar-years" style="color:#fecdd3;">15 – 21</span>
+                        <div style="font-weight:900; color:#fff;">بناء الروح والمجتمع</div>
+                        <p class="pillar-desc">عقد ميثاق التخصص البرهاني (٧٠٪) والثقافة الموسوعية (٣٠٪) للتأهيل الجامعي والإنتاج.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- المشهد 3: خريطة الـ 28 حرفاً والأختام السبعة -->
+            <section class="promo-scene" data-scene="2">
+                <h2 class="scene-headline">٢٨ مداراً أبجدياً × ٧ أختام لبناء الجوارح</h2>
+                <div class="s3-map-seals-wrap">
+                    <div class="s3-mini-map" id="s3-mini-map"></div>
+                    <div class="s3-seals-col">
+                        <div class="s3-seal-row"><span>🗣️ ١. المنطق والبيان</span><span class="s3-bat"><i></i><i></i><i></i></span><span>⭐</span></div>
+                        <div class="s3-seal-row"><span>👁️ ٢. البصيرة والفن الهندسي</span><span class="s3-bat"><i></i><i></i><i></i></span><span>⭐</span></div>
+                        <div class="s3-seal-row"><span>👂 ٣. الرنين والتناغم الصوتي</span><span class="s3-bat"><i></i><i></i><i></i></span><span>⭐</span></div>
+                        <div class="s3-seal-row"><span>✋ ٤. الرياضيات والمقدار</span><span class="s3-bat"><i></i><i></i><i></i></span><span>⭐</span></div>
+                        <div class="s3-seal-row"><span>👣 ٥. الحركة والاتزان البدني</span><span class="s3-bat"><i></i><i></i><i></i></span><span>⭐</span></div>
+                        <div class="s3-seal-row"><span>🍏 ٦. العلوم وسنن الكون</span><span class="s3-bat"><i></i><i></i><i></i></span><span>⭐</span></div>
+                        <div class="s3-seal-row"><span>💧 ٧. الآداب وتزكية السلوك</span><span class="s3-bat"><i></i><i></i><i></i></span><span>⭐</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- المشهد 4: مرحلة سيد (1 - 7 سنوات) -->
+            <section class="promo-scene" data-scene="3">
+                <h2 class="scene-headline">مرحلة «سيد»: متعة الحرف وبناء الحواس</h2>
+                <div class="s4-kid-showcase">
+                    <div class="s4-flashcard">
+                        <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:900; color:#0284c7;">
+                            <span>👁️ البصيرة والكتابة</span><span>حرف الباء (٢)</span>
+                        </div>
+                        <div class="s4-word"><span class="s4-red">بَـ</span>يْتٌ • كِتَـ<span class="s4-red">ـابٌ</span></div>
+                        <div style="font-size:0.88rem; font-weight:800; color:#15803d; background:#dcfce7; padding:6px 12px; border-radius:999px;">
+                            🪙 الحج (فضة) ⬅ الصدقة (ذهب) ⬅ الهدية (💎) ⬅ الكتابة الورقية ✍️
+                        </div>
+                    </div>
+                    <div class="s4-balloons-zone">
+                        <div class="s4-balloon" style="background:radial-gradient(circle at 30% 30%,#fde68a,#facc15);">مَ</div>
+                        <div class="s4-balloon win">بَ ✔️</div>
+                        <div class="s4-balloon" style="background:radial-gradient(circle at 30% 30%,#fbcfe8,#f472b6);">سُ</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- المشهد 5: مرحلة عبد (المختبرات الحية والمعلم المحاور الذكي) -->
+            <section class="promo-scene" data-scene="4">
+                <h2 class="scene-headline">مرحلة «عبد»: مختبرات حية ومعلم ذكي يحاورك</h2>
+                <div class="s5-split">
+                    <div class="s5-lab-card">
+                        <div style="color:#fde047; font-weight:900; font-size:0.9rem;">🧪 مختبر الهندسة والمقدار الحي (فيثاغورس)</div>
+                        <canvas id="s5-pyth-canvas" width="380" height="175" style="width:100%; height:165px; background:rgba(0,0,0,0.3); border-radius:14px;"></canvas>
+                    </div>
+                    <div class="s5-tutor-card">
+                        <div style="display:flex; align-items:center; gap:8px; color:#fef08a; font-weight:900; font-size:0.9rem;">
+                            <span style="background:#eab308; color:#064e3b; width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">؟</span>
+                            <span>مُعَلِّمُ مَدْرَسَةِ العِلْمِ (حوار متدرج بالصوت والنص)</span>
+                        </div>
+                        <div class="s5-stu-bubble">🎙️ كيف نعرف الوتر في المثلث القائم يا معلمي؟</div>
+                        <div class="s5-tutor-bubble">
+                            مربّع الوتر يساوي مجموع مربّعَي الضلعين القائمين (أ² + ب² = جـ²).<br>
+                            جرّب في المختبر أمامك: إذا كان الضلعان ٣ و ٤، فكم يكون الوتر؟ 🌟
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- المشهد 6: مرحلة صاحب (ميثاق التخصص 70% والمجيب الآلي) -->
+            <section class="promo-scene" data-scene="5">
+                <h2 class="scene-headline">مرحلة «صاحب»: ميثاق التخصص والبرهان الجامعي</h2>
+                <div class="s6-major-showcase">
+                    <div style="text-align:center; font-weight:900; color:#fde047; font-size:0.95rem;">
+                        🔒 ميثاق التخصص الأساسي الثابت + المجيب الآلي التخصصي المدمج
+                    </div>
+                    <div class="s6-tracks-row">
+                        <div class="s6-track-pill crowned">👑 كتاب البيان وفقه اللغة (٧٠٪)</div>
+                        <div class="s6-track-pill">📐 كتاب الرياضيات والخوارزميات</div>
+                        <div class="s6-track-pill">🔬 كتاب العلوم والطب الحيوي</div>
+                        <div class="s6-track-pill">🏛️ كتاب الآداب والعمران</div>
+                    </div>
+                    <div class="s6-meter-bar">
+                        <div style="width:70%; background:linear-gradient(90deg,#eab308,#ca8a04); color:#0f172a; display:flex; align-items:center; justify-content:center;">٧٠٪ عمق التخصص الأساسي</div>
+                        <div style="width:30%; background:#059669; color:#fff; display:flex; align-items:center; justify-content:center;">٣٠٪ ثقافة عامة (٦ مواد)</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- المشهد 7: السحابة الموحدة وبوابتا التلميذ والمعلم -->
+            <section class="promo-scene" data-scene="6">
+                <h2 class="scene-headline">مزامنة سحابية فورية ومدارس خاصة للمعلمين</h2>
+                <div class="s7-portals-grid">
+                    <div class="s7-portal-card">
+                        <div style="color:#6ee7b7; font-weight:900; font-size:1.05rem;">🎓 بوابة التلميذ الشخصية (student)</div>
+                        <p style="font-size:0.86rem; line-height:1.7; color:#e2e8f0; font-weight:700;">
+                            • دخول فوري بالاسم وكلمة المرور من أي هاتف أو حاسوب في العالم.<br>
+                            • سجل علامات حيّ، خريطة حروف، ومنبّه إشعارات يومي لموعد الدرس.<br>
+                            • ترقية آلية للصف التالي فور إتمام متطلبات السنة بنسبة ١٠٠٪.
+                        </p>
+                    </div>
+                    <div class="s7-portal-card teacher-card">
+                        <div style="color:#fde047; font-weight:900; font-size:1.05rem;">🏫 بوابة المعلمين والمدارس الخاصة (teachers)</div>
+                        <p style="font-size:0.86rem; line-height:1.7; color:#e2e8f0; font-weight:700;">
+                            • تأسيس مدارس خاصة مستقلة بمعرّف فريد (ELM-XXXX).<br>
+                            • اختيار الصفوف المفعّلة (١–٢١) وتعديل النصوص والصور مباشرةً.<br>
+                            • متابعة تقدم التلاميذ وتصدير الحزم التعليمية بأمانٍ وتشـفير.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- المشهد 8: التطبيق المرن والاستدامة اللامركزية والخاتمة -->
+            <section class="promo-scene" data-scene="7">
+                <div class="s8-finale-wrap">
+                    <div class="s8-devices-row">
+                        <div class="s8-phone-safe-zone">
+                            <div class="s8-phone-mockup">
+                                <span style="font-size:1.8rem;">📲</span>
+                                <span style="font-size:0.76rem; font-weight:900; color:#fef08a;">تطبيق المنصة</span>
+                                <span style="font-size:0.7rem; font-weight:800; color:#a7f3d0;">أفقي ↔️ عمودي ↕️</span>
+                            </div>
+                        </div>
+                        <div style="text-align:right; max-width:460px; padding: 0 8px;">
+                            <h2 class="scene-headline" style="text-align:right; margin-bottom:8px;">مَدْرَسَةُ العِلْم</h2>
+                            <p style="font-size:0.95rem; color:#d1fae5; font-weight:800; line-height:1.75;">
+                                تطبيقٌ مرن يعمل على كل شاشة، يجمع سرعة السحابة واستدامة الشبكات اللامركزية (IPFS).. لبناء الإنسان من الحرف الأول وحتى التخصص.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="index.html" target="_top" class="s8-domain-cta">al-3lm.org</a>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- الشريط السفلي للترجمة السينمائية وأزرار التحكم -->
+    <footer class="cinematic-footer">
+        <div class="subtitle-box" id="voiceover-subtitle"></div>
+        <div class="bottom-controls-bar">
+            <button type="button" class="ctrl-btn" onclick="prevPromoScene()">❯ السابق</button>
+            <button type="button" class="ctrl-btn" id="play-pause-btn" onclick="togglePromoPlay()">⏸ إيقاف مؤقت</button>
+            <button type="button" class="ctrl-btn" onclick="nextPromoScene()">التالي ❮</button>
+            <div class="scene-dots" id="scene-dots"></div>
+            <button type="button" class="ctrl-btn" id="voice-toggle-btn" onclick="togglePromoVoice()">🔊 التعليق الصوتي: مفعل</button>
+            <button type="button" class="ctrl-btn" onclick="toggleFullscreenPromo()">⛶ ملء الشاشة</button>
+        </div>
+    </footer>
+
+    <script>
+        const ABJAD_28 = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي','ك','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
+        const SCENES_SCRIPT = [
+            "مَاذَا لَوْ لَمْ يَكُنِ التَّعْلِيمُ فُصُولًا مُتَفَرِّقَةً، بَلْ رِحْلَةَ بِنَاءٍ وَاحِدَةً مُتَّصِلَةً تُرَافِقُ الإِنْسَانَ مِنْ سَنَتِهِ الأُولَى وَحَتَّى الحَادِيَةِ وَالعِشْرِينَ؟ هُنَا تَبْدَأُ مَدْرَسَةُ العِلْمِ.",
+            "ثَلَاثُ مَرَاحِلَ تُوَاكِبُ فِطْرَةَ نُمُوِّ الإِنْسَانِ: سَبْعٌ أُولَى لِبِنَاءِ البَدَنِ وَالحَوَاسِّ فِي مَرْحَلَةِ سَيِّد، وَسَبْعٌ ثَانِيَةٌ لِبِنَاءِ العَقْلِ وَالمَلَكَاتِ فِي مَرْحَلَةِ عَبْد، وَسَبْعٌ ثَالِثَةٌ لِلتَّخَصُّصِ وَبِنَاءِ الرُّوحِ وَالمُجْتَمَعِ فِي مَرْحَلَةِ صَاحِب.",
+            "فِي كُلِّ دَوْرَةٍ دِرَاسِيَّةٍ يَطُوفُ المُتَعَلِّمُ حَوْلَ ثَمَانِيَةٍ وَعِشْرِينَ حَرْفًا عَلَى تَرْتِيبِ أَبْجَدْ هَوَّزْ، وَيَبْنِي فِي كُلِّ حَرْفٍ سَبْعَةَ أَخْتَامٍ تُزَكِّي اللِّسَانَ وَالبَصِيرَةَ وَالسَّمْعَ وَالمِقْدَارَ وَالحَرَكَةَ وَالعُلُومَ وَالآدَابَ.",
+            "فِي مَرْحَلَةِ الطُّفُولَةِ سَيِّد، يَتَحَوَّلُ الدَّرْسُ إِلَى بَهْجَةٍ تَفَاعُلِيَّةٍ: حَرَكَاتٌ وَمُدُودٌ مُلَوَّنَةٌ، وَأَسْئِلَةُ بَالُونَاتٍ، وَمَحَطَّةُ صَدَقَةٍ تَجْبُرُ الخَطَأَ بِالتَّعَلُّمِ، لِتَنْتَهِيَ بِالتَّطْبِيقِ العَمَلِيِّ وَالكِتَابَةِ الوَرَقِيَّةِ.",
+            "وَمَعَ بُلُوغِ مَرْحَلَةِ عَبْد، يَخْتَبِرُ الطَّالِبُ القَوَانِينَ الهَنْدَسِيَّةَ وَالكُسُورَ بِيَدِهِ دَاخِلَ المُخْتَبَرَاتِ الحَيَّةِ، وَيُحَاوِرُ مُعَلِّمَهُ الذَّكِيَّ بِالصَّوْتِ أَوِ الكِتَابَةِ لِيَتَدَرَّجَ مَعَهُ فِي الفَهْمِ وَالاسْتِنْتَاجِ.",
+            "وَفِي مَرْحَلَةِ صَاحِب، يَعْقِدُ الشَّابُّ مِيثَاقَ تَخَصُّصِهِ الأَسَاسِيِّ بِوَزْنِ سَبْعِينَ بِالمِائَةِ مِنْ مُعَدَّلِهِ، مَعَ إِتْقَانِ الثَّقَافَةِ العَامَّةِ، وَمُحَاوَرَةِ المُجِيبِ الآلِيِّ المُتَخَصِّصِ فِي البَرَاهِينِ الجَامِعِيَّةِ.",
+            "مَنْظُومَةٌ سَحَابِيَّةٌ تَحْفَظُ تَقَدُّمَ كُلِّ تِلْمِيذٍ تِلْقَائِيًّا لِيَفْتَحَ حِسَابَهُ مِنْ أَيِّ جِهَازٍ فِي العَالَمِ مَعَ مُنَبِّهِ دِرَاسَةٍ يَوْمِيٍّ، وَتَمْنَحُ كُلَّ مُعَلِّمٍ قُدْرَةَ إِنْشَاءِ مَدْرَسَتِهِ الخَاصَّةِ وَتَخْصِيصِ دُرُوسِهَا.",
+            "بِتَصْمِيمٍ يَعْمَلُ كَتَطْبِيقٍ مَرِنٍ أُفُقِيًّا وَعَمُودِيًّا عَلَى كُلِّ شَاشَةٍ، وَهَنْدَسَةٍ تَجْمَعُ سُرْعَةَ السَّحَابَةِ وَاسْتِدَامَةَ الشَّبَكَاتِ اللَّامَرْكَزِيَّةِ.. مَدْرَسَةُ العِلْمِ: مِنَ المَهْدِ إِلَى اللَّحْدِ."
+        ];
+
+        const toAr = (n) => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+        // ١. بناء حلقة الـ 28 حرفاً في المشهد الأول + خريطة المشهد الثالث
+        (function buildVisualElements() {
+            const ring = document.getElementById('s1-abjad-ring');
+            ABJAD_28.forEach((ch, idx) => {
+                const angle = (idx / 28) * Math.PI * 2 - Math.PI / 2;
+                const rPct = 50;
+                const x = 50 + Math.cos(angle) * 46;
+                const y = 50 + Math.sin(angle) * 46;
+                const el = document.createElement('div');
+                el.className = 'abjad-node';
+                el.style.left = x + '%';
+                el.style.top = y + '%';
+                el.textContent = ch;
+                ring.appendChild(el);
+            });
+
+            const mapGrid = document.getElementById('s3-mini-map');
+            const rowColors = ['#b91c1c', '#92400e', '#ca8a04', '#065f46'];
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 7; c++) {
+                    const idx = c * 4 + r;
+                    const d = document.createElement('div');
+                    d.className = 's3-cell';
+                    d.style.background = rowColors[r];
+                    d.textContent = ABJAD_28[idx];
+                    mapGrid.appendChild(d);
+                }
+            }
+
+            const dotsWrap = document.getElementById('scene-dots');
+            SCENES_SCRIPT.forEach((_, i) => {
+                const b = document.createElement('button');
+                b.className = 's-dot' + (i === 0 ? ' active' : '');
+                b.onclick = () => goToScene(i);
+                dotsWrap.appendChild(b);
+            });
+        })();
+
+        // ٢. خلفية الكواكب والنجوم الهادئة + رسم متحرك لمختبر فيثاغورس في المشهد الخامس
+        (function startCanvasAnimations() {
+            const cv = document.getElementById('cosmos-canvas');
+            const ctx = cv.getContext('2d');
+            let stars = [];
+            const resize = () => {
+                cv.width = window.innerWidth; cv.height = window.innerHeight;
+                stars = Array.from({ length: 75 }, () => ({
+                    x: Math.random() * cv.width, y: Math.random() * cv.height,
+                    r: Math.random() * 1.8 + 0.4, s: Math.random() * 0.35 + 0.1
+                }));
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            let pythPhase = 0;
+            const pythCv = document.getElementById('s5-pyth-canvas');
+            const pCtx = pythCv.getContext('2d');
+
+            function loop() {
+                ctx.clearRect(0, 0, cv.width, cv.height);
+                const grad = ctx.createRadialGradient(cv.width * 0.5, cv.height * 0.3, 40, cv.width * 0.5, cv.height * 0.5, cv.width * 0.8);
+                grad.addColorStop(0, 'rgba(6, 78, 59, 0.38)');
+                grad.addColorStop(1, 'rgba(4, 19, 15, 0.96)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, cv.width, cv.height);
+
+                ctx.fillStyle = 'rgba(253, 224, 71, 0.65)';
+                stars.forEach(st => {
+                    st.y -= st.s;
+                    if (st.y < 0) st.y = cv.height;
+                    ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2); ctx.fill();
+                });
+
+                // تحريك مختبر فيثاغورس الحي في المشهد الخامس
+                pythPhase += 0.025;
+                const a = 3 + Math.sin(pythPhase) * 1.1;
+                const b = 4 + Math.cos(pythPhase * 0.8) * 1.1;
+                const c = Math.sqrt(a * a + b * b);
+                pCtx.clearRect(0, 0, pythCv.width, pythCv.height);
+                const ox = 115, oy = 142, sc = 20;
+                pCtx.beginPath();
+                pCtx.moveTo(ox, oy);
+                pCtx.lineTo(ox, oy - a * sc);
+                pCtx.lineTo(ox + b * sc, oy);
+                pCtx.closePath();
+                pCtx.fillStyle = 'rgba(250, 204, 21, 0.28)';
+                pCtx.fill();
+                pCtx.strokeStyle = '#fde047';
+                pCtx.lineWidth = 3;
+                pCtx.stroke();
+                pCtx.fillStyle = '#a7f3d0';
+                pCtx.font = 'bold 15px Cairo, sans-serif';
+                pCtx.textAlign = 'right';
+                pCtx.fillText(`أ = ${a.toFixed(1)} | ب = ${b.toFixed(1)}`, 360, 58);
+                pCtx.fillStyle = '#fef08a';
+                pCtx.font = 'bold 17px Cairo, sans-serif';
+                pCtx.fillText(`الوتر جـ = ${c.toFixed(2)}`, 360, 96);
+
+                requestAnimationFrame(loop);
+            }
+            loop();
+
+            // وميض متتابع لخلايا خريطة الأبجدية في المشهد الثالث
+            let pulseIdx = 0;
+            setInterval(() => {
+                const cells = document.querySelectorAll('#s3-mini-map .s3-cell');
+                cells.forEach(c => c.classList.remove('lit-pulse'));
+                if (cells.length) {
+                    cells[pulseIdx % cells.length].classList.add('lit-pulse');
+                    pulseIdx++;
+                }
+            }, 420);
+        })();
+
+        // ٣. محرك الموسيقى الهادئة الخلفية (Web Audio Ambient Chord) + التعليق الصوتي الآلي والانتقال بين المشاهد
+        let currentScene = 0;
+        let isPlaying = false;
+        let isVoiceEnabled = true;
+        let sceneTimer = null;
+        let audioCtx = null;
+
+        function playTransitionChime() {
+            try {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return;
+                if (!audioCtx) audioCtx = new Ctx();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                [523.25, 659.25, 783.99].forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    g.gain.setValueAtTime(0.001, now + i * 0.08);
+                    g.gain.exponentialRampToValueAtTime(0.06, now + i * 0.08 + 0.03);
+                    g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.65);
+                    osc.connect(g); g.connect(audioCtx.destination);
+                    osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.7);
+                });
+            } catch (_) {}
+        }
+
+        function speakSceneText(text, onDone) {
+            clearTimeout(sceneTimer);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            const fallbackMs = Math.max(6500, text.length * 78);
+
+            if (!isVoiceEnabled || !('speechSynthesis' in window)) {
+                if (isPlaying) sceneTimer = setTimeout(onDone, fallbackMs);
+                return;
+            }
+
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'ar-SA';
+            u.rate = 0.9;
+            u.pitch = 0.95;
+            const voices = window.speechSynthesis.getVoices() || [];
+            const arVoice = voices.find(v => v.lang.startsWith('ar') && /natural|online|hamed|zariyah|google/i.test(v.name))
+                         || voices.find(v => v.lang.startsWith('ar'));
+            if (arVoice) u.voice = arVoice;
+
+            let finished = false;
+            const complete = () => {
+                if (finished) return;
+                finished = true;
+                clearTimeout(sceneTimer);
+                if (isPlaying) sceneTimer = setTimeout(onDone, 1200);
+            };
+            u.onend = complete;
+            u.onerror = () => { if (isPlaying) sceneTimer = setTimeout(onDone, fallbackMs); };
+
+            sceneTimer = setTimeout(complete, fallbackMs + 3500);
+            window.speechSynthesis.speak(u);
+        }
+
+        function renderScene(idx) {
+            currentScene = (idx + SCENES_SCRIPT.length) % SCENES_SCRIPT.length;
+            document.querySelectorAll('.promo-scene').forEach((sec, i) => {
+                sec.classList.toggle('active', i === currentScene);
+            });
+            document.querySelectorAll('.s-dot').forEach((d, i) => {
+                d.classList.toggle('active', i === currentScene);
+            });
+            document.getElementById('scene-counter-badge').textContent = `المشهد ${toAr(currentScene + 1)} من ${toAr(SCENES_SCRIPT.length)}`;
+            const subTxt = SCENES_SCRIPT[currentScene];
+            document.getElementById('voiceover-subtitle').textContent = subTxt;
+            playTransitionChime();
+
+            if (isPlaying) {
+                speakSceneText(subTxt, () => {
+                    if (currentScene < SCENES_SCRIPT.length - 1) {
+                        renderScene(currentScene + 1);
+                    } else {
+                        isPlaying = false;
+                        document.getElementById('play-pause-btn').textContent = '▶ إعادة العرض';
+                    }
+                });
+            }
+        }
+
+        window.startPromoShow = function(cleanRecordMode) {
+            if (cleanRecordMode) {
+                document.body.classList.add('clean-record-mode');
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
+            }
+            const ov = document.getElementById('launch-overlay');
+            ov.style.opacity = '0';
+            setTimeout(() => { ov.style.display = 'none'; }, 550);
+            isPlaying = true;
+            document.getElementById('play-pause-btn').textContent = '⏸ إيقاف مؤقت';
+            renderScene(0);
+        };
+
+        window.goToScene = function(idx) {
+            renderScene(idx);
+        };
+        window.nextPromoScene = function() {
+            renderScene(currentScene + 1);
+        };
+        window.prevPromoScene = function() {
+            renderScene(currentScene - 1);
+        };
+        window.togglePromoPlay = function() {
+            isPlaying = !isPlaying;
+            document.getElementById('play-pause-btn').textContent = isPlaying ? '⏸ إيقاف مؤقت' : '▶ متابعة العرض';
+            if (isPlaying) {
+                if (currentScene === SCENES_SCRIPT.length - 1) renderScene(0);
+                else renderScene(currentScene);
+            } else {
+                clearTimeout(sceneTimer);
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        };
+        window.togglePromoVoice = function() {
+            isVoiceEnabled = !isVoiceEnabled;
+            document.getElementById('voice-toggle-btn').textContent = isVoiceEnabled ? '🔊 التعليق الصوتي: مفعل' : '🔇 التعليق الصوتي: صامت';
+            if (!isVoiceEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+        };
+        window.toggleFullscreenPromo = function() {
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
+        };
+
+        // اختصارات لوحة المفاتيح أثناء التسجيل (مسافة للإيقاف/التشغيل، والأسهم للتنقل، وحرف H لإخفاء الأزرار)
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') { e.preventDefault(); togglePromoPlay(); }
+            else if (e.code === 'ArrowLeft') nextPromoScene();
+            else if (e.code === 'ArrowRight') prevPromoScene();
+            else if (e.key === 'h' || e.key === 'H') document.body.classList.toggle('clean-record-mode');
+        });
+
+        if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+        document.getElementById('voiceover-subtitle').textContent = SCENES_SCRIPT[0];
+        if (new URLSearchParams(window.location.search).get('autostart') === '1') {
+            setTimeout(() => startPromoShow(false), 180);
+        }
+    </script>
+</body>
+</html>
