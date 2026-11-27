@@ -484,6 +484,50 @@
             background: #f8fafc;
             color: #334155;
         }
+
+        /* شريط التبديل الفوري بين التخصصات الأربعة للأستاذ والإدارة */
+        .teacher-major-switcher {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 1.8px solid #d97706;
+            border-radius: 999px;
+            padding: 3px 8px;
+            flex-wrap: wrap;
+        }
+        .teacher-major-switcher.show {
+            display: inline-flex;
+        }
+        .tms-label {
+            font-size: 0.74rem;
+            font-weight: 900;
+            color: #78350f;
+            margin-left: 2px;
+        }
+        .tms-btn {
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1.5px solid #fcd34d;
+            background: #ffffff;
+            color: #451a03;
+            font-family: inherit;
+            font-size: 0.74rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.16s ease;
+        }
+        .tms-btn:hover {
+            border-color: #b45309;
+            background: #fef9c3;
+        }
+        .tms-btn.active-tms {
+            background: linear-gradient(135deg, #b45309, #78350f);
+            color: #fef08a;
+            border-color: #fde047;
+            box-shadow: 0 3px 8px rgba(120, 53, 15, 0.32);
+        }
+
         .book-source-badge.major-book {
             background: linear-gradient(135deg, #fef08a, #fde047);
             border-color: #ca8a04;
@@ -1234,6 +1278,13 @@
                     <button type="button" class="st-pill" id="st-pill-1" data-st="1">❓ سُؤَالٌ وَمُحَاوَرَةٌ</button>
                     <button type="button" class="st-pill" id="st-pill-2" data-st="2">🌱 تَطْبِيقٌ</button>
                     <span class="book-source-badge" id="book-source-badge">📚 المَنْهَجُ العَامُّ</span>
+                    <div class="teacher-major-switcher" id="teacher-major-switcher" role="group" aria-label="تبديل التخصص للمعلم">
+                        <span class="tms-label">👨‍🏫 التخصص:</span>
+                        <button type="button" class="tms-btn" data-t-major="2">البَيَانُ</button>
+                        <button type="button" class="tms-btn" data-t-major="4">الرِّيَاضِيَّاتُ</button>
+                        <button type="button" class="tms-btn" data-t-major="6">العُلُومُ</button>
+                        <button type="button" class="tms-btn" data-t-major="7">الآدَابُ</button>
+                    </div>
                 </div>
 
                 <div class="media-controls-cluster" id="station-media-bar">
@@ -1266,7 +1317,14 @@
             <div class="major-locked-banner">
                 <div class="locked-major-title-row">
                     <span id="locked-major-name-display">👑 المَادَّةُ الأَسَاسِيَّةُ المُثَبَّتَةُ: —</span>
-                    <span class="locked-pill-tag">🔒 مِيثَاقٌ ثَابِتٌ (٧٠٪)</span>
+                    <span class="locked-pill-tag" id="locked-pill-status-tag">🔒 مِيثَاقٌ ثَابِتٌ (٧٠٪)</span>
+                </div>
+                <div class="teacher-major-switcher" id="map-teacher-major-switcher" style="align-self:center; margin-top:4px;">
+                    <span class="tms-label">👨‍🏫 معاينة كتاب التخصص للأستاذ:</span>
+                    <button type="button" class="tms-btn" data-t-major="2">البَيَانُ</button>
+                    <button type="button" class="tms-btn" data-t-major="4">الرِّيَاضِيَّاتُ</button>
+                    <button type="button" class="tms-btn" data-t-major="6">العُلُومُ</button>
+                    <button type="button" class="tms-btn" data-t-major="7">الآدَابُ</button>
                 </div>
                 <div class="grade-breakdown-row">
                     <span>👑 المَادَّةُ الأَسَاسِيَّةُ: <strong id="calc-major-pts" style="color:#b45309;">٠ / ٧٠</strong></span>
@@ -1762,26 +1820,86 @@ window.Stage3LabEngine = (function() {
     SafeStore.set('selected_school_year', activeYear);
     SafeStore.set('selected_stage3_year', activeYear);
 
-    let isFreeExplore = SafeStore.get('stage3_explore_mode') === 'true';
+    const isTeacherMode = (urlParams.get('from') === 'teachers') || (SafeStore.get('al3lm_active_role') === 'teacher');
+    const rawStuUser = String(SafeStore.get('al3lm_active_student_user') || '').trim().toLowerCase();
+    const stuPrefix = (!isTeacherMode && rawStuUser) ? `s3_u_${rawStuUser}_` : 's3_';
 
-    const MAJOR_SEAL_KEY = 's3_committed_major_seal';
-    const MAJOR_LOCKED_KEY = 's3_committed_major_locked';
+    // ترحيل تلقائي لبيانات الطالب الأول إذا كانت محفوظة بالمفتاح العام القديم قبل ربطها باسم المستخدم
+    if (!isTeacherMode && rawStuUser) {
+        try {
+            const accounts = JSON.parse(SafeStore.get('al3lm_student_accounts_v1') || '{}');
+            const stuObj = accounts[rawStuUser];
+            if (stuObj && stuObj.progress) {
+                const legacyMajor = stuObj.progress['s3_committed_major_seal'];
+                const legacyLocked = stuObj.progress['s3_committed_major_locked'];
+                if (legacyLocked === '1' && legacyMajor && !SafeStore.get(`${stuPrefix}committed_major_locked`)) {
+                    SafeStore.set(`${stuPrefix}committed_major_seal`, String(legacyMajor));
+                    SafeStore.set(`${stuPrefix}committed_major_locked`, '1');
+                }
+            }
+        } catch (_) {}
+    }
+
+    // للأستاذ: وضع الاستكشاف الحر مفعّل افتراضياً ليتمكن من تصفح جميع الوحدات والأختام بحرية
+    let isFreeExplore = isTeacherMode
+        ? (SafeStore.get('stage3_teacher_explore_mode') !== 'false')
+        : (SafeStore.get(`${stuPrefix}explore_mode`) === 'true');
+
+    const MAJOR_SEAL_KEY = `${stuPrefix}committed_major_seal`;
+    const MAJOR_LOCKED_KEY = `${stuPrefix}committed_major_locked`;
+    const TEACHER_PREVIEW_MAJOR_KEY = 's3_teacher_preview_major';
+
     // التخصص محصور حصراً في المواد الأربع: البيان (2)، الرياضيات (4)، العلوم (6)، الآداب (7)
-    // بينما تبقى: المنطق (1)، الصوت والقرآن (3)، والرياضة (5) مواداً عامة فقط (٥٪)
     const ELIGIBLE_MAJOR_SEALS = [2, 4, 6, 7];
+    const SHORT_MAJOR_NAMES = { 2: 'البَيَانُ', 4: 'الرِّيَاضِيَّاتُ', 6: 'العُلُومُ', 7: 'الآدَابُ' };
 
     function isMajorCommitted() {
+        if (isTeacherMode) {
+            try { return sessionStorage.getItem('s3_teacher_picked_session') === '1'; } catch (_) { return false; }
+        }
         const val = parseInt(SafeStore.get(MAJOR_SEAL_KEY) || '0', 10);
         return SafeStore.get(MAJOR_LOCKED_KEY) === '1' && ELIGIBLE_MAJOR_SEALS.includes(val);
     }
+
     function getMajorSeal() {
+        if (isTeacherMode) {
+            const paramMaj = parseInt(urlParams.get('major') || '0', 10);
+            if (ELIGIBLE_MAJOR_SEALS.includes(paramMaj)) return paramMaj;
+            const tVal = parseInt(SafeStore.get(TEACHER_PREVIEW_MAJOR_KEY) || '0', 10);
+            return ELIGIBLE_MAJOR_SEALS.includes(tVal) ? tVal : 2;
+        }
         const val = parseInt(SafeStore.get(MAJOR_SEAL_KEY) || '0', 10);
         return ELIGIBLE_MAJOR_SEALS.includes(val) ? val : 2;
     }
+
     function lockMajorChoiceOnce(sealNum) {
-        if (isMajorCommitted() || !ELIGIBLE_MAJOR_SEALS.includes(sealNum)) return;
+        if (!ELIGIBLE_MAJOR_SEALS.includes(sealNum)) return;
+        if (isTeacherMode) {
+            SafeStore.set(TEACHER_PREVIEW_MAJOR_KEY, String(sealNum));
+            try { sessionStorage.setItem('s3_teacher_picked_session', '1'); } catch (_) {}
+            return;
+        }
+        if (isMajorCommitted()) return;
         SafeStore.set(MAJOR_SEAL_KEY, String(sealNum));
         SafeStore.set(MAJOR_LOCKED_KEY, '1');
+        if (typeof window.syncAl3lmStudentProgressSnapshot === 'function') {
+            window.syncAl3lmStudentProgressSnapshot();
+        }
+    }
+
+    function switchTeacherMajorTo(sealNum) {
+        if (!isTeacherMode || !ELIGIBLE_MAJOR_SEALS.includes(sealNum)) return;
+        SafeStore.set(TEACHER_PREVIEW_MAJOR_KEY, String(sealNum));
+        try { sessionStorage.setItem('s3_teacher_picked_session', '1'); } catch (_) {}
+        activeSeal = sealNum;
+        activeStation = 0;
+        currentSlideIdx = 0;
+        isLabMode = false;
+        currentQuizData = null;
+        showToast(`👨‍🏫 تَمَّ التَّحْوِيلُ إِلَى كِتَابِ التَّخَصُّصِ: ${SEAL_NAMES[sealNum]} 👑`);
+        if (document.getElementById('map-modal').classList.contains('open')) renderMapModal();
+        if (document.getElementById('major-map-modal').classList.contains('open')) renderMajorMapModal();
+        renderActiveView();
     }
 
     let playWeek = 1;
@@ -1836,8 +1954,8 @@ window.Stage3LabEngine = (function() {
         return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    function starKey(y, w, s) { return `s3_star_y${y}_w${w}_s${s}`; }
-    function stationKey(y, w, s) { return `s3_st_y${y}_w${w}_s${s}`; }
+    function starKey(y, w, s) { return `${stuPrefix}star_y${y}_w${w}_s${s}`; }
+    function stationKey(y, w, s) { return `${stuPrefix}st_y${y}_w${w}_s${s}`; }
 
     function hasSealStar(y, w, s) { return SafeStore.get(starKey(y, w, s)) === '1'; }
     function setSealStar(y, w, s) {
@@ -1999,15 +2117,31 @@ window.Stage3LabEngine = (function() {
             gate.classList.remove('open');
             return false;
         }
+        const badgeTop = gate.querySelector('.gate-badge-top');
+        const headingEl = gate.querySelector('h1');
+        const warnEl = gate.querySelector('.gate-warning-note');
         const grid = document.getElementById('gate-tracks-grid');
         const confirmBtn = document.getElementById('gate-confirm-btn');
-        let pendingChoice = null;
+
+        if (isTeacherMode) {
+            if (badgeTop) badgeTop.textContent = '👨‍🏫 وَضْعُ الأُسْتَاذِ وَالإِدَارَةِ — مُعَايَنَةُ الفِئَاتِ التَّخَصُّصِيَّةِ';
+            if (headingEl) headingEl.textContent = 'اخْتَرِ الفِئَةَ التَّخَصُّصِيَّةَ الَّتِي تَوَدُّ مُعَايَنَتَهَا أَوْ تَدْرِيسَهَا الآنَ';
+            if (warnEl) {
+                warnEl.style.background = '#ecfdf5';
+                warnEl.style.borderColor = '#34d399';
+                warnEl.style.color = '#065f46';
+                warnEl.innerHTML = '🔓 <strong>مِيزَةُ الأُسْتَاذِ:</strong> لَا يُقْفَلُ التَّخَصُّصُ عَلَى المُعَلِّمِ؛ يُمْكِنُكَ التَّبْدِيلُ فَوْراً بَيْنَ التَّخَصُّصَاتِ الأَرْبَعَةِ فِي أَيِّ لَحْظَةٍ مِنَ الشَّرِيطِ العُلْوِيِّ لِلدَّرْسِ.';
+            }
+            confirmBtn.textContent = '👨‍🏫 فَتْحُ هٰذَا التَّخَصُّصِ لِلمُعَايَنَةِ (قَابِلٌ لِلتَّبْدِيلِ دَوْماً)';
+        }
+
+        let pendingChoice = isTeacherMode ? getMajorSeal() : null;
         grid.innerHTML = '';
 
         ELIGIBLE_MAJOR_SEALS.forEach(s => {
             const card = document.createElement('button');
             card.type = 'button';
-            card.className = 'gate-track-option';
+            card.className = 'gate-track-option' + (pendingChoice === s ? ' selected' : '');
             card.innerHTML = `
                 <div class="gate-track-title">
                     <span>${SEAL_NAMES[s]}</span>
@@ -2024,15 +2158,20 @@ window.Stage3LabEngine = (function() {
             grid.appendChild(card);
         });
 
+        confirmBtn.disabled = !pendingChoice;
+
         confirmBtn.onclick = () => {
             if (!pendingChoice) return;
             lockMajorChoiceOnce(pendingChoice);
             activeSeal = pendingChoice;
-            playWeek = getMaxUnlockedWeek(activeYear);
+            playWeek = isTeacherMode ? 1 : getMaxUnlockedWeek(activeYear);
             selectedMapCycle = getCycleOfWeek(playWeek);
             gate.classList.remove('open');
             playChime(true);
-            showToast(`تَمَّ تَثْبِيتُ مَادَّتِكَ الأَسَاسِيَّةِ فِي: ${SEAL_NAMES[pendingChoice]} 👑`);
+            showToast(isTeacherMode
+                ? `👨‍🏫 فُتِحَ تَخَصُّصُ: ${SEAL_NAMES[pendingChoice]} — يُمْكِنُكَ تَبْدِيلُهُ مِنَ الشَّرِيطِ العُلْوِيِّ 👑`
+                : `تَمَّ تَثْبِيتُ مَادَّتِكَ الأَسَاسِيَّةِ فِي: ${SEAL_NAMES[pendingChoice]} 👑`
+            );
             renderActiveView();
         };
 
@@ -2090,8 +2229,17 @@ window.Stage3LabEngine = (function() {
         srcBadge.setAttribute('role', isMajorActive ? 'button' : 'status');
         srcBadge.title = isMajorActive ? 'افتح الخريطة التخصصية (٢٨ حرفاً)' : 'الثقافة العامة';
         srcBadge.textContent = isMajorActive
-            ? '👑 خَرِيطَةُ التَّخَصُّصِ (٧٠٪)'
+            ? `👑 خَرِيطَةُ التَّخَصُّصِ: ${SHORT_MAJOR_NAMES[major] || ''} (٧٠٪)`
             : '📚 الثَّقَافَةُ العَامَّةُ (٥٪)';
+
+        // إظهار وتحديث شريط تبديل التخصص للأستاذ في الشريط العلوي ونافذة الخريطة
+        document.querySelectorAll('.teacher-major-switcher').forEach(sw => {
+            sw.classList.toggle('show', isTeacherMode);
+            sw.querySelectorAll('[data-t-major]').forEach(b => {
+                const mVal = parseInt(b.getAttribute('data-t-major'), 10);
+                b.classList.toggle('active-tms', mVal === major);
+            });
+        });
 
         const mediaBar = document.getElementById('station-media-bar');
         if (mediaBar) {
@@ -2737,8 +2885,13 @@ window.Stage3LabEngine = (function() {
         const major = getMajorSeal();
         const sc = calculateYearWeightedScore(activeYear);
 
-        document.getElementById('locked-major-name-display').textContent =
-            `👑 المَادَّةُ الأَسَاسِيَّةُ المُثَبَّتَةُ: ${SEAL_NAMES[major]} (${UNIVERSITY_TRACKS[major]})`;
+        document.getElementById('locked-major-name-display').textContent = isTeacherMode
+            ? `👨‍🏫 التَّخَصُّصُ المُعَايَنُ حَالِيّاً: ${SEAL_NAMES[major]} (${UNIVERSITY_TRACKS[major]})`
+            : `👑 المَادَّةُ الأَسَاسِيَّةُ المُثَبَّتَةُ: ${SEAL_NAMES[major]} (${UNIVERSITY_TRACKS[major]})`;
+        const pillTag = document.getElementById('locked-pill-status-tag');
+        if (pillTag) {
+            pillTag.textContent = isTeacherMode ? '🔓 مُعَايَنَةٌ حُرَّةٌ لِلأُسْتَاذِ (٧٠٪)' : '🔒 مِيثَاقٌ ثَابِتٌ (٧٠٪)';
+        }
 
         document.getElementById('calc-major-pts').textContent = `${toAr(sc.majorPoints)} / ٧٠`;
         document.getElementById('calc-minor-pts').textContent = `${toAr(sc.minorPoints)} / ٣٠`;
@@ -2882,7 +3035,7 @@ window.Stage3LabEngine = (function() {
     };
     document.getElementById('major-toggle-mode-btn').onclick = () => {
         isFreeExplore = !isFreeExplore;
-        SafeStore.set('stage3_explore_mode', isFreeExplore ? 'true' : 'false');
+        SafeStore.set(isTeacherMode ? 'stage3_teacher_explore_mode' : `${stuPrefix}explore_mode`, isFreeExplore ? 'true' : 'false');
         syncModeButtonsUI();
         renderMajorMapModal();
         renderActiveView();
@@ -2890,7 +3043,7 @@ window.Stage3LabEngine = (function() {
 
     document.getElementById('toggle-mode-btn').onclick = () => {
         isFreeExplore = !isFreeExplore;
-        SafeStore.set('stage3_explore_mode', isFreeExplore ? 'true' : 'false');
+        SafeStore.set(isTeacherMode ? 'stage3_teacher_explore_mode' : `${stuPrefix}explore_mode`, isFreeExplore ? 'true' : 'false');
         syncModeButtonsUI();
         renderMapModal();
         renderActiveView();
@@ -2971,9 +3124,17 @@ window.Stage3LabEngine = (function() {
     }
 
 
+    document.querySelectorAll('[data-t-major]').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const targetM = parseInt(btn.getAttribute('data-t-major'), 10);
+            switchTeacherMajorTo(targetM);
+        };
+    });
+
     if (!checkAndRenderOnboardingGate()) {
         activeSeal = getMajorSeal();
-        playWeek = getMaxUnlockedWeek(activeYear);
+        playWeek = isTeacherMode ? 1 : getMaxUnlockedWeek(activeYear);
         selectedMapCycle = getCycleOfWeek(playWeek);
         renderActiveView();
     }

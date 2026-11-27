@@ -1,5 +1,5 @@
 // Service Worker المحدّث لمنصة مدرسة العلم (Network-First للصفحات لضمان ظهور أي تعديل على GitHub فوراً)
-const CACHE_NAME = 'al3lm-pwa-v9';
+const CACHE_NAME = 'al3lm-pwa-v10';
 const CORE_ASSETS = [
   './manifest.json',
   './icon-192.png',
