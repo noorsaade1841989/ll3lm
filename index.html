@@ -2,9 +2,25 @@
 <html lang="ar" dir="rtl">
 <head>
     <script>
-    (function autoRefreshStaleCacheV6() {
+    // تحديد هل المنصة تعمل كنسخة محلية (ملف محلي / حاسوب / شبكة مدرسة LAN) أم كموقع ويب رسمي على الإنترنت
+    window.__AL3LM_IS_LOCAL = (function detectLocalEnvironment() {
+        var proto = window.location.protocol;
+        var host = window.location.hostname || '';
+        if (proto === 'file:') return true;
+        if (/^(localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[0-1])\.)/i.test(host)) return true;
+        if (host.endsWith('.local')) return true;
         try {
-            var VER = 'al3lm_layout_v21';
+            if (new URLSearchParams(window.location.search).get('local') === '1') return true;
+            if (localStorage.getItem('al3lm_force_local_mode') === '1') return true;
+        } catch (e) {}
+        return false;
+    })();
+
+    // على الويب الرسمي فقط يتم تحديث الكاش العالق تلقائياً، أما في النسخة المحلية فلا يُمسح شيء أبداً إلا بطلب المستخدم
+    (function autoRefreshWebOnly() {
+        if (window.__AL3LM_IS_LOCAL) return;
+        try {
+            var VER = 'al3lm_layout_v22';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -22,8 +38,6 @@
     window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
         window.__al3lmDeferredPrompt = e;
-        var btn = document.getElementById('install-pwa-btn');
-        if (btn) btn.classList.add('ready-to-install');
     });
     window.addEventListener('appinstalled', function() {
         window.__al3lmDeferredPrompt = null;
@@ -89,7 +103,7 @@
             flex: 1 0 auto;
         }
 
-        /* ================= ١. الشريط العلوي الموحّد (الهوية يميناً + تثبيت التطبيق والدخول يساراً) ================= */
+        /* ================= ١. الشريط العلوي النظيف (دائرة مدرسة العلم تفتح وتغلق القائمة عند الضغط عليها) ================= */
         .top-portal-bar {
             width: 100%;
             background: rgba(6, 28, 22, 0.92);
@@ -101,27 +115,68 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            flex-wrap: wrap;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38);
             position: sticky;
             top: 10px;
-            z-index: 900;
+            z-index: 950;
         }
         .top-brand-group {
             display: inline-flex;
             align-items: center;
             gap: 12px;
             min-width: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        .brand-circle-trigger {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            padding: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        .brand-circle-trigger:hover {
+            transform: scale(1.06);
+        }
+        .brand-circle-trigger.menu-open .top-brand-logo {
+            border-color: #fef08a;
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.32), 0 6px 18px rgba(0, 0, 0, 0.5);
         }
         .top-brand-logo {
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             object-fit: cover;
             border: 2.5px solid #eab308;
             background: #064e3b;
-            flex-shrink: 0;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .circle-menu-badge {
+            position: absolute;
+            bottom: -2px;
+            left: -2px;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fde047, #ca8a04);
+            color: #06281e;
+            border: 1.5px solid #06281e;
+            font-size: 0.68rem;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.45);
         }
         .top-brand-titles {
             display: flex;
@@ -145,67 +200,130 @@
             text-overflow: ellipsis;
         }
 
-        .top-actions-group {
-            display: inline-flex;
-            align-items: center;
+        /* القائمة المنسدلة التي تظهر عند الضغط على دائرة مدرسة العلم وتختفي عند الضغط عليها ثانيةً أو خارجها */
+        .circle-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 14px;
+            width: min(310px, calc(100vw - 28px));
+            background: rgba(6, 30, 23, 0.98);
+            backdrop-filter: blur(16px);
+            border: 2.5px solid #eab308;
+            border-radius: 22px;
+            padding: 12px;
+            display: none;
+            flex-direction: column;
             gap: 8px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
+            box-shadow: 0 22px 50px rgba(0, 0, 0, 0.72);
+            z-index: 1000;
         }
-        .install-app-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            height: 40px;
-            padding: 0 16px;
-            border-radius: 999px;
-            border: 1.8px solid #34d399;
-            background: rgba(6, 78, 59, 0.85);
-            color: #ecfdf5;
+        .circle-dropdown-menu.open {
+            display: flex;
+            animation: popMenuIn 0.18s ease forwards;
+        }
+        @keyframes popMenuIn {
+            from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .circle-menu-item {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(254, 240, 138, 0.25);
+            background: rgba(15, 23, 42, 0.72);
+            color: #f8fafc;
             font-family: inherit;
-            font-size: 0.82rem;
+            font-size: 0.86rem;
             font-weight: 900;
             cursor: pointer;
-            transition: transform 0.18s ease, background 0.18s ease;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: right;
+            transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
         }
-        .install-app-btn:hover { transform: translateY(-1px); background: #047857; }
-        .install-app-btn.ready-to-install {
-            background: linear-gradient(135deg, #ecfdf5, #a7f3d0);
-            border-color: #10b981;
-            color: #064e3b;
+        .circle-menu-item:hover {
+            background: rgba(5, 150, 105, 0.35);
+            border-color: #fde047;
+            transform: translateX(-2px);
+        }
+        .circle-menu-item.gold-primary {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #06281e;
+            border-color: #fef08a;
+        }
+        .circle-menu-item.gold-primary:hover {
+            filter: brightness(1.06);
+        }
+        .circle-menu-divider {
+            height: 1px;
+            background: rgba(234, 179, 8, 0.3);
+            margin: 2px 4px;
         }
 
-        .top-auth-btn {
-            display: inline-flex;
+        /* عناصر النسخة المحلية فقط: مخفية تماماً على الويب العام ولا تظهر إلا في النسخة المحلية */
+        .local-only-control {
+            display: none !important;
+        }
+        body.is-local-copy .local-only-control {
+            display: flex !important;
+        }
+        body.is-local-copy .circle-menu-divider.local-only-control {
+            display: block !important;
+        }
+
+        /* شريط التحديث الاختياري: مخصص للنسخة المحلية فقط عند وجود تحديث جديد */
+        .local-update-prompt-bar {
+            display: none;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(6, 78, 59, 0.95));
+            border: 2px solid #fbbf24;
+            border-radius: 20px;
+            padding: 10px 16px;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
-            height: 40px;
-            padding: 0 18px;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.35);
+        }
+        body.is-local-copy .local-update-prompt-bar.show {
+            display: flex;
+        }
+        .local-upd-msg {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: #fef9c3;
+            line-height: 1.6;
+        }
+        .local-upd-btns {
+            display: inline-flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .local-upd-yes {
+            padding: 6px 15px;
             border-radius: 999px;
-            border: 2px solid #fde047;
+            border: 1.5px solid #fde047;
             background: linear-gradient(135deg, #eab308, #ca8a04);
             color: #06281e;
             font-family: inherit;
-            font-size: 0.84rem;
+            font-size: 0.79rem;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 6px 18px rgba(234, 179, 8, 0.35);
-            transition: transform 0.18s ease, filter 0.18s ease;
-            white-space: nowrap;
         }
-        .top-auth-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
-        .top-auth-btn.signup-variant {
-            background: rgba(15, 23, 42, 0.9);
-            color: #fef08a;
-            border-color: #eab308;
-            box-shadow: none;
+        .local-upd-no {
+            padding: 6px 13px;
+            border-radius: 999px;
+            border: 1.5px solid #94a3b8;
+            background: transparent;
+            color: #e2e8f0;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
         }
-        .top-auth-btn.signup-variant:hover { background: #1e293b; }
 
-        /* شريط الجلسة النشطة (بنفس العرض الموحد إن كان المستخدم مسجلاً) */
+        /* شريط الجلسة النشطة */
         .active-session-bar {
             display: none;
             width: 100%;
@@ -235,7 +353,7 @@
             cursor: pointer;
         }
 
-        /* ================= ٢. لوحة المراحل الثلاث التفاعلية (بنفس العرض ١٠٠٪ وبدون جملة استكشف الصفوف الزائدة) ================= */
+        /* ================= ٢. لوحة المراحل الثلاث التفاعلية ================= */
         .stages-showcase-box {
             width: 100%;
             min-height: clamp(240px, 38dvh, 355px);
@@ -360,7 +478,7 @@
             .idx-stage-card:hover .idx-stg-details { max-height: 135px; opacity: 1; margin-top: 8px; }
         }
 
-        /* ================= ٣. قسم الترحيب والعرض التعريفي المنفصلين بانتظام (بنفس العرض الكلي ١٠٠٪) ================= */
+        /* ================= ٣. قسم الترحيب والعرض التعريفي الأصلي ================= */
         .welcome-and-promo-grid {
             width: 100%;
             display: grid;
@@ -392,15 +510,7 @@
             color: #d1fae5;
             line-height: 1.75;
         }
-        .welcome-quick-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
 
-        /* بطاقة العرض التعريفي المستقلة بتصميم سينمائي أنيق */
         .promo-feature-card {
             background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(6, 78, 59, 0.92));
             border: 2px solid #eab308;
@@ -464,7 +574,7 @@
             font-weight: 900;
         }
 
-        /* ================= ٤. تذييل الصفحة والسياسات بنفس العرض الموحد ================= */
+        /* ================= ٤. تذييل الصفحة الأصلي النظيف كما كان ================= */
         .unified-footer {
             width: 100%;
             background: rgba(6, 24, 19, 0.88);
@@ -493,7 +603,7 @@
         }
         .unified-footer-links a:hover { color: #ffffff; }
 
-        /* ================= ٥. قائمة / نافذة تسجيل الدخول وإنشاء الحساب (تظهر عند الضغط على زر Sign In / Sign Up العلوي) ================= */
+        /* ================= ٥. نافذة تسجيل الدخول وإنشاء الحساب ================= */
         #auth-drawer-backdrop {
             position: fixed;
             inset: 0;
@@ -771,7 +881,7 @@
         }
         .feedback-box.ok { color: #15803d; }
 
-        /* ================= ٦. نافذة الأزرار السبعة لكل مرحلة (وضع الاستكشاف الحر) ================= */
+        /* ================= ٦. نافذة الأزرار السبعة لكل مرحلة ================= */
         .idx-modal-toggle { display: none; }
         .idx-stage-modal {
             position: fixed;
@@ -874,7 +984,7 @@
             box-shadow: 0 8px 20px rgba(234, 179, 8, 0.45);
         }
 
-        /* ================= ٧. نافذة العرض التعريفي ومساعدة التثبيت ================= */
+        /* ================= ٧. نافذة العرض التعريفي ================= */
         #promo-lightbox-modal {
             position: fixed;
             inset: 0;
@@ -931,10 +1041,209 @@
         #promo-iframe-container { width: 100%; min-height: 100%; }
         #promo-iframe-container iframe { width: 100%; min-height: 760px; height: auto; border: none; display: block; overflow: hidden; }
 
+        /* ================= ٨. النوافذ المنبثقة (التثبيت الثلاثي / الدليل الشامل / المشاركة المحلية الحصرية) ================= */
+        .clean-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 12400;
+            background: rgba(2, 12, 9, 0.88);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            overflow-y: auto;
+        }
+        .clean-modal-backdrop.open { display: flex; }
+        .clean-modal-shell {
+            position: relative;
+            width: 100%;
+            max-width: 740px;
+            max-height: 92dvh;
+            overflow-y: auto;
+            background: linear-gradient(155deg, #06281e 0%, #091526 100%);
+            color: #f8fafc;
+            border: 3px solid #eab308;
+            border-radius: 28px;
+            padding: 22px 20px;
+            box-shadow: 0 28px 70px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: right;
+        }
+        .clean-modal-close {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(254, 240, 138, 0.5);
+            background: rgba(15, 23, 42, 0.85);
+            color: #fef08a;
+            font-size: 1.35rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .clean-modal-close:hover { background: #be123c; color: #fff; }
+        .clean-modal-hdr { padding-left: 42px; }
+        .clean-modal-hdr h3 {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(1.35rem, 3.4vmin, 1.8rem);
+            color: #fef08a;
+            margin-bottom: 4px;
+        }
+        .clean-modal-hdr p {
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: #a7f3d0;
+            line-height: 1.6;
+        }
+
+        .install-three-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .install-choice-card {
+            background: rgba(15, 23, 42, 0.78);
+            border: 2px solid rgba(52, 211, 153, 0.45);
+            border-radius: 20px;
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .install-choice-card.recommended {
+            border-color: #fde047;
+            background: linear-gradient(160deg, rgba(6, 78, 59, 0.85), rgba(15, 23, 42, 0.9));
+        }
+        .choice-tag {
+            align-self: flex-start;
+            font-size: 0.7rem;
+            font-weight: 900;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(254, 240, 138, 0.18);
+            color: #fef08a;
+            border: 1px solid rgba(254, 240, 138, 0.5);
+        }
+        .choice-title {
+            font-size: 0.98rem;
+            font-weight: 900;
+            color: #ffffff;
+        }
+        .choice-desc {
+            font-size: 0.79rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            line-height: 1.65;
+        }
+        .choice-btn {
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 999px;
+            border: 1.8px solid #fde047;
+            background: linear-gradient(135deg, #059669, #064e3b);
+            color: #fef08a;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .choice-btn:hover { filter: brightness(1.1); }
+
+        .guide-tabs-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            border-bottom: 1.5px solid rgba(234, 179, 8, 0.35);
+            padding-bottom: 10px;
+        }
+        .guide-tab-pill {
+            padding: 7px 14px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(167, 243, 208, 0.35);
+            background: rgba(15, 23, 42, 0.75);
+            color: #cbd5e1;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .guide-tab-pill.active {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #06281e;
+            border-color: #fef08a;
+        }
+        .guide-tab-pane { display: none; flex-direction: column; gap: 12px; }
+        .guide-tab-pane.active { display: flex; }
+        .guide-block {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1.5px solid rgba(167, 243, 208, 0.35);
+            border-radius: 18px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .guide-block h4 { color: #fef08a; font-size: 0.95rem; font-weight: 900; }
+        .guide-block p, .guide-block li { color: #e2e8f0; font-size: 0.82rem; font-weight: 700; line-height: 1.75; }
+        .guide-block ul { padding-right: 18px; display: flex; flex-direction: column; gap: 4px; }
+
+        .lan-grid-card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 2px solid rgba(56, 189, 248, 0.5);
+            border-radius: 20px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: center;
+        }
+        .qr-holder-white {
+            width: 146px;
+            height: 146px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #fde047;
+            margin: 0 auto;
+        }
+        .mini-pill-action {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1.5px solid #fde047;
+            background: rgba(15, 23, 42, 0.9);
+            color: #fef08a;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .mini-pill-action.gold {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #06281e;
+        }
+        .modal-status-line {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #fde047;
+            min-height: 20px;
+        }
+
         #pwa-help-modal {
             position: fixed;
             inset: 0;
-            z-index: 12500;
+            z-index: 12800;
             background: rgba(2, 12, 9, 0.86);
             backdrop-filter: blur(6px);
             display: none;
@@ -958,11 +1267,11 @@
             box-shadow: 0 24px 60px rgba(0,0,0,0.65);
         }
 
-        /* ================= ٨. التجاوب التام مع الوضع العمودي والأفقي والهواتف الصغيرة والحواسيب ================= */
+        /* ================= ٩. التجاوب التام ================= */
         @media (max-width: 860px) {
-            .welcome-and-promo-grid {
-                grid-template-columns: 1fr;
-            }
+            .welcome-and-promo-grid { grid-template-columns: 1fr; }
+            .install-three-grid { grid-template-columns: 1fr; }
+            .lan-grid-card { grid-template-columns: 1fr; text-align: center; }
         }
         @media (max-width: 720px) {
             .page-master-wrap {
@@ -971,19 +1280,13 @@
             }
             .top-portal-bar {
                 padding: 10px 12px;
-                justify-content: space-between;
             }
-            .top-brand-logo {
-                width: 40px;
-                height: 40px;
+            .brand-circle-trigger, .top-brand-logo {
+                width: 42px;
+                height: 42px;
             }
             .top-brand-titles span {
                 display: none;
-            }
-            .install-app-btn, .top-auth-btn {
-                height: 36px;
-                padding: 0 12px;
-                font-size: 0.76rem;
             }
             .stages-showcase-box {
                 flex-direction: column;
@@ -1007,7 +1310,6 @@
                 justify-content: center;
             }
         }
-        /* وضع الهاتف الأفقي المنخفض الارتفاع (Landscape Mobile): تبقى المراحل الثلاث متجاورة أفقياً بقياس متناسق مريح */
         @media (orientation: landscape) and (max-height: 520px) {
             .top-portal-bar {
                 position: static;
@@ -1027,34 +1329,70 @@
     </style>
 </head>
 <body>
+    <script>
+    if (window.__AL3LM_IS_LOCAL) {
+        document.body.classList.add('is-local-copy');
+    }
+    </script>
 
     <div class="page-master-wrap">
 
-        <!-- ١. الشريط العلوي الموحّد (شعار مدرسة العلم + زر تنزيل التطبيق المستقل + أزرار تسجيل الدخول وإنشاء الحساب) -->
-        <header class="top-portal-bar">
-            <div class="top-brand-group">
-                <img src="icon-512.png" onerror="this.src='cc.ico'" alt="مدرسة العلم" class="top-brand-logo">
+        <!-- ١. الشريط العلوي الهادئ بدون ازدحام أزرار: الضغط على دائرة مدرسة العلم يظهر القائمة ويخفيها -->
+        <header class="top-portal-bar" id="top-portal-bar">
+            <div class="top-brand-group" onclick="toggleCirclePortalMenu(event)">
+                <button type="button" class="brand-circle-trigger" id="brand-circle-btn" aria-label="قائمة مدرسة العلم" title="اضغط لإظهار أو إخفاء القائمة">
+                    <img src="icon-512.png" onerror="this.src='cc.ico'" alt="مدرسة العلم" class="top-brand-logo">
+                    <span class="circle-menu-badge" id="circle-menu-badge">☰</span>
+                </button>
                 <div class="top-brand-titles">
                     <h1>مدرسة العلم</h1>
                     <span>اطلبوا العلم من المهد إلى اللحد — بوابة التلميذ والمعلم</span>
                 </div>
             </div>
 
-            <div class="top-actions-group">
-                <button type="button" class="install-app-btn" id="install-pwa-btn" onclick="triggerInstallApp()">
-                    <span>📲</span>
-                    <span id="install-pwa-btn-txt">تثبيت التطبيق</span>
-                </button>
-                <button type="button" class="top-auth-btn" onclick="openAuthDrawer('login')">
+            <!-- قائمة الخيارات التي تظهر وتختفي عند الضغط على دائرة مدرسة العلم -->
+            <nav class="circle-dropdown-menu" id="circle-portal-menu" onclick="event.stopPropagation()">
+                <button type="button" class="circle-menu-item gold-primary" onclick="closeCirclePortalMenu(); openAuthDrawer('login')">
                     <span>🔑</span>
                     <span>تسجيل الدخول</span>
                 </button>
-                <button type="button" class="top-auth-btn signup-variant" onclick="openAuthDrawer('register')">
+                <button type="button" class="circle-menu-item" onclick="closeCirclePortalMenu(); openAuthDrawer('register')">
                     <span>✨</span>
-                    <span>إنشاء حساب</span>
+                    <span>إنشاء حساب جديد</span>
                 </button>
-            </div>
+                <div class="circle-menu-divider"></div>
+                <button type="button" class="circle-menu-item" onclick="closeCirclePortalMenu(); openInstallChoicesModal()">
+                    <span>📲</span>
+                    <span>تثبيت / تحميل التطبيق</span>
+                </button>
+                <button type="button" class="circle-menu-item" onclick="closeCirclePortalMenu(); openGuideModal()">
+                    <span>📘</span>
+                    <span>دليل المنصة الشامل</span>
+                </button>
+
+                <!-- هذان الزران مخفيان تماماً على الموقع العادي ولا يظهران إلا داخل النسخة المحلية فقط -->
+                <div class="circle-menu-divider local-only-control"></div>
+                <button type="button" class="circle-menu-item local-only-control" onclick="closeCirclePortalMenu(); openLocalLanModal()">
+                    <span>📡</span>
+                    <span>المشاركة عبر الشبكة المحلية (LAN)</span>
+                </button>
+                <button type="button" class="circle-menu-item local-only-control" onclick="closeCirclePortalMenu(); openLocalUpdateModal()">
+                    <span>🔄</span>
+                    <span>فحص التحديث بالطلب</span>
+                </button>
+            </nav>
         </header>
+
+        <!-- شريط التحديث الاختياري: لا يظهر أبداً على الموقع العادي، ويظهر فقط في النسخة المحلية إذا وُجد تحديث -->
+        <div class="local-update-prompt-bar" id="local-update-prompt-bar">
+            <div class="local-upd-msg" id="local-update-prompt-msg">
+                🔔 يتوفر تحديث جديد لمنصة «مدرسة العلم»؛ هل ترغب في تحديث نسختك المحلية الآن؟
+            </div>
+            <div class="local-upd-btns">
+                <button type="button" class="local-upd-yes" onclick="pullRemoteUpdateForLocal()">تحديث الآن</button>
+                <button type="button" class="local-upd-no" onclick="dismissLocalUpdatePrompt()">لاحقاً</button>
+            </div>
+        </div>
 
         <!-- شريط الجلسة النشطة (يظهر فقط عند تبديل الحساب) -->
         <div class="active-session-bar" id="active-session-bar">
@@ -1065,12 +1403,12 @@
             </div>
         </div>
 
-        <!-- ٢. صف موحّد القياس في الأعلى يجمع بطاقة الترحيب التوضيحية وبطاقة العرض التعريفي المستقلة -->
+        <!-- ٢. صف الترحيب والعرض التعريفي الأصلي -->
         <section class="welcome-and-promo-grid">
             <div class="welcome-info-card">
                 <h2>أهلاً بكم في صرح «مدرسة العلم»</h2>
                 <p>
-                    منهجٌ متكامل يرافق الإنسان واحداً وعشرين عاماً عبر ثلاث سباعيات عمرية؛ يمكنك الضغط على أي مرحلة بالأسفل لتفحّص دروسها في <strong>وضع الاستكشاف الحر</strong>، أو الدخول من الأزرار العلوية لحفظ علاماتك وتفعيل <strong>التسلسل الدراسي المنهجي</strong>.
+                    منهجٌ متكامل يرافق الإنسان واحداً وعشرين عاماً عبر ثلاث سباعيات عمرية؛ يمكنك الضغط على أي مرحلة بالأسفل لتفحّص دروسها في <strong>وضع الاستكشاف الحر</strong>، أو الضغط على <strong>دائرة شعار «مدرسة العلم»</strong> بالأعلى للدخول لحسابك وتثبيت المنصة.
                 </p>
             </div>
 
@@ -1086,9 +1424,8 @@
             </div>
         </section>
 
-        <!-- ٣. خريطة المراحل الثلاث التفاعلية (سيد • عبد • صاحب) في الأسفل بنفس القياس العرضي -->
+        <!-- ٣. خريطة المراحل الثلاث التفاعلية (سيد • عبد • صاحب) -->
         <section class="stages-showcase-box" aria-label="مراحل مدرسة العلم الثلاث">
-            <!-- المرحلة الأولى: سيد (1-7) -->
             <label for="idx-modal-stg1" class="idx-stage-card bg-st-1">
                 <div class="idx-stg-content">
                     <div class="idx-hero-title neon-silver-blue">سيد</div>
@@ -1103,7 +1440,6 @@
                 </div>
             </label>
 
-            <!-- المرحلة الثانية: عبد (8-14) -->
             <label for="idx-modal-stg2" class="idx-stage-card bg-st-2">
                 <div class="idx-stg-content">
                     <div class="idx-hero-title neon-gold-green">عبد</div>
@@ -1118,7 +1454,6 @@
                 </div>
             </label>
 
-            <!-- المرحلة الثالثة: صاحب (15-21) -->
             <label for="idx-modal-stg3" class="idx-stage-card bg-st-3">
                 <div class="idx-stg-content">
                     <div class="idx-hero-title neon-bronze-red">صاحب</div>
@@ -1134,7 +1469,7 @@
             </label>
         </section>
 
-        <!-- ٤. التذييل الموحّد القياس مع روابط السياسات -->
+        <!-- ٤. التذييل الأصلي النظيف كما كان دون أي إضافات مزعجة -->
         <footer class="unified-footer">
             <span>مدرسة العلم — اطلبوا العلم من المهد إلى اللحد</span>
             <div class="unified-footer-links">
@@ -1144,6 +1479,134 @@
             </div>
         </footer>
 
+    </div>
+
+    <!-- ================= نافذة الخيارات الثلاثة لتثبيت وتحميل المنصة ================= -->
+    <div class="clean-modal-backdrop" id="install-choices-modal" onclick="if(event.target===this) this.classList.remove('open')">
+        <div class="clean-modal-shell" onclick="event.stopPropagation()">
+            <button type="button" class="clean-modal-close" onclick="document.getElementById('install-choices-modal').classList.remove('open')">&times;</button>
+            <div class="clean-modal-hdr">
+                <h3>📲 تثبيت وتحميل «مدرسة العلم»</h3>
+                <p>اختر الطريقة المناسبة لجهازك (نسخة محلية تعمل بدون إنترنت، أو تطبيق ويب فوري):</p>
+            </div>
+            <div class="install-three-grid">
+                <div class="install-choice-card" id="choice-card-android">
+                    <span class="choice-tag" id="tag-android">أندرويد محلي</span>
+                    <div class="choice-title">🤖 تحميل محلي للأندرويد</div>
+                    <p class="choice-desc">ملف تثبيت مستقل (APK) للهواتف والأجهزة اللوحية يعمل بدون إنترنت ويمكن إرساله للآخرين مباشرةً.</p>
+                    <button type="button" class="choice-btn" onclick="startDownloadChoice('android')">تحميل نسخة الأندرويد</button>
+                </div>
+                <div class="install-choice-card" id="choice-card-pc">
+                    <span class="choice-tag" id="tag-pc">حاسوب وشبكة محلية</span>
+                    <div class="choice-title">💻 تحميل محلي للحاسوب</div>
+                    <p class="choice-desc">الحزمة الكاملة للحاسوب والفلاشة؛ تعمل بدون إنترنت وتتيح بث المنصة في المدرسة عبر الشبكة المحلية (LAN).</p>
+                    <button type="button" class="choice-btn" onclick="startDownloadChoice('pc')">تحميل حزمة الحاسوب</button>
+                </div>
+                <div class="install-choice-card" id="choice-card-web">
+                    <span class="choice-tag" id="tag-web">ويب وأجهزة Apple</span>
+                    <div class="choice-title">🌐 البقاء على الويب (PWA)</div>
+                    <p class="choice-desc">تثبيت أيقونة الموقع الفورية على iPhone و iPad والمتصفحات لاستخدام المنصة عبر الإنترنت متى احتجتها.</p>
+                    <button type="button" class="choice-btn" onclick="triggerInstallApp()">تثبيت تطبيق الويب</button>
+                </div>
+            </div>
+            <div class="modal-status-line" id="install-choice-status"></div>
+        </div>
+    </div>
+
+    <!-- ================= نافذة دليل المنصة الشامل ================= -->
+    <div class="clean-modal-backdrop" id="guide-modal" onclick="if(event.target===this) this.classList.remove('open')">
+        <div class="clean-modal-shell" onclick="event.stopPropagation()">
+            <button type="button" class="clean-modal-close" onclick="document.getElementById('guide-modal').classList.remove('open')">&times;</button>
+            <div class="clean-modal-hdr">
+                <h3>📘 الدليل التوضيحي الشامل لمنصة «مدرسة العلم»</h3>
+                <p>شرح مرتب لكل ما في الصفحة الرئيسية من مراحل ودخول وطرق تثبيت.</p>
+            </div>
+            <div class="guide-tabs-row">
+                <button type="button" class="guide-tab-pill active" id="gtab-btn-1" onclick="switchCleanGuide(1)">🌟 ١. المراحل والاستكشاف</button>
+                <button type="button" class="guide-tab-pill" id="gtab-btn-2" onclick="switchCleanGuide(2)">🔑 ٢. حساب التلميذ والمعلم</button>
+                <button type="button" class="guide-tab-pill" id="gtab-btn-3" onclick="switchCleanGuide(3)">📲 ٣. النسخ الثلاث والمحلية</button>
+            </div>
+            <div class="guide-tab-pane active" id="gtab-pane-1">
+                <div class="guide-block">
+                    <h4>🏛️ رحلة الـ ٢١ عاماً (سيد • عبد • صاحب)</h4>
+                    <ul>
+                        <li><strong>مرحلة «سيد» (١ – ٧):</strong> بناء البدن والنفس والحواس، تأسيس النطق والقراءة والحساب بالتفاعل الصوتي والبصري.</li>
+                        <li><strong>مرحلة «عبد» (٨ – ١٤):</strong> بناء العقل والأفعال بالبرهان والتجارب العملية والحوار المنهجي مع المعلم الذكي.</li>
+                        <li><strong>مرحلة «صاحب» (١٥ – ٢١):</strong> بناء الروح والمجتمع عبر ميثاق التخصص (٧٠٪ تخصص عملي و٣٠٪ ثقافة موسوعية).</li>
+                    </ul>
+                </div>
+                <div class="guide-block">
+                    <h4>👀 الاستكشاف الحر من البطاقات</h4>
+                    <p>الضغط على أي مرحلة في الواجهة يفتح سنواتها السبع في وضع الاستكشاف الحر للمعاينة المباشرة، بينما الدخول بحساب يحفظ العلامات والتسلسل الدراسي.</p>
+                </div>
+            </div>
+            <div class="guide-tab-pane" id="gtab-pane-2">
+                <div class="guide-block">
+                    <h4>🎓 التلميذ</h4>
+                    <p>اضغط على دائرة «مدرسة العلم» في الأعلى واختر <strong>إنشاء حساب جديد ⬅ أنا تلميذ</strong>، ثم حدد مرحلتك وسنتك ومدرستك لتفتح لك بوابتك الخاصة وتُحفظ علاماتك بخصوصية تامة على جهازك.</p>
+                </div>
+                <div class="guide-block">
+                    <h4>🏫 المعلم والمدارس الخاصة</h4>
+                    <p>اختر <strong>أنا معلم / إدارة</strong> لإنشاء مدرستك الخاصة وتحديد صفوفها والحصول على معرّف المدرسة (<code>ELM-XXXX</code>) لإدارة طلابك وتخصيص الدروس.</p>
+                </div>
+            </div>
+            <div class="guide-tab-pane" id="gtab-pane-3">
+                <div class="guide-block">
+                    <h4>📲 الفرق بين طرق التحميل الثلاث</h4>
+                    <ul>
+                        <li><strong>نسخة الأندرويد (APK):</strong> تطبيق محلي مستقل للهواتف يعمل بلا إنترنت.</li>
+                        <li><strong>حزمة الحاسوب المحلية:</strong> مجلد كامل يعمل بلا إنترنت على الحاسوب أو الفلاشة؛ وعند تشغيله عبر ملف <code>تشغيل_المدرسة_محليا.bat</code> يفعّل تلقائياً داخل قائمة الدائرة خيارَي <strong>المشاركة عبر الشبكة المحلية (LAN)</strong> و<strong>فحص التحديث بالطلب</strong>.</li>
+                        <li><strong>تطبيق الويب (PWA):</strong> مثالي لأجهزة Apple والمتصفحات لمن يستخدم الإنترنت.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= نافذة المشاركة المحلية (LAN) — مخصصة للنسخة المحلية فقط ================= -->
+    <div class="clean-modal-backdrop" id="local-lan-modal" onclick="if(event.target===this) this.classList.remove('open')">
+        <div class="clean-modal-shell" onclick="event.stopPropagation()">
+            <button type="button" class="clean-modal-close" onclick="document.getElementById('local-lan-modal').classList.remove('open')">&times;</button>
+            <div class="clean-modal-hdr">
+                <h3>📡 المشاركة المحلية عبر شبكة المدرسة أو المنزل (LAN)</h3>
+                <p>بثّ نسختك المحلية لزملائك وطلابك المتصلين بنفس الراوتر بدون استهلاك إنترنت.</p>
+            </div>
+            <div class="lan-grid-card">
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <p style="font-size:0.82rem; font-weight:700; color:#e2e8f0; line-height:1.65;">
+                        امسح رمز الـ QR المقابل بكاميرا أي هاتف متصل بنفس شبكة الـ Wi-Fi المحلية (أو افتح العنوان أدناه في متصفحه) لتعمل المنصة لديه فوراً:
+                    </p>
+                    <div id="lan-local-url-box" style="background:rgba(0,0,0,0.4); border:1px solid #38bdf8; border-radius:12px; padding:8px 12px; direction:ltr; text-align:center; font-weight:900; color:#7dd3fc; font-size:0.88rem; word-break:break-all;"></div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="mini-pill-action gold" onclick="copyLanUrl()">📋 نسخ عنوان الشبكة المحلية</button>
+                        <button type="button" class="mini-pill-action" onclick="exportSharedSchoolPack()">📦 تصدير حزمة إعدادات المدرسة</button>
+                        <button type="button" class="mini-pill-action" onclick="document.getElementById('import-school-pack-file').click()">📂 استيراد حزمة مدرسة</button>
+                        <input type="file" id="import-school-pack-file" accept=".json" style="display:none;" onchange="importSharedSchoolPack(event)">
+                    </div>
+                </div>
+                <div class="qr-holder-white" id="lan-qr-mount"></div>
+            </div>
+            <div class="modal-status-line" id="lan-modal-status"></div>
+        </div>
+    </div>
+
+    <!-- ================= نافذة فحص التحديث بالطلب — مخصصة للنسخة المحلية فقط ================= -->
+    <div class="clean-modal-backdrop" id="local-update-modal" onclick="if(event.target===this) this.classList.remove('open')">
+        <div class="clean-modal-shell" style="max-width:560px;" onclick="event.stopPropagation()">
+            <button type="button" class="clean-modal-close" onclick="document.getElementById('local-update-modal').classList.remove('open')">&times;</button>
+            <div class="clean-modal-hdr">
+                <h3>🔄 تحديث النسخة المحلية بالطلب</h3>
+                <p>نسختك المحلية لا تسحب أي بيانات من الإنترنت تلقائياً؛ يمكنك الفحص والتحديث يدوياً متى شئت.</p>
+            </div>
+            <div class="guide-block">
+                <p>عند الضغط على الزر أدناه، سيتحقق التطبيق من المنصة الرسمية (<code>al-3lm.org</code>) أو بوابة الـ IPFS اللامركزية لمعرفة إن كانت هناك دروس أو تحسينات جديدة:</p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                    <button type="button" class="mini-pill-action gold" onclick="checkRemoteUpdateFromLocal(true)">🔍 التحقق من وجود تحديث</button>
+                    <button type="button" class="mini-pill-action" onclick="pullRemoteUpdateForLocal()">⬇️ سحب التحديث الآن</button>
+                </div>
+                <div class="modal-status-line" id="local-upd-modal-status" style="margin-top:6px;"></div>
+            </div>
+        </div>
     </div>
 
     <!-- ================= نوافذ الاستكشاف الحر للأزرار السبعة في كل مرحلة ================= -->
@@ -1210,7 +1673,7 @@
         </div>
     </div>
 
-    <!-- ================= قائمة / نافذة تسجيل الدخول وإنشاء الحساب المنبثقة ================= -->
+    <!-- ================= نافذة تسجيل الدخول وإنشاء الحساب المنبثقة ================= -->
     <div id="auth-drawer-backdrop" onclick="if(event.target===this) closeAuthDrawer()">
         <div class="auth-shell" onclick="event.stopPropagation()">
             <button type="button" class="auth-close-x" onclick="closeAuthDrawer()" title="إغلاق">&times;</button>
@@ -1220,24 +1683,20 @@
                 <p>اختر صفتك (تلميذ أو معلم) للمتابعة إلى بوابتك الخاصة</p>
             </div>
 
-            <!-- ١. اختيار الصفة أولاً: تلميذ أو معلم -->
             <div class="role-tabs" role="tablist" aria-label="اختر نوع الحساب">
                 <button type="button" class="role-tab-btn active" id="tab-student" onclick="setRole('student')">🎓 أنا تلميذ</button>
                 <button type="button" class="role-tab-btn" id="tab-teacher" onclick="setRole('teacher')">🏫 أنا معلم / إدارة</button>
             </div>
 
-            <!-- ٢. وضع العملية: تسجيل الدخول أو إنشاء حساب جديد -->
             <div class="mode-switch-row">
                 <button type="button" class="mode-pill-btn active" id="mode-login-btn" onclick="setAuthMode('login')">🔑 تسجيل الدخول</button>
                 <button type="button" class="mode-pill-btn" id="mode-register-btn" onclick="setAuthMode('register')">✨ إنشاء حساب جديد</button>
             </div>
 
-            <!-- ٣. الحقول الأساسية -->
             <div class="field-col" id="auth-form-fields">
                 <input type="text" id="auth-username" class="auth-input" placeholder="اسم المستخدم (Username)" autocomplete="username">
                 <input type="password" id="auth-password" class="auth-input" placeholder="كلمة المرور (Password)" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleAuthSubmit()">
 
-                <!-- واجهة اختيار الصف الممتعة للتلميذ عند الاشتراك -->
                 <div class="fun-class-picker" id="student-class-picker">
                     <div class="fun-picker-label">🌟 اختر مرحلتك وعمرك الدراسي لرحلتك العلمية:</div>
                     <div class="stage-mini-cards">
@@ -1260,7 +1719,6 @@
                     </select>
                 </div>
 
-                <!-- إعدادات مدرسة المعلم عند إنشاء حساب معلم جديد -->
                 <input type="text" id="auth-school-name" class="auth-input" placeholder="اسم مدرستك الخاصة (اتركه فارغاً للتصفح العام)" style="display:none;">
                 <div class="teacher-reg-years-box" id="teacher-reg-years-box">
                     <div style="font-size:0.8rem; font-weight:800; color:#fde047;">💡 حدّد الصفوف العمرية (1 - 21) المفعّلة في مدرستك الخاصة:</div>
@@ -1277,7 +1735,7 @@
         </div>
     </div>
 
-    <!-- نافذة العرض الإعلاني التفاعلي بتمرير موحّد -->
+    <!-- نافذة العرض الإعلاني التفاعلي -->
     <div id="promo-lightbox-modal" onclick="if(event.target===this) closePromoLightbox()">
         <div class="promo-modal-frame-wrap" id="promo-scroll-host">
             <div class="promo-sticky-topbar">
@@ -1297,11 +1755,324 @@
         </div>
     </div>
 
+    <!-- مولّد QR محلي مدمج يعمل بلا إنترنت عند فتح نافذة الـ LAN في النسخة المحلية -->
+    <script>
+    (function initOfflineQR() {
+        const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+        let x = 1;
+        for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; }
+        for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+        const gfMul = (a, b) => (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]];
+        function polyRest(data, ecLen) {
+            let gen = [1];
+            for (let i = 0; i < ecLen; i++) {
+                const next = new Array(gen.length + 1).fill(0);
+                for (let j = 0; j < gen.length; j++) { next[j] ^= gen[j]; next[j + 1] ^= gfMul(gen[j], EXP[i]); }
+                gen = next;
+            }
+            const msg = Array.from(data).concat(new Array(ecLen).fill(0));
+            for (let i = 0; i < data.length; i++) {
+                const coef = msg[i];
+                if (coef !== 0) for (let j = 0; j < gen.length; j++) msg[i + j] ^= gfMul(gen[j], coef);
+            }
+            return msg.slice(data.length);
+        }
+        const VERS = [
+            null,
+            { size: 21, total: 26, ec: 7, align: [] },
+            { size: 25, total: 44, ec: 10, align: [6, 18] },
+            { size: 29, total: 70, ec: 15, align: [6, 22] },
+            { size: 33, total: 100, ec: 20, align: [6, 26] },
+            { size: 37, total: 134, ec: 26, align: [6, 30] }
+        ];
+        window.drawLocalQR = function(text, box) {
+            if (!box) return;
+            const bytes = new TextEncoder().encode(String(text || ''));
+            let vIdx = 1;
+            while (vIdx <= 5 && (VERS[vIdx].total - VERS[vIdx].ec - 3) < bytes.length) vIdx++;
+            if (vIdx > 5) { box.textContent = 'انسخ العنوان'; return; }
+            const V = VERS[vIdx], dataCap = V.total - V.ec, bits = [];
+            const push = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+            push(4, 4); push(bytes.length, 8); bytes.forEach(b => push(b, 8));
+            for (let i = 0; i < 4 && bits.length < dataCap * 8; i++) bits.push(0);
+            while (bits.length % 8 !== 0) bits.push(0);
+            const cw = [];
+            for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; cw.push(b); }
+            let pad = true;
+            while (cw.length < dataCap) { cw.push(pad ? 0xEC : 0x11); pad = !pad; }
+            const all = cw.concat(polyRest(cw, V.ec)), N = V.size;
+            const grid = Array.from({ length: N }, () => new Array(N).fill(0));
+            const resv = Array.from({ length: N }, () => new Array(N).fill(false));
+            const finder = (r, c) => {
+                for (let dr = -1; dr <= 7; dr++) for (let dc = -1; dc <= 7; dc++) {
+                    const rr = r + dr, cc = c + dc;
+                    if (rr < 0 || rr >= N || cc < 0 || cc >= N) continue;
+                    const out = (dr >= 0 && dr <= 6 && (dc === 0 || dc === 6)) || (dc >= 0 && dc <= 6 && (dr === 0 || dr === 6));
+                    const inn = (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4);
+                    grid[rr][cc] = (out || inn) ? 1 : 0; resv[rr][cc] = true;
+                }
+            };
+            finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
+            for (let i = 8; i < N - 8; i++) { grid[6][i] = grid[i][6] = (i % 2 === 0) ? 1 : 0; resv[6][i] = resv[i][6] = true; }
+            if (V.align.length) {
+                const [a, b] = V.align;
+                [[a, b], [b, a], [b, b]].forEach(([cr, cc]) => {
+                    if (resv[cr][cc]) return;
+                    for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) {
+                        grid[cr + dr][cc + dc] = (Math.abs(dr) === 2 || Math.abs(dc) === 2 || (!dr && !dc)) ? 1 : 0;
+                        resv[cr + dr][cc + dc] = true;
+                    }
+                });
+            }
+            for (let i = 0; i < 9; i++) if (i !== 6) resv[8][i] = resv[i][8] = true;
+            for (let i = 0; i < 8; i++) resv[8][N - 1 - i] = resv[N - 1 - i][8] = true;
+            grid[N - 8][8] = 1; resv[N - 8][8] = true;
+            const sBits = []; all.forEach(w => { for (let i = 7; i >= 0; i--) sBits.push((w >>> i) & 1); });
+            let bi = 0, up = true;
+            for (let col = N - 1; col > 0; col -= 2) {
+                if (col === 6) col--;
+                for (let cnt = 0; cnt < N; cnt++) {
+                    const r = up ? (N - 1 - cnt) : cnt;
+                    for (let dc = 0; dc < 2; dc++) {
+                        const c = col - dc;
+                        if (!resv[r][c]) {
+                            const bit = bi < sBits.length ? sBits[bi++] : 0;
+                            grid[r][c] = ((r + c) % 2 === 0) ? (bit ^ 1) : bit;
+                        }
+                    }
+                }
+                up = !up;
+            }
+            const fmt = 0x77c4, fb = [];
+            for (let i = 0; i < 15; i++) fb.push((fmt >>> i) & 1);
+            [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]].forEach(([r, c], idx) => { grid[r][c] = fb[14 - idx]; });
+            for (let i = 0; i < 7; i++) grid[N - 1 - i][8] = fb[14 - i];
+            for (let i = 7; i < 15; i++) grid[8][N - 15 + i] = fb[14 - i];
+            let p = '';
+            for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (grid[r][c]) p += `M${c+2},${r+2}h1v1h-1z`;
+            box.innerHTML = `<svg viewBox="0 0 ${N+4} ${N+4}" width="126" height="126" shape-rendering="crispEdges"><rect width="${N+4}" height="${N+4}" fill="#fff"/><path d="${p}" fill="#06281e"/></svg>`;
+        };
+    })();
+    </script>
+
     <script>
     (function initAl3lmGateway() {
+        const REMOTE_WEB_ORIGIN = 'https://al-3lm.org';
+        const DOWNLOAD_URLS = {
+            android: 'https://github.com/Noursaded1841989/al-3lm/releases/latest/download/al-3lm.apk',
+            pc: 'https://github.com/Noursaded1841989/al-3lm/archive/refs/heads/main.zip'
+        };
+
         const CLOUD_SYNC_API = localStorage.getItem('al3lm_sync_api_url')
                             || localStorage.getItem('al3lm_tutor_worker_url')
                             || 'https://al-3lm-tutor.noorsaade-1841989.workers.dev';
+
+        // فتح وإغلاق قائمة دائرة مدرسة العلم
+        window.toggleCirclePortalMenu = function(ev) {
+            if (ev) ev.stopPropagation();
+            const menu = document.getElementById('circle-portal-menu');
+            const btn = document.getElementById('brand-circle-btn');
+            const badge = document.getElementById('circle-menu-badge');
+            if (!menu) return;
+            const willOpen = !menu.classList.contains('open');
+            menu.classList.toggle('open', willOpen);
+            if (btn) btn.classList.toggle('menu-open', willOpen);
+            if (badge) badge.textContent = willOpen ? '✕' : '☰';
+        };
+
+        window.closeCirclePortalMenu = function() {
+            const menu = document.getElementById('circle-portal-menu');
+            const btn = document.getElementById('brand-circle-btn');
+            const badge = document.getElementById('circle-menu-badge');
+            if (menu) menu.classList.remove('open');
+            if (btn) btn.classList.remove('menu-open');
+            if (badge) badge.textContent = '☰';
+        };
+
+        document.addEventListener('click', function(ev) {
+            const bar = document.getElementById('top-portal-bar');
+            if (bar && !bar.contains(ev.target)) {
+                window.closeCirclePortalMenu();
+            }
+        });
+
+        // نافذة خيارات التثبيت الثلاثة
+        window.openInstallChoicesModal = function() {
+            const ua = navigator.userAgent || '';
+            const isAndroid = /android/i.test(ua);
+            const isIOS = /iphone|ipad|ipod/i.test(ua);
+            document.getElementById('choice-card-android')?.classList.toggle('recommended', isAndroid);
+            document.getElementById('choice-card-web')?.classList.toggle('recommended', isIOS);
+            document.getElementById('choice-card-pc')?.classList.toggle('recommended', !isAndroid && !isIOS);
+            document.getElementById('install-choice-status').textContent = '';
+            document.getElementById('install-choices-modal')?.classList.add('open');
+        };
+
+        window.startDownloadChoice = function(type) {
+            const st = document.getElementById('install-choice-status');
+            if (type === 'android') {
+                window.open(DOWNLOAD_URLS.android, '_blank');
+                if (st) st.textContent = '📲 تم فتح رابط تنزيل تطبيق الأندرويد المحلي (APK).';
+            } else if (type === 'pc') {
+                window.open(DOWNLOAD_URLS.pc, '_blank');
+                if (st) st.textContent = '💻 جاري تنزيل حزمة الحاسوب المحلية؛ بعد فك الضغط شغّل (تشغيل_المدرسة_محليا.bat) للعمل والمشاركة بلا إنترنت.';
+            }
+        };
+
+        // نافذة الدليل الشامل
+        window.openGuideModal = function() {
+            switchCleanGuide(1);
+            document.getElementById('guide-modal')?.classList.add('open');
+        };
+        window.switchCleanGuide = function(n) {
+            [1, 2, 3].forEach(i => {
+                document.getElementById('gtab-btn-' + i)?.classList.toggle('active', i === n);
+                document.getElementById('gtab-pane-' + i)?.classList.toggle('active', i === n);
+            });
+        };
+
+        // نافذة المشاركة المحلية (تعمل وتظهر في الوضع المحلي فقط!)
+        window.openLocalLanModal = function() {
+            const url = window.location.href.split('?')[0];
+            const urlBox = document.getElementById('lan-local-url-box');
+            if (urlBox) urlBox.textContent = url;
+            const qrMount = document.getElementById('lan-qr-mount');
+            if (qrMount && typeof window.drawLocalQR === 'function') {
+                window.drawLocalQR(url, qrMount);
+            }
+            document.getElementById('lan-modal-status').textContent = '';
+            document.getElementById('local-lan-modal')?.classList.add('open');
+        };
+
+        window.copyLanUrl = async function() {
+            const txt = document.getElementById('lan-local-url-box')?.textContent || '';
+            const st = document.getElementById('lan-modal-status');
+            try {
+                await navigator.clipboard.writeText(txt);
+                if (st) st.textContent = '✅ تم نسخ عنوان الشبكة المحلية بنجاح.';
+            } catch (_) {
+                if (st) st.textContent = '📋 يمكنك نسخ العنوان مباشرةً من الصندوق أعلاه.';
+            }
+        };
+
+        window.exportSharedSchoolPack = function() {
+            const st = document.getElementById('lan-modal-status');
+            const sharedCustomKeys = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (!k) continue;
+                const isPrivate = /student_accounts|teacher_accounts|active_student|active_teacher|owner_gate|admin_pin|progress|score|history/i.test(k);
+                const isShared = /^private_schools_directory$|^school_custom_|^custom_lesson_|^stage[123]_override_/i.test(k);
+                if (!isPrivate && isShared) sharedCustomKeys[k] = localStorage.getItem(k);
+            }
+            const schoolsClean = JSON.parse(localStorage.getItem('private_schools_directory') || '[]').map(s => {
+                const c = { ...s }; delete c.pinHash; return c;
+            });
+            const blob = new Blob([JSON.stringify({
+                packType: 'al3lm_local_school_mesh_pack_v1',
+                schoolsDirectory: schoolsClean,
+                sharedCurriculumOverrides: sharedCustomKeys
+            }, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'al3lm-school-local-pack.json';
+            a.click();
+            if (st) st.textContent = '📦 تم تصدير إعدادات المدرسة المشتركة (دون المساس بخصوصية درجات الطلاب).';
+        };
+
+        window.importSharedSchoolPack = function(ev) {
+            const file = ev.target?.files?.[0];
+            const st = document.getElementById('lan-modal-status');
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    const pack = JSON.parse(String(reader.result || '{}'));
+                    if (pack.packType !== 'al3lm_local_school_mesh_pack_v1') {
+                        if (st) st.textContent = '❌ ملف الحزمة غير صالح.';
+                        return;
+                    }
+                    if (Array.isArray(pack.schoolsDirectory)) {
+                        const existing = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+                        pack.schoolsDirectory.forEach(inc => {
+                            if (!inc || !inc.id) return;
+                            const idx = existing.findIndex(x => x.id === inc.id);
+                            if (idx >= 0) existing[idx] = { ...existing[idx], ...inc, pinHash: existing[idx].pinHash || inc.pinHash };
+                            else existing.push(inc);
+                        });
+                        localStorage.setItem('private_schools_directory', JSON.stringify(existing));
+                    }
+                    if (pack.sharedCurriculumOverrides) {
+                        Object.keys(pack.sharedCurriculumOverrides).forEach(k => {
+                            if (k !== 'private_schools_directory') localStorage.setItem(k, pack.sharedCurriculumOverrides[k]);
+                        });
+                    }
+                    populateStudentSchools();
+                    if (st) st.textContent = '✅ تم استيراد إعدادات المدرسة بنجاح!';
+                } catch (_) {
+                    if (st) st.textContent = '❌ تعذّر قراءة الملف.';
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // نافذة التحديث بالطلب (تعمل وتظهر في النسخة المحلية فقط!)
+        let _remoteFoundVer = null;
+        window.openLocalUpdateModal = function() {
+            document.getElementById('local-upd-modal-status').textContent = '';
+            document.getElementById('local-update-modal')?.classList.add('open');
+        };
+
+        window.checkRemoteUpdateFromLocal = async function(manualClick) {
+            if (!window.__AL3LM_IS_LOCAL) return;
+            const st = document.getElementById('local-upd-modal-status');
+            if (manualClick && st) st.textContent = '⏳ جاري التحقق من الخادم الرسمي...';
+            try {
+                const res = await fetch(REMOTE_WEB_ORIGIN + '/version.json?t=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) throw new Error('offline');
+                const data = await res.json();
+                const myVer = localStorage.getItem('al3lm_local_pack_ver') || '1.0';
+                if (data && data.version && data.version !== myVer) {
+                    _remoteFoundVer = data.version;
+                    if (manualClick && st) {
+                        st.textContent = `✨ يتوفر تحديث جديد (${data.version})! اضغط «سحب التحديث الآن» لتحديث نسختك المحلية.`;
+                    } else if (sessionStorage.getItem('al3lm_skip_local_upd') !== data.version) {
+                        document.getElementById('local-update-prompt-bar')?.classList.add('show');
+                    }
+                } else if (manualClick && st) {
+                    st.textContent = '✅ نسختك المحلية محدّثة بآخر إصدار بالفعل.';
+                }
+            } catch (_) {
+                if (manualClick && st) st.textContent = '📴 لا يوجد اتصال بالإنترنت حالياً — نسختك المحلية تعمل بكفاءة تامة دون إنترنت.';
+            }
+        };
+
+        window.dismissLocalUpdatePrompt = function() {
+            if (_remoteFoundVer) {
+                try { sessionStorage.setItem('al3lm_skip_local_upd', _remoteFoundVer); } catch (_) {}
+            }
+            document.getElementById('local-update-prompt-bar')?.classList.remove('show');
+        };
+
+        window.pullRemoteUpdateForLocal = async function() {
+            const st = document.getElementById('local-upd-modal-status');
+            if (st) st.textContent = '🔄 جاري تحديث الملفات المحلية...';
+            try {
+                if ('serviceWorker' in navigator) {
+                    const reg = await navigator.serviceWorker.getRegistration();
+                    if (reg && reg.active) reg.active.postMessage({ type: 'AL3LM_MANUAL_UPDATE_NOW' });
+                }
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+                if (_remoteFoundVer) localStorage.setItem('al3lm_local_pack_ver', _remoteFoundVer);
+                if (st) st.textContent = '✅ اكتمل التحديث؛ سيتم إعادة فتح الصفحة الآن...';
+                setTimeout(() => window.location.reload(), 800);
+            } catch (_) {
+                if (st) st.textContent = '⚠️ تعذّر سحب التحديث بسبب انقطاع الإنترنت.';
+            }
+        };
 
         async function callCloudApi(payload, timeoutMs = 9000) {
             if (!navigator.onLine) return { ok: false, offline: true };
@@ -1422,7 +2193,7 @@
                 if (isIOS) {
                     stepsBox.innerHTML = '١. اضغط على زر <strong>المشاركة (⬆️)</strong> في شريط متصفح Safari.<br>٢. اختر <strong>«إضافة إلى الشاشة الرئيسية» (Add to Home Screen)</strong>.<br>٣. اضغط <strong>إضافة (Add)</strong> لتظهر أيقونة التطبيق على شاشة هاتفك.';
                 } else {
-                    stepsBox.innerHTML = '• إذا كان التطبيق مثبّتاً مسبقاً على هاتفك، فستجد أيقونة <strong>«مدرسة العلم»</strong> على شاشتك الرئيسية (أو ستجد في قائمة المتصفح <strong>⋮</strong> خيار <strong>«فتح في التطبيق»</strong>).<br>• لتثبيته الآن يدوياً: اضغط النقاط الثلاث <strong>(⋮)</strong> أعلى المتصفح واختر <strong>«تثبيت التطبيق» (Install app)</strong> أو <strong>«الإضافة إلى الشاشة الرئيسية»</strong>.';
+                    stepsBox.innerHTML = '• إذا كان التطبيق مثبّتاً مسبقاً على هاتفك، فستجد أيقونة <strong>«مدرسة العلم»</strong> على شاشتك الرئيسية.<br>• لتثبيته الآن يدوياً: اضغط النقاط الثلاث <strong>(⋮)</strong> أعلى المتصفح واختر <strong>«تثبيت التطبيق» (Install app)</strong> أو <strong>«الإضافة إلى الشاشة الرئيسية»</strong>.';
                 }
                 modal.classList.add('open');
             }
@@ -1431,10 +2202,10 @@
         async function populateStudentSchools() {
             const sel = document.getElementById('student-school-branch');
             if (!sel) return;
-            // مزامنة قائمة المدارس الخاصة من السحابة تلقائياً
             const dirRes = await callCloudApi({ action: 'list_directory' }, 5000);
             const gClientId = (dirRes && dirRes.googleClientId) || localStorage.getItem('googleClientId') || '178209594110-om1t4lndsng9ktd5hu9b7r6n9qivlt84.apps.googleusercontent.com';
-            if (gClientId) {                initGoogleOneTapButton(gClientId);
+            if (gClientId && navigator.onLine) {
+                initGoogleOneTapButton(gClientId);
             }
             if (dirRes && dirRes.ok && Array.isArray(dirRes.schools)) {
                 const localSc = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
@@ -1637,7 +2408,6 @@
             submitBtn.disabled = true;
 
             try {
-                // ١. مسار التلميذ (Student) — مزامنة سحابية تلقائية عبر الإنترنت
                 if (currentRole === 'student') {
                     const accounts = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
                     const pwHash = computeHash(password, 'stu_' + username);
@@ -1680,7 +2450,7 @@
                         localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
                         localStorage.setItem('al3lm_active_student_user', username);
                         localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'student');
+                        localStorage.setItem('al3lm_active_role', 'student');
                         restoreStudentSnapshotToLocal(accounts[username]);
                         window.location.href = 'student.html';
                         return;
@@ -1689,7 +2459,6 @@
                         const cloudLogin = await callCloudApi({ action: 'login_student', username, pwHash });
 
                         if (cloudLogin && cloudLogin.ok && cloudLogin.profile) {
-                            // دمج أي تقدم محلي إن وجد مع النسخة السحابية
                             const localCopy = accounts[username];
                             const merged = cloudLogin.profile;
                             if (localCopy && localCopy.pwHash === pwHash && localCopy.progress) {
@@ -1699,7 +2468,7 @@
                             localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
                             localStorage.setItem('al3lm_active_student_user', username);
                             localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'student');
+                            localStorage.setItem('al3lm_active_role', 'student');
                             restoreStudentSnapshotToLocal(merged);
                             window.location.href = 'student.html';
                             return;
@@ -1710,14 +2479,12 @@
                             return;
                         }
 
-                        // احتياطي العمل دون اتصال (Offline Fallback) إن كان الحساب محفوظاً على نفس الجهاز
                         const localAcc = accounts[username];
                         if (localAcc && localAcc.pwHash === pwHash) {
-                            // إذا كان السيرفر يعمل ولكن الحساب لم يُرفع له بعد، نرفعه تلقائياً الآن!
                             callCloudApi({ action: 'sync_student', username, pwHash, profile: localAcc });
                             localStorage.setItem('al3lm_active_student_user', username);
                             localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'student');
+                            localStorage.setItem('al3lm_active_role', 'student');
                             restoreStudentSnapshotToLocal(localAcc);
                             window.location.href = 'student.html';
                             return;
@@ -1728,7 +2495,6 @@
                     }
                 }
 
-                // ٢. مسار المعلم والإدارة (Teacher) — مزامنة سحابية تلقائية
                 const teachers = JSON.parse(localStorage.getItem('al3lm_teacher_accounts_v1') || '{}');
                 const pwHash = computeHash(password, 'tch_' + username);
 
@@ -1787,10 +2553,10 @@
                     teachers[username] = cloudTchReg.profile || newTch;
                     localStorage.setItem('al3lm_teacher_accounts_v1', JSON.stringify(teachers));
                     localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'teacher');
+                    localStorage.setItem('al3lm_active_role', 'teacher');
                     localStorage.removeItem('al3lm_owner_gate1_passed');
-                        try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
-                        localStorage.setItem('al3lm_active_teacher_user', username);
+                    try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
+                    localStorage.setItem('al3lm_active_teacher_user', username);
                     window.location.href = 'teachers.html';
                     return;
                 } else {
@@ -1807,7 +2573,7 @@
                             localStorage.setItem('private_schools_directory', JSON.stringify(schools));
                         }
                         localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_role', 'teacher');
                         localStorage.removeItem('al3lm_owner_gate1_passed');
                         try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
                         localStorage.setItem('al3lm_active_teacher_user', username);
@@ -1824,14 +2590,14 @@
                     if (tAcc && tAcc.pwHash === pwHash) {
                         callCloudApi({ action: 'sync_teacher', username, pwHash, profile: tAcc, schoolMeta: tAcc.schoolMeta || null });
                         localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_role', 'teacher');
                         localStorage.removeItem('al3lm_owner_gate1_passed');
                         try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
                         localStorage.setItem('al3lm_active_teacher_user', username);
                         if (tAcc.schoolId && tAcc.schoolId !== 'main') {
                             localStorage.setItem('selected_school_branch', tAcc.schoolId);
                             localStorage.setItem('school_edit_mode', 'true');
-                            localStorage.setItem('edit_mode_owner', tAcc.schoolId);
+                            localStorage.setItem('edit_mode_owner', tProf?.schoolId || tAcc.schoolId);
                         }
                         window.location.href = 'teachers.html';
                         return;
@@ -1844,7 +2610,7 @@
                     );
                     if (matchedSchool) {
                         localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_role', 'teacher');
                         localStorage.removeItem('al3lm_owner_gate1_passed');
                         try { sessionStorage.removeItem('al3lm_owner_gate1_passed'); } catch (_) {}
                         localStorage.setItem('al3lm_active_teacher_user', matchedSchool.owner || matchedSchool.code);
@@ -1856,7 +2622,6 @@
                         return;
                     }
 
-                    // البوابة الأولى للإدارة العليا: تتحقق من اسم المستخدم وكلمة المرور الأولى للإدارة لكشف زر المالك السري في teachers.html
                     const gate1Cloud = await callCloudApi({ action: 'verify_admin_gate1', username, password });
                     const savedGate1User = (localStorage.getItem('owner_gate1_username') || '').trim().toLowerCase();
                     const savedGate1PassHash = localStorage.getItem('owner_gate1_pass_hash') || '';
@@ -1869,7 +2634,7 @@
 
                     if ((gate1Cloud && gate1Cloud.ok && gate1Cloud.isOwnerGate1) || (!gate1Cloud?.status && localUserOk && localPassOk)) {
                         localStorage.removeItem('al3lm_explore_guest_mode');
-                                localStorage.setItem('al3lm_active_role', 'teacher');
+                        localStorage.setItem('al3lm_active_role', 'teacher');
                         localStorage.setItem('al3lm_active_teacher_user', rawUser || 'الإدارة');
                         localStorage.setItem('al3lm_owner_gate1_passed', '1');
                         try { sessionStorage.setItem('al3lm_owner_gate1_passed', '1'); } catch (_) {}
@@ -1888,24 +2653,22 @@
         renderTeacherRegYears();
         updateFormUI();
 
-        if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
             navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
+        // فحص التحديث الاختياري يتم فقط في النسخة المحلية ولا يعمل أبداً على الموقع العام
+        if (window.__AL3LM_IS_LOCAL && navigator.onLine) {
+            setTimeout(() => window.checkRemoteUpdateFromLocal(false), 2000);
         }
     })();
     </script>
 
     <script>
-    (function setupLazyPromoAndInstall() {
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-        const installBtn = document.getElementById('install-pwa-btn');
-        if (isStandalone && installBtn) {
-            installBtn.style.display = 'none';
-        }
-
+    (function setupLazyPromo() {
         let _promoResizeTimer = null;
         let _promoFooterHidden = false;
 
-        // دالة تجعل صفحة promo.html تتمدد كقطعة واحدة طبيعية بلا أي تثبيت عائم، ليتولى شريط التمرير الخارجي الصعود والهبوط من الأول إلى الأخير!
         function unifyPromoIframeScroll(ifr) {
             try {
                 const doc = ifr && (ifr.contentDocument || ifr.contentWindow?.document);
@@ -1936,9 +2699,7 @@
                             flex-direction: column !important;
                             gap: 18px !important;
                         }
-                        .top-cinema-bar {
-                            padding-left: 0 !important;
-                        }
+                        .top-cinema-bar { padding-left: 0 !important; }
                         .scenes-stack {
                             position: relative !important;
                             height: auto !important;
@@ -1946,7 +2707,6 @@
                             overflow: visible !important;
                             display: block !important;
                         }
-                        /* فكّ التموضع المطلق للمشاهد حتى تأخذ ارتفاعها الحقيقي الكامل ولا يركب النص فوقها أبداً */
                         .promo-scene {
                             position: relative !important;
                             inset: auto !important;
@@ -1956,10 +2716,7 @@
                             height: auto !important;
                             padding: 10px 0 18px 0 !important;
                         }
-                        .promo-scene.active {
-                            display: flex !important;
-                        }
-                        /* وضع النص وأزرار التحكم في نهاية الصفحة بشكل طبيعي أسفل المشهد تماماً بدون position: fixed */
+                        .promo-scene.active { display: flex !important; }
                         .cinematic-footer {
                             position: relative !important;
                             bottom: auto !important;
@@ -1971,13 +2728,8 @@
                             background: rgba(3, 20, 15, 0.98) !important;
                             border-top: 2px solid #eab308 !important;
                         }
-                        .subtitle-box {
-                            max-height: none !important;
-                            overflow: visible !important;
-                        }
-                        body.hide-promo-footer-all .cinematic-footer {
-                            display: none !important;
-                        }
+                        .subtitle-box { max-height: none !important; overflow: visible !important; }
+                        body.hide-promo-footer-all .cinematic-footer { display: none !important; }
                     `;
                     doc.head.appendChild(st);
                 }
@@ -2022,7 +2774,6 @@
             ifr.onload = function() {
                 unifyPromoIframeScroll(ifr);
                 clearInterval(_promoResizeTimer);
-                // متابعة تغيّر ارتفاع كل مشهد عند تبدّل المشاهد الثمانية ليبقى شريط التمرير الواحد مضبوطاً من الأعلى للأسفل
                 _promoResizeTimer = setInterval(() => unifyPromoIframeScroll(ifr), 350);
             };
             box.appendChild(ifr);
@@ -2040,7 +2791,6 @@
     </script>
 
     <script>
-    // فتح وإغلاق قائمة تسجيل الدخول / إنشاء الحساب من الأزرار العلوية
     window.openAuthDrawer = function(mode) {
         if (mode === 'login' || mode === 'register') {
             if (typeof window.setAuthMode === 'function') window.setAuthMode(mode);
@@ -2061,10 +2811,13 @@
     };
 
     window.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeAuthDrawer();
+        if (e.key === 'Escape') {
+            closeAuthDrawer();
+            if (typeof window.closeCirclePortalMenu === 'function') window.closeCirclePortalMenu();
+            document.querySelectorAll('.clean-modal-backdrop.open').forEach(function(m) { m.classList.remove('open'); });
+        }
     });
 
-    // إذا وصل المستخدم عبر رابط تبديل الحساب أو دور محدد، نفتح قائمة الدخول تلقائياً لراحته
     (function autoOpenDrawerIfRequested() {
         var p = new URLSearchParams(window.location.search);
         if (p.get('switchAccount') === '1' || p.get('role') || p.get('login') === '1') {
@@ -2072,7 +2825,6 @@
         }
     })();
 
-    // إطلاق وضع الاستكشاف الحر للزائر دون تسلسل أو صلاحيات تعديل
     window.launchGuestExplore = function(ev, stg, yr) {
         if (ev) ev.preventDefault();
         localStorage.setItem('al3lm_explore_guest_mode', '1');

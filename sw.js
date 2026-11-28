@@ -1,5 +1,10 @@
-// Service Worker المحدّث لمنصة مدرسة العلم (v11 — إشعارات الجرس على الهاتف + Network-First للصفحات)
-const CACHE_NAME = 'al3lm-pwa-v13';
+// المشغل الخدمي لمنصة مدرسة العلم:
+// ١. على الموقع الرسمي (al-3lm.org): يعمل كما كان تماماً (Network-First للصفحات + إشعارات الجرس الأصلية)
+// ٢. في النسخة المحلية فقط (localhost / LAN): يعمل بـ Cache-First ولا يسحب إنترنت إلا بالطلب
+
+const CACHE_NAME = 'al3lm-pwa-v14';
+const IS_LOCAL_HOST = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[0-1])\.)/i.test(self.location.hostname);
+
 const CORE_ASSETS = [
   './manifest.json',
   './icon-192.png',
@@ -21,10 +26,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// استقبال أوامر الجرس من student.html لإطلاق إشعار نظام أصلي على هواتف أندرويد و iOS والحاسوب
 self.addEventListener('message', (event) => {
-  const d = event.data;
-  if (d && d.type === 'SHOW_ALARM_NOTIFICATION') {
+  const d = event.data || {};
+  if (d.type === 'SHOW_ALARM_NOTIFICATION') {
     const title = d.title || 'مدرسة العلم 🌟';
     const options = {
       body: d.body || 'حان موعد درسك الجديد في مدرسة العلم!',
@@ -38,6 +42,8 @@ self.addEventListener('message', (event) => {
       data: { url: d.url || './student.html' }
     };
     event.waitUntil(self.registration.showNotification(title, options));
+  } else if (d.type === 'AL3LM_MANUAL_UPDATE_NOW') {
+    event.waitUntil(caches.delete(CACHE_NAME));
   }
 });
 
@@ -47,7 +53,26 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith('/version.json')) return;
 
+  // في النسخة المحلية فقط: الاعتماد على الملفات المحلية أولاً دون صرف إنترنت
+  if (IS_LOCAL_HOST) {
+    event.respondWith(
+      caches.match(req, { ignoreSearch: true }).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((netRes) => {
+          if (netRes && netRes.ok) {
+            const copy = netRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+          }
+          return netRes;
+        });
+      })
+    );
+    return;
+  }
+
+  // على الموقع الرسمي (الويب): السلوك الأصلي تماماً (Network-First لملفات HTML و JS ليرى الزوار أي تعديل فوراً)
   const isHTMLOrJS = req.mode === 'navigate' ||
                      url.pathname.endsWith('.html') ||
                      url.pathname.endsWith('.js') ||
