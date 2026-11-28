@@ -5,7 +5,7 @@
 	<script>
 	(function autoRefreshStaleCacheV6() {
 		try {
-			var VER = 'al3lm_layout_v17';
+			var VER = 'al3lm_layout_v21';
 			if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
 				localStorage.setItem('al3lm_ui_cache_ver', VER);
 				if ('caches' in window) {
@@ -742,6 +742,9 @@
 				<span class="btn-ico">📥</span><span class="btn-lbl">ملف مدرسة</span>
 				<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
 			</label>
+			<button type="button" class="school-mode-btn" style="border-color:#38bdf8; color:#bae6fd;" onclick="openTeacherEditExportGuideModal()" title="شرح تفصيلي لطريقة التعديل وتصدير واستيراد ملفات JSON">
+				<span class="btn-ico">📘</span><span class="btn-lbl">توضيح التعديل والتصدير</span>
+			</button>
 		</div>
 
 		<span id="active-school-hint" class="active-school-hint"></span>
@@ -883,6 +886,11 @@
 			<h3 class="admin-modal-title">🏫 بَوَّابَةُ المَدَارِسِ الخَاصَّةِ (لِلْمُعَلِّم)</h3>
 			<div id="admin-status-badge" class="admin-status-pill">وضع التعديل: مغلق 🔒</div>
 			<div id="active-school-code-display" class="school-code-badge" style="display:none;"></div>
+			<div style="margin-bottom:10px;">
+				<button type="button" class="admin-action-btn secondary-btn" style="margin-top:0; background:rgba(2,132,199,0.22); color:#bae6fd; border:1.5px solid #38bdf8; font-weight:900;" onclick="openTeacherEditExportGuideModal()">
+					📘 الدليل التوضيحي لطريقة التعديل والتصدير والاستيراد (خطوة بخطوة)
+				</button>
+			</div>
 
 			<div id="modal-teacher-warning-box" class="school-warning-banner" style="margin-bottom:10px;"></div>
 
@@ -4093,6 +4101,9 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
                         <button type="button" class="tch-action-pill" onclick="openAdminPassModal()">
                             <span>🏫</span><span>إعدادات المدرسة ووضع التعديل</span>
                         </button>
+                        <button type="button" class="tch-action-pill" style="background:linear-gradient(135deg,#0284c7,#1e3a8a);border-color:#7dd3fc;color:#fef08a;" onclick="openTeacherEditExportGuideModal()">
+                            <span>📘</span><span>دليل التعديل والتصدير والاستيراد</span>
+                        </button>
                         <button type="button" class="tch-action-pill secondary" onclick="renderPlatformUsersModal(); document.getElementById('platform-users-modal').style.display='flex';">
                             <span>📨</span><span>الطلاب وصندوق الحزم (<span id="ut-inbox-cnt">0</span>)</span>
                         </button>
@@ -4521,6 +4532,367 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
         if (window.utSyncAndRefreshDashboard) window.utSyncAndRefreshDashboard();
     }, 1100);
 })();
+</script>
+
+
+<!-- ==================== نافذة الدليل التوضيحي الشامل للمعلم (طريقة التعديل والتصدير والاستيراد لملفات JSON) ==================== -->
+<style id="al3lm-teacher-guide-styles">
+    #teacher-edit-export-guide-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 12500;
+        background: rgba(2, 12, 9, 0.86);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+        direction: rtl;
+        font-family: 'Cairo', sans-serif;
+    }
+    #teacher-edit-export-guide-modal.open {
+        display: flex;
+    }
+    .t-guide-card {
+        width: 100%;
+        max-width: 860px;
+        max-height: 92dvh;
+        background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+        color: #0f172a;
+        border: 3.5px solid #eab308;
+        border-radius: 28px;
+        box-shadow: 0 25px 65px rgba(0, 0, 0, 0.75);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+    }
+    .t-guide-header {
+        background: linear-gradient(135deg, #064e3b, #042f2e);
+        color: #fef08a;
+        padding: 16px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 2.5px solid #eab308;
+    }
+    .t-guide-header h3 {
+        font-family: 'Aref Ruqaa', serif;
+        font-size: clamp(1.25rem, 3.4vmin, 1.7rem);
+        margin: 0;
+        color: #fef08a;
+    }
+    .t-guide-close-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #fda4af;
+        background: rgba(225, 29, 72, 0.25);
+        color: #ffe4e6;
+        font-size: 1.3rem;
+        font-weight: 900;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .t-guide-close-btn:hover { background: #e11d48; color: #ffffff; }
+
+    .t-guide-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 12px 18px;
+        background: #ecfdf5;
+        border-bottom: 1.5px solid #a7f3d0;
+        justify-content: center;
+    }
+    .t-guide-tab-btn {
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: 1.8px solid #6ee7b7;
+        background: #ffffff;
+        color: #065f46;
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+    .t-guide-tab-btn.active {
+        background: linear-gradient(135deg, #059669, #064e3b);
+        color: #fef08a;
+        border-color: #eab308;
+        box-shadow: 0 4px 12px rgba(6, 78, 59, 0.28);
+    }
+
+    .t-guide-body {
+        padding: 20px 22px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        line-height: 1.8;
+        text-align: right;
+    }
+    .t-guide-pane {
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .t-guide-pane.active {
+        display: flex;
+    }
+    .t-guide-step-box {
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        border-right: 6px solid #059669;
+        border-radius: 18px;
+        padding: 14px 16px;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+    }
+    .t-guide-step-box h4 {
+        color: #064e3b;
+        font-size: 1rem;
+        font-weight: 900;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .t-guide-step-box ol, .t-guide-step-box ul {
+        padding-right: 20px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .t-guide-step-box li {
+        color: #1e293b !important;
+        font-size: 0.88rem;
+        font-weight: 700;
+        padding-right: 4px !important;
+        margin-bottom: 2px !important;
+        list-style: decimal;
+    }
+    .t-guide-step-box ul li {
+        list-style: disc;
+    }
+    .t-guide-step-box li::before {
+        content: none !important;
+    }
+    .t-guide-badge {
+        display: inline-block;
+        padding: 1px 9px;
+        border-radius: 8px;
+        background: #fef9c3;
+        border: 1px solid #eab308;
+        color: #713f12;
+        font-weight: 900;
+        font-size: 0.8rem;
+    }
+    .t-guide-alert {
+        background: #eff6ff;
+        border: 2px solid #93c5fd;
+        border-radius: 16px;
+        padding: 12px 16px;
+        color: #1e3a8a;
+        font-size: 0.86rem;
+        font-weight: 800;
+    }
+    .t-guide-compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+        background: #ffffff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1.5px solid #cbd5e1;
+    }
+    .t-guide-compare-table th {
+        background: #064e3b;
+        color: #fef08a;
+        padding: 10px;
+        font-weight: 900;
+        text-align: right;
+    }
+    .t-guide-compare-table td {
+        padding: 10px;
+        border-top: 1px solid #e2e8f0;
+        color: #1e293b;
+        font-weight: 700;
+        vertical-align: top;
+    }
+    .t-guide-footer {
+        padding: 12px 20px;
+        background: #f8fafc;
+        border-top: 1.5px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+</style>
+
+<div id="teacher-edit-export-guide-modal" onclick="if(event.target===this) closeTeacherEditExportGuideModal()">
+    <div class="t-guide-card" onclick="event.stopPropagation()">
+        <div class="t-guide-header">
+            <h3>📘 الدليل التوضيحي الشامل للمعلم: التعديل والتصدير والاستيراد</h3>
+            <button type="button" class="t-guide-close-btn" onclick="closeTeacherEditExportGuideModal()" title="إغلاق">×</button>
+        </div>
+
+        <div class="t-guide-tabs">
+            <button type="button" class="t-guide-tab-btn active" data-gtab="tab-enter-edit" onclick="switchTeacherGuideTab('tab-enter-edit')">١. تفعيل وضع التعديل</button>
+            <button type="button" class="t-guide-tab-btn" data-gtab="tab-inside-lesson" onclick="switchTeacherGuideTab('tab-inside-lesson')">٢. أدوات التعديل داخل الدرس</button>
+            <button type="button" class="t-guide-tab-btn" data-gtab="tab-export-json" onclick="switchTeacherGuideTab('tab-export-json')">٣. طريقة التصدير والنشر</button>
+            <button type="button" class="t-guide-tab-btn" data-gtab="tab-import-json" onclick="switchTeacherGuideTab('tab-import-json')">٤. طريقة الاستيراد والنقل</button>
+        </div>
+
+        <div class="t-guide-body">
+            <!-- التبويب الأول: الدخول إلى وضع التعديل -->
+            <div class="t-guide-pane active" id="tab-enter-edit">
+                <div class="t-guide-alert">
+                    💡 <strong>قاعدة ذهبية للمعلم:</strong> المنهج الأصلي لـ «مدرسة العلم» محفوظ كمرجع ثابت، وعندما تنشئ «مدرسة خاصة» تحصل على نسخة قابلة للتخصيص الكامل باسمك ومعرّفك الفريد (<span style="direction:ltr;display:inline-block;">ELM-XXXX</span>) دون أن يتأثر عمل غيرك.
+                </div>
+
+                <div class="t-guide-step-box">
+                    <h4>🔑 أولاً: كيف تنشئ مدرستك أو تفتح «وضع التعديل»؟</h4>
+                    <ol>
+                        <li>من بطاقة الترحيب في بوابة المعلمين، اضغط على زر <span class="t-guide-badge">🏫 إعدادات المدرسة ووضع التعديل</span> (أو اضغط <span class="t-guide-badge">🌟 مدرسة خاصة</span> من الشريط العلوي).</li>
+                        <li><strong>إذا كانت هذه مرتك الأولى:</strong> اضغط <span class="t-guide-badge">➕ إنشاء مدرسة خاصة جديدة</span>، واكتب اسم مدرستك واسمك ورقماً سرياً خاصاً بك وكلمة أمان للاسترداد، ثم <strong>أضئ دوائر الصفوف العمرية (1 – 21)</strong> التي ستعمل عليها، واضغط إنشاء؛ سيظهر لك معرّف مدرستك الفريد مثل <code>ELM-4821</code> فاحتفظ به.</li>
+                        <li><strong>إذا كانت مدرستك مسجّلة مسبقاً:</strong> اختر اسم مدرستك من القائمة (أو اكتب معرّفها <code>ELM-XXXX</code>)، وأدخل رقمك السري، ثم اضغط <span class="t-guide-badge">🔓 تفعيل تعديل مدرستي</span>.</li>
+                        <li>بمجرد التفعيل ستتحول الشارة إلى اللون الأخضر <span class="t-guide-badge">وضع التعديل مفعل 🔓</span>، وتظهر لك شبكة الـ 21 صفاً لتشغيل أو إطفاء أي صف متى شئت.</li>
+                        <li>الآن أغلق النافذة واضغط على دائرة أي صف من صفوفك المضيئة للدخول مباشرةً إلى شاشة الدروس وهي في <strong>وضع التحرير المباشر</strong>.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- التبويب الثاني: كل ما يستطيع المعلم فعله داخل الدرس -->
+            <div class="t-guide-pane" id="tab-inside-lesson">
+                <div class="t-guide-step-box">
+                    <h4>✏️ ثانياً: ماذا تستطيع أن تفعل داخل الصف بعد فتح وضع التعديل؟</h4>
+                    <ul>
+                        <li><strong>التنقل الحر المفتوح:</strong> تُفتح لك جميع الحروف الـ ٢٨ وجميع الأختام السبعة والمحطات دون قيد التسلسل لتتمكن من تحرير أي وحدة فوراً.</li>
+                        <li><strong>تعديل النصوص والأسئلة مباشرةً باللمس أو النقر:</strong> أي نص محاط بإطار متقطع برتقالي (عنوان الدرس، الهدف، نصوص الشرائح، نص السؤال، خيارات الصح والخطأ أو الاختيار المتعدد، أزواج التوصيل، وخطوات التطبيق) يمكنك النقر داخله والكتابة أو التعديل مباشرةً.</li>
+                        <li><strong>شريط تنسيق الخط العائم (<span class="t-guide-badge">🎨 شريط الخط</span>):</strong> من الشريط الأسود العلوي اضغط «شريط الخط» لتلوين الكلمات، أو تمييز الخلفية، أو تكبير وتصغير حجم الخط، أو جعله عريضاً <b>B</b>، ويمكنك سحب الشريط ووضعه في أي زاوية مريحة.</li>
+                        <li><strong>استبدال الصور والفيديوهات بزر (<span class="t-guide-badge">+</span>) أو السحب والإفلات:</strong> ستجد فوق كل صورة أو فيديو زر <strong>(+)</strong> دائرياً؛ اضغط عليه لاختيار صورة أو فيديو من جهازك (أو اسحب الملف وأفلته فوق الصورة)، وسيقوم النظام بضغط الصورة ذكياً للحفاظ على خفة وسرعة المدرسة.</li>
+                        <li><strong>إدارة شرائح العرض والفيديو (في المرحلة الأولى):</strong> يمكنك التبديل بين <span class="t-guide-badge">🎬 وضع الفيديو</span> و<span class="t-guide-badge">📖 وضع الشرائح</span>، وإضافة شرائح جديدة بزر <span class="t-guide-badge">➕ شريحة جديدة</span> أو حذف الشريحة الحالية.</li>
+                        <li><strong>الحفظ الفوري (<span class="t-guide-badge">💾 حفظ التعديلات</span>):</strong> بعد تعديل أي درس، اضغط زر <strong>«💾 حفظ التعديلات»</strong> في أعلى الشاشة ليُحفظ عملك في مدرستك فوراً، وعند الانتهاء اضغط <span class="t-guide-badge">✖ إغلاق التعديل</span> لمعاينة الدرس كما يراه التلميذ.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- التبويب الثالث: التصدير والنشر بالتفصيل -->
+            <div class="t-guide-pane" id="tab-export-json">
+                <div class="t-guide-step-box">
+                    <h4>📤 ثالثاً: كيف تحفظ وتُصدّر ملفات مدرستك (JSON) أو تنشرها لطلابك؟</h4>
+                    <ol>
+                        <li>ارجع إلى <strong>بوابة المعلمين (`teachers.html`)</strong> واضغط <span class="t-guide-badge">🏫 إعدادات المدرسة ووضع التعديل</span> (وتأكد أن وضع التعديل مفعل لمدرستك).</li>
+                        <li>ستظهر لك تحت شبكة الصفوف <strong>٣ أزرار للتصدير والنشر</strong>، لكل زر وظيفة محددة كما في الجدول التالي:</li>
+                    </ol>
+                </div>
+
+                <table class="t-guide-compare-table">
+                    <thead>
+                        <tr>
+                            <th>اسم الزر</th>
+                            <th>لمن يُستخدم؟</th>
+                            <th>ماذا يفعل بالضبط؟</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>☁️ نشر دروس مدرستي سحابياً لطلابي</strong></td>
+                            <td>للطلاب المتصلين بالإنترنت</td>
+                            <td>يرفع تعديلاتك مباشرةً إلى السحابة بضغطة واحدة؛ فأي طالب مسجّل في مدرستك يفتح حسابه ستتحدث الدروس لديه تلقائياً دون إرسال أي ملفات!</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🎓 تنزيل ملف للطلاب (JSON)</strong></td>
+                            <td>لمشاركته مع الطلاب</td>
+                            <td>ينزّل ملفاً باسم <code>ELM-XXXX-STUDENT.json</code> يحتوي على الدروس والصفوف فقط <strong>وخالياً تماماً من رقمك السري</strong>، لتعطيه لطلابك عبر واتساب أو الشبكة المحلية أو صندوق الحزم.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔐 تنزيل حزمة المعلم (JSON)</strong></td>
+                            <td>للمعلم نفسه فقط (نسخة احتياطية / نقل لجهاز آخر)</td>
+                            <td>ينزّل ملفاً باسم <code>ELM-XXXX-TEACHER_ADMIN.json</code> يضم الدروس مع البصمة المشفرة للرقم السري، لتحتفظ به كنسخة أمان أو تنقل مدرستك إلى حاسوب أو هاتف آخر.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="t-guide-alert">
+                    📨 <strong>ميزة إضافية بدون ملفات خارجية:</strong> يمكنك من زر <span class="t-guide-badge">📨 الطلاب وصندوق الحزم</span> كتابة اسم مستخدم التلميذ والضغط على <strong>«📤 إرسال حزمة مدرستي لهذا المستخدم»</strong> أو <strong>«📢 إرسال لكل طلابي»</strong> لتصلهم داخل المنصة مباشرة!
+                </div>
+            </div>
+
+            <!-- التبويب الرابع: الاستيراد كمعلم في كل الحالات -->
+            <div class="t-guide-pane" id="tab-import-json">
+                <div class="t-guide-alert">
+                    📥 <strong>انتبه للفرق بين حالات الاستيراد الثلاث كمعلم حتى تختار الزر الصحيح دائماً:</strong>
+                </div>
+
+                <div class="t-guide-step-box">
+                    <h4>الحالة ١: فتح مدرستك واستعادتها على حاسوب أو هاتف جديد (بصلاحية التعديل الكاملة)</h4>
+                    <ol>
+                        <li>على الجهاز الجديد، افتح <strong>بوابة المعلمين</strong> واضغط <span class="t-guide-badge">🏫 إعدادات المدرسة ووضع التعديل</span>.</li>
+                        <li>اضغط الزر الأخضر السفلي: <span class="t-guide-badge">💻 استعادة مدرستي على هذا الجهاز (من ملف المعلم)</span>.</li>
+                        <li>اكتب <strong>الرقم السري الأصلي لمدرستك</strong> أولاً في الخانة المخصصة (للتحقق من هويتك كمالك للمدرسة).</li>
+                        <li>اضغط <span class="t-guide-badge">📂 اختر حزمة المعلم المشفرة (.json)</span> واختر ملف <code>ELM-XXXX-TEACHER_ADMIN.json</code> الذي نزّلته سابقاً؛ ستُستعاد مدرستك وكل دروسها ويُفتح لك وضع التعديل فوراً!</li>
+                    </ol>
+                </div>
+
+                <div class="t-guide-step-box">
+                    <h4>الحالة ٢: تحديث دروس مدرستك المفتوحة حالياً من ملف JSON على نفس الجهاز</h4>
+                    <ol>
+                        <li>افتح <span class="t-guide-badge">🏫 إعدادات المدرسة ووضع التعديل</span> وتأكد أن وضع التعديل <strong>مفعل 🔓</strong> لمدرستك.</li>
+                        <li>من قائمة أدوات المعلم النشط، اضغط الزر البنفسجي: <span class="t-guide-badge">📤 تحديث دروس مدرستي من ملف (JSON)</span>.</li>
+                        <li>اختر ملف الـ JSON المحدّث من جهازك؛ سيتم دمج وتحديث جميع الدروس والصفوف داخل مدرستك الحالية فوراً.</li>
+                    </ol>
+                </div>
+
+                <div class="t-guide-step-box">
+                    <h4>الحالة ٣: معاينة ملف مدرسة كقراءة فقط أو استيراد سجلات الطلاب الواردة</h4>
+                    <ul>
+                        <li><strong>لمعاينة مدرسة أخرى دون تعديلها:</strong> اضغط <span class="t-guide-badge">🌟 مدرسة خاصة</span> في الهيدر العلوي سيظهر بجانبها زر <span class="t-guide-badge">📥 ملف مدرسة</span>؛ اختر ملف الطالب <code>STUDENT.json</code> لتُضاف لقائمة العرض.</li>
+                        <li><strong>لاستيراد سجلات وعلامات الطلاب:</strong> افتح <span class="t-guide-badge">📨 الطلاب وصندوق الحزم</span>؛ إن أرسل لك الطالب سجله عبر المنصة ستجده في «الوارد» وتضغط <strong>«📥 قبول وتطبيق»</strong>، وإن أرسله كملف JSON خارجي اضغط <strong>«📤 استيراد سجل مستخدمين»</strong> واختر الملف.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="t-guide-footer">
+            <span style="font-size:0.8rem; font-weight:800; color:#475569;">💡 يمكنك الرجوع لهذا الدليل في أي وقت من بوابة المعلمين أو من داخل نافذة المدرسة.</span>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="tch-action-pill" onclick="closeTeacherEditExportGuideModal(); openAdminPassModal();">🏫 افتح نافذة التعديل والتصدير الآن</button>
+                <button type="button" class="tch-action-pill secondary" onclick="closeTeacherEditExportGuideModal()">إغلاق الدليل</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.openTeacherEditExportGuideModal = function(initialTabId) {
+        const modal = document.getElementById('teacher-edit-export-guide-modal');
+        if (!modal) return;
+        if (initialTabId) window.switchTeacherGuideTab(initialTabId);
+        modal.classList.add('open');
+    };
+
+    window.closeTeacherEditExportGuideModal = function() {
+        const modal = document.getElementById('teacher-edit-export-guide-modal');
+        if (modal) modal.classList.remove('open');
+    };
+
+    window.switchTeacherGuideTab = function(tabId) {
+        document.querySelectorAll('.t-guide-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-gtab') === tabId);
+        });
+        document.querySelectorAll('.t-guide-pane').forEach(pane => {
+            pane.classList.toggle('active', pane.id === tabId);
+        });
+    };
 </script>
 
 </body>

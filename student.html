@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v20';
+            var VER = 'al3lm_layout_v22';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -84,12 +84,21 @@
             border-bottom: 2px solid rgba(250, 204, 21, 0.45);
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
             gap: 10px;
             flex-wrap: nowrap;
             position: sticky;
             top: 0;
             z-index: 900;
+        }
+        .top-nav-inner {
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
         .brand-menu-anchor {
             position: relative;
@@ -746,18 +755,25 @@
 </head>
 <body>
     <nav class="top-nav">
-        <div class="brand-menu-anchor" id="stu-brand-menu-anchor">
-            <button type="button" class="logo-circle-trigger" id="stu-logo-menu-btn" onclick="toggleStudentLogoMenu(event)" title="اضغط لإظهار أو إخفاء خيارات الحساب والتطبيق" aria-expanded="false">
-                <img src="icon-512.png" onerror="this.src='icon-192.png'" alt="شعار مدرسة العلم">
-            </button>
-            <span class="nav-student-title-txt" id="nav-student-title" onclick="toggleStudentLogoMenu(event)" title="اضغط لفتح قائمة الحساب">بوابة التلميذ</span>
+        <div class="top-nav-inner">
+            <div class="brand-menu-anchor" id="stu-brand-menu-anchor">
+                <button type="button" class="logo-circle-trigger" id="stu-logo-menu-btn" onclick="toggleStudentLogoMenu(event)" title="اضغط لإظهار أو إخفاء خيارات الحساب والتطبيق" aria-expanded="false">
+                    <img src="icon-512.png" onerror="this.src='icon-192.png'" alt="شعار مدرسة العلم">
+                </button>
+                <span class="nav-student-title-txt" id="nav-student-title" onclick="toggleStudentLogoMenu(event)" title="اضغط لفتح قائمة الحساب">بوابة التلميذ</span>
 
-            <div class="nav-actions" id="stu-logo-capsules-menu">
-                <button type="button" class="nav-pill-btn al3lm-orient-cycle-btn compact-orient" onclick="cycleAl3lmOrientation()">🔄 حر</button>
-                <button type="button" class="nav-pill-btn hide-in-pwa" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
-                <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب</a>
-                <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 خروج</a>
+                <div class="nav-actions" id="stu-logo-capsules-menu">
+                    <button type="button" class="nav-pill-btn al3lm-orient-cycle-btn compact-orient" onclick="cycleAl3lmOrientation()">🔄 حر</button>
+                    <button type="button" class="nav-pill-btn hide-in-pwa" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
+                    <button type="button" class="nav-pill-btn" style="border-color:#7dd3fc;color:#bae6fd;" onclick="openStudentGuideModal()">📘 دليل التلميذ</button>
+                    <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب</a>
+                    <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 خروج</a>
+                </div>
             </div>
+
+            <button type="button" class="nav-pill-btn" style="background:linear-gradient(135deg,#0284c7,#1e3a8a);border-color:#7dd3fc;color:#fef08a;" onclick="openStudentGuideModal()" title="دليل الاستخدام الشامل لبوابة التلميذ والدروس والمنبّه والتطبيق">
+                <span>📘</span><span>دليل استخدام البوابة والمنصة</span>
+            </button>
         </div>
     </nav>
 
@@ -796,6 +812,9 @@
             </div>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:4px;">
+                <button type="button" class="action-pill-btn" style="font-size:0.82rem; padding:7px 15px; background:linear-gradient(135deg,#0284c7,#1e3a8a); border-color:#7dd3fc; color:#fef08a;" onclick="openStudentGuideModal()">
+                    📘 الدليل التوضيحي للتلميذ والأهل (كيف أستخدم كل شيء؟)
+                </button>
                 <select id="stu-school-selector" class="alarm-time-input" style="font-size:0.84rem; padding:6px 12px;" onchange="changeStudentSchool(this.value)">
                     <option value="main">🏫 مدرسة العلم (المنهج الأساسي)</option>
                 </select>
@@ -2229,6 +2248,379 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
         }
     });
 })();
+</script>
+
+
+<!-- ==================== نافذة الدليل التوضيحي والدلالي الشامل لبوابة التلميذ والمنصة ==================== -->
+<style id="al3lm-student-guide-styles">
+    #student-portal-guide-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 12500;
+        background: rgba(2, 12, 9, 0.86);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+        direction: rtl;
+        font-family: 'Cairo', sans-serif;
+    }
+    #student-portal-guide-modal.open {
+        display: flex;
+    }
+    .s-guide-card {
+        width: 100%;
+        max-width: 880px;
+        max-height: 92dvh;
+        background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+        color: #0f172a;
+        border: 3.5px solid #eab308;
+        border-radius: 28px;
+        box-shadow: 0 25px 65px rgba(0, 0, 0, 0.75);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+    }
+    .s-guide-header {
+        background: linear-gradient(135deg, #064e3b, #042f2e);
+        color: #fef08a;
+        padding: 16px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 2.5px solid #eab308;
+    }
+    .s-guide-header h3 {
+        font-family: 'Aref Ruqaa', serif;
+        font-size: clamp(1.22rem, 3.4vmin, 1.7rem);
+        margin: 0;
+        color: #fef08a;
+    }
+    .s-guide-close-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #fda4af;
+        background: rgba(225, 29, 72, 0.25);
+        color: #ffe4e6;
+        font-size: 1.3rem;
+        font-weight: 900;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .s-guide-close-btn:hover { background: #e11d48; color: #ffffff; }
+
+    .s-guide-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 11px 16px;
+        background: #ecfdf5;
+        border-bottom: 1.5px solid #a7f3d0;
+        justify-content: center;
+    }
+    .s-guide-tab-btn {
+        padding: 6px 13px;
+        border-radius: 999px;
+        border: 1.8px solid #6ee7b7;
+        background: #ffffff;
+        color: #065f46;
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+    .s-guide-tab-btn.active {
+        background: linear-gradient(135deg, #059669, #064e3b);
+        color: #fef08a;
+        border-color: #eab308;
+        box-shadow: 0 4px 12px rgba(6, 78, 59, 0.28);
+    }
+
+    .s-guide-body {
+        padding: 20px 22px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        line-height: 1.8;
+        text-align: right;
+    }
+    .s-guide-pane {
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .s-guide-pane.active {
+        display: flex;
+    }
+    .s-guide-step-box {
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        border-right: 6px solid #059669;
+        border-radius: 18px;
+        padding: 14px 16px;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+    }
+    .s-guide-step-box h4 {
+        color: #064e3b;
+        font-size: 1rem;
+        font-weight: 900;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .s-guide-step-box ol, .s-guide-step-box ul {
+        padding-right: 20px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .s-guide-step-box li {
+        color: #1e293b;
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+    .s-guide-badge {
+        display: inline-block;
+        padding: 1px 9px;
+        border-radius: 8px;
+        background: #fef9c3;
+        border: 1px solid #eab308;
+        color: #713f12;
+        font-weight: 900;
+        font-size: 0.8rem;
+    }
+    .s-guide-alert {
+        background: #eff6ff;
+        border: 2px solid #93c5fd;
+        border-radius: 16px;
+        padding: 12px 16px;
+        color: #1e3a8a;
+        font-size: 0.86rem;
+        font-weight: 800;
+    }
+    .s-guide-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+        background: #ffffff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1.5px solid #cbd5e1;
+    }
+    .s-guide-table th {
+        background: #064e3b;
+        color: #fef08a;
+        padding: 10px;
+        font-weight: 900;
+        text-align: right;
+    }
+    .s-guide-table td {
+        padding: 10px;
+        border-top: 1px solid #e2e8f0;
+        color: #1e293b;
+        font-weight: 700;
+        vertical-align: top;
+    }
+    .s-guide-footer {
+        padding: 12px 20px;
+        background: #f8fafc;
+        border-top: 1.5px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+</style>
+
+<div id="student-portal-guide-modal" onclick="if(event.target===this) closeStudentGuideModal()">
+    <div class="s-guide-card" onclick="event.stopPropagation()">
+        <div class="s-guide-header">
+            <h3>📘 الدليل التوضيحي الشامل للتلميذ والأهل (كيف أستخدم بوابتـي والمنصة؟)</h3>
+            <button type="button" class="s-guide-close-btn" onclick="closeStudentGuideModal()" title="إغلاق">×</button>
+        </div>
+
+        <div class="s-guide-tabs">
+            <button type="button" class="s-guide-tab-btn active" data-sgtab="sg-start-lessons" onclick="switchStudentGuideTab('sg-start-lessons')">١. بدء الدرس ومراحل التعلّم</button>
+            <button type="button" class="s-guide-tab-btn" data-sgtab="sg-app-account" onclick="switchStudentGuideTab('sg-app-account')">٢. تثبيت التطبيق وقائمة الحساب</button>
+            <button type="button" class="s-guide-tab-btn" data-sgtab="sg-alarm-bell" onclick="switchStudentGuideTab('sg-alarm-bell')">٣. المنبّه وجرس الدراسة</button>
+            <button type="button" class="s-guide-tab-btn" data-sgtab="sg-scores-map" onclick="switchStudentGuideTab('sg-scores-map')">٤. العلامات والخريطة والترقية</button>
+            <button type="button" class="s-guide-tab-btn" data-sgtab="sg-school-sync" onclick="switchStudentGuideTab('sg-school-sync')">٥. مدرسة المعلم والتراسل</button>
+        </div>
+
+        <div class="s-guide-body">
+            <!-- التبويب ١: بدء الدرس وكيف يعمل داخل المنصة في كل مرحلة -->
+            <div class="s-guide-pane active" id="sg-start-lessons">
+                <div class="s-guide-alert">
+                    🌟 <strong>أهلاً بك يا بطل العلم (ومرحباً بالأهل الكرام):</strong> هذه البوابة هي غرفتك الدراسية الخاصة؛ كل ما تنجزه فيها يُحفظ باسمك تلقائياً لتكمل رحلتك يوماً بعد يوم من حيث وصلت تماماً!
+                </div>
+
+                <div class="s-guide-step-box">
+                    <h4>▶️ أولاً: كيف تبدأ درسك اليومي وتتنقل داخله؟</h4>
+                    <ol>
+                        <li>اضغط الزر الدائري الكبير النابض <span class="t-guide-badge s-guide-badge">▶ ابدأ الدرس</span> في وسط البطاقة العلوية؛ سينقلك فوراً إلى محطتك الحالية دون أي خطوات معقدة.</li>
+                        <li>على يمين شاشة الدرس ستجد <strong>شريط الأختام السبعة العمودي</strong>: (🗣️ المنطق والبيان • 👁️ البصيرة والفن • 👂 الرنين والصوت • ✋ الرياضيات والمقدار • 👣 الحركة والاتزان • 🍏 العلوم والحياة • 💧 الآداب والسلوك)؛ أكمل الأختام بالتسلسل ليضيء كل ختم بنجمة ⭐.</li>
+                        <li>تتكوّن كل سنة دراسية من <strong>٢٨ محطة (وحدة)</strong> مرتبة على حروف <strong>أبجد هوز</strong>؛ وعندما تُتم الأختام السبعة لحرفك الحالي، يعيدك النظام تلقائياً إلى هذه البوابة محتفلاً بعلامتك لتستريح حتى موعدك القادم!</li>
+                        <li>للعودة إلى بوابتك في أي لحظة أثناء الدرس، اضغط شارة <strong>«مدرسة العلم»</strong> في أعلى الشاشة وسيُحفظ مكانك تلقائياً.</li>
+                    </ol>
+                </div>
+
+                <table class="s-guide-table">
+                    <thead>
+                        <tr>
+                            <th>المرحلة والصفوف</th>
+                            <th>ماذا يفعل التلميذ داخل الدرس؟</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>السنة الأولى (1) — التمهيدية</strong></td>
+                            <td>سنة هادئة مخصصة للألفة والسكينة بلا أسئلة ولا ناطق آلي؛ يشاهد الطفل <strong>٧ مرئيات مريحة</strong> عبر الأختام السبعة بأزرار الفيديو المعتادة، ويُحتسب التقدم بعدد المشاهدات من <strong>٢٨</strong>.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>مرحلة سَيِّد (الصفوف 2 – 7)</strong></td>
+                            <td>يتنقّل الطفل عبر محطات ممتعة: التمهيد (🕌) ⬅ العرض المصوّر والشرائح (📖) مع أزرار القارئ الصوتي (🔊 / ⏹) والتكبير (🔍) ⬅ أسئلة الحج لكسب العملات الفضية (🕋) ⬅ توصيل الصدقة الذهبية (🪙) ⬅ فقاعات الهدية لكسب الألماسة (🎁💎) ⬅ التطبيق العملي والورقي (🌱).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>مرحلة عَبْد (الصفوف 8 – 14)</strong></td>
+                            <td>دراسة منهجية أعمق عبر الشرائح العلمية والقصص والمختبرات التفاعلية، مع وجود زر <strong>المعلم الذكي المساعد (؟)</strong> لشرح أي فكرة خطوة بخطوة وكسب النجوم ⭐.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>مرحلة صَاحِب (الصفوف 15 – 21)</strong></td>
+                            <td>مرحلة التخصص الموسوعي؛ يختار الطالب ختم تخصصه الرئيسي (يُحتسب بوزن <strong>٧٠٪</strong>) مع إتقان بقية العلوم المساندة (<strong>٣٠٪</strong>) للوصول إلى 100 نقطة.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- التبويب ٢: تثبيت التطبيق على الهاتف وقائمة دائرة الشعار -->
+            <div class="s-guide-pane" id="sg-app-account">
+                <div class="s-guide-step-box">
+                    <h4>📲 ثانياً: كيف تثبّت «مدرسة العلم» كتطبيق مستقل على الهاتف أو الحاسوب؟</h4>
+                    <ol>
+                        <li>اضغط على <strong>دائرة شعار مدرسة العلم</strong> (أو اسمك «بوابة التلميذ») في أعلى يمين الصفحة؛ ستفتح لك كبسولات الحساب.</li>
+                        <li>اضغط على كبسولة <span class="s-guide-badge">📲 تثبيت التطبيق</span> ثم وافق على التثبيت؛ ستظهر أيقونة «مدرسة العلم» على شاشة هاتفك الرئيسية لتفتحها بملء الشاشة كتطبيق مستقل تماماً!</li>
+                        <li><strong>على أجهزة iPhone / iPad (متصفح Safari):</strong> اضغط زر المشاركة السفلي <strong>(⬆️)</strong> في المتصفح واختر <strong>«إضافة إلى الشاشة الرئيسية / Add to Home Screen»</strong> ثم اضغط «إضافة».</li>
+                    </ol>
+                </div>
+
+                <div class="s-guide-step-box">
+                    <h4>⚙️ ثالثاً: ما وظيفة الأزرار الموجودة داخل دائرة الشعار العلوية؟</h4>
+                    <ul>
+                        <li><span class="s-guide-badge">🔄 حر / ↔️ أفقي / ↕️ عمودي</span>: يظهر هذا الزر داخل التطبيق المثبّت على الهاتف ليسمح لك بقفل الشاشة بالوضع الأفقي العريض أثناء الدرس أو إعادتها للوضع العمودي أو التلقائي.</li>
+                        <li><span class="s-guide-badge">🔄 تبديل الحساب</span>: إذا كان لك إخوة يستخدمون نفس الجهاز أو الهاتف، اضغط هنا للانتقال لحساب أخيك دون أن يضيع تقدم أيٍّ منكما!</li>
+                        <li><span class="s-guide-badge">🚪 خروج</span>: لتسجيل الخروج الآمن من حسابك عند استخدام جهاز مشترك، ويمكنك فتح حسابك من أي جهاز آخر باسم المستخدم وكلمة المرور لأن علاماتك محفوظة سحابياً ☁️.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- التبويب ٣: المنبّه اليومي وجرس الدراسة وتقويم الهاتف -->
+            <div class="s-guide-pane" id="sg-alarm-bell">
+                <div class="s-guide-alert">
+                    🔔 <strong>لماذا نضبط منبّه الدراسة؟</strong> التعلّم القليل المستمر كل يوم في ساعة محددة هو سر التفوق والبركة في «مدرسة العلم».
+                </div>
+
+                <div class="s-guide-step-box">
+                    <h4>⏰ رابعاً: شرح أزرار بطاقة «منبّه موعد الدراسة والإشعارات» بالتفصيل</h4>
+                    <ol>
+                        <li><strong>خانة الوقت (مثال <code>08:30</code>):</strong> اضغط عليها واختر الساعة والدقيقة التي تحب أن تدرس فيها كل يوم.</li>
+                        <li><span class="s-guide-badge">🔔 تفعيل الجرس وموافق</span>: يحفظ موعدك اليومي؛ وعندما تطلب منك شاشة الهاتف «السماح بالإشعارات» اضغط <strong>سماح (Allow)</strong> ليرنّ الجرس ويصلك إشعار من معلمك في الموعد.</li>
+                        <li><span class="s-guide-badge">🔔 تجربة رنين الجرس والإشعار</span>: اضغط عليه في أي وقت لتسمع نغمة جرس المدرسة المبهجة وتتأكد أن صوت وإشعارات جهازك يعملان بنجاح.</li>
+                        <li><span class="s-guide-badge">📱 تثبيت في منبّه تقويم الهاتف</span> <strong>(مهم جداً للهواتف!):</strong> ينزّل ملف منبّه صغير (<code>.ics</code>)؛ بمجرد فتحه والضغط على <strong>«حفظ / إضافة للتقويم»</strong> سيرنّ منبّه هاتفك الأصلي يومياً في موعد درسك <strong>حتى لو كان المتصفح مغلقاً أو الإنترنت مقطوعاً!</strong></li>
+                        <li><span class="s-guide-badge">🔕 إيقاف الجرس</span>: لإيقاف التنبيه اليومي مؤقتاً في أيام الإجازة متى شئت.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- التبويب ٤: سجل العلامات وخريطة الـ 28 حرفاً والصفوف الـ 21 والترقية -->
+            <div class="s-guide-pane" id="sg-scores-map">
+                <div class="s-guide-step-box">
+                    <h4>📜 خامساً: كيف تقرأ «سجلّي الشخصي وعلاماتي» وخريطة الحروف؟</h4>
+                    <ul>
+                        <li><strong>المربعات الأربعة العلوية:</strong> تعرض اسمك، وصفّك المثبّت حالياً، والحرف والوحدة التي وصلت إليها، ورصيد علاماتك (عملات 🪙 أو نجوم ⭐ أو نقاط ⚖️).</li>
+                        <li><strong>شريط نسبة إنجاز الصف + شريط نقاط القوة:</strong> يوضّح كم أنجزت من صفّك المئوي (%)، ويخبرك تلقائياً بـ <strong>«🌟 أقوى مادة لديك»</strong> و<strong>«💪 المادة التي تحتاج منك تركيزاً إضافياً»</strong>.</li>
+                        <li><strong>خريطة الحروف الـ ٢٨ (أبجد هوز):</strong> المربعات الخضراء تعني وحدات أنجزتها بنجاح، والمربع الأصفر البارز هو حرفك الحالي، والرمادية الباهتة هي المحطات القادمة التي ستفتحها قريباً.</li>
+                        <li><strong>قائمة آخر الدروس المحفوظة:</strong> توثّق سجل إنجازاتك اليومية مع التاريخ والعلامة لكل وحدة أتممتها.</li>
+                        <li><strong>زر <span class="s-guide-badge">🎓 مبارك إتمام الصف! انتقل للصف التالي</span>:</strong> يظهر لك هذا الزر الذهبي تلقائياً فور وصول نسبة إنجاز صفّك إلى <strong>100%</strong> لتترقى بنفسك إلى السنة الدراسية الأعلى!</li>
+                    </ul>
+                </div>
+
+                <div class="s-guide-step-box">
+                    <h4>🧭 سادساً: كيف تستخدم «خريطة المراحل والصفوف الـ 21» في أسفل الصفحة؟</h4>
+                    <ul>
+                        <li><span class="s-guide-badge">🟡 الدائرة الصفراء الكبيرة</span>: هي صفّك الدراسي الحالي؛ اضغط عليها للانطلاق مباشرةً إلى درسك.</li>
+                        <li><span class="s-guide-badge">🟢 الدوائر الخضراء المضيئة</span>: هي الصفوف السابقة التي أتممتها بنجاح؛ يمكنك الضغط على أيٍّ منها في أي وقت لفتحها في <strong>وضع المراجعة الحرة</strong> دون أن يتأثر صفّك الحالي.</li>
+                        <li><span class="s-guide-badge">⚪ الدوائر المطفأة</span>: هي الصفوف المستقبلية التي ستُفتح لك بالتسلسل العلمي واحداً تلو الآخر كلما أتممت صفّك الحالي.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- التبويب ٥: الارتباط بمدرسة المعلم وصندوق الحزم وملفات JSON -->
+            <div class="s-guide-pane" id="sg-school-sync">
+                <div class="s-guide-step-box">
+                    <h4>🏫 سابعاً: كيف ترتبط بمدرسة معلمك الخاصة وتتبادل معه الحزم والعلامات؟</h4>
+                    <ol>
+                        <li><strong>القائمة المنسدلة للمدرسة (تحت زر ابدأ الدرس):</strong> افتراضياً أنت تدرس في <strong>«🏫 مدرسة العلم (المنهج الأساسي)»</strong>؛ وإذا كنت مسجلاً مع معلم في مدرسة خاصة، اختر اسم مدرسته من القائمة وستنزل دروسه المخصّصة لك من السحابة تلقائياً!</li>
+                        <li><strong>زر <span class="s-guide-badge">📨 صندوق الحزم والتراسل</span>:</strong>
+                            <ul>
+                                <li>إذا أرسل لك معلمك حزمة دروس عبر المنصة، سيظهر رقم تنبيه بجانب الزر؛ افتحه واضغط <strong>«📥 قبول وتفعيل»</strong> لتعمل دروس المعلم لديك فوراً.</li>
+                                <li>ولإرسال علاماتك وتقدمك لمعلمك: اكتب اسم مستخدم معلمك في الخانة واضغط <strong>«📤 إرسال سجلّي وعلاماتي»</strong> ليصل تقريرك الكامل إلى بوابته بضغطة واحدة!</li>
+                            </ul>
+                        </li>
+                        <li><strong>زر <span class="s-guide-badge">📥 إضافة ملف JSON يدوياً</span>:</strong> إذا أرسل لك معلمك ملف مدرسة (بصيغة <code>.json</code>) عبر واتساب أو في الشبكة المنزلية دون إنترنت، اضغط هذا الزر واختر الملف من جهازك لتُربط مدرسته ودروسه بحسابك فوراً.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="s-guide-footer">
+            <span style="font-size:0.8rem; font-weight:800; color:#475569;">💡 يمكنك فتح هذا الدليل في أي وقت من الزر العلوي «📘 دليل استخدام البوابة والمنصة».</span>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="action-pill-btn" onclick="closeStudentGuideModal(); launchStudentLesson();">▶ ابدأ درسي الآن</button>
+                <button type="button" class="action-pill-btn secondary" onclick="closeStudentGuideModal()">إغلاق الدليل</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.openStudentGuideModal = function(initialTabId) {
+        const modal = document.getElementById('student-portal-guide-modal');
+        if (!modal) return;
+        const menu = document.getElementById('stu-logo-capsules-menu');
+        if (menu) menu.classList.remove('open');
+        if (initialTabId) window.switchStudentGuideTab(initialTabId);
+        modal.classList.add('open');
+    };
+
+    window.closeStudentGuideModal = function() {
+        const modal = document.getElementById('student-portal-guide-modal');
+        if (modal) modal.classList.remove('open');
+    };
+
+    window.switchStudentGuideTab = function(tabId) {
+        document.querySelectorAll('.s-guide-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-sgtab') === tabId);
+        });
+        document.querySelectorAll('.s-guide-pane').forEach(pane => {
+            pane.classList.toggle('active', pane.id === tabId);
+        });
+    };
+
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') window.closeStudentGuideModal();
+    });
 </script>
 
 </body>

@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v19';
+            var VER = 'al3lm_layout_v21';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -1145,14 +1145,15 @@
         </footer>
 
     </div>
-<!-- ================= نوافذ الاستكشاف الحر للأزرار السبعة في كل مرحلة ================= -->
+
+    <!-- ================= نوافذ الاستكشاف الحر للأزرار السبعة في كل مرحلة ================= -->
     <input type="checkbox" id="idx-modal-stg1" class="idx-modal-toggle">
     <div class="idx-stage-modal">
         <label for="idx-modal-stg1" class="idx-modal-backdrop"></label>
         <div class="idx-modal-box" style="background-image:url('assets/stage1-bg.jpg'), url('assets/34273.jpg');">
             <label for="idx-modal-stg1" class="idx-modal-close">&times;</label>
             <div class="idx-modal-overlay">
-                <h3>مرحلة التعلم الأولى (سيد  ١ – ٧ )</h3>
+                <h3>مرحلة التعلم الأولى (سيد  ١ – ٧)</h3>
                 <div class="idx-explore-note">👀 وضع الاستكشاف الحر: اختر سنة لمعاينة دروسها (لحفظ العلامات والتسلسل الدراسي سجّل الدخول)</div>
                 <div class="idx-years-row">
                     <a href="stage1.html?stage=1&year=1&explore=1" onclick="return launchGuestExplore(event, 1, 1)" class="idx-year-btn">1</a>
@@ -1208,6 +1209,7 @@
             </div>
         </div>
     </div>
+
     <!-- ================= قائمة / نافذة تسجيل الدخول وإنشاء الحساب المنبثقة ================= -->
     <div id="auth-drawer-backdrop" onclick="if(event.target===this) closeAuthDrawer()">
         <div class="auth-shell" onclick="event.stopPropagation()">
