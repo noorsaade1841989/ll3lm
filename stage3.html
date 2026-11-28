@@ -1378,6 +1378,72 @@
     </div>
 
     <div id="app-toast"></div>
+    <style>
+        #s3-hover-tooltip {
+            position: fixed;
+            z-index: 100000;
+            background: rgba(6, 30, 23, 0.97);
+            color: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 16px;
+            border: 2px solid #fde047;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            text-align: right;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.68);
+            max-width: min(380px, 92vw);
+            direction: rtl;
+        }
+        #s3-hover-tooltip.visible { opacity: 1; }
+        #s3-hover-tooltip .tip-hdr {
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: #fde047;
+            text-align: center;
+            padding-bottom: 5px;
+            margin-bottom: 6px;
+            border-bottom: 1px dashed rgba(253, 224, 71, 0.38);
+        }
+        #s3-hover-tooltip .tip-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 3.5px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: #ecfdf5;
+            line-height: 1.48;
+        }
+        #s3-hover-tooltip .tip-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #s3-hover-tooltip .tip-row.major-row {
+            color: #fef08a;
+            background: rgba(234, 179, 8, 0.15);
+            padding: 1px 6px;
+            border-radius: 8px;
+        }
+        #s3-hover-tooltip .tip-ico {
+            flex-shrink: 0;
+            min-width: 22px;
+            text-align: center;
+            color: #fde047;
+            font-weight: 900;
+        }
+        #s3-hover-tooltip .tip-txt {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+    <div id="s3-hover-tooltip">
+        <div class="tip-hdr" id="s3-tip-hdr"></div>
+        <div class="tip-lines" id="s3-tip-lines"></div>
+    </div>
 
     <!-- ============================================================================ -->
     <!-- ١. نظام تحميل البيانات الموحد بدون أي رسائل تقنية أو ملاحظات خارجية -->
@@ -2943,6 +3009,8 @@ window.Stage3LabEngine = (function() {
 
             const cell = document.createElement('button');
             cell.type = 'button';
+            cell.dataset.week = String(gw);
+            cell.dataset.letter = ABJAD[i - 1];
             cell.className = 'map-letter-cell'
                 + (gw === playWeek ? ' current-week' : '')
                 + (majDone ? ' major-done-week' : '')
@@ -3000,6 +3068,8 @@ window.Stage3LabEngine = (function() {
 
             const cell = document.createElement('button');
             cell.type = 'button';
+            cell.dataset.unit = String(i);
+            cell.dataset.letter = ABJAD[i - 1];
             cell.className = 'major-map-letter-cell'
                 + (i === playWeek ? ' current-week' : '')
                 + (done ? ' major-done-week' : '')
@@ -3131,6 +3201,83 @@ window.Stage3LabEngine = (function() {
             switchTeacherMajorTo(targetM);
         };
     });
+
+    (function initStage3MapsHoverTooltips() {
+        const SEAL_ICONS_7 = { 1: '🗣️', 2: '👁️', 3: '👂', 4: '✋', 5: '👣', 6: '🍏', 7: '💧' };
+        const tipBox = document.getElementById('s3-hover-tooltip');
+        const tipHdr = document.getElementById('s3-tip-hdr');
+        const tipLines = document.getElementById('s3-tip-lines');
+        if (!tipBox || !tipHdr || !tipLines) return;
+
+        function posS3Tip(cx, cy) {
+            const pad = 10;
+            const rect = tipBox.getBoundingClientRect();
+            let x = cx - (rect.width / 2);
+            let y = cy + 18;
+            if (x < pad) x = pad;
+            if (x + rect.width > window.innerWidth - pad) x = window.innerWidth - rect.width - pad;
+            if (y + rect.height > window.innerHeight - pad) y = Math.max(pad, cy - rect.height - 12);
+            tipBox.style.left = `${x}px`;
+            tipBox.style.top = `${y}px`;
+        }
+
+        document.addEventListener('mouseover', function(e) {
+            const genCell = e.target.closest && e.target.closest('.map-letter-cell');
+            const majCell = e.target.closest && e.target.closest('.major-map-letter-cell');
+
+            if (!genCell && !majCell) {
+                tipBox.classList.remove('visible');
+                return;
+            }
+
+            const major = getMajorSeal();
+
+            // ١. الخريطة العامة في Stage 3: ٧ سطور لعناوين الأختام السبعة، وفي ختم التخصص يظهر الحرف فقط
+            if (genCell) {
+                const gw = parseInt(genCell.dataset.week || '1', 10) || 1;
+                const ltr = genCell.dataset.letter || ABJAD[(gw - 1) % 28] || 'أ';
+                const cyc = getCycleOfWeek(gw);
+                const rows = [];
+                for (let s = 1; s <= 7; s++) {
+                    if (s === major) {
+                        rows.push(`<div class="tip-row major-row"><span class="tip-ico">${SEAL_ICONS_7[s]}</span><span class="tip-txt">👑 حَرْفُ (${ltr})</span></div>`);
+                    } else {
+                        const gEntry = getGeneralBookEntry(activeYear, gw, s);
+                        const cleanTitle = safeRenderText(String(gEntry?.title || SEAL_NAMES[s] || '').split('—')[0].trim() || SEAL_NAMES[s]);
+                        rows.push(`<div class="tip-row"><span class="tip-ico">${SEAL_ICONS_7[s]}</span><span class="tip-txt">${cleanTitle}</span></div>`);
+                    }
+                }
+                tipHdr.textContent = `حَرْفُ (${ltr}) — الدَّوْرَةُ ${CYCLE_AR_NAMES[cyc] || toAr(cyc)}`;
+                tipLines.innerHTML = rows.join('');
+                tipBox.classList.add('visible');
+                posS3Tip(e.clientX, e.clientY);
+                return;
+            }
+
+            // ٢. الخريطة التخصصية في Stage 3: العناوين الرئيسية المختصرة للدروس الـ ٥ أو ٦ أو ٧ لهذا الحرف مرقمة ١، ٢، ٣...
+            if (majCell) {
+                const uIdx = parseInt(majCell.dataset.unit || '1', 10) || 1;
+                const ltr = majCell.dataset.letter || ABJAD[(uIdx - 1) % 28] || 'أ';
+                const bundle = getUnitMajorBundle(activeYear, uIdx, major);
+                const rows = bundle.map((lesson, idx) => {
+                    const shortMainTitle = safeRenderText(String(lesson.title || SEAL_NAMES[major]).split('—')[0].trim());
+                    return `<div class="tip-row"><span class="tip-ico">${toAr(idx + 1)}.</span><span class="tip-txt">${shortMainTitle}</span></div>`;
+                });
+                tipHdr.textContent = `👑 حَرْفُ (${ltr}) — عَنَاوِينُ دُرُوسِ ${SHORT_MAJOR_NAMES[major] || 'التَّخَصُّصِ'} (${toAr(bundle.length)})`;
+                tipLines.innerHTML = rows.join('');
+                tipBox.classList.add('visible');
+                posS3Tip(e.clientX, e.clientY);
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (tipBox.classList.contains('visible')) posS3Tip(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('mousedown', function() {
+            tipBox.classList.remove('visible');
+        });
+    })();
 
     if (!checkAndRenderOnboardingGate()) {
         activeSeal = getMajorSeal();

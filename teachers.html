@@ -3,9 +3,18 @@
 <html lang="ar" dir="rtl">
 <head>
 	<script>
-	(function autoRefreshStaleCacheV6() {
+	window.__AL3LM_IS_LOCAL = (function() {
+		var p = window.location.protocol, h = window.location.hostname || '';
+		if (p === 'file:' || p === 'capacitor:' || window.Capacitor || window.Al3lmNative) return true;
+		if (/^(localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[0-1])\.)/i.test(h)) return true;
+		if (h.endsWith('.local')) return true;
+		try { if (localStorage.getItem('al3lm_force_local_mode') === '1') return true; } catch (e) {}
+		return false;
+	})();
+	(function autoRefreshWebOnly() {
+		if (window.__AL3LM_IS_LOCAL) return;
 		try {
-			var VER = 'al3lm_layout_v21';
+			var VER = 'al3lm_layout_v23';
 			if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
 				localStorage.setItem('al3lm_ui_cache_ver', VER);
 				if ('caches' in window) {
@@ -710,41 +719,46 @@
 <body>
 
 	<header>
-		<!-- الصف العلوي الأول: دائرة الشعار القابلة للضغط وبجانبها كبسولات الحساب والإدارة المخفية -->
 		<div class="hdr-top-row">
 			<div class="tch-brand-menu-anchor" id="tch-brand-menu-anchor">
-				<button type="button" class="tch-logo-circle-btn" id="tch-logo-menu-btn" onclick="toggleTeacherLogoMenu(event)" title="اضغط لإظهار أو إخفاء كبسولات الحساب والإدارة" aria-expanded="false">
+				<button type="button" class="tch-logo-circle-btn" id="tch-logo-menu-btn" onclick="toggleTeacherLogoMenu(event)" title="اضغط لإظهار أو إخفاء القائمة" aria-expanded="false" style="position:relative;">
 					<img src="icon-512.png" onerror="this.src='icon-192.png'" alt="شعار مدرسة العلم">
+					<span id="tch-circle-badge" style="position:absolute;bottom:-3px;left:-3px;width:17px;height:17px;border-radius:50%;background:linear-gradient(135deg,#fde047,#ca8a04);color:#06281e;border:1.5px solid #06281e;font-size:0.62rem;font-weight:900;display:inline-flex;align-items:center;justify-content:center;line-height:1;">☰</span>
 				</button>
-				<h1 onclick="toggleTeacherLogoMenu(event)" style="cursor:pointer;" title="اضغط لفتح قائمة البوابة">اطلب العلم</h1>
+				<h1 onclick="toggleTeacherLogoMenu(event)" style="cursor:pointer;" title="اضغط لفتح قائمة البوابة">بوابة المعلم</h1>
 
 				<div class="top-left-controls" id="top-left-controls-bar">
-					<button type="button" class="portal-top-btn al3lm-orient-cycle-btn" style="background:rgba(15,23,42,0.92);color:#7dd3fc;border:1.5px solid #38bdf8;" onclick="cycleAl3lmOrientation()">
-						<span class="btn-ico">🔄</span><span class="btn-lbl">تلقائي</span>
+					<button type="button" class="portal-top-btn" style="background:rgba(15,23,42,0.92);color:#fef08a;border:1.5px solid #7dd3fc;" onclick="document.getElementById('top-left-controls-bar')?.classList.remove('open'); openTeacherEditExportGuideModal();">
+						<span class="btn-ico">📘</span><span class="btn-lbl">دليل التعديل والتصدير</span>
 					</button>
-					<button id="admin-lock-trigger" onclick="openAdminPassModal()" title="وضع التعديل">
+					<button id="admin-lock-trigger" onclick="document.getElementById('top-left-controls-bar')?.classList.remove('open'); openAdminPassModal();" title="وضع التعديل">
 						<span id="admin-lock-icon">🔒</span>
 						<span id="admin-lock-text" class="btn-lbl">وضع التعديل</span>
 					</button>
-					<button id="owner-square-trigger" class="portal-top-btn" onclick="openOwnerSecretModal()" title="خزنة المالك والتحليلات (البوابة السرية الثانية)"><span class="btn-ico">👑</span><span class="btn-lbl">خزنة الإدارة</span></button>
+					<label id="student-import-school-btn" class="portal-top-btn" style="background:rgba(15,23,42,0.92);color:#7dd3fc;border:1.5px solid #38bdf8;cursor:pointer;" title="إضافة حزمة مدرسة خاصة من ملف JSON">
+						<span class="btn-ico">📥</span><span class="btn-lbl">استيراد ملف مدرسة (.json)</span>
+						<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
+					</label>
+					<button type="button" class="portal-top-btn al3lm-orient-cycle-btn" style="background:rgba(15,23,42,0.92);color:#7dd3fc;border:1.5px solid #38bdf8;" onclick="cycleAl3lmOrientation()">
+						<span class="btn-ico">🔄</span><span class="btn-lbl">اتجاه الشاشة</span>
+					</button>
+					<button type="button" class="portal-top-btn al3lm-local-only-slot" style="display:none;background:rgba(15,23,42,0.92);color:#bbf7d0;border:1.5px solid #4ade80;" onclick="document.getElementById('top-left-controls-bar')?.classList.remove('open'); window.Al3lmMesh && window.Al3lmMesh.shareApp();">
+						<span class="btn-ico">📤</span><span class="btn-lbl">إرسال التطبيق لصديق</span>
+					</button>
+					<button type="button" class="portal-top-btn al3lm-local-only-slot" style="display:none;background:rgba(15,23,42,0.92);color:#fef08a;border:1.5px solid #fde047;" onclick="document.getElementById('top-left-controls-bar')?.classList.remove('open'); window.Al3lmMesh && window.Al3lmMesh.oneClickUpdate();">
+						<span class="btn-ico">🔄</span><span class="btn-lbl">تحديث المنصة بضغطة واحدة</span>
+					</button>
+					<button id="owner-square-trigger" class="portal-top-btn" onclick="document.getElementById('top-left-controls-bar')?.classList.remove('open'); openOwnerSecretModal();" title="خزنة المالك والتحليلات (البوابة السرية الثانية)"><span class="btn-ico">👑</span><span class="btn-lbl">خزنة الإدارة</span></button>
 				</div>
 			</div>
-		</div>
 
-		<!-- الصف الثاني المستقل: شريط التبديل بين مدرسة العلم والمدارس الخاصة -->
-		<div class="school-selector-bar">
-			<button id="btn-public-school" class="school-mode-btn active" onclick="switchSchoolMode('main', true)"><span class="btn-ico">🏫</span><span class="btn-lbl">مدرسة العلم</span></button>
-			<div class="private-school-menu-wrap">
-				<button id="btn-private-school" class="school-mode-btn" onclick="switchSchoolMode('private', true)"><span class="btn-ico">🌟</span><span class="btn-lbl">مدرسة خاصة</span></button>
-				<select id="private-school-dropdown" onchange="selectPrivateSchool(this.value, true)"></select>
+			<div class="school-selector-bar">
+				<button id="btn-public-school" class="school-mode-btn active" onclick="switchSchoolMode('main', true)"><span class="btn-ico">🏫</span><span class="btn-lbl">مدرسة العلم</span></button>
+				<div class="private-school-menu-wrap">
+					<button id="btn-private-school" class="school-mode-btn" onclick="switchSchoolMode('private', true)"><span class="btn-ico">🌟</span><span class="btn-lbl">مدرسة خاصة</span></button>
+					<select id="private-school-dropdown" onchange="selectPrivateSchool(this.value, true)"></select>
+				</div>
 			</div>
-			<label id="student-import-school-btn" class="student-import-pill" title="إضافة حزمة مدرسة خاصة من ملف JSON أرسله المعلم">
-				<span class="btn-ico">📥</span><span class="btn-lbl">ملف مدرسة</span>
-				<input type="file" accept=".json" style="display:none;" onchange="importStudentSchoolPackage(event)">
-			</label>
-			<button type="button" class="school-mode-btn" style="border-color:#38bdf8; color:#bae6fd;" onclick="openTeacherEditExportGuideModal()" title="شرح تفصيلي لطريقة التعديل وتصدير واستيراد ملفات JSON">
-				<span class="btn-ico">📘</span><span class="btn-lbl">توضيح التعديل والتصدير</span>
-			</button>
 		</div>
 
 		<span id="active-school-hint" class="active-school-hint"></span>
@@ -2546,7 +2560,7 @@
 			const bar = document.getElementById('top-left-controls-bar');
 			const btn = document.getElementById('tch-logo-menu-btn');
 			if (!bar) return;
-			const isOpen = bar.classList.toggle('open');
+			const isOpen = bar.classList.toggle('open'); const bdg = document.getElementById('tch-circle-badge'); if (bdg) bdg.textContent = isOpen ? '✕' : '☰';
 			if (btn) {
 				btn.classList.toggle('menu-open', isOpen);
 				btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
@@ -2558,7 +2572,7 @@
 			const bar = document.getElementById('top-left-controls-bar');
 			const btn = document.getElementById('tch-logo-menu-btn');
 			if (anchor && bar && !anchor.contains(e.target)) {
-				bar.classList.remove('open');
+				bar.classList.remove('open'); const bdg = document.getElementById('tch-circle-badge'); if (bdg) bdg.textContent = '☰';
 				if (btn) { btn.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); }
 			}
 		});
@@ -3631,6 +3645,9 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
     .hdr-top-row {
         max-width: 960px !important;
         margin: 0 auto;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
     }
     header h1 {
         color: #fef08a !important;
@@ -3643,8 +3660,36 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
         border-color: #fde047 !important;
     }
     .school-selector-bar {
-        max-width: 960px !important;
-        margin: 0 auto;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        justify-content: flex-end !important;
+    }
+    .top-left-controls.open {
+        position: absolute !important;
+        top: calc(100% + 10px) !important;
+        right: 0 !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        background: rgba(6, 30, 23, 0.98) !important;
+        backdrop-filter: blur(16px) !important;
+        border: 2.5px solid #eab308 !important;
+        border-radius: 22px !important;
+        padding: 11px !important;
+        gap: 7px !important;
+        width: min(285px, calc(100vw - 28px)) !important;
+        box-shadow: 0 22px 50px rgba(0,0,0,0.72) !important;
+        z-index: 9800 !important;
+    }
+    .top-left-controls.open .portal-top-btn,
+    .top-left-controls.open #admin-lock-trigger,
+    .top-left-controls.open #owner-square-trigger {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        height: 36px !important;
+        padding: 0 14px !important;
+        border-radius: 14px !important;
+        font-size: 0.82rem !important;
     }
 
     /* ضبط نافذة بوابة المدارس الخاصة كـ Modal عائم سليم */
@@ -4101,15 +4146,9 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
                         <button type="button" class="tch-action-pill" onclick="openAdminPassModal()">
                             <span>🏫</span><span>إعدادات المدرسة ووضع التعديل</span>
                         </button>
-                        <button type="button" class="tch-action-pill" style="background:linear-gradient(135deg,#0284c7,#1e3a8a);border-color:#7dd3fc;color:#fef08a;" onclick="openTeacherEditExportGuideModal()">
-                            <span>📘</span><span>دليل التعديل والتصدير والاستيراد</span>
-                        </button>
                         <button type="button" class="tch-action-pill secondary" onclick="renderPlatformUsersModal(); document.getElementById('platform-users-modal').style.display='flex';">
                             <span>📨</span><span>الطلاب وصندوق الحزم (<span id="ut-inbox-cnt">0</span>)</span>
                         </button>
-                        <a href="index.html?switchAccount=1" class="tch-action-pill secondary">
-                            <span>🏠</span><span>الصفحة الرئيسية</span>
-                        </a>
                     </div>
                 </div>
 
@@ -4124,15 +4163,15 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
                 <h2 class="tch-sec-title"><span>🔔</span><span>مُنَبِّهُ مَوْعِدِ التَّدْرِيسِ وَالمُتَابَعَةِ اليَوْمِيَّةِ</span></h2>
                 <span style="font-size:0.8rem; font-weight:800; color:#059669;">الجرس التذكيري للمعلم</span>
             </div>
-            <p style="font-size:0.88rem; font-weight:800; color:#475569; text-align:center;">
-                اختر الساعة اليومية لمتابعة طلابك أو بدء حصتك الدراسية، أو ثبّت الموعد في منبّه تقويم الهاتف:
-            </p>
             <div class="tch-alarm-controls">
                 <input type="time" id="ut-alarm-time" class="tch-time-input" value="08:00">
-                <button type="button" class="tch-action-pill" onclick="utSaveAlarm()">🔔 تفعيل الجرس وموافق</button>
-                <button type="button" class="tch-action-pill secondary" onclick="utRingBellTest()">🔔 تجربة رنين الجرس</button>
-                <button type="button" class="tch-action-pill secondary" onclick="utDownloadICS()">📱 تثبيت في منبّه تقويم الهاتف</button>
-                <button type="button" class="tch-action-pill secondary" onclick="utDisableAlarm()">🔕 إيقاف الجرس</button>
+                <button type="button" class="tch-action-pill" onclick="utSaveAlarm()">🔔 تفعيل الجرس</button>
+                <button type="button" class="tch-action-pill secondary" onclick="utDisableAlarm()">🔕 إيقاف</button>
+                <button type="button" class="tch-action-pill secondary" onclick="var el=document.getElementById('ut-extra-alarm-tools'); el.style.display=(el.style.display==='flex'?'none':'flex');">⚙️ خيارات الرنين والهاتف</button>
+            </div>
+            <div id="ut-extra-alarm-tools" style="display:none; justify-content:center; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="tch-action-pill secondary" style="font-size:0.8rem;" onclick="utRingBellTest()">🔊 تجربة رنين الجرس الآن</button>
+                <button type="button" class="tch-action-pill secondary" style="font-size:0.8rem;" onclick="utDownloadICS()">📱 تثبيت في تقويم الهاتف</button>
             </div>
             <div class="tch-alarm-banner" id="ut-alarm-banner">
                 لم يتم تفعيل جرس المتابعة بعد — اختر وقتك المفضل واضغط «تفعيل الجرس وموافق».
@@ -4895,5 +4934,6 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
     };
 </script>
 
+    <script src="al3lm-local-mesh.js"></script>
 </body>
 </html>

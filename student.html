@@ -2,9 +2,18 @@
 <html lang="ar" dir="rtl">
 <head>
     <script>
-    (function autoRefreshStaleCacheV6() {
+    window.__AL3LM_IS_LOCAL = (function() {
+        var p = window.location.protocol, h = window.location.hostname || '';
+        if (p === 'file:' || p === 'capacitor:' || window.Capacitor || window.Al3lmNative) return true;
+        if (/^(localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[0-1])\.)/i.test(h)) return true;
+        if (h.endsWith('.local')) return true;
+        try { if (localStorage.getItem('al3lm_force_local_mode') === '1') return true; } catch (e) {}
+        return false;
+    })();
+    (function autoRefreshWebOnly() {
+        if (window.__AL3LM_IS_LOCAL) return;
         try {
-            var VER = 'al3lm_layout_v22';
+            var VER = 'al3lm_layout_v23';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -144,66 +153,99 @@
             text-overflow: ellipsis;
             cursor: pointer;
         }
-        /* كبسولات القائمة المخفية: تظهر بجانب دائرة الأيقونة في صف واحد متجاور دون أي تراكب، وتنزل كقائمة عمودية في الشاشات الصغيرة جداً */
-        .nav-actions {
-            display: none;
-            align-items: center;
-            gap: 7px;
-            flex-wrap: nowrap;
-            white-space: nowrap;
-        }
-        .nav-actions.open {
-            display: inline-flex;
-            animation: trayFadeIn 0.2s ease forwards;
-        }
-        @keyframes trayFadeIn {
-            from { opacity: 0; transform: translateX(8px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .nav-pill-btn {
-            padding: 6px 13px;
-            border-radius: 999px;
-            border: 1.5px solid rgba(253, 224, 71, 0.65);
-            background: rgba(15, 23, 42, 0.92);
-            color: #ffffff;
-            font-family: inherit;
-            font-size: 0.78rem;
-            font-weight: 800;
-            cursor: pointer;
-            text-decoration: none;
-            transition: 0.18s;
-            white-space: nowrap;
-            flex-shrink: 0;
+        /* قائمة دائرة الشعار العمودية الهادئة والموحدة على جميع الشاشات بلا زحام بصري */
+        .circle-menu-badge {
+            position: absolute;
+            bottom: -3px;
+            left: -3px;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fde047, #ca8a04);
+            color: #06281e;
+            border: 1.5px solid #06281e;
+            font-size: 0.62rem;
+            font-weight: 900;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            line-height: 1;
         }
-        .nav-pill-btn:hover { background: #065f46; border-color: #fde047; }
-
-        /* عندما تكون الشاشة صغيرة جداً: تنزل الكبسولات بشكل قائمة عمودية مرتبة أسفل دائرة الشعار دون تداخل إطلاقاً */
-        @media (max-width: 640px) {
-            .nav-actions.open {
-                position: absolute;
-                top: calc(100% + 10px);
-                right: 0;
-                flex-direction: column;
-                align-items: stretch;
-                background: rgba(6, 28, 22, 0.98);
-                border: 2px solid #eab308;
-                border-radius: 20px;
-                padding: 10px;
-                gap: 7px;
-                min-width: 195px;
-                box-shadow: 0 16px 38px rgba(0,0,0,0.65);
-                z-index: 1500;
-            }
-            .nav-actions.open .nav-pill-btn {
-                width: 100%;
-                justify-content: flex-start;
-                padding: 8px 14px;
-                font-size: 0.82rem;
-            }
+        .nav-actions {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            flex-direction: column;
+            align-items: stretch;
+            background: rgba(6, 30, 23, 0.98);
+            backdrop-filter: blur(16px);
+            border: 2.5px solid #eab308;
+            border-radius: 22px;
+            padding: 11px;
+            gap: 7px;
+            width: min(285px, calc(100vw - 28px));
+            box-shadow: 0 22px 50px rgba(0,0,0,0.72);
+            z-index: 1500;
+        }
+        .nav-actions.open {
+            display: flex;
+            animation: trayFadeIn 0.18s ease forwards;
+        }
+        @keyframes trayFadeIn {
+            from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .nav-pill-btn {
+            width: 100%;
+            padding: 9px 14px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(254, 240, 138, 0.25);
+            background: rgba(15, 23, 42, 0.78);
+            color: #f8fafc;
+            font-family: inherit;
+            font-size: 0.83rem;
+            font-weight: 900;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+        }
+        .nav-pill-btn:hover { background: rgba(5, 150, 105, 0.38); border-color: #fde047; transform: translateX(-2px); }
+        .menu-divider-line { height: 1px; background: rgba(234, 179, 8, 0.28); margin: 2px 4px; }
+        .stu-school-strip {
+            width: 100%;
+            max-width: 640px;
+            background: #f8fafc;
+            border: 1.8px solid #cbd5e1;
+            border-radius: 999px;
+            padding: 5px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+        .stu-school-strip select {
+            flex: 1;
+            min-width: 180px;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.83rem;
+            font-weight: 900;
+            color: #064e3b;
+            padding: 5px 10px;
+            outline: none;
+            cursor: pointer;
+        }
+        @media (max-width: 560px) {
+            .stu-school-strip { border-radius: 18px; justify-content: center; }
         }
 
         .page-container {
@@ -757,23 +799,24 @@
     <nav class="top-nav">
         <div class="top-nav-inner">
             <div class="brand-menu-anchor" id="stu-brand-menu-anchor">
-                <button type="button" class="logo-circle-trigger" id="stu-logo-menu-btn" onclick="toggleStudentLogoMenu(event)" title="اضغط لإظهار أو إخفاء خيارات الحساب والتطبيق" aria-expanded="false">
+                <button type="button" class="logo-circle-trigger" id="stu-logo-menu-btn" onclick="toggleStudentLogoMenu(event)" title="اضغط لإظهار أو إخفاء قائمة الخيارات" aria-expanded="false">
                     <img src="icon-512.png" onerror="this.src='icon-192.png'" alt="شعار مدرسة العلم">
+                    <span class="circle-menu-badge" id="stu-circle-badge">☰</span>
                 </button>
-                <span class="nav-student-title-txt" id="nav-student-title" onclick="toggleStudentLogoMenu(event)" title="اضغط لفتح قائمة الحساب">بوابة التلميذ</span>
+                <span class="nav-student-title-txt" id="nav-student-title" onclick="toggleStudentLogoMenu(event)" title="اضغط لفتح قائمة البوابة">بوابة التلميذ</span>
 
                 <div class="nav-actions" id="stu-logo-capsules-menu">
-                    <button type="button" class="nav-pill-btn al3lm-orient-cycle-btn compact-orient" onclick="cycleAl3lmOrientation()">🔄 حر</button>
+                    <button type="button" class="nav-pill-btn" style="border-color:#7dd3fc;color:#fef08a;" onclick="openStudentGuideModal()">📘 دليل التلميذ والأهل</button>
                     <button type="button" class="nav-pill-btn hide-in-pwa" onclick="triggerInstallPWA()">📲 تثبيت التطبيق</button>
-                    <button type="button" class="nav-pill-btn" style="border-color:#7dd3fc;color:#bae6fd;" onclick="openStudentGuideModal()">📘 دليل التلميذ</button>
-                    <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب</a>
-                    <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 خروج</a>
+                    <button type="button" class="nav-pill-btn al3lm-orient-cycle-btn compact-orient" onclick="cycleAl3lmOrientation()">🔄 اتجاه الشاشة: حر</button>
+                    <div class="menu-divider-line al3lm-local-only-slot" style="display:none;"></div>
+                    <button type="button" class="nav-pill-btn al3lm-local-only-slot" style="display:none;border-color:#4ade80;color:#bbf7d0;" onclick="document.getElementById('stu-logo-capsules-menu')?.classList.remove('open'); window.Al3lmMesh && window.Al3lmMesh.shareApp()">📤 إرسال التطبيق لصديق</button>
+                    <button type="button" class="nav-pill-btn al3lm-local-only-slot" style="display:none;border-color:#fde047;color:#fef08a;" onclick="document.getElementById('stu-logo-capsules-menu')?.classList.remove('open'); window.Al3lmMesh && window.Al3lmMesh.oneClickUpdate()">🔄 تحديث المنصة بضغطة واحدة</button>
+                    <div class="menu-divider-line"></div>
+                    <a href="index.html?switchAccount=1" class="nav-pill-btn">🔄 تبديل الحساب / الرئيسية</a>
+                    <a href="index.html?logout=1" class="nav-pill-btn" style="border-color:#fda4af;color:#fecdd3;">🚪 تسجيل الخروج</a>
                 </div>
             </div>
-
-            <button type="button" class="nav-pill-btn" style="background:linear-gradient(135deg,#0284c7,#1e3a8a);border-color:#7dd3fc;color:#fef08a;" onclick="openStudentGuideModal()" title="دليل الاستخدام الشامل لبوابة التلميذ والدروس والمنبّه والتطبيق">
-                <span>📘</span><span>دليل استخدام البوابة والمنصة</span>
-            </button>
         </div>
     </nav>
 
@@ -811,27 +854,26 @@
                 </div>
             </div>
 
-            <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:4px;">
-                <button type="button" class="action-pill-btn" style="font-size:0.82rem; padding:7px 15px; background:linear-gradient(135deg,#0284c7,#1e3a8a); border-color:#7dd3fc; color:#fef08a;" onclick="openStudentGuideModal()">
-                    📘 الدليل التوضيحي للتلميذ والأهل (كيف أستخدم كل شيء؟)
-                </button>
-                <select id="stu-school-selector" class="alarm-time-input" style="font-size:0.84rem; padding:6px 12px;" onchange="changeStudentSchool(this.value)">
+            <div class="stu-school-strip">
+                <select id="stu-school-selector" onchange="changeStudentSchool(this.value)" title="المدرسة الحالية">
                     <option value="main">🏫 مدرسة العلم (المنهج الأساسي)</option>
                 </select>
-                <button type="button" class="action-pill-btn secondary" style="font-size:0.8rem; padding:6px 12px; border-color:#eab308; background:#fefce8; color:#713f12;" onclick="toggleStudentPackageExchangeBox()">
-                    📨 صندوق الحزم والتراسل (<span id="stu-inbox-badge-cnt">0</span>)
+                <button type="button" class="action-pill-btn secondary" style="font-size:0.78rem; padding:6px 14px; border-color:#eab308; background:#fefce8; color:#713f12;" onclick="toggleStudentPackageExchangeBox()">
+                    📨 الحزم والملفات (<span id="stu-inbox-badge-cnt">0</span>)
                 </button>
-                <label class="action-pill-btn secondary" style="cursor:pointer; font-size:0.8rem; padding:6px 12px;">
-                    <span>📥 إضافة ملف JSON يدوياً</span>
-                    <input type="file" accept=".json" style="display:none;" onchange="importTeacherSchoolForStudent(event)">
-                </label>
             </div>
 
-            <!-- صندوق استقبال حزم المعلم وإرسال سجل التلميذ مباشرةً عبر المنصة -->
-            <div id="stu-pkg-exchange-box" style="display:none; width:100%; max-width:660px; background:#f8fafc; border:2px solid #10b981; border-radius:20px; padding:12px 14px; text-align:right; flex-direction:column; gap:8px; margin-top:6px;">
+            <!-- صندوق استقبال حزم المعلم واستيراد/إرسال ملفات JSON (مخفي بهدوء حتى يُطلب) -->
+            <div id="stu-pkg-exchange-box" style="display:none; width:100%; max-width:640px; background:#f8fafc; border:2px solid #10b981; border-radius:20px; padding:12px 14px; text-align:right; flex-direction:column; gap:8px; margin-top:4px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-                    <span style="font-weight:900; font-size:0.86rem; color:#064e3b;">📦 الحزم الواردة إليك وإرسال سجلّك لمعلمك:</span>
-                    <button type="button" class="action-pill-btn secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="refreshStudentDirectInbox()">🔄 تحديث الوارد</button>
+                    <span style="font-weight:900; font-size:0.85rem; color:#064e3b;">📦 صندوق الحزم وربط ملفات المدرسة:</span>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <label class="action-pill-btn secondary" style="cursor:pointer; font-size:0.74rem; padding:4px 10px;">
+                            <span>📥 استيراد ملف مدرسة (.json)</span>
+                            <input type="file" accept=".json" style="display:none;" onchange="importTeacherSchoolForStudent(event)">
+                        </label>
+                        <button type="button" class="action-pill-btn secondary" style="font-size:0.74rem; padding:4px 10px;" onclick="refreshStudentDirectInbox()">🔄 تحديث الوارد</button>
+                    </div>
                 </div>
                 <div id="stu-direct-inbox-list" style="display:flex; flex-direction:column; gap:6px;"></div>
                 <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding-top:6px; border-top:1px dashed #cbd5e1;">
@@ -851,15 +893,15 @@
                 <h2 class="sec-title"><span>🔔</span><span>مُنَبِّهُ مَوْعِدِ الدِّرَاسَةِ وَالإِشْعَارَاتُ</span></h2>
                 <span style="font-size:0.8rem; font-weight:800; color:#059669;" id="notif-perm-badge">الجرس التذكيري</span>
             </div>
-            <p style="font-size:0.9rem; font-weight:800; color:#475569; text-align:center;">
-                اختر الساعة التي تحب أن يذكّرك فيها معلمك بموعد درسك القادم، وعند الضغط على الإشعار ستفتح لك هذه الصفحة مباشرة:
-            </p>
             <div class="alarm-controls-row">
                 <input type="time" id="stu-alarm-time" class="alarm-time-input" value="08:30">
-                <button type="button" class="action-pill-btn" onclick="saveAndArmStudentAlarm()">🔔 تفعيل الجرس وموافق</button>
-                <button type="button" class="action-pill-btn secondary" onclick="testNotificationNow()">🔔 تجربة رنين الجرس والإشعار</button>
-                <button type="button" class="action-pill-btn secondary" onclick="addPhoneSystemAlarmICS()" title="لتنبيهك حتى لو أغلقت المتصفح بالكامل على الهاتف">📱 تثبيت في منبّه تقويم الهاتف</button>
-                <button type="button" class="action-pill-btn secondary" onclick="disableStudentAlarm()">🔕 إيقاف الجرس</button>
+                <button type="button" class="action-pill-btn" onclick="saveAndArmStudentAlarm()">🔔 تفعيل الجرس</button>
+                <button type="button" class="action-pill-btn secondary" onclick="disableStudentAlarm()">🔕 إيقاف</button>
+                <button type="button" class="action-pill-btn secondary" onclick="var el=document.getElementById('stu-extra-alarm-tools'); el.style.display=(el.style.display==='flex'?'none':'flex');">⚙️ خيارات الرنين والهاتف</button>
+            </div>
+            <div id="stu-extra-alarm-tools" style="display:none; justify-content:center; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="action-pill-btn secondary" style="font-size:0.8rem;" onclick="testNotificationNow()">🔊 تجربة رنين الجرس الآن</button>
+                <button type="button" class="action-pill-btn secondary" style="font-size:0.8rem;" onclick="addPhoneSystemAlarmICS()">📱 تثبيت في تقويم الهاتف (يعمل والمتصفح مغلق)</button>
             </div>
             <div class="alarm-status-banner" id="alarm-status-banner">
                 لم يتم تفعيل جرس التذكير بعد — اختر وقتك المفضل واضغط «تفعيل الجرس وموافق».
@@ -1537,7 +1579,7 @@
             const menu = document.getElementById('stu-logo-capsules-menu');
             const btn = document.getElementById('stu-logo-menu-btn');
             if (!menu) return;
-            const isOpen = menu.classList.toggle('open');
+            const isOpen = menu.classList.toggle('open'); const bdg = document.getElementById('stu-circle-badge'); if (bdg) bdg.textContent = isOpen ? '✕' : '☰';
             if (btn) {
                 btn.classList.toggle('menu-open', isOpen);
                 btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
@@ -1548,7 +1590,7 @@
             const menu = document.getElementById('stu-logo-capsules-menu');
             const btn = document.getElementById('stu-logo-menu-btn');
             if (anchor && menu && !anchor.contains(e.target)) {
-                menu.classList.remove('open');
+                menu.classList.remove('open'); const bdg = document.getElementById('stu-circle-badge'); if (bdg) bdg.textContent = '☰';
                 if (btn) { btn.classList.remove('menu-open'); btn.setAttribute('aria-expanded', 'false'); }
             }
         });
@@ -2585,7 +2627,7 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
         </div>
 
         <div class="s-guide-footer">
-            <span style="font-size:0.8rem; font-weight:800; color:#475569;">💡 يمكنك فتح هذا الدليل في أي وقت من الزر العلوي «📘 دليل استخدام البوابة والمنصة».</span>
+            <span style="font-size:0.8rem; font-weight:800; color:#475569;">💡 يمكنك فتح هذا الدليل في أي وقت بالضغط على دائرة شعار «مدرسة العلم» في الأعلى.</span>
             <div style="display:flex; gap:8px;">
                 <button type="button" class="action-pill-btn" onclick="closeStudentGuideModal(); launchStudentLesson();">▶ ابدأ درسي الآن</button>
                 <button type="button" class="action-pill-btn secondary" onclick="closeStudentGuideModal()">إغلاق الدليل</button>
@@ -2599,7 +2641,7 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
         const modal = document.getElementById('student-portal-guide-modal');
         if (!modal) return;
         const menu = document.getElementById('stu-logo-capsules-menu');
-        if (menu) menu.classList.remove('open');
+        if (menu) menu.classList.remove('open'); const bdg = document.getElementById('stu-circle-badge'); if (bdg) bdg.textContent = '☰';
         if (initialTabId) window.switchStudentGuideTab(initialTabId);
         modal.classList.add('open');
     };
@@ -2623,5 +2665,6 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
     });
 </script>
 
+    <script src="al3lm-local-mesh.js"></script>
 </body>
 </html>

@@ -1456,7 +1456,7 @@
         #smart-tooltip {
             position: fixed;
             z-index: 100000;
-            background: rgba(15, 23, 42, 0.94);
+            background: rgba(15, 23, 42, 0.96);
             color: #f8fafc;
             padding: 6px 12px;
             border-radius: 12px;
@@ -1465,10 +1465,52 @@
             opacity: 0;
             transition: opacity 0.15s ease;
             text-align: center;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+            max-width: min(350px, 92vw);
         }
         #smart-tooltip.visible { opacity: 1; }
         #smart-tooltip .tip-title { font-weight: 900; font-size: 0.82rem; color: #38bdf8; }
         #smart-tooltip .tip-desc { font-size: 0.72rem; color: #cbd5e1; }
+        #smart-tooltip.seals-list-mode {
+            text-align: right;
+            padding: 9px 13px;
+            border-radius: 15px;
+            border-color: #fde047;
+        }
+        #smart-tooltip.seals-list-mode .tip-title {
+            text-align: center;
+            color: #fde047;
+            font-size: 0.84rem;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed rgba(253, 224, 71, 0.35);
+        }
+        #smart-tooltip.seals-list-mode .tip-desc {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #f1f5f9;
+            line-height: 1.45;
+        }
+        .tip-seal-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tip-seal-ico {
+            flex-shrink: 0;
+            min-width: 20px;
+            text-align: center;
+        }
+        .tip-seal-txt {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         @media (max-width: 768px) {
             .brand-logo-text { display: none; }
@@ -2872,6 +2914,7 @@
                     wrap.className = 'week-wrapper';
 
                     let btn = document.createElement('button');
+                    btn.dataset.week = String(weekIdx);
                     btn.innerHTML = `
                         <span class="week-btn-letter">${letterChar}</span>
                         <span class="week-btn-eval">${weekRelEval}/${maxPerSubj}</span>
@@ -5191,7 +5234,23 @@
                     }
                     if (el.classList.contains('week-btn-item')) {
                         let ltr = el.querySelector('.week-btn-letter')?.innerText || '';
-                        return { title: `حَرْفُ (${ltr})`, desc: 'اضْغَطْ لِفَتْحِ دُرُوسِ الحَرْفْ.' };
+                        let wNum = parseInt(el.dataset.week || '0', 10) || (STRICT_ABJAD_LETTERS.indexOf(ltr) + 1) || 1;
+                        let db = (window.curriculumData && Object.keys(window.curriculumData).length > 0)
+                            ? window.curriculumData
+                            : (typeof curriculumData !== 'undefined' ? curriculumData : null);
+                        let yKey = db ? (db[RAW_YEAR] ? RAW_YEAR : (db[SCHOOL_YEAR] ? SCHOOL_YEAR : (db[7] ? 7 : Number(Object.keys(db)[0])))) : null;
+                        let wData = (db && yKey && db[yKey]) ? (db[yKey][wNum] || db[yKey][String(wNum)]) : null;
+                        let lines = [];
+                        for (let s = 1; s <= 7; s++) {
+                            let sObj = wData ? (wData[s] || wData[String(s)]) : null;
+                            let rawT = (sObj && sObj.learn && sObj.learn.introTitle)
+                                ? String(sObj.learn.introTitle).replace(/<[^>]*>/g, '').split('—')[0].trim()
+                                : '';
+                            if (!rawT) rawT = `${SUBJ_TITLES[s] || ''} (${ltr})`;
+                            let safeT = rawT.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            lines.push(`<div class="tip-seal-line"><span class="tip-seal-ico">${SUBJ_EMOJIS[s] || s}</span><span class="tip-seal-txt">${safeT}</span></div>`);
+                        }
+                        return { title: `حَرْفُ (${ltr}) — عَنَاوِينُ الأَخْتَامِ السَّبْعَةِ`, htmlDesc: lines.join(''), isList: true };
                     }
                     el = el.parentElement;
                 }
@@ -5205,7 +5264,7 @@
                 let y = clientY + 18;
                 if (x < pad) x = pad;
                 if (x + rect.width > window.innerWidth - pad) x = window.innerWidth - rect.width - pad;
-                if (y + rect.height > window.innerHeight - pad) y = clientY - rect.height - 12;
+                if (y + rect.height > window.innerHeight - pad) y = Math.max(pad, clientY - rect.height - 12);
                 tooltipEl.style.left = `${x}px`;
                 tooltipEl.style.top = `${y}px`;
             }
@@ -5213,12 +5272,14 @@
             document.addEventListener('mouseover', function(e) {
                 const info = getTipInfo(e.target);
                 if (info) {
+                    tooltipEl.classList.toggle('seals-list-mode', Boolean(info.isList));
                     titleEl.innerText = info.title;
-                    descEl.innerText = info.desc;
+                    if (info.htmlDesc) descEl.innerHTML = info.htmlDesc;
+                    else descEl.innerText = info.desc || '';
                     tooltipEl.classList.add('visible');
                     positionTooltip(e.clientX, e.clientY);
                 } else {
-                    tooltipEl.classList.remove('visible');
+                    tooltipEl.classList.remove('visible', 'seals-list-mode');
                 }
             });
 

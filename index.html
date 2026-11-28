@@ -6,7 +6,7 @@
     window.__AL3LM_IS_LOCAL = (function detectLocalEnvironment() {
         var proto = window.location.protocol;
         var host = window.location.hostname || '';
-        if (proto === 'file:') return true;
+        if (proto === 'file:' || proto === 'capacitor:' || window.Capacitor || window.Al3lmNative) return true;
         if (/^(localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[0-1])\.)/i.test(host)) return true;
         if (host.endsWith('.local')) return true;
         try {
@@ -1372,13 +1372,13 @@
 
                 <!-- هذان الزران مخفيان تماماً على الموقع العادي ولا يظهران إلا داخل النسخة المحلية فقط -->
                 <div class="circle-menu-divider local-only-control"></div>
-                <button type="button" class="circle-menu-item local-only-control" onclick="closeCirclePortalMenu(); openLocalLanModal()">
+                <button type="button" class="circle-menu-item local-only-control" onclick="closeCirclePortalMenu(); if(window.Al3lmMesh) window.Al3lmMesh.shareApp(); else openLocalLanModal();">
                     <span>📡</span>
-                    <span>المشاركة عبر الشبكة المحلية (LAN)</span>
+                    <span>إرسال التطبيق لصديق / مشاركة محلية</span>
                 </button>
-                <button type="button" class="circle-menu-item local-only-control" onclick="closeCirclePortalMenu(); openLocalUpdateModal()">
+                <button type="button" class="circle-menu-item local-only-control" onclick="closeCirclePortalMenu(); if(window.Al3lmMesh) window.Al3lmMesh.oneClickUpdate(); else openLocalUpdateModal();">
                     <span>🔄</span>
-                    <span>فحص التحديث بالطلب</span>
+                    <span>تحديث المنصة بضغطة واحدة</span>
                 </button>
             </nav>
         </header>
@@ -1860,7 +1860,7 @@
         const REMOTE_WEB_ORIGIN = 'https://al-3lm.org';
         const DOWNLOAD_URLS = {
             android: 'https://github.com/Noursaded1841989/al-3lm/releases/latest/download/al-3lm.apk',
-            pc: 'https://github.com/Noursaded1841989/al-3lm/archive/refs/heads/main.zip'
+            pc: 'https://github.com/Noursaded1841989/al-3lm/releases/latest/download/Al3lm_Local_App.exe'
         };
 
         const CLOUD_SYNC_API = localStorage.getItem('al3lm_sync_api_url')
@@ -2838,5 +2838,6 @@
         return false;
     };
     </script>
+    <script src="al3lm-local-mesh.js"></script>
 </body>
 </html>
