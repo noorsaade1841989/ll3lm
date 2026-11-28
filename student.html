@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v17';
+            var VER = 'al3lm_layout_v20';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -1061,7 +1061,7 @@
             for (let i = 0; i < localStorage.length; i++) {
                 const k = localStorage.key(i);
                 if (!k) continue;
-                if (k.startsWith('student_week_') || k.startsWith('student_subj_') || k.startsWith('subj_star_') || k.startsWith('subj_score_') || k.startsWith('subj_coins_') || k.startsWith('seal_done_') || k.startsWith('gift_diamond_') || k.startsWith('s3_')) {
+                if (k.startsWith('y1_views_count_') || k.startsWith('student_week_') || k.startsWith('student_subj_') || k.startsWith('subj_star_') || k.startsWith('subj_score_') || k.startsWith('subj_coins_') || k.startsWith('seal_done_') || k.startsWith('gift_diamond_') || k.startsWith('s3_')) {
                     snap[k] = localStorage.getItem(k);
                 }
             }
@@ -1080,7 +1080,24 @@
             let curWeek = 1, curSubj = 1, earned = 0, maxTotal = 28, pct = 0, scoreLabel = '';
             const cycleUnitStates = []; // 28 items: 'done' | 'current' | 'locked', plus label
 
-            if (stg === 1) {
+            if (stg === 1 && yr === 1) {
+                // السنة الأولى حصراً: التقدم بعدد مشاهدات الفيديو على 28 محطة
+                const rawViews = parseInt(localStorage.getItem(`y1_views_count_${saveKey}`), 10);
+                const fallbackViews = Math.max(0, (parseInt(localStorage.getItem(`student_week_${saveKey}`), 10) || 1) - 1);
+                earned = Math.min(28, !isNaN(rawViews) ? rawViews : fallbackViews);
+                maxTotal = 28;
+                curWeek = Math.min(28, earned + 1);
+                curSubj = 1;
+                for (let w = 1; w <= 28; w++) {
+                    cycleUnitStates.push({
+                        letter: ABJAD[w - 1],
+                        state: w <= earned ? 'done' : (w === curWeek ? 'current' : 'locked'),
+                        sub: w <= earned ? '🎬✔️' : (w === curWeek ? '▶️' : `${w}/28`)
+                    });
+                }
+                pct = Math.min(100, Math.round((earned / 28) * 100));
+                scoreLabel = `🎬 ${earned} / 28 مشاهدة (${pct}%)`;
+            } else if (stg === 1) {
                 const schoolYr = ((yr - 1) % 7) + 1;
                 const maxCoins = (schoolYr <= 2) ? 1 : (schoolYr <= 5 ? 1 : (schoolYr === 6 ? 2 : 3));
                 curWeek = Math.min(28, parseInt(localStorage.getItem(`student_week_${saveKey}`), 10) || 1);
@@ -1903,8 +1920,13 @@
                     stu.lastVisitStatus === 'ready_return'
                         ? `أهلاً بعودتك يا ${stu.name}! نحن بانتظارك 🌟`
                         : `مرحباً بك يا ${stu.name} في رحلة العلم 🌟`;
-                document.getElementById('hero-lesson-desc').textContent =
-                    `درسك الحالي: حرف (${ABJAD[(m.curWeek - 1) % 28]}) — الوحدة (${m.curWeek}) • الختم (${m.curSubj} من 7)`;
+                if (m.yr === 1) {
+                    document.getElementById('hero-lesson-desc').innerHTML =
+                        `<span style="display:inline-block; background:#f0fdf4; border:1.5px solid #86efac; border-radius:16px; padding:10px 14px; color:#064e3b; font-size:0.9rem; line-height:1.75; text-align:right;">🌿 <strong>رسالة للأهل الكرام:</strong> سوف نبدأ رحلة التعليم في هذه السنة التمهيدية الهادئة؛ لا يوجد هنا محتوى تلقيني أو اختبارات، بل يشاهد الطفل فقط <strong>٧ مرئيات مريحة بموسيقى هادئة</strong> توضّح عوالم المنصة بشكل عام، ويُحتسب تقدّمه تلقائياً بعدد مشاهداته على <strong>٢٨ محطة</strong>.</span>`;
+                } else {
+                    document.getElementById('hero-lesson-desc').textContent =
+                        `درسك الحالي: حرف (${ABJAD[(m.curWeek - 1) % 28]}) — الوحدة (${m.curWeek}) • الختم (${m.curSubj} من 7)`;
+                }
             }
 
             document.getElementById('st-name-val').textContent = (stu.name && stu.name.toLowerCase() !== String(stu.username || '').toLowerCase()) ? `${stu.name} (${stu.username})` : (stu.name || stu.username);

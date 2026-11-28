@@ -1944,6 +1944,7 @@
 
         // صوت رنين جرس مبهج عند اختيار الإجابة الصحيحة
         function playCorrectChime() {
+            if (RAW_YEAR === 1 && !isSecretEditMode) return;
             try {
                 const ctx = getSharedAudioCtx();
                 if (!ctx) return;
@@ -1986,6 +1987,7 @@
         }
 
         function playNextChime() {
+            if (RAW_YEAR === 1 && !isSecretEditMode) return;
             if (typeof GameEngine !== 'undefined') GameEngine.playSound('chime');
         }
 
@@ -2147,6 +2149,12 @@
         }
 
         function speakText(text, onEndCallback, customAudioSrc = null) {
+            if (RAW_YEAR === 1 && !isSecretEditMode) {
+                window._isSpeakingMainQuestion = false;
+                window._questionReadCompleted = true;
+                if (onEndCallback) setTimeout(onEndCallback, 50);
+                return;
+            }
             let isDone = false;
             clearTimeout(_questionGuardTimer);
 
@@ -3596,10 +3604,16 @@
             }
 
             if (SCHOOL_YEAR === 1 && !isSecretEditMode) {
-                if (!isMusicPlaying && currentMusicIndex === -1) {
-                    currentMusicIndex = 0;
-                    playSelectedMusicTrack();
-                }
+                // إيقاف أي موسيقى خلفية أو ناطق آلي تماماً في السنة الأولى ليبقى صوت الفيديو فقط
+                isMusicPlaying = false;
+                currentMusicIndex = -1;
+                try {
+                    const bgM = document.getElementById('bg-music');
+                    if (bgM) { bgM.pause(); bgM.removeAttribute('src'); }
+                    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                    const cAud = document.getElementById('custom-audio');
+                    if (cAud) cAud.pause();
+                } catch (_) {}
                 if (globalStep === 0) globalStep = 1;
                 else if (globalStep > 1) { completeLesson(activeViewSubj); return; }
             }
@@ -4019,25 +4033,26 @@
                 if (isGrades2To5 && !hasCustomVideo) {
                     renderSlidesFallbackView();
                 } else if (SCHOOL_YEAR === 1) {
+                    // في السنة الأولى: 7 فيديوهات عبر الأختام السبعة (1 -> v1.mp4 ... 7 -> v7.mp4) بأزرار التحكم العالمية المعتادة وبدون موسيقى خارجية أو ناطق آلي
+                    let sealVidIdx = Math.min(7, Math.max(1, activeViewSubj));
                     let candidateVideos = [];
                     if (defData.learn?.video) candidateVideos.push(defData.learn.video);
                     candidateVideos.push(
-                        defaultVidPath,
-                        `assets/y1/videos/v${playWeek}.mp4`,
-                        `assets/videos/v${playWeek}.mp4`,
-                        `v${playWeek}.mp4`
+                        `assets/y1/videos/v${sealVidIdx}.mp4`,
+                        `assets/videos/v${sealVidIdx}.mp4`,
+                        `v${sealVidIdx}.mp4`
                     );
+                    candidateVideos = [...new Set(candidateVideos.filter(Boolean))];
 
                     let card = document.createElement('div');
-                    card.className = 'fancy-card';
+                    card.className = 'fancy-card y1-pure-video-card';
                     card.innerHTML = `
                         <div class="video-wrapper-box">
-                            <video id="lesson-video" data-edit-asset-key="lesson_video" poster="${defData.learn?.coverImg || activeDefaultImg}" class="media-box-vid" controls playsinline preload="metadata"></video>
+                            <video id="lesson-video" data-edit-asset-key="lesson_video" poster="${defData.learn?.coverImg || `assets/y4/art/art${sealVidIdx}.jpg`}" class="media-box-vid" controls controlsList="nodownload" playsinline preload="metadata"></video>
                         </div>`;
                     contentDiv.appendChild(card);
 
                     let vidEl = document.getElementById('lesson-video');
-                    let bgMusic = document.getElementById('bg-music');
                     let currentCandidateIdx = 0;
 
                     const tryLoadY1Video = () => {
@@ -4046,15 +4061,10 @@
                             vidEl.load();
                             vidEl.onloadeddata = () => {
                                 updateNavButtons(true);
-                                if (!isSecretEditMode) vidEl.play().catch(() => {});
                             };
-                        } else {
-                            if (!isSecretEditMode) {
-                                renderSlidesFallbackView();
-                            } else {
-                                updateNavButtons(true);
-                                attachEditHooksToCurrentStation(defData);
-                            }
+                        } else if (isSecretEditMode) {
+                            updateNavButtons(true);
+                            attachEditHooksToCurrentStation(defData);
                         }
                     };
 
@@ -4062,12 +4072,10 @@
                         currentCandidateIdx++;
                         tryLoadY1Video();
                     };
-                    vidEl.onplay = () => { if (isMusicPlaying && SCHOOL_YEAR !== 1) bgMusic.volume = 0.02; };
-                    vidEl.onpause = () => { if (isMusicPlaying) bgMusic.volume = 0.15; };
                     vidEl.onended = () => {
-                        if (isMusicPlaying) bgMusic.volume = 0.15;
-                        updateNavButtons(true);
-                        showCenterAction(() => completeLesson(activeViewSubj), true);
+                        if (typeof window.recordYear1VideoWatch === 'function') {
+                            window.recordYear1VideoWatch(sealVidIdx);
+                        }
                     };
 
                     tryLoadY1Video();
@@ -5978,7 +5986,7 @@
         }
 
         // Auto-bypass internal #welcome-screen when launched from student.html (?autostart=1) or teachers.html
-        const shouldAutoStart = (params.get('autostart') === '1') || isTeacher || Boolean(localStorage.getItem('al3lm_active_student_user'));
+        const shouldAutoStart = (typeof RAW_YEAR !== 'undefined' && RAW_YEAR === 1 && !isTeacher) ? false : ((params.get('autostart') === '1') || isTeacher || Boolean(localStorage.getItem('al3lm_active_student_user')));
         const ws = document.getElementById('welcome-screen');
         if (ws && shouldAutoStart) {
             ws.style.display = 'none';
@@ -6216,6 +6224,247 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
             document.addEventListener('click', onceLock, { once: true });
         }
     });
+})();
+</script>
+
+
+<!-- ==================== الوضع الحصري الصافي للسنة الأولى (RAW_YEAR === 1) ==================== -->
+<style id="al3lm-year1-exclusive-styles">
+    /* إخفاء كافة الأشرطة العلوية والخريطة وأزرار الطبقات في السنة الأولى (إلا في وضع تعديل المعلم السري) */
+    body.year1-minimal-mode:not(.edit-mode-active) header,
+    body.year1-minimal-mode:not(.edit-mode-active) #stage-layers-strip,
+    body.year1-minimal-mode:not(.edit-mode-active) #week-modal,
+    body.year1-minimal-mode:not(.edit-mode-active) #center-action,
+    body.year1-minimal-mode:not(.edit-mode-active) .al3lm-tts-stop-btn,
+    body.year1-minimal-mode:not(.edit-mode-active) .seal-battery {
+        display: none !important;
+    }
+
+    body.year1-minimal-mode:not(.edit-mode-active) .layout-wrapper {
+        height: 100dvh !important;
+    }
+
+    /* شريط الأختام العمودي في السنة الأولى مع زر «مدرسة العلم» في أعلاه للعودة للصفحة الرئيسية */
+    body.year1-minimal-mode .sidebar-nav {
+        width: clamp(72px, 10.5vmin, 92px) !important;
+        padding: 10px 6px !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        background: rgba(6, 28, 22, 0.92) !important;
+        border-left: 2.5px solid rgba(234, 179, 8, 0.65) !important;
+    }
+
+    .y1-sidebar-home-btn {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        width: 100%;
+        padding: 7px 4px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #065f46, #064e3b);
+        border: 2px solid #fde047;
+        color: #fef08a;
+        text-decoration: none;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        flex-shrink: 0;
+    }
+    body.year1-minimal-mode .y1-sidebar-home-btn {
+        display: flex;
+    }
+    .y1-sidebar-home-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 14px rgba(253, 224, 71, 0.55);
+    }
+    .y1-sidebar-home-btn img {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid #fde047;
+        background: #042f2e;
+    }
+    .y1-sidebar-home-btn span {
+        font-family: 'Aref Ruqaa', serif;
+        font-size: 0.78rem;
+        line-height: 1.1;
+        color: #fef08a;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    body.year1-minimal-mode .subject-btn {
+        width: clamp(46px, 6.4vmin, 58px) !important;
+        height: clamp(44px, 6vmin, 54px) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+    }
+    body.year1-minimal-mode .subject-btn.active {
+        border: 3px solid #fde047 !important;
+        background: linear-gradient(135deg, #fef9c3, #dcfce7) !important;
+        box-shadow: 0 0 16px rgba(253, 224, 71, 0.65) !important;
+    }
+
+    body.year1-minimal-mode .y1-pure-video-card {
+        padding: 10px !important;
+        background: rgba(15, 23, 42, 0.88) !important;
+        border: 2.5px solid rgba(234, 179, 8, 0.55) !important;
+    }
+    body.year1-minimal-mode .video-wrapper-box {
+        border: none !important;
+        background: #000000 !important;
+    }
+
+    /* رسالة الترحيب والتوضيح الخاصة بالأهل عند الدخول للسنة الأولى */
+    .y1-parents-welcome-note {
+        background: #f0fdf4;
+        border: 2px solid #86efac;
+        border-radius: 20px;
+        padding: 14px 16px;
+        text-align: right;
+        color: #064e3b;
+        font-size: clamp(0.84rem, 2vmin, 0.96rem);
+        font-weight: 800;
+        line-height: 1.75;
+        max-width: 460px;
+    }
+    .y1-parents-welcome-note strong {
+        color: #047857;
+        display: block;
+        margin-bottom: 4px;
+        font-size: 1rem;
+        text-align: center;
+    }
+</style>
+
+<script>
+(function setupYear1ExclusiveExperience() {
+    if (typeof RAW_YEAR === 'undefined' || RAW_YEAR !== 1) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const isTeacher = (params.get('from') === 'teachers') || (localStorage.getItem('al3lm_active_role') === 'teacher');
+    const isGuestExplore = (params.get('explore') === '1') || (localStorage.getItem('al3lm_explore_guest_mode') === '1');
+
+    document.body.classList.add('year1-minimal-mode');
+
+    // ١. إيقاف القارئ الآلي والموسيقى الخلفية كلياً في السنة الأولى
+    isTTSActive = false;
+    isMusicPlaying = false;
+    currentMusicIndex = -1;
+    try {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        const bgM = document.getElementById('bg-music');
+        if (bgM) { bgM.pause(); bgM.removeAttribute('src'); }
+    } catch (_) {}
+
+    // ٢. فتح الأختام السبعة كلها في السنة الأولى ليتمكن الطفل/الأهل من فتح أي فيديو من الفيديوهات الـ 7 بحرية
+    playMaxSubj = 7;
+    isFreeExplore = true;
+
+    // ٣. إضافة زر «مدرسة العلم» أعلى شريط الأختام العمودي للعودة المباشرة إلى الصفحة الرئيسية / البوابة
+    const sidebar = document.getElementById('seals-sidebar');
+    if (sidebar && !document.getElementById('y1-home-return-btn')) {
+        const homeBtn = document.createElement('a');
+        homeBtn.id = 'y1-home-return-btn';
+        homeBtn.className = 'y1-sidebar-home-btn';
+        // يعيد الزائر إلى index.html، والمعلم إلى teachers.html، والتلميذ المسجل إلى بوابته الرئيسية student.html (أو index.html إن لم يكن مسجلاً)
+        const hasActiveStudent = Boolean(localStorage.getItem('al3lm_active_student_user'));
+        homeBtn.href = isTeacher ? 'teachers.html' : ((hasActiveStudent && !isGuestExplore) ? 'student.html' : 'index.html');
+        homeBtn.title = 'العودة إلى الصفحة الرئيسية — مدرسة العلم';
+        homeBtn.innerHTML = `
+            <img src="icon-512.png" onerror="this.src='cc.ico'" alt="مدرسة العلم">
+            <span>مدرسة العلم</span>
+        `;
+        homeBtn.addEventListener('click', () => {
+            try {
+                const v = document.getElementById('lesson-video');
+                if (v) v.pause();
+                if (typeof window.syncAl3lmStudentProgressSnapshot === 'function') {
+                    window.syncAl3lmStudentProgressSnapshot();
+                }
+            } catch (_) {}
+        });
+        sidebar.insertBefore(homeBtn, sidebar.firstChild);
+    }
+
+    // ٤. تخصيص رسالة الترحيب الموجهة للأهل في شاشة البداية للسنة الأولى (تظهر للأهل عند أول دخول حتى لو جاء من البوابة ليفهموا طبيعة السنة الأولى)
+    const ws = document.getElementById('welcome-screen');
+    const wBox = ws ? ws.querySelector('.welcome-box') : null;
+    if (ws && wBox) {
+        wBox.style.maxWidth = '500px';
+        if (!document.getElementById('y1-parents-msg-box')) {
+            const note = document.createElement('div');
+            note.id = 'y1-parents-msg-box';
+            note.className = 'y1-parents-welcome-note';
+            note.innerHTML = `
+                <strong>🌿 رسالة ترحيبية إلى الأهل الكرام (بداية الرحلة)</strong>
+                سوف نبدأ رحلة التعليم من هذه السنة التمهيدية الهادئة؛ لا يوجد في هذه السنة محتوى تلقيني أو أسئلة دراسية، بل يشاهد الطفل فقط <strong>٧ مرئيات مريحة بموسيقى هادئة</strong> عبر الأختام السبعة الجانبية توضّح عوالم المنصة بشكل عام بعيداً عن أي تشتيت، ويُحتسب تقدّم الطفل تلقائياً بعدد مشاهداته على مدار <strong>٢٨ مشاهدة</strong>.
+            `;
+            const startBtn = document.getElementById('start-lesson-btn');
+            if (startBtn) wBox.insertBefore(note, startBtn);
+            else wBox.appendChild(note);
+        }
+        // إظهار الرسالة الترحيبية للأهل دائماً عند فتح السنة الأولى ليقرؤوها بطمأنينة قبل بدء الفيديو
+        if (!isTeacher) {
+            ws.style.display = 'flex';
+            ws.style.opacity = '1';
+        }
+    }
+
+    // ٥. احتساب التقدم في السنة الأولى بعدد مشاهدات الفيديو على 28 (كل مشاهدة ترفع العداد 1 من 28 وتزامن سجل التلميذ تلقائياً)
+    window.recordYear1VideoWatch = function(sealIdx) {
+        if (isTeacher || isGuestExplore || isSecretEditMode) return;
+        const watchKey = `y1_views_count_${SAVE_KEY}`;
+        let views = parseInt(localStorage.getItem(watchKey), 10);
+        if (isNaN(views)) {
+            views = Math.max(0, (parseInt(localStorage.getItem(`student_week_${SAVE_KEY}`), 10) || 1) - 1);
+        }
+        views = Math.min(28, views + 1);
+        localStorage.setItem(watchKey, String(views));
+
+        // مزامنة المفاتيح القياسية (student_week_ / seal_done_ / subj_score_) ليتطابق التقدم مع نسق الـ 28 في كل المنصة
+        localStorage.setItem(`seal_done_${SAVE_KEY}_w${views}_s${sealIdx}`, 'true');
+        const nextWeekPtr = Math.min(28, views + 1);
+        localStorage.setItem(`student_week_${SAVE_KEY}`, String(nextWeekPtr));
+        localStorage.setItem(`student_subj_${SAVE_KEY}`, '1');
+
+        // تحديث نجمة الختم الحالي بصرياً على الشريط العمودي
+        const sealBtn = document.getElementById('btn-subj-' + sealIdx);
+        if (sealBtn) sealBtn.classList.add('completed');
+
+        // حفظ السجل في حساب الطالب السحابي والمحلي
+        try {
+            const activeUser = localStorage.getItem('al3lm_active_student_user');
+            if (activeUser) {
+                const accounts = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+                const stu = accounts[activeUser];
+                if (stu) {
+                    stu.progress = stu.progress || {};
+                    stu.progress[watchKey] = String(views);
+                    stu.progress[`student_week_${SAVE_KEY}`] = String(nextWeekPtr);
+                    if (views >= 28) stu.completed = true;
+                    const pct = Math.min(100, Math.round((views / 28) * 100));
+                    stu.lastScore = `🎬 ${views} / 28 مشاهدة (${pct}%)`;
+                    if (!Array.isArray(stu.lessonHistory)) stu.lessonHistory = [];
+                    const nowStr = new Date().toLocaleDateString('ar-EG') + ' ' + new Date().toTimeString().slice(0, 5);
+                    stu.lessonHistory.push({
+                        date: nowStr,
+                        year: 1,
+                        week: views,
+                        letter: STRICT_ABJAD_LETTERS[(views - 1) % 28] || 'أ',
+                        title: `مشاهدة مرئية الختم (${sealIdx}) — المشاهدة ${views} من 28`,
+                        score: `${views}/28 ⭐`
+                    });
+                    accounts[activeUser] = stu;
+                    localStorage.setItem('al3lm_student_accounts_v1', JSON.stringify(accounts));
+                }
+            }
+            if (typeof window.syncAl3lmStudentProgressSnapshot === 'function') {
+                window.syncAl3lmStudentProgressSnapshot();
+            }
+        } catch (_) {}
+    };
 })();
 </script>
 
