@@ -5,7 +5,7 @@
 	<script>
 	(function autoRefreshStaleCacheV6() {
 		try {
-			var VER = 'al3lm_layout_v13';
+			var VER = 'al3lm_layout_v16';
 			if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
 				localStorage.setItem('al3lm_ui_cache_ver', VER);
 				if ('caches' in window) {
@@ -703,6 +703,575 @@
 		}
 		body.owner-gate1-verified #owner-square-trigger {
 			display: inline-flex !important;
+		}
+
+
+		/* ================= القالب الموحد لبوابة المعلمين (مطابق لبوابة التلميذ + فوتر المراحل المصغّر) ================= */
+		html, body {
+			height: auto !important;
+			min-height: 100dvh !important;
+			overflow-y: auto !important;
+			overflow-x: hidden !important;
+			background: radial-gradient(circle at 50% 10%, #065f46 0%, #06281e 55%, #09111e 100%) !important;
+			color: #0f172a;
+			user-select: text !important;
+		}
+		body::before {
+			content: "";
+			position: fixed;
+			inset: 0;
+			z-index: 0;
+			pointer-events: none;
+			background-image: var(--tch-ambient-bg, url('assets/stage2-bg.jpg'), url('assets/34275.jpg'), url('stage2-bg.jpg'));
+			background-size: cover;
+			background-position: center 22%;
+			opacity: 0.14;
+			transition: background-image 0.45s ease;
+		}
+
+		/* توحيد الترويسة العلوية مع شريط بوابة التلميذ مع الحفاظ على جميع أزرار المعلم والمدارس */
+		header {
+			position: sticky !important;
+			top: 0 !important;
+			background: rgba(6, 24, 19, 0.94) !important;
+			backdrop-filter: blur(14px) !important;
+			border-bottom: 2px solid rgba(250, 204, 21, 0.45) !important;
+			animation: none !important;
+			padding: 9px 16px 10px 16px !important;
+			z-index: 900 !important;
+			box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important;
+		}
+		header h1 {
+			color: #fef08a !important;
+			font-family: 'Cairo', sans-serif !important;
+			font-size: clamp(0.92rem, 2.4vmin, 1.08rem) !important;
+			font-weight: 900 !important;
+			text-shadow: none !important;
+		}
+		.tch-logo-circle-btn {
+			border-color: #fde047 !important;
+		}
+
+		/* ضمان عمل نافذة بوابة المدارس الخاصة كنافذة منبثقة متمركزة */
+		#admin-pass-modal {
+			position: fixed;
+			inset: 0;
+			z-index: 9950;
+			background: rgba(0, 0, 0, 0.82);
+			backdrop-filter: blur(6px);
+			display: none;
+			justify-content: center;
+			align-items: center;
+			padding: 14px;
+			direction: rtl;
+		}
+
+		/* حاوية البطاقات الموحدة مع student.html */
+		.tch-page-container {
+			position: relative;
+			z-index: 2;
+			max-width: 960px;
+			width: 100%;
+			margin: 0 auto;
+			padding: 18px 14px 18px 14px;
+			display: flex;
+			flex-direction: column;
+			gap: 18px;
+		}
+
+		/* ١. بطاقة الترحيب العلوية للمعلم + لوحة صور الصفوف المختارة ودوائر التنقل السريع */
+		.tch-hero-card {
+			background: linear-gradient(145deg, rgba(255,255,255,0.97), rgba(240,253,244,0.95));
+			border: 3.5px solid #eab308;
+			border-radius: 32px;
+			padding: clamp(20px, 3.8vmin, 30px);
+			box-shadow: 0 22px 55px rgba(0,0,0,0.45);
+			display: grid;
+			grid-template-columns: 1.25fr 1.05fr;
+			gap: 20px;
+			align-items: stretch;
+		}
+		.tch-h	<main class="tch-page-container">
+		<!-- ١. بطاقة الترحيب العلوية للمعلم + صور المراحل ودوائر الصفوف المختارة للتنقل السريع -->
+		<section class="tch-hero-card">
+			<div class="tch-hero-right">
+				<div class="tch-role-chip" id="tch-hero-school-chip">🏫 مدرسة العلم (المنهج الأساسي)</div>
+				<h2 class="tch-hero-greeting" id="tch-hero-greeting">مرحباً بك في بوابة المعلم</h2>
+				<p class="tch-hero-desc" id="tch-hero-desc">
+					اضغط على أي دائرة من دوائر صفوفك المختارة للانتقال المباشر إلى الصف والعمل عليه، وعند العودة ستجد لوحتك وصفوفك بانتظارك هنا.
+				</p>
+				<div class="tch-hero-actions">
+					<button type="button" class="tch-action-pill" onclick="openAdminPassModal()">
+						<span>🏫</span><span>إدارة مدرستي وتعديل الصفوف</span>
+					</button>
+					<button type="button" class="tch-action-pill secondary" onclick="renderPlatformUsersModal(); document.getElementById('platform-users-modal').style.display='flex';">
+						<span>👥</span><span>سجل التلاميذ وتراسل الحزم</span>
+					</button>
+					<a href="index.html?switchAccount=1" class="tch-action-pill secondary" title="العودة إلى الصفحة الرئيسية (بوابة الدخول)">
+						<span>🏠</span><span>الصفحة الرئيسية</span>
+					</a>
+				</div>
+			</div>
+
+			<!-- لوحة الصور والدوائر للصفوف التي اختارها المعلم أو المدرسة للعمل عليها -->
+			<div class="tch-chosen-stages-panel">
+				<div class="tch-chosen-hdr" id="tch-chosen-hdr">🎯 صفوفك ومراحلك المفعّلة (اضغط رقم الصف للدخول المباشر):</div>
+				<div class="tch-chosen-cards-list" id="tch-chosen-cards-list"></div>
+			</div>
+		</section>
+
+		<!-- ٢. مركز الإشعارات ومنبّه موعد التدريس والمتابعة اليومية للمعلم -->
+		<section class="tch-section-card">
+			<div class="tch-sec-hdr">
+				<h3 class="tch-sec-title"><span>🔔</span><span>مُنَبِّهُ مَوْعِدِ التَّدْرِيسِ وَالمُتَابَعَةِ اليَوْمِيَّةِ</span></h3>
+				<span style="font-size:0.8rem; font-weight:800; color:#059669;" id="tch-notif-badge">الجرس التذكيري للمعلم</span>
+			</div>
+			<p style="font-size:0.9rem; font-weight:800; color:#475569; text-align:center;">
+				اضبط الساعة اليومية لمتابعة طلابك أو تحضير دروسك، ليذكّرك الجرس أو تقويم الهاتف في الموعد:
+			</p>
+			<div class="tch-alarm-controls">
+				<input type="time" id="tch-alarm-time" class="tch-time-input" value="08:00">
+				<button type="button" class="tch-action-pill" onclick="saveAndArmTeacherAlarm()">🔔 تفعيل الجرس وموافق</button>
+				<button type="button" class="tch-action-pill secondary" onclick="testTeacherBellNow()">🔔 تجربة رنين الجرس</button>
+				<button type="button" class="tch-action-pill secondary" onclick="downloadTeacherSystemICS()">📱 تثبيت في تقويم الهاتف</button>
+				<button type="button" class="tch-action-pill secondary" onclick="disableTeacherAlarmNow()">🔕 إيقاف الجرس</button>
+			</div>
+			<div class="tch-alarm-banner" id="tch-alarm-status-banner">
+				لم يتم تفعيل جرس المعلم بعد — اختر الساعة المناسبة واضغط «تفعيل الجرس وموافق».
+			</div>
+		</section>
+
+		<!-- ٣. بطاقة معلومات المعلم وملخص المدرسة وتقدم التلاميذ -->
+		<section class="tch-section-card">
+			<div class="tch-sec-hdr">
+				<h3 class="tch-sec-title"><span>📜</span><span>بِطَاقَةُ المُعَلِّمِ وَإِحْصَائِيَّاتُ المَدْرَسَةِ</span></h3>
+				<button type="button" class="tch-action-pill secondary" style="font-size:0.78rem; padding:6px 14px;" onclick="refreshTeacherUnifiedView()">🔄 تحديث السجل</button>
+			</div>
+
+			<div class="tch-stats-grid">
+				<div class="tch-stat-tile">
+					<span class="tch-stat-lbl">اسم المعلم / الحساب</span>
+					<span class="tch-stat-val" id="tch-st-name">—</span>
+				</div>
+				<div class="tch-stat-tile">
+					<span class="tch-stat-lbl">المدرسة المفتوحة حالياً</span>
+					<span class="tch-stat-val" id="tch-st-school">—</span>
+				</div>
+				<div class="tch-stat-tile">
+					<span class="tch-stat-lbl">وضع التعديل والصلاحية</span>
+					<span class="tch-stat-val" id="tch-st-edit">—</span>
+				</div>
+				<div class="tch-stat-tile">
+					<span class="tch-stat-lbl">عدد التلاميذ ومتوسط الإنجاز</span>
+					<span class="tch-stat-val" id="tch-st-students">0 تلميذ</span>
+				</div>
+			</div>
+
+			<div id="tch-cohort-insight-bar" style="background:linear-gradient(135deg,#f0fdf4,#fefce8);border:1.8px solid #86efac;border-radius:16px;padding:10px 16px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-size:0.85rem;font-weight:900;color:#064e3b;">
+				<span id="tch-stuck-lbl">📍 محطات تركّز الطلاب: ستظهر مع انطلاق التلاميذ</span>
+				<span id="tch-weak-lbl" style="color:#b45309;">🛠️ مادة تحتاج دعماً: لا يوجد تعثر ملحوظ</span>
+			</div>
+		</section>
+
+		<div style="text-align:center; padding:4px 12px; font-size:0.82rem; font-weight:800; color:#a7f3d0;">
+			☁️ اطلبوا العلم من المهد إلى اللحد — جميع تعديلات مدرستك وحزم طلابك متاحة للمزامنة السحابية واللامركزية.
+		</div>
+	</main>
+
+	<!-- ٤. الفوتر السفلي المصغّر والموحد للمراحل الثلاث والصفوف الـ 21 (للانتقال السريع بين الصفوف) -->
+	<footer class="unified-stages-footer" aria-label="التنقل السريع بين المراحل والصفوف">
+		<div class="unified-footer-hdr">
+			<div class="unified-footer-title">
+				<span>🧭</span>
+				<span>مَسَارُ المَرَاحِلِ الثَّلَاثِ وَالتَّنَقُّلُ بَيْنَ الصُّفُوفِ (١ – ٢١):</span>
+			</div>
+			<div class="unified-footer-legend">
+				<span class="legend-dot"><i style="background:#fde047; border:1.5px solid #fff;"></i> آخر صف عملت عليه</span>
+				<span class="legend-dot"><i style="background:#166534; border:1.5px solid #4ade80;"></i> صف مفعّل في المدرسة</span>
+				<span class="legend-dot"><i style="background:#475569; opacity:0.45;"></i> صف غير مفعّل</span>
+			</div>
+		</div>
+
+		<div class="compact-stages-grid">
+			<!-- المرحلة الأولى: سيد (1-7) -->
+			<div id="stage-card-1" class="compact-stage-box bg-stage-1">
+				<label for="modal-stage1" class="compact-stg-head" title="اضغط لفتح نافذة المرحلة الأولى">
+					<span class="compact-stg-ar" style="color:#7dd3fc;">سَيِّد</span>
+					<span class="compact-stg-rng">1 – 7</span>
+				</label>
+				<div class="compact-years-circles">
+					<a href="stage1.html?stage=1&year=1" data-year="1" onclick="return selectStageYear(event, 1, 1)" class="year-btn">1</a>
+					<a href="stage1.html?stage=1&year=2" data-year="2" onclick="return selectStageYear(event, 1, 2)" class="year-btn">2</a>
+					<a href="stage1.html?stage=1&year=3" data-year="3" onclick="return selectStageYear(event, 1, 3)" class="year-btn">3</a>
+					<a href="stage1.html?stage=1&year=4" data-year="4" onclick="return selectStageYear(event, 1, 4)" class="year-btn">4</a>
+					<a href="stage1.html?stage=1&year=5" data-year="5" onclick="return selectStageYear(event, 1, 5)" class="year-btn">5</a>
+					<a href="stage1.html?stage=1&year=6" data-year="6" onclick="return selectStageYear(event, 1, 6)" class="year-btn">6</a>
+					<a href="stage1.html?stage=1&year=7" data-year="7" onclick="return selectStageYear(event, 1, 7)" class="year-btn">7</a>
+				</div>
+			</div>
+
+			<!-- المرحلة الثانية: عبد (8-14) -->
+			<div id="stage-card-2" class="compact-stage-box bg-stage-2">
+				<label for="modal-stage2" class="compact-stg-head" title="اضغط لفتح نافذة المرحلة الثانية">
+					<span class="compact-stg-ar" style="color:#fde047;">عَبْد</span>
+					<span class="compact-stg-rng">8 – 14</span>
+				</label>
+				<div class="compact-years-circles">
+					<a href="stage2.html?stage=2&year=8" data-year="8" onclick="return selectStageYear(event, 2, 8)" class="year-btn">8</a>
+					<a href="stage2.html?stage=2&year=9" data-year="9" onclick="return selectStageYear(event, 2, 9)" class="year-btn">9</a>
+					<a href="stage2.html?stage=2&year=10" data-year="10" onclick="return selectStageYear(event, 2, 10)" class="year-btn">10</a>
+					<a href="stage2.html?stage=2&year=11" data-year="11" onclick="return selectStageYear(event, 2, 11)" class="year-btn">11</a>
+					<a href="stage2.html?stage=2&year=12" data-year="12" onclick="return selectStageYear(event, 2, 12)" class="year-btn">12</a>
+					<a href="stage2.html?stage=2&year=13" data-year="13" onclick="return selectStageYear(event, 2, 13)" class="year-btn">13</a>
+					<a href="stage2.html?stage=2&year=14" data-year="14" onclick="return selectStageYear(event, 2, 14)" class="year-btn">14</a>
+				</div>
+			</div>
+
+			<!-- المرحلة الثالثة: صاحب (15-21) -->
+			<div id="stage-card-3" class="compact-stage-box bg-stage-3">
+				<label for="modal-stage3" class="compact-stg-head" title="اضغط لفتح نافذة المرحلة الثالثة">
+					<span class="compact-stg-ar" style="color:#fda4af;">صَاحِب</span>
+					<span class="compact-stg-rng">15 – 21</span>
+				</label>
+				<div class="compact-years-circles">
+					<a href="stage3.html?stage=3&year=15" data-year="15" onclick="return selectStageYear(event, 3, 15)" class="year-btn">15</a>
+					<a href="stage3.html?stage=3&year=16" data-year="16" onclick="return selectStageYear(event, 3, 16)" class="year-btn">16</a>
+					<a href="stage3.html?stage=3&year=17" data-year="17" onclick="return selectStageYear(event, 3, 17)" class="year-btn">17</a>
+					<a href="stage3.html?stage=3&year=18" data-year="18" onclick="return selectStageYear(event, 3, 18)" class="year-btn">18</a>
+					<a href="stage3.html?stage=3&year=19" data-year="19" onclick="return selectStageYear(event, 3, 19)" class="year-btn">19</a>
+					<a href="stage3.html?stage=3&year=20" data-year="20" onclick="return selectStageYear(event, 3, 20)" class="year-btn">20</a>
+					<a href="stage3.html?stage=3&year=21" data-year="21" onclick="return selectStageYear(event, 3, 21)" class="year-btn">21</a>
+				</div>
+			</div>
+		</div>
+	</footer>olor: #fef08a;
+			padding-bottom: 6px;
+			border-bottom: 1px dashed rgba(253, 224, 71, 0.4);
+		}
+		.tch-chosen-cards-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			flex: 1;
+			justify-content: center;
+		}
+		.tch-chosen-stg-row {
+			position: relative;
+			border-radius: 18px;
+			overflow: hidden;
+			background-size: cover;
+			background-position: center 22%;
+			border: 2px solid rgba(253, 224, 71, 0.65);
+			padding: 10px 12px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 10px;
+			flex-wrap: wrap;
+			min-height: 62px;
+		}
+		.tch-chosen-stg-row::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(90deg, rgba(4, 19, 15, 0.86) 0%, rgba(4, 19, 15, 0.58) 100%);
+			z-index: 1;
+		}
+		.tch-chosen-stg-row > * {
+			position: relative;
+			z-index: 2;
+		}
+		.tch-chosen-stg-lbl {
+			display: flex;
+			flex-direction: column;
+			text-align: right;
+		}
+		.tch-chosen-stg-lbl strong {
+			font-family: 'Aref Ruqaa', serif;
+			font-size: 1.25rem;
+			color: #fef08a;
+			line-height: 1.1;
+		}
+		.tch-chosen-stg-lbl span {
+			font-size: 0.72rem;
+			font-weight: 800;
+			color: #d1fae5;
+		}
+		.tch-chosen-circles-wrap {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			flex-wrap: wrap;
+			justify-content: flex-end;
+		}
+		.tch-hero-yr-circle {
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #16a34a, #065f46);
+			color: #ffffff;
+			border: 2px solid #86efac;
+			font-family: 'Cairo', sans-serif;
+			font-size: 0.92rem;
+			font-weight: 900;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			text-decoration: none;
+			box-shadow: 0 0 12px rgba(74, 222, 128, 0.55);
+			transition: transform 0.2s ease, background 0.2s ease;
+		}
+		.tch-hero-yr-circle:hover {
+			transform: translateY(-2px) scale(1.1);
+			background: linear-gradient(135deg, #fde047, #eab308);
+			color: #064e3b;
+			border-color: #ffffff;
+		}
+		.tch-hero-yr-circle.active-working-yr {
+			width: 42px;
+			height: 42px;
+			font-size: 1.05rem;
+			background: linear-gradient(135deg, #fde047, #eab308);
+			color: #064e3b;
+			border: 2.5px solid #ffffff;
+			box-shadow: 0 0 18px rgba(250, 204, 21, 0.95);
+		}
+
+		/* ٢. بطاقات المنبّه وملخص المعلم والطلاب المطابقة لـ student.html */
+		.tch-section-card {
+			background: rgba(255, 255, 255, 0.96);
+			border: 2.5px solid rgba(250, 204, 21, 0.65);
+			border-radius: 26px;
+			padding: 20px;
+			box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+			display: flex;
+			flex-direction: column;
+			gap: 14px;
+		}
+		.tch-sec-hdr {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 10px;
+			border-bottom: 2px dashed #d1fae5;
+			padding-bottom: 10px;
+			flex-wrap: wrap;
+		}
+		.tch-sec-title {
+			font-size: 1.15rem;
+			font-weight: 900;
+			color: #064e3b;
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+		}
+		.tch-alarm-controls {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+		.tch-time-input {
+			padding: 9px 16px;
+			border-radius: 16px;
+			border: 2.5px solid #10b981;
+			font-family: 'Cairo', sans-serif;
+			font-size: 1.05rem;
+			font-weight: 900;
+			color: #064e3b;
+			background: #f0fdf4;
+		}
+		.tch-alarm-banner {
+			padding: 12px 16px;
+			border-radius: 16px;
+			background: #064e3b;
+			color: #fef08a;
+			font-size: 0.9rem;
+			font-weight: 900;
+			text-align: center;
+			line-height: 1.65;
+		}
+		.tch-stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+			gap: 12px;
+		}
+		.tch-stat-tile {
+			background: linear-gradient(145deg, #f8fafc, #ecfdf5);
+			border: 2px solid #a7f3d0;
+			border-radius: 20px;
+			padding: 14px;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			text-align: center;
+		}
+		.tch-stat-lbl { font-size: 0.8rem; font-weight: 800; color: #475569; }
+		.tch-stat-val { font-size: 1.18rem; font-weight: 900; color: #064e3b; }
+
+		/* ٣. الفوتر السفلي المصغّر والموحد للمراحل الثلاث والصفوف الـ 21 (نفس فوتر student.html تماماً) */
+		.unified-stages-footer {
+			position: relative;
+			z-index: 2;
+			max-width: 960px;
+			width: calc(100% - 28px);
+			margin: 0 auto 38px auto;
+			background: rgba(6, 28, 22, 0.92) !important;
+			border: 2.5px solid rgba(250, 204, 21, 0.65) !important;
+			border-radius: 28px;
+			padding: 16px !important;
+			box-shadow: 0 18px 44px rgba(0, 0, 0, 0.48);
+			backdrop-filter: blur(12px);
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			animation: none !important;
+			text-align: right !important;
+		}
+		.unified-footer-hdr {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 10px;
+			flex-wrap: wrap;
+			padding: 0 4px 8px 4px;
+			border-bottom: 1.5px dashed rgba(253, 224, 71, 0.35);
+		}
+		.unified-footer-title {
+			color: #fef08a;
+			font-size: 0.95rem;
+			font-weight: 900;
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+		}
+		.unified-footer-legend {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			flex-wrap: wrap;
+			font-size: 0.75rem;
+			font-weight: 800;
+			color: #d1fae5;
+		}
+		.legend-dot {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+		}
+		.legend-dot i {
+			width: 11px;
+			height: 11px;
+			border-radius: 50%;
+			display: inline-block;
+		}
+
+		.compact-stages-grid {
+			display: grid !important;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 12px;
+			width: 100%;
+			overflow: visible !important;
+		}
+		.compact-stage-box {
+			position: relative;
+			border-radius: 20px;
+			overflow: hidden;
+			background-size: cover;
+			background-position: center 24%;
+			border: 2px solid rgba(255, 255, 255, 0.25);
+			padding: 12px 10px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-between;
+			gap: 10px;
+			min-height: 142px;
+			box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+			transition: transform 0.22s ease, opacity 0.3s ease;
+		}
+		.compact-stage-box.stage-dimmed {
+			opacity: 0.5;
+			filter: grayscale(60%);
+		}
+		.compact-stage-box::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(180deg, rgba(4, 19, 15, 0.56) 0%, rgba(4, 19, 15, 0.84) 100%);
+			z-index: 1;
+		}
+		.compact-stage-box.bg-stage-1 { border-color: rgba(56, 189, 248, 0.55); }
+		.compact-stage-box.bg-stage-2 { border-color: rgba(234, 179, 8, 0.55); }
+		.compact-stage-box.bg-stage-3 { border-color: rgba(251, 113, 133, 0.55); }
+
+		.compact-stg-head {
+			position: relative;
+			z-index: 2;
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			width: 100%;
+			padding: 0 4px 4px 4px;
+			border-bottom: 1px solid rgba(255,255,255,0.18);
+			cursor: pointer;
+		}
+		.compact-stg-ar {
+			font-family: 'Aref Ruqaa', serif;
+			font-size: 1.45rem;
+			line-height: 1.05;
+		}
+		.compact-stg-rng {
+			font-size: 0.78rem;
+			font-weight: 900;
+			direction: ltr;
+			padding: 1px 8px;
+			border-radius: 999px;
+			background: rgba(0,0,0,0.42);
+			color: #f8fafc;
+		}
+		.compact-years-circles {
+			position: relative;
+			z-index: 2;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 6px;
+			flex-wrap: wrap;
+			width: 100%;
+		}
+		.compact-years-circles .year-btn {
+			width: 32px !important;
+			height: 32px !important;
+			font-size: 0.85rem !important;
+			font-weight: 900 !important;
+		}
+		.compact-years-circles .year-btn.current-tch-focus {
+			width: 40px !important;
+			height: 40px !important;
+			font-size: 1.02rem !important;
+			background: linear-gradient(135deg, #fde047, #eab308) !important;
+			color: #064e3b !important;
+			border: 2.5px solid #ffffff !important;
+			box-shadow: 0 0 16px rgba(250, 204, 21, 0.9) !important;
+		}
+
+		@media (max-width: 780px) {
+			.tch-hero-card {
+				grid-template-columns: 1fr;
+			}
+			.tch-chosen-stages-panel {
+				order: -1;
+				min-height: auto;
+			}
+			.compact-stages-grid {
+				grid-template-columns: 1fr;
+			}
+			.compact-stage-box {
+				min-height: 118px;
+			}
 		}
 
 	</style>
@@ -3592,6 +4161,280 @@ body.is-installed-pwa .al3lm-orient-cycle-btn {
             document.addEventListener('click', onceLock, { once: true });
         }
     });
+})();
+</script>
+
+
+<script>
+(function initUnifiedTeacherDashboardController() {
+    const STAGE_META = {
+        1: { name: 'مرحلة سَيِّد', sub: 'بناء البدن والنفس (١–٧)', bgCls: 'bg-stage-1', img: "url('assets/stage1-bg.jpg')" },
+        2: { name: 'مرحلة عَبْد', sub: 'بناء العقل والأفعال (٨–١٤)', bgCls: 'bg-stage-2', img: "url('assets/stage2-bg.jpg')" },
+        3: { name: 'مرحلة صَاحِب', sub: 'بناء الروح والمجتمع (١٥–٢١)', bgCls: 'bg-stage-3', img: "url('assets/stage3-bg.jpg')" }
+    };
+
+    window.refreshTeacherUnifiedView = function() {
+        const activeTch = localStorage.getItem('al3lm_active_teacher_user') || 'المعلم';
+        const branch = localStorage.getItem('selected_school_branch') || 'main';
+        const lastYr = parseInt(localStorage.getItem('selected_school_year'), 10) || 1;
+        const lastStg = Math.min(3, Math.max(1, Math.ceil(lastYr / 7)));
+
+        // ضبط الخلفية المحيطة الخافتة حسب آخر مرحلة عمل عليها المعلم
+        document.body.style.setProperty('--tch-ambient-bg', STAGE_META[lastStg].img);
+
+        const hdrTitle = document.querySelector('header h1');
+        if (hdrTitle) hdrTitle.textContent = `بوابة المعلم — ${activeTch}`;
+
+        const schools = (typeof getAllPrivateSchools === 'function')
+            ? getAllPrivateSchools()
+            : JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
+        const foundSc = (branch !== 'main') ? schools.find(s => s.id === branch) : null;
+
+        // التحقق أيضاً إن كان لحساب المعلم مدرسة مرتبطة مباشرةً
+        const teachersMap = JSON.parse(localStorage.getItem('al3lm_teacher_accounts_v1') || '{}');
+        const tchAcc = teachersMap[String(activeTch).toLowerCase()];
+
+        const scName = foundSc
+            ? `${foundSc.name} ${foundSc.code ? '[' + foundSc.code + ']' : ''}`
+            : 'مدرسة العلم (المنهج الأساسي)';
+
+        const greetEl = document.getElementById('tch-hero-greeting');
+        if (greetEl) greetEl.textContent = `أهلاً بك يا ${activeTch} في مدرسة العلم 🌟`;
+
+        const chipEl = document.getElementById('tch-hero-school-chip');
+        if (chipEl) chipEl.textContent = `🏫 ${scName}`;
+
+        const editOn = (typeof isSchoolEditModeActive === 'function')
+            ? isSchoolEditModeActive()
+            : (localStorage.getItem('school_edit_mode') === 'true');
+
+        // حساب إحصائيات الطلاب ضمن نطاق المعلم أو المنصة
+        const studentsObj = JSON.parse(localStorage.getItem('al3lm_student_accounts_v1') || '{}');
+        const allStus = Object.values(studentsObj);
+        const scopedStus = (foundSc && foundSc.id)
+            ? allStus.filter(s => s.schoolBranch === foundSc.id)
+            : allStus;
+        const avgPct = scopedStus.length
+            ? Math.round(scopedStus.reduce((acc, s) => acc + Number(s.pct ?? s.stats?.pct ?? 0), 0) / scopedStus.length)
+            : 0;
+
+        const stNameEl = document.getElementById('tch-st-name');
+        const stSchoolEl = document.getElementById('tch-st-school');
+        const stEditEl = document.getElementById('tch-st-edit');
+        const stStuEl = document.getElementById('tch-st-students');
+        if (stNameEl) stNameEl.textContent = activeTch;
+        if (stSchoolEl) stSchoolEl.textContent = scName;
+        if (stEditEl) stEditEl.textContent = editOn ? 'مفعّل للتعديل ✏️' : 'وضع المعاينة والتصفح 🔒';
+        if (stStuEl) stStuEl.textContent = `${scopedStus.length} تلميذ (متوسط ${avgPct}%)`;
+
+        // تحديث شريط البصيرة السريع
+        const ABJ = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي','ك','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
+        const SEALS = { 1:'المنطق والبيان', 2:'البصيرة والفن', 3:'الرنين والصوت', 4:'الرياضيات والمقدار', 5:'الحركة والاتزان', 6:'العلوم والحياة', 7:'الآداب والسلوك' };
+        const stuckEl = document.getElementById('tch-stuck-lbl');
+        const weakEl = document.getElementById('tch-weak-lbl');
+        if (stuckEl && weakEl) {
+            if (scopedStus.length > 0) {
+                const sMap = {}, wMap = {};
+                scopedStus.forEach(s => {
+                    const y = parseInt(s.assignedYear, 10) || 1;
+                    const w = parseInt(s.curWeek ?? s.stats?.curWeek ?? 1, 10) || 1;
+                    const p = Number(s.pct ?? s.stats?.pct ?? 0);
+                    if (p < 100) {
+                        const k = `صف ${y} • حرف (${ABJ[(w - 1) % 28] || 'أ'})`;
+                        sMap[k] = (sMap[k] || 0) + 1;
+                    }
+                    const ws = s.weakestSeal ?? s.stats?.weakestSeal;
+                    if (ws && SEALS[ws]) wMap[ws] = (wMap[ws] || 0) + 1;
+                });
+                const topS = Object.entries(sMap).sort((a,b) => b[1] - a[1])[0];
+                const topW = Object.entries(wMap).sort((a,b) => b[1] - a[1])[0];
+                stuckEl.textContent = topS ? `📍 أكثر محطة يدرسها طلابك الآن: ${topS[0]} (${topS[1]} طلاب)` : '✨ جميع الطلاب أتمّوا محطاتهم الحالية!';
+                weakEl.textContent = topW ? `🛠️ مادة تحتاج تعزيزاً: ${SEALS[topW[0]]} (${topW[1]} طلاب)` : '✨ الأداء متوازن في الأختام السبعة';
+            } else {
+                stuckEl.textContent = '📍 محطات تركّز الطلاب: ستظهر فور انضمام التلاميذ';
+                weakEl.textContent = '🛠️ اختر أي صف من الدوائر لمعاينة الدروس أو تخصيصها';
+            }
+        }
+
+        // ١. رسم لوحة صور المراحل ودوائر الصفوف المختارة في بطاقة الترحيب العلوية (#tch-chosen-cards-list)
+        const chosenHdr = document.getElementById('tch-chosen-hdr');
+        const chosenList = document.getElementById('tch-chosen-cards-list');
+        if (chosenList) {
+            let chosenYears = [];
+            if (foundSc && Array.isArray(foundSc.targetYears) && foundSc.targetYears.length > 0) {
+                chosenYears = foundSc.targetYears.slice().sort((a, b) => a - b);
+                if (chosenHdr) chosenHdr.textContent = `🎯 صفوف مدرسة (${foundSc.name}) المفعّلة — اضغط الدائرة للدخول للصف:`;
+            } else if (tchAcc && tchAcc.schoolMeta && Array.isArray(tchAcc.schoolMeta.targetYears) && tchAcc.schoolMeta.targetYears.length > 0 && branch !== 'main') {
+                chosenYears = tchAcc.schoolMeta.targetYears.slice().sort((a, b) => a - b);
+                if (chosenHdr) chosenHdr.textContent = `🎯 صفوفك المختارة — اضغط رقم الصف للانتقال المباشر:`;
+            } else {
+                // في المنهج الأساسي العام نعرض المراحل الثلاث مع أبرز الدوائر وآخر صف زاره المعلم، مع إمكانية فتح كل الـ 21 من الفوتر
+                chosenYears = Array.from({ length: 21 }, (_, i) => i + 1);
+                if (chosenHdr) chosenHdr.textContent = `🧭 جميع الصفوف (١ – ٢١) متاحة — اضغط أي دائرة للانتقال الفوري للصف:`;
+            }
+
+            const grouped = { 1: [], 2: [], 3: [] };
+            chosenYears.forEach(y => {
+                const stg = Math.min(3, Math.max(1, Math.ceil(y / 7)));
+                grouped[stg].push(y);
+            });
+
+            chosenList.innerHTML = '';
+            [1, 2, 3].forEach(stg => {
+                if (grouped[stg].length === 0) return;
+                const row = document.createElement('div');
+                row.className = `tch-chosen-stg-row ${STAGE_META[stg].bgCls}`;
+                const targetFile = stg === 1 ? 'stage1.html' : (stg === 2 ? 'stage2.html' : 'stage3.html');
+
+                const circlesHtml = grouped[stg].map(y => {
+                    const isLast = (y === lastYr);
+                    return `<a href="${targetFile}?stage=${stg}&year=${y}" onclick="return selectStageYear(event, ${stg}, ${y})" class="tch-hero-yr-circle ${isLast ? 'active-working-yr' : ''}" title="اضغط للدخول إلى الصف ${y}">${y}</a>`;
+                }).join('');
+
+                row.innerHTML = `
+                    <div class="tch-chosen-stg-lbl">
+                        <strong>${STAGE_META[stg].name}</strong>
+                        <span>${STAGE_META[stg].sub}</span>
+                    </div>
+                    <div class="tch-chosen-circles-wrap">${circlesHtml}</div>
+                `;
+                chosenList.appendChild(row);
+            });
+        }
+
+        // ٢. تمييز آخر صف عمل عليه المعلم في الفوتر السفلي المصغّر أيضاً
+        document.querySelectorAll('.unified-stages-footer .year-btn').forEach(btn => {
+            const y = parseInt(btn.getAttribute('data-year'), 10);
+            btn.classList.toggle('current-tch-focus', y === lastYr && !btn.classList.contains('year-disabled'));
+        });
+    };
+
+    // ربط التحديث التلقائي مع دوال التبديل بين المدارس ووضع التعديل في teachers.html
+    ['refreshAdminUI', 'selectPrivateSchool', 'switchSchoolMode'].forEach(fnName => {
+        const orig = window[fnName];
+        if (typeof orig === 'function') {
+            window[fnName] = function() {
+                const res = orig.apply(this, arguments);
+                if (window.refreshTeacherUnifiedView) window.refreshTeacherUnifiedView();
+                return res;
+            };
+        }
+    });
+
+    // ================= محرك الجرس التذكيري اليومي للمعلم =================
+    let tchBellInterval = null;
+    function playTeacherBellSound() {
+        try { if (navigator.vibrate) navigator.vibrate([200, 100, 250]); } catch (_) {}
+        try {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            if (!window._tchAudioCtx) window._tchAudioCtx = new Ctx();
+            const ctx = window._tchAudioCtx;
+            if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+            const now = ctx.currentTime;
+            [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = 'triangle';
+                const t0 = now + i * 0.14;
+                osc.frequency.setValueAtTime(freq, t0);
+                g.gain.setValueAtTime(0.001, t0);
+                g.gain.exponentialRampToValueAtTime(0.26, t0 + 0.025);
+                g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.42);
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(t0); osc.stop(t0 + 0.45);
+            });
+        } catch (_) {}
+    }
+
+    function updateTeacherAlarmBanner() {
+        const activeTch = localStorage.getItem('al3lm_active_teacher_user') || 'teacher';
+        const enabled = localStorage.getItem(`al3lm_tch_alarm_on_${activeTch}`) === '1';
+        const tVal = localStorage.getItem(`al3lm_tch_alarm_time_${activeTch}`) || '08:00';
+        const inp = document.getElementById('tch-alarm-time');
+        const ban = document.getElementById('tch-alarm-status-banner');
+        const bdg = document.getElementById('tch-notif-badge');
+        if (inp) inp.value = tVal;
+        if (bdg && 'Notification' in window) {
+            bdg.textContent = Notification.permission === 'granted' ? '✅ إشعارات الجهاز مفعّلة' : '🔔 الجرس التذكيري للمعلم';
+        }
+        if (ban) {
+            ban.style.background = enabled ? '#064e3b' : '#334155';
+            ban.innerHTML = enabled
+                ? `✅ الجرس اليومي للمعلم مفعّل على الساعة (<strong>${tVal}</strong>) — بارك الله في جهودك التربوية 🌟`
+                : `🔕 الجرس غير مفعّل حالياً — اختر الساعة المناسبة واضغط «تفعيل الجرس وموافق».`;
+        }
+        clearInterval(tchBellInterval);
+        if (enabled) {
+            tchBellInterval = setInterval(() => {
+                const [hh, mm] = tVal.split(':').map(Number);
+                const now = new Date();
+                const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${hh}:${mm}`;
+                const nowM = now.getHours() * 60 + now.getMinutes();
+                const tarM = hh * 60 + mm;
+                if (nowM >= tarM && nowM <= tarM + 2 && localStorage.getItem(`al3lm_tch_fired_${activeTch}`) !== key) {
+                    localStorage.setItem(`al3lm_tch_fired_${activeTch}`, key);
+                    playTeacherBellSound();
+                }
+            }, 15000);
+        }
+    }
+
+    window.saveAndArmTeacherAlarm = async function() {
+        const activeTch = localStorage.getItem('al3lm_active_teacher_user') || 'teacher';
+        const tVal = document.getElementById('tch-alarm-time')?.value || '08:00';
+        playTeacherBellSound();
+        localStorage.setItem(`al3lm_tch_alarm_time_${activeTch}`, tVal);
+        localStorage.setItem(`al3lm_tch_alarm_on_${activeTch}`, '1');
+        localStorage.removeItem(`al3lm_tch_fired_${activeTch}`);
+        if ('Notification' in window && Notification.permission !== 'granted') {
+            try { await Notification.requestPermission(); } catch (_) {}
+        }
+        updateTeacherAlarmBanner();
+    };
+
+    window.testTeacherBellNow = function() {
+        playTeacherBellSound();
+        updateTeacherAlarmBanner();
+    };
+
+    window.disableTeacherAlarmNow = function() {
+        const activeTch = localStorage.getItem('al3lm_active_teacher_user') || 'teacher';
+        localStorage.setItem(`al3lm_tch_alarm_on_${activeTch}`, '0');
+        clearInterval(tchBellInterval);
+        updateTeacherAlarmBanner();
+    };
+
+    window.downloadTeacherSystemICS = function() {
+        const activeTch = localStorage.getItem('al3lm_active_teacher_user') || 'المعلم';
+        const tVal = document.getElementById('tch-alarm-time')?.value || '08:00';
+        const [hh, mm] = tVal.split(':').map(Number);
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh || 8, mm || 0, 0);
+        if (start <= now) start.setDate(start.getDate() + 1);
+        const end = new Date(start.getTime() + 30 * 60000);
+        const pad = (n) => String(n).padStart(2, '0');
+        const fmt = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+        const ics = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Al3lm School//Teacher Alarm//AR', 'BEGIN:VEVENT',
+            `UID:al3lm-teacher-${encodeURIComponent(activeTch)}@al-3lm.org`,
+            `DTSTAMP:${fmt(now)}`, `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`, 'RRULE:FREQ=DAILY',
+            `SUMMARY:🏫 موعد التدريس ومتابعة الطلاب — مدرسة العلم (${activeTch})`,
+            'DESCRIPTION:افتح بوابة المعلم في مدرسة العلم: https://al-3lm.org/teachers.html',
+            'URL:https://al-3lm.org/teachers.html',
+            'BEGIN:VALARM', 'TRIGGER:-PT0M', 'ACTION:DISPLAY', 'DESCRIPTION:حان موعد متابعة مدرسة العلم!', 'END:VALARM',
+            'END:VEVENT', 'END:VCALENDAR'
+        ].join('\r\n');
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'al3lm-teacher-alarm.ics';
+        a.click();
+    };
+
+    updateTeacherAlarmBanner();
+    window.refreshTeacherUnifiedView();
+    setTimeout(() => window.refreshTeacherUnifiedView && window.refreshTeacherUnifiedView(), 1100);
 })();
 </script>
 

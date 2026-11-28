@@ -4,7 +4,7 @@
     <script>
     (function autoRefreshStaleCacheV6() {
         try {
-            var VER = 'al3lm_layout_v13';
+            var VER = 'al3lm_layout_v16';
             if (localStorage.getItem('al3lm_ui_cache_ver') !== VER) {
                 localStorage.setItem('al3lm_ui_cache_ver', VER);
                 if ('caches' in window) {
@@ -475,6 +475,337 @@
         @media (max-width: 600px) {
             .abjad-mini-grid { grid-template-columns: repeat(4, 1fr); }
         }
+
+        /* ================= توحيد الهوية البصرية لبوابة التلميذ مع صورة الشجرة والفوتر المصغّر ================= */
+        body {
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: var(--stage-bg-img, url('assets/stage1-bg.jpg'), url('assets/34273.jpg'), url('stage1-bg.jpg'));
+            background-size: cover;
+            background-position: center 22%;
+            opacity: 0.15;
+            transition: background-image 0.45s ease;
+        }
+        body.theme-stage-1 {
+            --stage-bg-img: url('assets/stage1-bg.jpg'), url('assets/34273.jpg'), url('stage1-bg.jpg');
+            --stage-frame-color: #38bdf8;
+        }
+        body.theme-stage-2 {
+            --stage-bg-img: url('assets/stage2-bg.jpg'), url('assets/34275.jpg'), url('stage2-bg.jpg');
+            --stage-frame-color: #eab308;
+        }
+        body.theme-stage-3 {
+            --stage-bg-img: url('assets/stage3-bg.jpg'), url('assets/34276.jpg'), url('stage3-bg.jpg');
+            --stage-frame-color: #fb7185;
+        }
+        .top-nav, .page-container, .unified-stages-footer {
+            position: relative;
+            z-index: 2;
+        }
+        .page-container {
+            padding-bottom: 18px !important;
+        }
+
+        /* تقسيم بطاقة الترحيب العلوية: الترحيب وزر البدء يميناً + صورة المرحلة والطفل والشجرة يساراً */
+        .hero-welcome-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.32fr 0.98fr;
+            gap: 20px;
+            align-items: stretch;
+        }
+        .hero-welcome-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 12px;
+            padding: 4px;
+        }
+        .hero-stage-tree-card {
+            position: relative;
+            min-height: 245px;
+            border-radius: 26px;
+            border: 3.5px solid var(--stage-frame-color, #eab308);
+            background-image: var(--stage-bg-img, url('assets/stage1-bg.jpg'));
+            background-size: cover;
+            background-position: center 20%;
+            box-shadow: 0 16px 38px rgba(0, 0, 0, 0.32);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 14px;
+            color: #ffffff;
+        }
+        .hero-stage-tree-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.08) 42%, rgba(4, 24, 18, 0.88) 100%);
+            z-index: 1;
+        }
+        .hero-tree-top-row, .hero-tree-bottom-info {
+            position: relative;
+            z-index: 2;
+        }
+        .hero-tree-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .hero-year-circle-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fde047, #ca8a04);
+            color: #064e3b;
+            border: 2.5px solid #ffffff;
+            font-size: 1.3rem;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 18px rgba(250, 204, 21, 0.85);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .hero-year-circle-badge:hover { transform: scale(1.08); }
+        .hero-tree-tag {
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(6, 78, 59, 0.88);
+            border: 1.5px solid rgba(253, 224, 71, 0.75);
+            color: #fef08a;
+            font-size: 0.76rem;
+            font-weight: 900;
+        }
+        .hero-tree-bottom-info {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .hero-tree-stg-name {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 1.95rem;
+            line-height: 1.1;
+            color: #fef08a;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.85);
+        }
+        .hero-tree-stg-sub {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #ecfdf5;
+        }
+
+        /* ================= الفوتر السفلي المصغّر والمرتب للمراحل الثلاث والصفوف الـ 21 ================= */
+        .unified-stages-footer {
+            max-width: 960px;
+            width: calc(100% - 28px);
+            margin: 0 auto 38px auto;
+            background: rgba(6, 28, 22, 0.92);
+            border: 2.5px solid rgba(250, 204, 21, 0.65);
+            border-radius: 28px;
+            padding: 16px;
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.48);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .unified-footer-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 0 4px 8px 4px;
+            border-bottom: 1.5px dashed rgba(253, 224, 71, 0.35);
+        }
+        .unified-footer-title {
+            color: #fef08a;
+            font-size: 0.95rem;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .unified-footer-legend {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #d1fae5;
+        }
+        .legend-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .legend-dot i {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .compact-stages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .compact-stage-box {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center 24%;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-height: 142px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+            transition: transform 0.22s ease, border-color 0.22s ease;
+        }
+        .compact-stage-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(4, 19, 15, 0.56) 0%, rgba(4, 19, 15, 0.84) 100%);
+            z-index: 1;
+        }
+        .compact-stage-box.st1 { background-image: url('assets/stage1-bg.jpg'), url('assets/34273.jpg'), url('stage1-bg.jpg'); border-color: rgba(56, 189, 248, 0.55); }
+        .compact-stage-box.st2 { background-image: url('assets/stage2-bg.jpg'), url('assets/34275.jpg'), url('stage2-bg.jpg'); border-color: rgba(234, 179, 8, 0.55); }
+        .compact-stage-box.st3 { background-image: url('assets/stage3-bg.jpg'), url('assets/34276.jpg'), url('stage3-bg.jpg'); border-color: rgba(251, 113, 133, 0.55); }
+        .compact-stage-box.active-stage-box {
+            border-width: 2.5px;
+            border-color: #fde047;
+            box-shadow: 0 0 22px rgba(250, 204, 21, 0.32);
+        }
+
+        .compact-stg-head {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.18);
+            padding-bottom: 4px;
+        }
+        .compact-stg-ar {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 1.45rem;
+            line-height: 1.05;
+        }
+        .compact-stg-rng {
+            font-size: 0.78rem;
+            font-weight: 900;
+            direction: ltr;
+            padding: 1px 8px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.42);
+            color: #f8fafc;
+        }
+        .compact-years-circles {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        /* حالات إضاءة أزرار الصفوف للتلميذ: الحالي كبير ومضيء بقوة، السابق مضاء للمراجعة، اللاحق مطفأ */
+        .stu-footer-yr-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            border: 1.8px solid rgba(255,255,255,0.35);
+            background: rgba(15, 23, 42, 0.55);
+            color: #ffffff;
+            text-decoration: none;
+        }
+        /* الصف الحالي: مضاء بشكل كبير وبارز */
+        .stu-footer-yr-btn.is-current {
+            width: 42px;
+            height: 42px;
+            font-size: 1.06rem;
+            background: linear-gradient(135deg, #fde047, #eab308);
+            color: #064e3b;
+            border: 2.5px solid #ffffff;
+            box-shadow: 0 0 18px rgba(250, 204, 21, 0.95), 0 0 0 4px rgba(250, 204, 21, 0.28);
+            transform: scale(1.08);
+            z-index: 3;
+        }
+        .stu-footer-yr-btn.is-current:hover {
+            transform: scale(1.15);
+        }
+        /* الصفوف السابقة المنجزة: مضاءة باللون الأخضر للمراجعة متى شاء */
+        .stu-footer-yr-btn.is-passed {
+            background: rgba(22, 163, 74, 0.88);
+            color: #ffffff;
+            border: 2px solid #86efac;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.55);
+        }
+        .stu-footer-yr-btn.is-passed:hover {
+            background: #22c55e;
+            transform: translateY(-2px) scale(1.06);
+        }
+        /* الصفوف اللاحقة: مطفأة ومقفلة حتى إتمام الصف الحالي */
+        .stu-footer-yr-btn.is-future {
+            opacity: 0.26;
+            filter: grayscale(100%);
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @media (max-width: 780px) {
+            .hero-welcome-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-stage-tree-card {
+                min-height: 195px;
+                order: -1;
+            }
+            .compact-stages-grid {
+                grid-template-columns: 1fr;
+            }
+            .compact-stage-box {
+                min-height: 118px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -504,14 +835,29 @@
                 <div style="font-size:0.9rem; font-weight:800;">نَحْنُ بِانْتِظَارِكَ غَداً صَبَاحاً أَوْ فِي مَوْعِدِكَ القَادِمِ — اضْبِطْ جَرَسَ التَّنْبِيهِ بِالأَسْفَلِ!</div>
             </div>
 
-            <div class="student-stage-chip" id="hero-stage-chip">مرحلة سيد • السنة 1</div>
-            <h1 class="hero-greeting" id="hero-greeting">أهلاً بك في مدرسة العلم</h1>
-            <p class="hero-next-lesson-desc" id="hero-lesson-desc">اضغط زر البدء للانطلاق مباشرة إلى درسك الحالي</p>
+            <div class="hero-welcome-grid">
+                <div class="hero-welcome-right">
+                    <div class="student-stage-chip" id="hero-stage-chip">مرحلة سيد • السنة 1</div>
+                    <h1 class="hero-greeting" id="hero-greeting">أهلاً بك في مدرسة العلم</h1>
+                    <p class="hero-next-lesson-desc" id="hero-lesson-desc">اضغط زر البدء للانطلاق مباشرة إلى درسك الحالي</p>
 
-            <button type="button" class="giant-start-btn" id="start-now-btn" onclick="launchStudentLesson()">
-                <svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>
-                <span class="giant-start-lbl">ابدأ الدرس</span>
-            </button>
+                    <button type="button" class="giant-start-btn" id="start-now-btn" onclick="launchStudentLesson()">
+                        <svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>
+                        <span class="giant-start-lbl">ابدأ الدرس</span>
+                    </button>
+                </div>
+
+                <div class="hero-stage-tree-card" id="hero-stage-tree-card" title="مرحلتي الدراسية الحالية">
+                    <div class="hero-tree-top-row">
+                        <span class="hero-tree-tag" id="hero-tree-tag">🌱 غرس العلم</span>
+                        <button type="button" class="hero-year-circle-badge" id="hero-year-circle-badge" onclick="launchStudentLesson()" title="اضغط للدخول إلى صفك الحالي">1</button>
+                    </div>
+                    <div class="hero-tree-bottom-info">
+                        <div class="hero-tree-stg-name" id="hero-tree-stg-name">سَيِّد</div>
+                        <div class="hero-tree-stg-sub" id="hero-tree-stg-sub">بناء البدن والنفس • الصف 1</div>
+                    </div>
+                </div>
+            </div>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:4px;">
                 <select id="stu-school-selector" class="alarm-time-input" style="font-size:0.84rem; padding:6px 12px;" onchange="changeStudentSchool(this.value)">
@@ -631,6 +977,47 @@
             ☁️ تقدمك وعلاماتك محفوظة تلقائياً في حسابك؛ يمكنك فتح حسابك من أي جهاز باسم المستخدم وكلمة المرور.
         </div>
     </main>
+
+    <!-- الفوتر المصغّر والموحد للمراحل الثلاث والصفوف الـ 21 (الصف الحالي مضاء بقوة، السابق متاح للمراجعة، اللاحق مقفل) -->
+    <footer class="unified-stages-footer" aria-label="التنقل بين المراحل والصفوف الدراسية">
+        <div class="unified-footer-hdr">
+            <div class="unified-footer-title">
+                <span>🧭</span>
+                <span>مَسَارُ المَرَاحِلِ الثَّلَاثِ وَالصُّفُوفِ (١ – ٢١):</span>
+            </div>
+            <div class="unified-footer-legend">
+                <span class="legend-dot"><i style="background:#fde047; border:1.5px solid #fff;"></i> صفك الحالي</span>
+                <span class="legend-dot"><i style="background:#16a34a; border:1.5px solid #86efac;"></i> صف سابق (متاح للمراجعة)</span>
+                <span class="legend-dot"><i style="background:#475569; opacity:0.5;"></i> صف قادم</span>
+            </div>
+        </div>
+
+        <div class="compact-stages-grid">
+            <div class="compact-stage-box st1" id="stu-ftr-stg-1">
+                <div class="compact-stg-head">
+                    <span class="compact-stg-ar" style="color:#7dd3fc;">سَيِّد</span>
+                    <span class="compact-stg-rng">1 – 7</span>
+                </div>
+                <div class="compact-years-circles" id="stu-ftr-years-1"></div>
+            </div>
+
+            <div class="compact-stage-box st2" id="stu-ftr-stg-2">
+                <div class="compact-stg-head">
+                    <span class="compact-stg-ar" style="color:#fde047;">عَبْد</span>
+                    <span class="compact-stg-rng">8 – 14</span>
+                </div>
+                <div class="compact-years-circles" id="stu-ftr-years-2"></div>
+            </div>
+
+            <div class="compact-stage-box st3" id="stu-ftr-stg-3">
+                <div class="compact-stg-head">
+                    <span class="compact-stg-ar" style="color:#fda4af;">صَاحِب</span>
+                    <span class="compact-stg-rng">15 – 21</span>
+                </div>
+                <div class="compact-years-circles" id="stu-ftr-years-3"></div>
+            </div>
+        </div>
+    </footer>
 
     <div class="toast-msg" id="portal-toast"></div>
 
@@ -1142,6 +1529,25 @@
             reader.readAsText(file);
         };
 
+        // فتح صف معين من الفوتر السفلي (الصف الحالي للدرس، أو الصفوف السابقة للمراجعة دون المساس بالصف المثبت)
+        window.openStudentFooterYear = function(targetYear) {
+            const curY = parseInt(stu.assignedYear, 10) || 1;
+            const passedList = Array.isArray(stu.completedYears) ? stu.completedYears : [];
+            if (targetYear === curY) {
+                window.launchStudentLesson();
+                return;
+            }
+            if (targetYear < curY || passedList.includes(targetYear)) {
+                const stg = Math.ceil(targetYear / 7);
+                const branch = stu.schoolBranch || 'main';
+                localStorage.setItem('school_edit_mode', 'false');
+                const targetFile = stg === 1 ? 'stage1.html' : (stg === 2 ? 'stage2.html' : 'stage3.html');
+                window.location.href = `${targetFile}?stage=${stg}&year=${targetYear}&school=${encodeURIComponent(branch)}&review=1&from=student&autostart=1`;
+                return;
+            }
+            showToast(`🔒 الصف (${targetYear}) سيُفتح لك تلقائياً بعد إتمام صفك الحالي (${curY}) 🌟`);
+        };
+
         // إطلاق الدرس مباشرة بدون شاشة بدء مكررة
         window.launchStudentLesson = function() {
             const yr = parseInt(stu.assignedYear, 10) || 1;
@@ -1507,10 +1913,54 @@
 
         function renderDashboard() {
             const m = computeStudentLiveMetrics();
-            document.body.className = `theme-stage-${m.stg}`;
+            document.body.classList.remove('theme-stage-1', 'theme-stage-2', 'theme-stage-3');
+            document.body.classList.add(`theme-stage-${m.stg}`);
 
             document.getElementById('nav-student-title').textContent = `بوابة التلميذ — ${stu.name}`;
             document.getElementById('hero-stage-chip').textContent = `${STAGE_NAMES[m.stg]} • السنة ${m.yr}`;
+
+            // تحديث لوحة صورة المرحلة والطفل والشجرة في بطاقة الترحيب العلوية
+            const stgArNames = { 1: 'سَيِّد', 2: 'عَبْد', 3: 'صَاحِب' };
+            const stgSubMottos = { 1: 'بناء البدن والنفس', 2: 'بناء العقل والأفعال', 3: 'بناء الروح والمجتمع' };
+            const stgTags = { 1: '🌱 قطف ثمار الحواس (١–٧)', 2: '🌿 شجرة العقل والبرهان (٨–١٤)', 3: '🌳 ثمار التخصص والعمران (١٥–٢١)' };
+            const badgeYrEl = document.getElementById('hero-year-circle-badge');
+            const treeTagEl = document.getElementById('hero-tree-tag');
+            const treeNameEl = document.getElementById('hero-tree-stg-name');
+            const treeSubEl = document.getElementById('hero-tree-stg-sub');
+            if (badgeYrEl) badgeYrEl.textContent = m.yr;
+            if (treeTagEl) treeTagEl.textContent = stgTags[m.stg] || '';
+            if (treeNameEl) treeNameEl.textContent = stgArNames[m.stg] || STAGE_NAMES[m.stg];
+            if (treeSubEl) treeSubEl.textContent = `${stgSubMottos[m.stg] || ''} • الصف ${m.yr}`;
+
+            // تحديث الفوتر السفلي المصغّر للمراحل الثلاث والصفوف الـ 21
+            const passedSet = new Set(Array.isArray(stu.completedYears) ? stu.completedYears : []);
+            for (let s = 1; s <= 3; s++) {
+                const stgBox = document.getElementById(`stu-ftr-stg-${s}`);
+                if (stgBox) stgBox.classList.toggle('active-stage-box', s === m.stg);
+                const yWrap = document.getElementById(`stu-ftr-years-${s}`);
+                if (!yWrap) continue;
+                yWrap.innerHTML = '';
+                const startY = (s - 1) * 7 + 1;
+                const endY = s * 7;
+                for (let y = startY; y <= endY; y++) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    let stateCls = 'is-future';
+                    let tip = `الصف ${y} (يُفتح بعد إتمام الصف ${m.yr})`;
+                    if (y === m.yr) {
+                        stateCls = 'is-current';
+                        tip = `صفك الحالي (${y}) — اضغط لبدء الدرس`;
+                    } else if (y < m.yr || passedSet.has(y)) {
+                        stateCls = 'is-passed';
+                        tip = `الصف ${y} (سابق) — اضغط للمراجعة`;
+                    }
+                    btn.className = `stu-footer-yr-btn ${stateCls}`;
+                    btn.textContent = y;
+                    btn.title = tip;
+                    btn.onclick = () => window.openStudentFooterYear(y);
+                    yWrap.appendChild(btn);
+                }
+            }
 
             const params = new URLSearchParams(window.location.search);
             const isWrapUp = params.get('wrapup') === '1' || stu.lastVisitStatus === 'wrapup';

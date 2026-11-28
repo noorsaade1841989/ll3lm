@@ -369,6 +369,76 @@
             .s6-tracks-row { grid-template-columns: repeat(2, 1fr); }
             .s3-seals-col { width: 100%; max-width: 360px; }
         }
+
+        /* صور المراحل الثلاث (stage1-bg, stage2-bg, stage3-bg) مع شرح كل مرحلة بانتظام وأناقة */
+        .pillar-stage-img {
+            width: 100%;
+            height: clamp(118px, 18vmin, 155px);
+            border-radius: 18px;
+            background-size: cover;
+            background-position: center 22%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+            margin-bottom: 4px;
+        }
+        .pillar-stage-img.st1 { background-image: url('assets/stage1-bg.jpg'), url('assets/34273.jpg'), url('stage1-bg.jpg'); border-color: #7dd3fc; }
+        .pillar-stage-img.st2 { background-image: url('assets/stage2-bg.jpg'), url('assets/34275.jpg'), url('stage2-bg.jpg'); border-color: #fde047; }
+        .pillar-stage-img.st3 { background-image: url('assets/stage3-bg.jpg'), url('assets/34276.jpg'), url('stage3-bg.jpg'); border-color: #fda4af; }
+
+        .scene-with-stage-card {
+            width: 100%;
+            max-width: 980px;
+            display: grid;
+            grid-template-columns: 225px 1fr;
+            gap: 18px;
+            align-items: stretch;
+        }
+        .stage-explain-visual {
+            border-radius: 24px;
+            background-size: cover;
+            background-position: center 20%;
+            border: 3px solid #fde047;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.48);
+            min-height: 215px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 12px;
+            text-align: center;
+        }
+        .stage-explain-visual::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.08) 32%, rgba(4, 19, 15, 0.88) 100%);
+        }
+        .stage-explain-visual > * {
+            position: relative;
+            z-index: 2;
+        }
+        .stage-explain-visual .vis-badge {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 1.55rem;
+            color: #fef08a;
+            line-height: 1.15;
+        }
+        .stage-explain-visual .vis-caption {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #ecfdf5;
+            margin-top: 3px;
+        }
+        .stage-explain-visual.st1 { background-image: url('assets/stage1-bg.jpg'), url('assets/34273.jpg'), url('stage1-bg.jpg'); border-color: #38bdf8; }
+        .stage-explain-visual.st2 { background-image: url('assets/stage2-bg.jpg'), url('assets/34275.jpg'), url('stage2-bg.jpg'); border-color: #eab308; }
+        .stage-explain-visual.st3 { background-image: url('assets/stage3-bg.jpg'), url('assets/34276.jpg'), url('stage3-bg.jpg'); border-color: #fb7185; }
+
+        @media (max-width: 800px) {
+            .scene-with-stage-card { grid-template-columns: 1fr; }
+            .stage-explain-visual { min-height: 155px; }
+        }
+
     </style>
 </head>
 <body>
@@ -421,18 +491,21 @@
                 <h2 class="scene-headline">سباعيات العمر الثلاث (٢١ عاماً)</h2>
                 <div class="s2-pillars-grid">
                     <div class="stage-pillar p1">
+                        <div class="pillar-stage-img st1"></div>
                         <span class="pillar-name" style="color:#7dd3fc;">سَيِّد</span>
                         <span class="pillar-years" style="color:#bae6fd;">1 – 7</span>
                         <div style="font-weight:900; color:#fff;">بناء البدن والنفس</div>
                         <p class="pillar-desc">إيقاظ الحواس من الصفر المعرفي بالقصص والبطاقات الملونة والتطبيق المادي والورقي.</p>
                     </div>
                     <div class="stage-pillar p2">
+                        <div class="pillar-stage-img st2"></div>
                         <span class="pillar-name" style="color:#fde047;">عَبْد</span>
                         <span class="pillar-years" style="color:#fef08a;">8 – 14</span>
                         <div style="font-weight:900; color:#fff;">بناء العقل والأفعال</div>
                         <p class="pillar-desc">ترويض العقل عبر دورات الأبجدية والمختبرات التفاعلية الحية والمعلم المحاور الذكي.</p>
                     </div>
                     <div class="stage-pillar p3">
+                        <div class="pillar-stage-img st3"></div>
                         <span class="pillar-name" style="color:#fda4af;">صَاحِب</span>
                         <span class="pillar-years" style="color:#fecdd3;">15 – 21</span>
                         <div style="font-weight:900; color:#fff;">بناء الروح والمجتمع</div>
@@ -461,7 +534,12 @@
             <!-- المشهد 4: مرحلة سيد (1 - 7 سنوات) -->
             <section class="promo-scene" data-scene="3">
                 <h2 class="scene-headline">مرحلة «سيد»: متعة الحرف وبناء الحواس</h2>
-                <div class="s4-kid-showcase">
+                <div class="scene-with-stage-card">
+                    <div class="stage-explain-visual st1">
+                        <div class="vis-badge">مرحلة سَيِّد (١ – ٧)</div>
+                        <div class="vis-caption">بناء البدن والحواس بالتجربة والبهجة</div>
+                    </div>
+                    <div class="s4-kid-showcase" style="max-width:none;">
                     <div class="s4-flashcard">
                         <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:900; color:#0284c7;">
                             <span>👁️ البصيرة والكتابة</span><span>حرف الباء (٢)</span>
@@ -476,13 +554,19 @@
                         <div class="s4-balloon win">بَ ✔️</div>
                         <div class="s4-balloon" style="background:radial-gradient(circle at 30% 30%,#fbcfe8,#f472b6);">سُ</div>
                     </div>
+                    </div>
                 </div>
             </section>
 
             <!-- المشهد 5: مرحلة عبد (المختبرات الحية والمعلم المحاور الذكي) -->
             <section class="promo-scene" data-scene="4">
                 <h2 class="scene-headline">مرحلة «عبد»: مختبرات حية ومعلم ذكي يحاورك</h2>
-                <div class="s5-split">
+                <div class="scene-with-stage-card">
+                    <div class="stage-explain-visual st2">
+                        <div class="vis-badge">مرحلة عَبْد (٨ – ١٤)</div>
+                        <div class="vis-caption">بناء العقل والملكات العملية المتقنة</div>
+                    </div>
+                    <div class="s5-split" style="max-width:none;">
                     <div class="s5-lab-card">
                         <div style="color:#fde047; font-weight:900; font-size:0.9rem;">🧪 مختبر الهندسة والمقدار الحي (فيثاغورس)</div>
                         <canvas id="s5-pyth-canvas" width="380" height="175" style="width:100%; height:165px; background:rgba(0,0,0,0.3); border-radius:14px;"></canvas>
@@ -498,13 +582,19 @@
                             جرّب في المختبر أمامك: إذا كان الضلعان ٣ و ٤، فكم يكون الوتر؟ 🌟
                         </div>
                     </div>
+                    </div>
                 </div>
             </section>
 
             <!-- المشهد 6: مرحلة صاحب (ميثاق التخصص 70% والمجيب الآلي) -->
             <section class="promo-scene" data-scene="5">
                 <h2 class="scene-headline">مرحلة «صاحب»: ميثاق التخصص والبرهان الجامعي</h2>
-                <div class="s6-major-showcase">
+                <div class="scene-with-stage-card">
+                    <div class="stage-explain-visual st3">
+                        <div class="vis-badge">مرحلة صَاحِب (١٥ – ٢١)</div>
+                        <div class="vis-caption">بناء الروح والتخصص والإنتاج المجتمعي</div>
+                    </div>
+                    <div class="s6-major-showcase" style="max-width:none;">
                     <div style="text-align:center; font-weight:900; color:#fde047; font-size:0.95rem;">
                         🔒 ميثاق التخصص الأساسي الثابت + المجيب الآلي التخصصي المدمج
                     </div>
@@ -517,6 +607,7 @@
                     <div class="s6-meter-bar">
                         <div style="width:70%; background:linear-gradient(90deg,#eab308,#ca8a04); color:#0f172a; display:flex; align-items:center; justify-content:center;">٧٠٪ عمق التخصص الأساسي</div>
                         <div style="width:30%; background:#059669; color:#fff; display:flex; align-items:center; justify-content:center;">٣٠٪ ثقافة عامة (٦ مواد)</div>
+                    </div>
                     </div>
                 </div>
             </section>
