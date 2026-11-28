@@ -587,9 +587,8 @@
             if (!sel) return;
             // مزامنة قائمة المدارس الخاصة من السحابة تلقائياً
             const dirRes = await callCloudApi({ action: 'list_directory' }, 5000);
-            const gClientId = (dirRes && dirRes.googleClientId) || localStorage.getItem('al3lm_google_client_id') || '';
-            if (gClientId) {
-                initGoogleOneTapButton(gClientId);
+            const gClientId = (dirRes && dirRes.googleClientId) || localStorage.getItem('googleClientId') || '178209594110-om1t4lndsng9ktd5hu9b7r6n9qivlt84.apps.googleusercontent.com';
+            if (gClientId) {                initGoogleOneTapButton(gClientId);
             }
             if (dirRes && dirRes.ok && Array.isArray(dirRes.schools)) {
                 const localSc = JSON.parse(localStorage.getItem('private_schools_directory') || '[]');
